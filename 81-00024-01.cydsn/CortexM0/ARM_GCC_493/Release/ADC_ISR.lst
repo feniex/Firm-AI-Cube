@@ -1,0 +1,2438 @@
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 1
+
+
+   1              		.cpu cortex-m0
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 4
+  10              		.eabi_attribute 34, 0
+  11              		.eabi_attribute 18, 4
+  12              		.code	16
+  13              		.file	"ADC_ISR.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.section	.text.ADC_ISR_Interrupt,"ax",%progbits
+  18              		.align	1
+  19              		.global	ADC_ISR_Interrupt
+  20              		.code	16
+  21              		.thumb_func
+  22              		.type	ADC_ISR_Interrupt, %function
+  23              	ADC_ISR_Interrupt:
+  24              	.LFB37:
+  25              		.file 1 ".\\Generated_Source\\PSoC4\\ADC_ISR.c"
+   1:.\Generated_Source\PSoC4/ADC_ISR.c **** /*******************************************************************************
+   2:.\Generated_Source\PSoC4/ADC_ISR.c **** * File Name: ADC_ISR.c  
+   3:.\Generated_Source\PSoC4/ADC_ISR.c **** * Version 1.70
+   4:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+   5:.\Generated_Source\PSoC4/ADC_ISR.c **** *  Description:
+   6:.\Generated_Source\PSoC4/ADC_ISR.c **** *   API for controlling the state of an interrupt.
+   7:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+   8:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+   9:.\Generated_Source\PSoC4/ADC_ISR.c **** *  Note:
+  10:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+  11:.\Generated_Source\PSoC4/ADC_ISR.c **** ********************************************************************************
+  12:.\Generated_Source\PSoC4/ADC_ISR.c **** * Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+  13:.\Generated_Source\PSoC4/ADC_ISR.c **** * You may use this file only in accordance with the license, terms, conditions, 
+  14:.\Generated_Source\PSoC4/ADC_ISR.c **** * disclaimers, and limitations in the end user license agreement accompanying 
+  15:.\Generated_Source\PSoC4/ADC_ISR.c **** * the software package with which this file was provided.
+  16:.\Generated_Source\PSoC4/ADC_ISR.c **** *******************************************************************************/
+  17:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+  18:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+  19:.\Generated_Source\PSoC4/ADC_ISR.c **** #include <cydevice_trm.h>
+  20:.\Generated_Source\PSoC4/ADC_ISR.c **** #include <CyLib.h>
+  21:.\Generated_Source\PSoC4/ADC_ISR.c **** #include <ADC_ISR.h>
+  22:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+  23:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+  24:.\Generated_Source\PSoC4/ADC_ISR.c **** #if !defined(ADC_ISR__REMOVED) /* Check for removal by optimization */
+  25:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+  26:.\Generated_Source\PSoC4/ADC_ISR.c **** /*******************************************************************************
+  27:.\Generated_Source\PSoC4/ADC_ISR.c **** *  Place your includes, defines and code here 
+  28:.\Generated_Source\PSoC4/ADC_ISR.c **** ********************************************************************************/
+  29:.\Generated_Source\PSoC4/ADC_ISR.c **** /* `#START ADC_ISR_intc` */
+  30:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+  31:.\Generated_Source\PSoC4/ADC_ISR.c **** #include "IO_Control.h"
+  32:.\Generated_Source\PSoC4/ADC_ISR.c ****     
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 2
+
+
+  33:.\Generated_Source\PSoC4/ADC_ISR.c **** /* `#END` */
+  34:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+  35:.\Generated_Source\PSoC4/ADC_ISR.c **** extern cyisraddress CyRamVectors[CYINT_IRQ_BASE + CY_NUM_INTERRUPTS];
+  36:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+  37:.\Generated_Source\PSoC4/ADC_ISR.c **** /* Declared in startup, used to set unused interrupts to. */
+  38:.\Generated_Source\PSoC4/ADC_ISR.c **** CY_ISR_PROTO(IntDefaultHandler);
+  39:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+  40:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+  41:.\Generated_Source\PSoC4/ADC_ISR.c **** /*******************************************************************************
+  42:.\Generated_Source\PSoC4/ADC_ISR.c **** * Function Name: ADC_ISR_Start
+  43:.\Generated_Source\PSoC4/ADC_ISR.c **** ********************************************************************************
+  44:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+  45:.\Generated_Source\PSoC4/ADC_ISR.c **** * Summary:
+  46:.\Generated_Source\PSoC4/ADC_ISR.c **** *  Set up the interrupt and enable it. This function disables the interrupt, 
+  47:.\Generated_Source\PSoC4/ADC_ISR.c **** *  sets the default interrupt vector, sets the priority from the value in the
+  48:.\Generated_Source\PSoC4/ADC_ISR.c **** *  Design Wide Resources Interrupt Editor, then enables the interrupt to the 
+  49:.\Generated_Source\PSoC4/ADC_ISR.c **** *  interrupt controller.
+  50:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+  51:.\Generated_Source\PSoC4/ADC_ISR.c **** * Parameters:  
+  52:.\Generated_Source\PSoC4/ADC_ISR.c **** *   None
+  53:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+  54:.\Generated_Source\PSoC4/ADC_ISR.c **** * Return:
+  55:.\Generated_Source\PSoC4/ADC_ISR.c **** *   None
+  56:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+  57:.\Generated_Source\PSoC4/ADC_ISR.c **** *******************************************************************************/
+  58:.\Generated_Source\PSoC4/ADC_ISR.c **** void ADC_ISR_Start(void)
+  59:.\Generated_Source\PSoC4/ADC_ISR.c **** {
+  60:.\Generated_Source\PSoC4/ADC_ISR.c ****     /* For all we know the interrupt is active. */
+  61:.\Generated_Source\PSoC4/ADC_ISR.c ****     ADC_ISR_Disable();
+  62:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+  63:.\Generated_Source\PSoC4/ADC_ISR.c ****     /* Set the ISR to point to the ADC_ISR Interrupt. */
+  64:.\Generated_Source\PSoC4/ADC_ISR.c ****     ADC_ISR_SetVector(&ADC_ISR_Interrupt);
+  65:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+  66:.\Generated_Source\PSoC4/ADC_ISR.c ****     /* Set the priority. */
+  67:.\Generated_Source\PSoC4/ADC_ISR.c ****     ADC_ISR_SetPriority((uint8)ADC_ISR_INTC_PRIOR_NUMBER);
+  68:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+  69:.\Generated_Source\PSoC4/ADC_ISR.c ****     /* Enable it. */
+  70:.\Generated_Source\PSoC4/ADC_ISR.c ****     ADC_ISR_Enable();
+  71:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+  72:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+  73:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+  74:.\Generated_Source\PSoC4/ADC_ISR.c **** /*******************************************************************************
+  75:.\Generated_Source\PSoC4/ADC_ISR.c **** * Function Name: ADC_ISR_StartEx
+  76:.\Generated_Source\PSoC4/ADC_ISR.c **** ********************************************************************************
+  77:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+  78:.\Generated_Source\PSoC4/ADC_ISR.c **** * Summary:
+  79:.\Generated_Source\PSoC4/ADC_ISR.c **** *  Sets up the interrupt and enables it. This function disables the interrupt,
+  80:.\Generated_Source\PSoC4/ADC_ISR.c **** *  sets the interrupt vector based on the address passed in, sets the priority 
+  81:.\Generated_Source\PSoC4/ADC_ISR.c **** *  from the value in the Design Wide Resources Interrupt Editor, then enables 
+  82:.\Generated_Source\PSoC4/ADC_ISR.c **** *  the interrupt to the interrupt controller.
+  83:.\Generated_Source\PSoC4/ADC_ISR.c **** *  
+  84:.\Generated_Source\PSoC4/ADC_ISR.c **** *  When defining ISR functions, the CY_ISR and CY_ISR_PROTO macros should be 
+  85:.\Generated_Source\PSoC4/ADC_ISR.c **** *  used to provide consistent definition across compilers:
+  86:.\Generated_Source\PSoC4/ADC_ISR.c **** *  
+  87:.\Generated_Source\PSoC4/ADC_ISR.c **** *  Function definition example:
+  88:.\Generated_Source\PSoC4/ADC_ISR.c **** *   CY_ISR(MyISR)
+  89:.\Generated_Source\PSoC4/ADC_ISR.c **** *   {
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 3
+
+
+  90:.\Generated_Source\PSoC4/ADC_ISR.c **** *   }
+  91:.\Generated_Source\PSoC4/ADC_ISR.c **** *   Function prototype example:
+  92:.\Generated_Source\PSoC4/ADC_ISR.c **** *   CY_ISR_PROTO(MyISR);
+  93:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+  94:.\Generated_Source\PSoC4/ADC_ISR.c **** * Parameters:  
+  95:.\Generated_Source\PSoC4/ADC_ISR.c **** *   address: Address of the ISR to set in the interrupt vector table.
+  96:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+  97:.\Generated_Source\PSoC4/ADC_ISR.c **** * Return:
+  98:.\Generated_Source\PSoC4/ADC_ISR.c **** *   None
+  99:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 100:.\Generated_Source\PSoC4/ADC_ISR.c **** *******************************************************************************/
+ 101:.\Generated_Source\PSoC4/ADC_ISR.c **** void ADC_ISR_StartEx(cyisraddress address)
+ 102:.\Generated_Source\PSoC4/ADC_ISR.c **** {
+ 103:.\Generated_Source\PSoC4/ADC_ISR.c ****     /* For all we know the interrupt is active. */
+ 104:.\Generated_Source\PSoC4/ADC_ISR.c ****     ADC_ISR_Disable();
+ 105:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 106:.\Generated_Source\PSoC4/ADC_ISR.c ****     /* Set the ISR to point to the ADC_ISR Interrupt. */
+ 107:.\Generated_Source\PSoC4/ADC_ISR.c ****     ADC_ISR_SetVector(address);
+ 108:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 109:.\Generated_Source\PSoC4/ADC_ISR.c ****     /* Set the priority. */
+ 110:.\Generated_Source\PSoC4/ADC_ISR.c ****     ADC_ISR_SetPriority((uint8)ADC_ISR_INTC_PRIOR_NUMBER);
+ 111:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 112:.\Generated_Source\PSoC4/ADC_ISR.c ****     /* Enable it. */
+ 113:.\Generated_Source\PSoC4/ADC_ISR.c ****     ADC_ISR_Enable();
+ 114:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ 115:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 116:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 117:.\Generated_Source\PSoC4/ADC_ISR.c **** /*******************************************************************************
+ 118:.\Generated_Source\PSoC4/ADC_ISR.c **** * Function Name: ADC_ISR_Stop
+ 119:.\Generated_Source\PSoC4/ADC_ISR.c **** ********************************************************************************
+ 120:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 121:.\Generated_Source\PSoC4/ADC_ISR.c **** * Summary:
+ 122:.\Generated_Source\PSoC4/ADC_ISR.c **** *   Disables and removes the interrupt.
+ 123:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 124:.\Generated_Source\PSoC4/ADC_ISR.c **** * Parameters:  
+ 125:.\Generated_Source\PSoC4/ADC_ISR.c **** *   None
+ 126:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 127:.\Generated_Source\PSoC4/ADC_ISR.c **** * Return:
+ 128:.\Generated_Source\PSoC4/ADC_ISR.c **** *   None
+ 129:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 130:.\Generated_Source\PSoC4/ADC_ISR.c **** *******************************************************************************/
+ 131:.\Generated_Source\PSoC4/ADC_ISR.c **** void ADC_ISR_Stop(void)
+ 132:.\Generated_Source\PSoC4/ADC_ISR.c **** {
+ 133:.\Generated_Source\PSoC4/ADC_ISR.c ****     /* Disable this interrupt. */
+ 134:.\Generated_Source\PSoC4/ADC_ISR.c ****     ADC_ISR_Disable();
+ 135:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 136:.\Generated_Source\PSoC4/ADC_ISR.c ****     /* Set the ISR to point to the passive one. */
+ 137:.\Generated_Source\PSoC4/ADC_ISR.c ****     ADC_ISR_SetVector(&IntDefaultHandler);
+ 138:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ 139:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 140:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 141:.\Generated_Source\PSoC4/ADC_ISR.c **** /*******************************************************************************
+ 142:.\Generated_Source\PSoC4/ADC_ISR.c **** * Function Name: ADC_ISR_Interrupt
+ 143:.\Generated_Source\PSoC4/ADC_ISR.c **** ********************************************************************************
+ 144:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 145:.\Generated_Source\PSoC4/ADC_ISR.c **** * Summary:
+ 146:.\Generated_Source\PSoC4/ADC_ISR.c **** *   The default Interrupt Service Routine for ADC_ISR.
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 4
+
+
+ 147:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 148:.\Generated_Source\PSoC4/ADC_ISR.c **** *   Add custom code between the START and END comments to keep the next version
+ 149:.\Generated_Source\PSoC4/ADC_ISR.c **** *   of this file from over-writing your code.
+ 150:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 151:.\Generated_Source\PSoC4/ADC_ISR.c **** *   Note You may use either the default ISR by using this API, or you may define
+ 152:.\Generated_Source\PSoC4/ADC_ISR.c **** *   your own separate ISR through ISR_StartEx().
+ 153:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 154:.\Generated_Source\PSoC4/ADC_ISR.c **** * Parameters:  
+ 155:.\Generated_Source\PSoC4/ADC_ISR.c **** *   None
+ 156:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 157:.\Generated_Source\PSoC4/ADC_ISR.c **** * Return:
+ 158:.\Generated_Source\PSoC4/ADC_ISR.c **** *   None
+ 159:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 160:.\Generated_Source\PSoC4/ADC_ISR.c **** *******************************************************************************/
+ 161:.\Generated_Source\PSoC4/ADC_ISR.c **** CY_ISR(ADC_ISR_Interrupt)
+ 162:.\Generated_Source\PSoC4/ADC_ISR.c **** {
+  26              		.loc 1 162 0
+  27              		.cfi_startproc
+  28 0000 08B5     		push	{r3, lr}
+  29              		.cfi_def_cfa_offset 8
+  30              		.cfi_offset 3, -8
+  31              		.cfi_offset 14, -4
+ 163:.\Generated_Source\PSoC4/ADC_ISR.c ****     #ifdef ADC_ISR_INTERRUPT_INTERRUPT_CALLBACK
+ 164:.\Generated_Source\PSoC4/ADC_ISR.c ****         ADC_ISR_Interrupt_InterruptCallback();
+ 165:.\Generated_Source\PSoC4/ADC_ISR.c ****     #endif /* ADC_ISR_INTERRUPT_INTERRUPT_CALLBACK */ 
+ 166:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 167:.\Generated_Source\PSoC4/ADC_ISR.c ****     /*  Place your Interrupt code here. */
+ 168:.\Generated_Source\PSoC4/ADC_ISR.c ****     /* `#START ADC_ISR_Interrupt` */
+ 169:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 170:.\Generated_Source\PSoC4/ADC_ISR.c ****     processTemperatureSample();
+  32              		.loc 1 170 0
+  33 0002 FFF7FEFF 		bl	processTemperatureSample
+  34              	.LVL0:
+ 171:.\Generated_Source\PSoC4/ADC_ISR.c ****     
+ 172:.\Generated_Source\PSoC4/ADC_ISR.c ****     /* `#END` */
+ 173:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+  35              		.loc 1 173 0
+  36              		@ sp needed
+  37 0006 08BD     		pop	{r3, pc}
+  38              		.cfi_endproc
+  39              	.LFE37:
+  40              		.size	ADC_ISR_Interrupt, .-ADC_ISR_Interrupt
+  41              		.section	.text.ADC_ISR_Stop,"ax",%progbits
+  42              		.align	1
+  43              		.global	ADC_ISR_Stop
+  44              		.code	16
+  45              		.thumb_func
+  46              		.type	ADC_ISR_Stop, %function
+  47              	ADC_ISR_Stop:
+  48              	.LFB36:
+ 132:.\Generated_Source\PSoC4/ADC_ISR.c ****     /* Disable this interrupt. */
+  49              		.loc 1 132 0
+  50              		.cfi_startproc
+  51              	.LBB18:
+  52              	.LBB19:
+ 174:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 175:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 5
+
+
+ 176:.\Generated_Source\PSoC4/ADC_ISR.c **** /*******************************************************************************
+ 177:.\Generated_Source\PSoC4/ADC_ISR.c **** * Function Name: ADC_ISR_SetVector
+ 178:.\Generated_Source\PSoC4/ADC_ISR.c **** ********************************************************************************
+ 179:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 180:.\Generated_Source\PSoC4/ADC_ISR.c **** * Summary:
+ 181:.\Generated_Source\PSoC4/ADC_ISR.c **** *   Change the ISR vector for the Interrupt. Note calling ADC_ISR_Start
+ 182:.\Generated_Source\PSoC4/ADC_ISR.c **** *   will override any effect this method would have had. To set the vector 
+ 183:.\Generated_Source\PSoC4/ADC_ISR.c **** *   before the component has been started use ADC_ISR_StartEx instead.
+ 184:.\Generated_Source\PSoC4/ADC_ISR.c **** * 
+ 185:.\Generated_Source\PSoC4/ADC_ISR.c **** *   When defining ISR functions, the CY_ISR and CY_ISR_PROTO macros should be 
+ 186:.\Generated_Source\PSoC4/ADC_ISR.c **** *   used to provide consistent definition across compilers:
+ 187:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 188:.\Generated_Source\PSoC4/ADC_ISR.c **** *   Function definition example:
+ 189:.\Generated_Source\PSoC4/ADC_ISR.c **** *   CY_ISR(MyISR)
+ 190:.\Generated_Source\PSoC4/ADC_ISR.c **** *   {
+ 191:.\Generated_Source\PSoC4/ADC_ISR.c **** *   }
+ 192:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 193:.\Generated_Source\PSoC4/ADC_ISR.c **** *   Function prototype example:
+ 194:.\Generated_Source\PSoC4/ADC_ISR.c **** *     CY_ISR_PROTO(MyISR);
+ 195:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 196:.\Generated_Source\PSoC4/ADC_ISR.c **** * Parameters:
+ 197:.\Generated_Source\PSoC4/ADC_ISR.c **** *   address: Address of the ISR to set in the interrupt vector table.
+ 198:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 199:.\Generated_Source\PSoC4/ADC_ISR.c **** * Return:
+ 200:.\Generated_Source\PSoC4/ADC_ISR.c **** *   None
+ 201:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 202:.\Generated_Source\PSoC4/ADC_ISR.c **** *******************************************************************************/
+ 203:.\Generated_Source\PSoC4/ADC_ISR.c **** void ADC_ISR_SetVector(cyisraddress address)
+ 204:.\Generated_Source\PSoC4/ADC_ISR.c **** {
+ 205:.\Generated_Source\PSoC4/ADC_ISR.c ****     CyRamVectors[CYINT_IRQ_BASE + ADC_ISR__INTC_NUMBER] = address;
+ 206:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ 207:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 208:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 209:.\Generated_Source\PSoC4/ADC_ISR.c **** /*******************************************************************************
+ 210:.\Generated_Source\PSoC4/ADC_ISR.c **** * Function Name: ADC_ISR_GetVector
+ 211:.\Generated_Source\PSoC4/ADC_ISR.c **** ********************************************************************************
+ 212:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 213:.\Generated_Source\PSoC4/ADC_ISR.c **** * Summary:
+ 214:.\Generated_Source\PSoC4/ADC_ISR.c **** *   Gets the "address" of the current ISR vector for the Interrupt.
+ 215:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 216:.\Generated_Source\PSoC4/ADC_ISR.c **** * Parameters:
+ 217:.\Generated_Source\PSoC4/ADC_ISR.c **** *   None
+ 218:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 219:.\Generated_Source\PSoC4/ADC_ISR.c **** * Return:
+ 220:.\Generated_Source\PSoC4/ADC_ISR.c **** *   Address of the ISR in the interrupt vector table.
+ 221:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 222:.\Generated_Source\PSoC4/ADC_ISR.c **** *******************************************************************************/
+ 223:.\Generated_Source\PSoC4/ADC_ISR.c **** cyisraddress ADC_ISR_GetVector(void)
+ 224:.\Generated_Source\PSoC4/ADC_ISR.c **** {
+ 225:.\Generated_Source\PSoC4/ADC_ISR.c ****     return CyRamVectors[CYINT_IRQ_BASE + ADC_ISR__INTC_NUMBER];
+ 226:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ 227:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 228:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 229:.\Generated_Source\PSoC4/ADC_ISR.c **** /*******************************************************************************
+ 230:.\Generated_Source\PSoC4/ADC_ISR.c **** * Function Name: ADC_ISR_SetPriority
+ 231:.\Generated_Source\PSoC4/ADC_ISR.c **** ********************************************************************************
+ 232:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 6
+
+
+ 233:.\Generated_Source\PSoC4/ADC_ISR.c **** * Summary:
+ 234:.\Generated_Source\PSoC4/ADC_ISR.c **** *   Sets the Priority of the Interrupt. 
+ 235:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 236:.\Generated_Source\PSoC4/ADC_ISR.c **** *   Note calling ADC_ISR_Start or ADC_ISR_StartEx will 
+ 237:.\Generated_Source\PSoC4/ADC_ISR.c **** *   override any effect this API would have had. This API should only be called
+ 238:.\Generated_Source\PSoC4/ADC_ISR.c **** *   after ADC_ISR_Start or ADC_ISR_StartEx has been called. 
+ 239:.\Generated_Source\PSoC4/ADC_ISR.c **** *   To set the initial priority for the component, use the Design-Wide Resources
+ 240:.\Generated_Source\PSoC4/ADC_ISR.c **** *   Interrupt Editor.
+ 241:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 242:.\Generated_Source\PSoC4/ADC_ISR.c **** *   Note This API has no effect on Non-maskable interrupt NMI).
+ 243:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 244:.\Generated_Source\PSoC4/ADC_ISR.c **** * Parameters:
+ 245:.\Generated_Source\PSoC4/ADC_ISR.c **** *   priority: Priority of the interrupt, 0 being the highest priority
+ 246:.\Generated_Source\PSoC4/ADC_ISR.c **** *             PSoC 3 and PSoC 5LP: Priority is from 0 to 7.
+ 247:.\Generated_Source\PSoC4/ADC_ISR.c **** *             PSoC 4: Priority is from 0 to 3.
+ 248:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 249:.\Generated_Source\PSoC4/ADC_ISR.c **** * Return:
+ 250:.\Generated_Source\PSoC4/ADC_ISR.c **** *   None
+ 251:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 252:.\Generated_Source\PSoC4/ADC_ISR.c **** *******************************************************************************/
+ 253:.\Generated_Source\PSoC4/ADC_ISR.c **** void ADC_ISR_SetPriority(uint8 priority)
+ 254:.\Generated_Source\PSoC4/ADC_ISR.c **** {
+ 255:.\Generated_Source\PSoC4/ADC_ISR.c **** 	uint8 interruptState;
+ 256:.\Generated_Source\PSoC4/ADC_ISR.c ****     uint32 priorityOffset = ((ADC_ISR__INTC_NUMBER % 4u) * 8u) + 6u;
+ 257:.\Generated_Source\PSoC4/ADC_ISR.c ****     
+ 258:.\Generated_Source\PSoC4/ADC_ISR.c **** 	interruptState = CyEnterCriticalSection();
+ 259:.\Generated_Source\PSoC4/ADC_ISR.c ****     *ADC_ISR_INTC_PRIOR = (*ADC_ISR_INTC_PRIOR & (uint32)(~ADC_ISR__INTC_PRIOR_MASK)) |
+ 260:.\Generated_Source\PSoC4/ADC_ISR.c ****                                     ((uint32)priority << priorityOffset);
+ 261:.\Generated_Source\PSoC4/ADC_ISR.c **** 	CyExitCriticalSection(interruptState);
+ 262:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ 263:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 264:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 265:.\Generated_Source\PSoC4/ADC_ISR.c **** /*******************************************************************************
+ 266:.\Generated_Source\PSoC4/ADC_ISR.c **** * Function Name: ADC_ISR_GetPriority
+ 267:.\Generated_Source\PSoC4/ADC_ISR.c **** ********************************************************************************
+ 268:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 269:.\Generated_Source\PSoC4/ADC_ISR.c **** * Summary:
+ 270:.\Generated_Source\PSoC4/ADC_ISR.c **** *   Gets the Priority of the Interrupt.
+ 271:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 272:.\Generated_Source\PSoC4/ADC_ISR.c **** * Parameters:
+ 273:.\Generated_Source\PSoC4/ADC_ISR.c **** *   None
+ 274:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 275:.\Generated_Source\PSoC4/ADC_ISR.c **** * Return:
+ 276:.\Generated_Source\PSoC4/ADC_ISR.c **** *   Priority of the interrupt, 0 being the highest priority
+ 277:.\Generated_Source\PSoC4/ADC_ISR.c **** *    PSoC 3 and PSoC 5LP: Priority is from 0 to 7.
+ 278:.\Generated_Source\PSoC4/ADC_ISR.c **** *    PSoC 4: Priority is from 0 to 3.
+ 279:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 280:.\Generated_Source\PSoC4/ADC_ISR.c **** *******************************************************************************/
+ 281:.\Generated_Source\PSoC4/ADC_ISR.c **** uint8 ADC_ISR_GetPriority(void)
+ 282:.\Generated_Source\PSoC4/ADC_ISR.c **** {
+ 283:.\Generated_Source\PSoC4/ADC_ISR.c ****     uint32 priority;
+ 284:.\Generated_Source\PSoC4/ADC_ISR.c **** 	uint32 priorityOffset = ((ADC_ISR__INTC_NUMBER % 4u) * 8u) + 6u;
+ 285:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 286:.\Generated_Source\PSoC4/ADC_ISR.c ****     priority = (*ADC_ISR_INTC_PRIOR & ADC_ISR__INTC_PRIOR_MASK) >> priorityOffset;
+ 287:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 288:.\Generated_Source\PSoC4/ADC_ISR.c ****     return (uint8)priority;
+ 289:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 7
+
+
+ 290:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 291:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 292:.\Generated_Source\PSoC4/ADC_ISR.c **** /*******************************************************************************
+ 293:.\Generated_Source\PSoC4/ADC_ISR.c **** * Function Name: ADC_ISR_Enable
+ 294:.\Generated_Source\PSoC4/ADC_ISR.c **** ********************************************************************************
+ 295:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 296:.\Generated_Source\PSoC4/ADC_ISR.c **** * Summary:
+ 297:.\Generated_Source\PSoC4/ADC_ISR.c **** *   Enables the interrupt to the interrupt controller. Do not call this function
+ 298:.\Generated_Source\PSoC4/ADC_ISR.c **** *   unless ISR_Start() has been called or the functionality of the ISR_Start() 
+ 299:.\Generated_Source\PSoC4/ADC_ISR.c **** *   function, which sets the vector and the priority, has been called.
+ 300:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 301:.\Generated_Source\PSoC4/ADC_ISR.c **** * Parameters:
+ 302:.\Generated_Source\PSoC4/ADC_ISR.c **** *   None
+ 303:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 304:.\Generated_Source\PSoC4/ADC_ISR.c **** * Return:
+ 305:.\Generated_Source\PSoC4/ADC_ISR.c **** *   None
+ 306:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 307:.\Generated_Source\PSoC4/ADC_ISR.c **** *******************************************************************************/
+ 308:.\Generated_Source\PSoC4/ADC_ISR.c **** void ADC_ISR_Enable(void)
+ 309:.\Generated_Source\PSoC4/ADC_ISR.c **** {
+ 310:.\Generated_Source\PSoC4/ADC_ISR.c ****     /* Enable the general interrupt. */
+ 311:.\Generated_Source\PSoC4/ADC_ISR.c ****     *ADC_ISR_INTC_SET_EN = ADC_ISR__INTC_MASK;
+ 312:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ 313:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 314:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 315:.\Generated_Source\PSoC4/ADC_ISR.c **** /*******************************************************************************
+ 316:.\Generated_Source\PSoC4/ADC_ISR.c **** * Function Name: ADC_ISR_GetState
+ 317:.\Generated_Source\PSoC4/ADC_ISR.c **** ********************************************************************************
+ 318:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 319:.\Generated_Source\PSoC4/ADC_ISR.c **** * Summary:
+ 320:.\Generated_Source\PSoC4/ADC_ISR.c **** *   Gets the state (enabled, disabled) of the Interrupt.
+ 321:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 322:.\Generated_Source\PSoC4/ADC_ISR.c **** * Parameters:
+ 323:.\Generated_Source\PSoC4/ADC_ISR.c **** *   None
+ 324:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 325:.\Generated_Source\PSoC4/ADC_ISR.c **** * Return:
+ 326:.\Generated_Source\PSoC4/ADC_ISR.c **** *   1 if enabled, 0 if disabled.
+ 327:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 328:.\Generated_Source\PSoC4/ADC_ISR.c **** *******************************************************************************/
+ 329:.\Generated_Source\PSoC4/ADC_ISR.c **** uint8 ADC_ISR_GetState(void)
+ 330:.\Generated_Source\PSoC4/ADC_ISR.c **** {
+ 331:.\Generated_Source\PSoC4/ADC_ISR.c ****     /* Get the state of the general interrupt. */
+ 332:.\Generated_Source\PSoC4/ADC_ISR.c ****     return ((*ADC_ISR_INTC_SET_EN & (uint32)ADC_ISR__INTC_MASK) != 0u) ? 1u:0u;
+ 333:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ 334:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 335:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 336:.\Generated_Source\PSoC4/ADC_ISR.c **** /*******************************************************************************
+ 337:.\Generated_Source\PSoC4/ADC_ISR.c **** * Function Name: ADC_ISR_Disable
+ 338:.\Generated_Source\PSoC4/ADC_ISR.c **** ********************************************************************************
+ 339:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 340:.\Generated_Source\PSoC4/ADC_ISR.c **** * Summary:
+ 341:.\Generated_Source\PSoC4/ADC_ISR.c **** *   Disables the Interrupt in the interrupt controller.
+ 342:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 343:.\Generated_Source\PSoC4/ADC_ISR.c **** * Parameters:
+ 344:.\Generated_Source\PSoC4/ADC_ISR.c **** *   None
+ 345:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 346:.\Generated_Source\PSoC4/ADC_ISR.c **** * Return:
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 8
+
+
+ 347:.\Generated_Source\PSoC4/ADC_ISR.c **** *   None
+ 348:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 349:.\Generated_Source\PSoC4/ADC_ISR.c **** *******************************************************************************/
+ 350:.\Generated_Source\PSoC4/ADC_ISR.c **** void ADC_ISR_Disable(void)
+ 351:.\Generated_Source\PSoC4/ADC_ISR.c **** {
+ 352:.\Generated_Source\PSoC4/ADC_ISR.c ****     /* Disable the general interrupt. */
+ 353:.\Generated_Source\PSoC4/ADC_ISR.c ****     *ADC_ISR_INTC_CLR_EN = ADC_ISR__INTC_MASK;
+  53              		.loc 1 353 0
+  54 0000 0122     		mov	r2, #1
+  55 0002 034B     		ldr	r3, .L3
+  56              	.LBE19:
+  57              	.LBE18:
+ 138:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+  58              		.loc 1 138 0
+  59              		@ sp needed
+  60              	.LBB21:
+  61              	.LBB20:
+  62              		.loc 1 353 0
+  63 0004 1A60     		str	r2, [r3]
+  64              	.LVL1:
+  65              	.LBE20:
+  66              	.LBE21:
+  67              	.LBB22:
+  68              	.LBB23:
+ 205:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+  69              		.loc 1 205 0
+  70 0006 034A     		ldr	r2, .L3+4
+  71 0008 034B     		ldr	r3, .L3+8
+  72 000a 1A64     		str	r2, [r3, #64]
+  73              	.LBE23:
+  74              	.LBE22:
+ 138:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+  75              		.loc 1 138 0
+  76 000c 7047     		bx	lr
+  77              	.L4:
+  78 000e C046     		.align	2
+  79              	.L3:
+  80 0010 80E100E0 		.word	-536813184
+  81 0014 00000000 		.word	IntDefaultHandler
+  82 0018 00000000 		.word	CyRamVectors
+  83              		.cfi_endproc
+  84              	.LFE36:
+  85              		.size	ADC_ISR_Stop, .-ADC_ISR_Stop
+  86              		.section	.text.ADC_ISR_SetVector,"ax",%progbits
+  87              		.align	1
+  88              		.global	ADC_ISR_SetVector
+  89              		.code	16
+  90              		.thumb_func
+  91              		.type	ADC_ISR_SetVector, %function
+  92              	ADC_ISR_SetVector:
+  93              	.LFB38:
+ 204:.\Generated_Source\PSoC4/ADC_ISR.c ****     CyRamVectors[CYINT_IRQ_BASE + ADC_ISR__INTC_NUMBER] = address;
+  94              		.loc 1 204 0
+  95              		.cfi_startproc
+  96              	.LVL2:
+ 205:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+  97              		.loc 1 205 0
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 9
+
+
+  98 0000 014B     		ldr	r3, .L6
+ 206:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+  99              		.loc 1 206 0
+ 100              		@ sp needed
+ 205:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ 101              		.loc 1 205 0
+ 102 0002 1864     		str	r0, [r3, #64]
+ 206:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 103              		.loc 1 206 0
+ 104 0004 7047     		bx	lr
+ 105              	.L7:
+ 106 0006 C046     		.align	2
+ 107              	.L6:
+ 108 0008 00000000 		.word	CyRamVectors
+ 109              		.cfi_endproc
+ 110              	.LFE38:
+ 111              		.size	ADC_ISR_SetVector, .-ADC_ISR_SetVector
+ 112              		.section	.text.ADC_ISR_GetVector,"ax",%progbits
+ 113              		.align	1
+ 114              		.global	ADC_ISR_GetVector
+ 115              		.code	16
+ 116              		.thumb_func
+ 117              		.type	ADC_ISR_GetVector, %function
+ 118              	ADC_ISR_GetVector:
+ 119              	.LFB39:
+ 224:.\Generated_Source\PSoC4/ADC_ISR.c ****     return CyRamVectors[CYINT_IRQ_BASE + ADC_ISR__INTC_NUMBER];
+ 120              		.loc 1 224 0
+ 121              		.cfi_startproc
+ 225:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ 122              		.loc 1 225 0
+ 123 0000 014B     		ldr	r3, .L9
+ 226:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 124              		.loc 1 226 0
+ 125              		@ sp needed
+ 225:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ 126              		.loc 1 225 0
+ 127 0002 186C     		ldr	r0, [r3, #64]
+ 226:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 128              		.loc 1 226 0
+ 129 0004 7047     		bx	lr
+ 130              	.L10:
+ 131 0006 C046     		.align	2
+ 132              	.L9:
+ 133 0008 00000000 		.word	CyRamVectors
+ 134              		.cfi_endproc
+ 135              	.LFE39:
+ 136              		.size	ADC_ISR_GetVector, .-ADC_ISR_GetVector
+ 137              		.section	.text.ADC_ISR_SetPriority,"ax",%progbits
+ 138              		.align	1
+ 139              		.global	ADC_ISR_SetPriority
+ 140              		.code	16
+ 141              		.thumb_func
+ 142              		.type	ADC_ISR_SetPriority, %function
+ 143              	ADC_ISR_SetPriority:
+ 144              	.LFB40:
+ 254:.\Generated_Source\PSoC4/ADC_ISR.c **** 	uint8 interruptState;
+ 145              		.loc 1 254 0
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 10
+
+
+ 146              		.cfi_startproc
+ 147              	.LVL3:
+ 148 0000 10B5     		push	{r4, lr}
+ 149              		.cfi_def_cfa_offset 8
+ 150              		.cfi_offset 4, -8
+ 151              		.cfi_offset 14, -4
+ 254:.\Generated_Source\PSoC4/ADC_ISR.c **** 	uint8 interruptState;
+ 152              		.loc 1 254 0
+ 153 0002 041C     		mov	r4, r0
+ 258:.\Generated_Source\PSoC4/ADC_ISR.c ****     *ADC_ISR_INTC_PRIOR = (*ADC_ISR_INTC_PRIOR & (uint32)(~ADC_ISR__INTC_PRIOR_MASK)) |
+ 154              		.loc 1 258 0
+ 155 0004 FFF7FEFF 		bl	CyEnterCriticalSection
+ 156              	.LVL4:
+ 259:.\Generated_Source\PSoC4/ADC_ISR.c ****                                     ((uint32)priority << priorityOffset);
+ 157              		.loc 1 259 0
+ 158 0008 C021     		mov	r1, #192
+ 159 000a 044A     		ldr	r2, .L12
+ 260:.\Generated_Source\PSoC4/ADC_ISR.c **** 	CyExitCriticalSection(interruptState);
+ 160              		.loc 1 260 0
+ 161 000c A401     		lsl	r4, r4, #6
+ 259:.\Generated_Source\PSoC4/ADC_ISR.c ****                                     ((uint32)priority << priorityOffset);
+ 162              		.loc 1 259 0
+ 163 000e 1368     		ldr	r3, [r2]
+ 262:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 164              		.loc 1 262 0
+ 165              		@ sp needed
+ 259:.\Generated_Source\PSoC4/ADC_ISR.c ****                                     ((uint32)priority << priorityOffset);
+ 166              		.loc 1 259 0
+ 167 0010 8B43     		bic	r3, r1
+ 168 0012 2343     		orr	r3, r4
+ 169 0014 1360     		str	r3, [r2]
+ 261:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ 170              		.loc 1 261 0
+ 171 0016 FFF7FEFF 		bl	CyExitCriticalSection
+ 172              	.LVL5:
+ 262:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 173              		.loc 1 262 0
+ 174 001a 10BD     		pop	{r4, pc}
+ 175              	.L13:
+ 176              		.align	2
+ 177              	.L12:
+ 178 001c 00E400E0 		.word	-536812544
+ 179              		.cfi_endproc
+ 180              	.LFE40:
+ 181              		.size	ADC_ISR_SetPriority, .-ADC_ISR_SetPriority
+ 182              		.section	.text.ADC_ISR_Start,"ax",%progbits
+ 183              		.align	1
+ 184              		.global	ADC_ISR_Start
+ 185              		.code	16
+ 186              		.thumb_func
+ 187              		.type	ADC_ISR_Start, %function
+ 188              	ADC_ISR_Start:
+ 189              	.LFB34:
+  59:.\Generated_Source\PSoC4/ADC_ISR.c ****     /* For all we know the interrupt is active. */
+ 190              		.loc 1 59 0
+ 191              		.cfi_startproc
+ 192 0000 10B5     		push	{r4, lr}
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 11
+
+
+ 193              		.cfi_def_cfa_offset 8
+ 194              		.cfi_offset 4, -8
+ 195              		.cfi_offset 14, -4
+ 196              	.LBB24:
+ 197              	.LBB25:
+ 198              		.loc 1 353 0
+ 199 0002 0124     		mov	r4, #1
+ 200 0004 054B     		ldr	r3, .L15
+ 201              	.LBE25:
+ 202              	.LBE24:
+ 203              	.LBB27:
+ 204              	.LBB28:
+ 205:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ 205              		.loc 1 205 0
+ 206 0006 064A     		ldr	r2, .L15+4
+ 207              	.LBE28:
+ 208              	.LBE27:
+ 209              	.LBB31:
+ 210              	.LBB26:
+ 211              		.loc 1 353 0
+ 212 0008 1C60     		str	r4, [r3]
+ 213              	.LVL6:
+ 214              	.LBE26:
+ 215              	.LBE31:
+ 216              	.LBB32:
+ 217              	.LBB29:
+ 205:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ 218              		.loc 1 205 0
+ 219 000a 064B     		ldr	r3, .L15+8
+ 220              	.LBE29:
+ 221              	.LBE32:
+  67:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 222              		.loc 1 67 0
+ 223 000c 0320     		mov	r0, #3
+ 224              	.LBB33:
+ 225              	.LBB30:
+ 205:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ 226              		.loc 1 205 0
+ 227 000e 1A64     		str	r2, [r3, #64]
+ 228              	.LBE30:
+ 229              	.LBE33:
+  67:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 230              		.loc 1 67 0
+ 231 0010 FFF7FEFF 		bl	ADC_ISR_SetPriority
+ 232              	.LVL7:
+ 233              	.LBB34:
+ 234              	.LBB35:
+ 311:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ 235              		.loc 1 311 0
+ 236 0014 044B     		ldr	r3, .L15+12
+ 237              	.LBE35:
+ 238              	.LBE34:
+  71:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 239              		.loc 1 71 0
+ 240              		@ sp needed
+ 241              	.LBB37:
+ 242              	.LBB36:
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 12
+
+
+ 311:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ 243              		.loc 1 311 0
+ 244 0016 1C60     		str	r4, [r3]
+ 245              	.LBE36:
+ 246              	.LBE37:
+  71:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 247              		.loc 1 71 0
+ 248 0018 10BD     		pop	{r4, pc}
+ 249              	.L16:
+ 250 001a C046     		.align	2
+ 251              	.L15:
+ 252 001c 80E100E0 		.word	-536813184
+ 253 0020 00000000 		.word	ADC_ISR_Interrupt
+ 254 0024 00000000 		.word	CyRamVectors
+ 255 0028 00E100E0 		.word	-536813312
+ 256              		.cfi_endproc
+ 257              	.LFE34:
+ 258              		.size	ADC_ISR_Start, .-ADC_ISR_Start
+ 259              		.section	.text.ADC_ISR_StartEx,"ax",%progbits
+ 260              		.align	1
+ 261              		.global	ADC_ISR_StartEx
+ 262              		.code	16
+ 263              		.thumb_func
+ 264              		.type	ADC_ISR_StartEx, %function
+ 265              	ADC_ISR_StartEx:
+ 266              	.LFB35:
+ 102:.\Generated_Source\PSoC4/ADC_ISR.c ****     /* For all we know the interrupt is active. */
+ 267              		.loc 1 102 0
+ 268              		.cfi_startproc
+ 269              	.LVL8:
+ 270 0000 10B5     		push	{r4, lr}
+ 271              		.cfi_def_cfa_offset 8
+ 272              		.cfi_offset 4, -8
+ 273              		.cfi_offset 14, -4
+ 274              	.LBB38:
+ 275              	.LBB39:
+ 276              		.loc 1 353 0
+ 277 0002 0124     		mov	r4, #1
+ 278 0004 044B     		ldr	r3, .L18
+ 279              	.LBE39:
+ 280              	.LBE38:
+ 114:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 281              		.loc 1 114 0
+ 282              		@ sp needed
+ 283              	.LBB41:
+ 284              	.LBB40:
+ 285              		.loc 1 353 0
+ 286 0006 1C60     		str	r4, [r3]
+ 287              	.LVL9:
+ 288              	.LBE40:
+ 289              	.LBE41:
+ 290              	.LBB42:
+ 291              	.LBB43:
+ 205:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ 292              		.loc 1 205 0
+ 293 0008 044B     		ldr	r3, .L18+4
+ 294 000a 1864     		str	r0, [r3, #64]
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 13
+
+
+ 295              	.LBE43:
+ 296              	.LBE42:
+ 110:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 297              		.loc 1 110 0
+ 298 000c 0320     		mov	r0, #3
+ 299              	.LVL10:
+ 300 000e FFF7FEFF 		bl	ADC_ISR_SetPriority
+ 301              	.LVL11:
+ 302              	.LBB44:
+ 303              	.LBB45:
+ 311:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ 304              		.loc 1 311 0
+ 305 0012 034B     		ldr	r3, .L18+8
+ 306 0014 1C60     		str	r4, [r3]
+ 307              	.LBE45:
+ 308              	.LBE44:
+ 114:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 309              		.loc 1 114 0
+ 310 0016 10BD     		pop	{r4, pc}
+ 311              	.L19:
+ 312              		.align	2
+ 313              	.L18:
+ 314 0018 80E100E0 		.word	-536813184
+ 315 001c 00000000 		.word	CyRamVectors
+ 316 0020 00E100E0 		.word	-536813312
+ 317              		.cfi_endproc
+ 318              	.LFE35:
+ 319              		.size	ADC_ISR_StartEx, .-ADC_ISR_StartEx
+ 320              		.section	.text.ADC_ISR_GetPriority,"ax",%progbits
+ 321              		.align	1
+ 322              		.global	ADC_ISR_GetPriority
+ 323              		.code	16
+ 324              		.thumb_func
+ 325              		.type	ADC_ISR_GetPriority, %function
+ 326              	ADC_ISR_GetPriority:
+ 327              	.LFB41:
+ 282:.\Generated_Source\PSoC4/ADC_ISR.c ****     uint32 priority;
+ 328              		.loc 1 282 0
+ 329              		.cfi_startproc
+ 330              	.LVL12:
+ 286:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 331              		.loc 1 286 0
+ 332 0000 024B     		ldr	r3, .L21
+ 289:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 333              		.loc 1 289 0
+ 334              		@ sp needed
+ 286:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 335              		.loc 1 286 0
+ 336 0002 1868     		ldr	r0, [r3]
+ 337              	.LVL13:
+ 338 0004 0006     		lsl	r0, r0, #24
+ 339              	.LVL14:
+ 288:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ 340              		.loc 1 288 0
+ 341 0006 800F     		lsr	r0, r0, #30
+ 289:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 342              		.loc 1 289 0
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 14
+
+
+ 343 0008 7047     		bx	lr
+ 344              	.L22:
+ 345 000a C046     		.align	2
+ 346              	.L21:
+ 347 000c 00E400E0 		.word	-536812544
+ 348              		.cfi_endproc
+ 349              	.LFE41:
+ 350              		.size	ADC_ISR_GetPriority, .-ADC_ISR_GetPriority
+ 351              		.section	.text.ADC_ISR_Enable,"ax",%progbits
+ 352              		.align	1
+ 353              		.global	ADC_ISR_Enable
+ 354              		.code	16
+ 355              		.thumb_func
+ 356              		.type	ADC_ISR_Enable, %function
+ 357              	ADC_ISR_Enable:
+ 358              	.LFB42:
+ 309:.\Generated_Source\PSoC4/ADC_ISR.c ****     /* Enable the general interrupt. */
+ 359              		.loc 1 309 0
+ 360              		.cfi_startproc
+ 311:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ 361              		.loc 1 311 0
+ 362 0000 0122     		mov	r2, #1
+ 363 0002 014B     		ldr	r3, .L24
+ 312:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 364              		.loc 1 312 0
+ 365              		@ sp needed
+ 311:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ 366              		.loc 1 311 0
+ 367 0004 1A60     		str	r2, [r3]
+ 312:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 368              		.loc 1 312 0
+ 369 0006 7047     		bx	lr
+ 370              	.L25:
+ 371              		.align	2
+ 372              	.L24:
+ 373 0008 00E100E0 		.word	-536813312
+ 374              		.cfi_endproc
+ 375              	.LFE42:
+ 376              		.size	ADC_ISR_Enable, .-ADC_ISR_Enable
+ 377              		.section	.text.ADC_ISR_GetState,"ax",%progbits
+ 378              		.align	1
+ 379              		.global	ADC_ISR_GetState
+ 380              		.code	16
+ 381              		.thumb_func
+ 382              		.type	ADC_ISR_GetState, %function
+ 383              	ADC_ISR_GetState:
+ 384              	.LFB43:
+ 330:.\Generated_Source\PSoC4/ADC_ISR.c ****     /* Get the state of the general interrupt. */
+ 385              		.loc 1 330 0
+ 386              		.cfi_startproc
+ 332:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ 387              		.loc 1 332 0
+ 388 0000 024B     		ldr	r3, .L27
+ 333:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 389              		.loc 1 333 0
+ 390              		@ sp needed
+ 332:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 15
+
+
+ 391              		.loc 1 332 0
+ 392 0002 1868     		ldr	r0, [r3]
+ 393 0004 0123     		mov	r3, #1
+ 394 0006 1840     		and	r0, r3
+ 333:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 395              		.loc 1 333 0
+ 396 0008 7047     		bx	lr
+ 397              	.L28:
+ 398 000a C046     		.align	2
+ 399              	.L27:
+ 400 000c 00E100E0 		.word	-536813312
+ 401              		.cfi_endproc
+ 402              	.LFE43:
+ 403              		.size	ADC_ISR_GetState, .-ADC_ISR_GetState
+ 404              		.section	.text.ADC_ISR_Disable,"ax",%progbits
+ 405              		.align	1
+ 406              		.global	ADC_ISR_Disable
+ 407              		.code	16
+ 408              		.thumb_func
+ 409              		.type	ADC_ISR_Disable, %function
+ 410              	ADC_ISR_Disable:
+ 411              	.LFB44:
+ 351:.\Generated_Source\PSoC4/ADC_ISR.c ****     /* Disable the general interrupt. */
+ 412              		.loc 1 351 0
+ 413              		.cfi_startproc
+ 414              		.loc 1 353 0
+ 415 0000 0122     		mov	r2, #1
+ 416 0002 014B     		ldr	r3, .L30
+ 354:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ 417              		.loc 1 354 0
+ 418              		@ sp needed
+ 353:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ 419              		.loc 1 353 0
+ 420 0004 1A60     		str	r2, [r3]
+ 421              		.loc 1 354 0
+ 422 0006 7047     		bx	lr
+ 423              	.L31:
+ 424              		.align	2
+ 425              	.L30:
+ 426 0008 80E100E0 		.word	-536813184
+ 427              		.cfi_endproc
+ 428              	.LFE44:
+ 429              		.size	ADC_ISR_Disable, .-ADC_ISR_Disable
+ 430              		.section	.text.ADC_ISR_SetPending,"ax",%progbits
+ 431              		.align	1
+ 432              		.global	ADC_ISR_SetPending
+ 433              		.code	16
+ 434              		.thumb_func
+ 435              		.type	ADC_ISR_SetPending, %function
+ 436              	ADC_ISR_SetPending:
+ 437              	.LFB45:
+ 355:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 356:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 357:.\Generated_Source\PSoC4/ADC_ISR.c **** /*******************************************************************************
+ 358:.\Generated_Source\PSoC4/ADC_ISR.c **** * Function Name: ADC_ISR_SetPending
+ 359:.\Generated_Source\PSoC4/ADC_ISR.c **** ********************************************************************************
+ 360:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 16
+
+
+ 361:.\Generated_Source\PSoC4/ADC_ISR.c **** * Summary:
+ 362:.\Generated_Source\PSoC4/ADC_ISR.c **** *   Causes the Interrupt to enter the pending state, a software method of
+ 363:.\Generated_Source\PSoC4/ADC_ISR.c **** *   generating the interrupt.
+ 364:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 365:.\Generated_Source\PSoC4/ADC_ISR.c **** * Parameters:
+ 366:.\Generated_Source\PSoC4/ADC_ISR.c **** *   None
+ 367:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 368:.\Generated_Source\PSoC4/ADC_ISR.c **** * Return:
+ 369:.\Generated_Source\PSoC4/ADC_ISR.c **** *   None
+ 370:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 371:.\Generated_Source\PSoC4/ADC_ISR.c **** * Side Effects:
+ 372:.\Generated_Source\PSoC4/ADC_ISR.c **** *   If interrupts are enabled and the interrupt is set up properly, the ISR is
+ 373:.\Generated_Source\PSoC4/ADC_ISR.c **** *   entered (depending on the priority of this interrupt and other pending 
+ 374:.\Generated_Source\PSoC4/ADC_ISR.c **** *   interrupts).
+ 375:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 376:.\Generated_Source\PSoC4/ADC_ISR.c **** *******************************************************************************/
+ 377:.\Generated_Source\PSoC4/ADC_ISR.c **** void ADC_ISR_SetPending(void)
+ 378:.\Generated_Source\PSoC4/ADC_ISR.c **** {
+ 438              		.loc 1 378 0
+ 439              		.cfi_startproc
+ 379:.\Generated_Source\PSoC4/ADC_ISR.c ****     *ADC_ISR_INTC_SET_PD = ADC_ISR__INTC_MASK;
+ 440              		.loc 1 379 0
+ 441 0000 0122     		mov	r2, #1
+ 442 0002 014B     		ldr	r3, .L33
+ 380:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ 443              		.loc 1 380 0
+ 444              		@ sp needed
+ 379:.\Generated_Source\PSoC4/ADC_ISR.c ****     *ADC_ISR_INTC_SET_PD = ADC_ISR__INTC_MASK;
+ 445              		.loc 1 379 0
+ 446 0004 1A60     		str	r2, [r3]
+ 447              		.loc 1 380 0
+ 448 0006 7047     		bx	lr
+ 449              	.L34:
+ 450              		.align	2
+ 451              	.L33:
+ 452 0008 00E200E0 		.word	-536813056
+ 453              		.cfi_endproc
+ 454              	.LFE45:
+ 455              		.size	ADC_ISR_SetPending, .-ADC_ISR_SetPending
+ 456              		.section	.text.ADC_ISR_ClearPending,"ax",%progbits
+ 457              		.align	1
+ 458              		.global	ADC_ISR_ClearPending
+ 459              		.code	16
+ 460              		.thumb_func
+ 461              		.type	ADC_ISR_ClearPending, %function
+ 462              	ADC_ISR_ClearPending:
+ 463              	.LFB46:
+ 381:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 382:.\Generated_Source\PSoC4/ADC_ISR.c **** 
+ 383:.\Generated_Source\PSoC4/ADC_ISR.c **** /*******************************************************************************
+ 384:.\Generated_Source\PSoC4/ADC_ISR.c **** * Function Name: ADC_ISR_ClearPending
+ 385:.\Generated_Source\PSoC4/ADC_ISR.c **** ********************************************************************************
+ 386:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 387:.\Generated_Source\PSoC4/ADC_ISR.c **** * Summary:
+ 388:.\Generated_Source\PSoC4/ADC_ISR.c **** *   Clears a pending interrupt in the interrupt controller.
+ 389:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 390:.\Generated_Source\PSoC4/ADC_ISR.c **** *   Note Some interrupt sources are clear-on-read and require the block 
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 17
+
+
+ 391:.\Generated_Source\PSoC4/ADC_ISR.c **** *   interrupt/status register to be read/cleared with the appropriate block API 
+ 392:.\Generated_Source\PSoC4/ADC_ISR.c **** *   (GPIO, UART, and so on). Otherwise the ISR will continue to remain in 
+ 393:.\Generated_Source\PSoC4/ADC_ISR.c **** *   pending state even though the interrupt itself is cleared using this API.
+ 394:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 395:.\Generated_Source\PSoC4/ADC_ISR.c **** * Parameters:
+ 396:.\Generated_Source\PSoC4/ADC_ISR.c **** *   None
+ 397:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 398:.\Generated_Source\PSoC4/ADC_ISR.c **** * Return:
+ 399:.\Generated_Source\PSoC4/ADC_ISR.c **** *   None
+ 400:.\Generated_Source\PSoC4/ADC_ISR.c **** *
+ 401:.\Generated_Source\PSoC4/ADC_ISR.c **** *******************************************************************************/
+ 402:.\Generated_Source\PSoC4/ADC_ISR.c **** void ADC_ISR_ClearPending(void)
+ 403:.\Generated_Source\PSoC4/ADC_ISR.c **** {
+ 464              		.loc 1 403 0
+ 465              		.cfi_startproc
+ 404:.\Generated_Source\PSoC4/ADC_ISR.c ****     *ADC_ISR_INTC_CLR_PD = ADC_ISR__INTC_MASK;
+ 466              		.loc 1 404 0
+ 467 0000 0122     		mov	r2, #1
+ 468 0002 014B     		ldr	r3, .L36
+ 405:.\Generated_Source\PSoC4/ADC_ISR.c **** }
+ 469              		.loc 1 405 0
+ 470              		@ sp needed
+ 404:.\Generated_Source\PSoC4/ADC_ISR.c ****     *ADC_ISR_INTC_CLR_PD = ADC_ISR__INTC_MASK;
+ 471              		.loc 1 404 0
+ 472 0004 1A60     		str	r2, [r3]
+ 473              		.loc 1 405 0
+ 474 0006 7047     		bx	lr
+ 475              	.L37:
+ 476              		.align	2
+ 477              	.L36:
+ 478 0008 80E200E0 		.word	-536812928
+ 479              		.cfi_endproc
+ 480              	.LFE46:
+ 481              		.size	ADC_ISR_ClearPending, .-ADC_ISR_ClearPending
+ 482              		.text
+ 483              	.Letext0:
+ 484              		.file 2 "Generated_Source\\PSoC4/cytypes.h"
+ 485              		.file 3 "./IO_Control.h"
+ 486              		.file 4 "Generated_Source\\PSoC4/CyLib.h"
+ 487              		.section	.debug_info,"",%progbits
+ 488              	.Ldebug_info0:
+ 489 0000 62030000 		.4byte	0x362
+ 490 0004 0400     		.2byte	0x4
+ 491 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 492 000a 04       		.byte	0x4
+ 493 000b 01       		.uleb128 0x1
+ 494 000c 41000000 		.4byte	.LASF33
+ 495 0010 01       		.byte	0x1
+ 496 0011 64010000 		.4byte	.LASF34
+ 497 0015 D3020000 		.4byte	.LASF35
+ 498 0019 80000000 		.4byte	.Ldebug_ranges0+0x80
+ 499 001d 00000000 		.4byte	0
+ 500 0021 00000000 		.4byte	.Ldebug_line0
+ 501 0025 02       		.uleb128 0x2
+ 502 0026 01       		.byte	0x1
+ 503 0027 06       		.byte	0x6
+ 504 0028 B7020000 		.4byte	.LASF0
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 18
+
+
+ 505 002c 02       		.uleb128 0x2
+ 506 002d 01       		.byte	0x1
+ 507 002e 08       		.byte	0x8
+ 508 002f 1D010000 		.4byte	.LASF1
+ 509 0033 02       		.uleb128 0x2
+ 510 0034 02       		.byte	0x2
+ 511 0035 05       		.byte	0x5
+ 512 0036 82020000 		.4byte	.LASF2
+ 513 003a 02       		.uleb128 0x2
+ 514 003b 02       		.byte	0x2
+ 515 003c 07       		.byte	0x7
+ 516 003d E5000000 		.4byte	.LASF3
+ 517 0041 02       		.uleb128 0x2
+ 518 0042 04       		.byte	0x4
+ 519 0043 05       		.byte	0x5
+ 520 0044 9B020000 		.4byte	.LASF4
+ 521 0048 02       		.uleb128 0x2
+ 522 0049 04       		.byte	0x4
+ 523 004a 07       		.byte	0x7
+ 524 004b 3A010000 		.4byte	.LASF5
+ 525 004f 02       		.uleb128 0x2
+ 526 0050 08       		.byte	0x8
+ 527 0051 05       		.byte	0x5
+ 528 0052 4E020000 		.4byte	.LASF6
+ 529 0056 02       		.uleb128 0x2
+ 530 0057 08       		.byte	0x8
+ 531 0058 07       		.byte	0x7
+ 532 0059 06010000 		.4byte	.LASF7
+ 533 005d 03       		.uleb128 0x3
+ 534 005e 04       		.byte	0x4
+ 535 005f 05       		.byte	0x5
+ 536 0060 696E7400 		.ascii	"int\000"
+ 537 0064 02       		.uleb128 0x2
+ 538 0065 04       		.byte	0x4
+ 539 0066 07       		.byte	0x7
+ 540 0067 E0010000 		.4byte	.LASF8
+ 541 006b 04       		.uleb128 0x4
+ 542 006c 4C010000 		.4byte	.LASF9
+ 543 0070 02       		.byte	0x2
+ 544 0071 3801     		.2byte	0x138
+ 545 0073 2C000000 		.4byte	0x2c
+ 546 0077 04       		.uleb128 0x4
+ 547 0078 C2010000 		.4byte	.LASF10
+ 548 007c 02       		.byte	0x2
+ 549 007d 3A01     		.2byte	0x13a
+ 550 007f 48000000 		.4byte	0x48
+ 551 0083 02       		.uleb128 0x2
+ 552 0084 04       		.byte	0x4
+ 553 0085 04       		.byte	0x4
+ 554 0086 DF000000 		.4byte	.LASF11
+ 555 008a 02       		.uleb128 0x2
+ 556 008b 08       		.byte	0x8
+ 557 008c 04       		.byte	0x4
+ 558 008d BB010000 		.4byte	.LASF12
+ 559 0091 02       		.uleb128 0x2
+ 560 0092 01       		.byte	0x1
+ 561 0093 08       		.byte	0x8
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 19
+
+
+ 562 0094 5C020000 		.4byte	.LASF13
+ 563 0098 04       		.uleb128 0x4
+ 564 0099 27000000 		.4byte	.LASF14
+ 565 009d 02       		.byte	0x2
+ 566 009e E401     		.2byte	0x1e4
+ 567 00a0 A4000000 		.4byte	0xa4
+ 568 00a4 05       		.uleb128 0x5
+ 569 00a5 77000000 		.4byte	0x77
+ 570 00a9 04       		.uleb128 0x4
+ 571 00aa 2B020000 		.4byte	.LASF15
+ 572 00ae 02       		.byte	0x2
+ 573 00af F401     		.2byte	0x1f4
+ 574 00b1 B5000000 		.4byte	0xb5
+ 575 00b5 06       		.uleb128 0x6
+ 576 00b6 04       		.byte	0x4
+ 577 00b7 BB000000 		.4byte	0xbb
+ 578 00bb 07       		.uleb128 0x7
+ 579 00bc 02       		.uleb128 0x2
+ 580 00bd 04       		.byte	0x4
+ 581 00be 07       		.byte	0x7
+ 582 00bf 45020000 		.4byte	.LASF16
+ 583 00c3 08       		.uleb128 0x8
+ 584 00c4 CF000000 		.4byte	.LASF17
+ 585 00c8 01       		.byte	0x1
+ 586 00c9 5E01     		.2byte	0x15e
+ 587 00cb 01       		.byte	0x1
+ 588 00cc 09       		.uleb128 0x9
+ 589 00cd 15000000 		.4byte	.LASF36
+ 590 00d1 01       		.byte	0x1
+ 591 00d2 CB       		.byte	0xcb
+ 592 00d3 01       		.byte	0x1
+ 593 00d4 E4000000 		.4byte	0xe4
+ 594 00d8 0A       		.uleb128 0xa
+ 595 00d9 ED010000 		.4byte	.LASF27
+ 596 00dd 01       		.byte	0x1
+ 597 00de CB       		.byte	0xcb
+ 598 00df A9000000 		.4byte	0xa9
+ 599 00e3 00       		.byte	0
+ 600 00e4 08       		.uleb128 0x8
+ 601 00e5 0B020000 		.4byte	.LASF18
+ 602 00e9 01       		.byte	0x1
+ 603 00ea 3401     		.2byte	0x134
+ 604 00ec 01       		.byte	0x1
+ 605 00ed 0B       		.uleb128 0xb
+ 606 00ee 87010000 		.4byte	.LASF19
+ 607 00f2 01       		.byte	0x1
+ 608 00f3 A1       		.byte	0xa1
+ 609 00f4 00000000 		.4byte	.LFB37
+ 610 00f8 08000000 		.4byte	.LFE37-.LFB37
+ 611 00fc 01       		.uleb128 0x1
+ 612 00fd 9C       		.byte	0x9c
+ 613 00fe 0C010000 		.4byte	0x10c
+ 614 0102 0C       		.uleb128 0xc
+ 615 0103 06000000 		.4byte	.LVL0
+ 616 0107 46030000 		.4byte	0x346
+ 617 010b 00       		.byte	0
+ 618 010c 0B       		.uleb128 0xb
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 20
+
+
+ 619 010d 38020000 		.4byte	.LASF20
+ 620 0111 01       		.byte	0x1
+ 621 0112 83       		.byte	0x83
+ 622 0113 00000000 		.4byte	.LFB36
+ 623 0117 1C000000 		.4byte	.LFE36-.LFB36
+ 624 011b 01       		.uleb128 0x1
+ 625 011c 9C       		.byte	0x9c
+ 626 011d 46010000 		.4byte	0x146
+ 627 0121 0D       		.uleb128 0xd
+ 628 0122 C3000000 		.4byte	0xc3
+ 629 0126 00000000 		.4byte	.LBB18
+ 630 012a 00000000 		.4byte	.Ldebug_ranges0+0
+ 631 012e 01       		.byte	0x1
+ 632 012f 86       		.byte	0x86
+ 633 0130 0E       		.uleb128 0xe
+ 634 0131 CC000000 		.4byte	0xcc
+ 635 0135 06000000 		.4byte	.LBB22
+ 636 0139 06000000 		.4byte	.LBE22-.LBB22
+ 637 013d 01       		.byte	0x1
+ 638 013e 89       		.byte	0x89
+ 639 013f 0F       		.uleb128 0xf
+ 640 0140 D8000000 		.4byte	0xd8
+ 641 0144 00       		.byte	0
+ 642 0145 00       		.byte	0
+ 643 0146 10       		.uleb128 0x10
+ 644 0147 CC000000 		.4byte	0xcc
+ 645 014b 00000000 		.4byte	.LFB38
+ 646 014f 0C000000 		.4byte	.LFE38-.LFB38
+ 647 0153 01       		.uleb128 0x1
+ 648 0154 9C       		.byte	0x9c
+ 649 0155 61010000 		.4byte	0x161
+ 650 0159 11       		.uleb128 0x11
+ 651 015a D8000000 		.4byte	0xd8
+ 652 015e 01       		.uleb128 0x1
+ 653 015f 50       		.byte	0x50
+ 654 0160 00       		.byte	0
+ 655 0161 12       		.uleb128 0x12
+ 656 0162 52010000 		.4byte	.LASF28
+ 657 0166 01       		.byte	0x1
+ 658 0167 DF       		.byte	0xdf
+ 659 0168 A9000000 		.4byte	0xa9
+ 660 016c 00000000 		.4byte	.LFB39
+ 661 0170 0C000000 		.4byte	.LFE39-.LFB39
+ 662 0174 01       		.uleb128 0x1
+ 663 0175 9C       		.byte	0x9c
+ 664 0176 0B       		.uleb128 0xb
+ 665 0177 2D000000 		.4byte	.LASF21
+ 666 017b 01       		.byte	0x1
+ 667 017c FD       		.byte	0xfd
+ 668 017d 00000000 		.4byte	.LFB40
+ 669 0181 20000000 		.4byte	.LFE40-.LFB40
+ 670 0185 01       		.uleb128 0x1
+ 671 0186 9C       		.byte	0x9c
+ 672 0187 C9010000 		.4byte	0x1c9
+ 673 018b 13       		.uleb128 0x13
+ 674 018c 99010000 		.4byte	.LASF26
+ 675 0190 01       		.byte	0x1
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 21
+
+
+ 676 0191 FD       		.byte	0xfd
+ 677 0192 6B000000 		.4byte	0x6b
+ 678 0196 00000000 		.4byte	.LLST0
+ 679 019a 14       		.uleb128 0x14
+ 680 019b 2B010000 		.4byte	.LASF22
+ 681 019f 01       		.byte	0x1
+ 682 01a0 FF       		.byte	0xff
+ 683 01a1 6B000000 		.4byte	0x6b
+ 684 01a5 21000000 		.4byte	.LLST1
+ 685 01a9 15       		.uleb128 0x15
+ 686 01aa 8C020000 		.4byte	.LASF23
+ 687 01ae 01       		.byte	0x1
+ 688 01af 0001     		.2byte	0x100
+ 689 01b1 77000000 		.4byte	0x77
+ 690 01b5 06       		.byte	0x6
+ 691 01b6 0C       		.uleb128 0xc
+ 692 01b7 08000000 		.4byte	.LVL4
+ 693 01bb 4D030000 		.4byte	0x34d
+ 694 01bf 0C       		.uleb128 0xc
+ 695 01c0 1A000000 		.4byte	.LVL5
+ 696 01c4 58030000 		.4byte	0x358
+ 697 01c8 00       		.byte	0
+ 698 01c9 0B       		.uleb128 0xb
+ 699 01ca F8000000 		.4byte	.LASF24
+ 700 01ce 01       		.byte	0x1
+ 701 01cf 3A       		.byte	0x3a
+ 702 01d0 00000000 		.4byte	.LFB34
+ 703 01d4 2C000000 		.4byte	.LFE34-.LFB34
+ 704 01d8 01       		.uleb128 0x1
+ 705 01d9 9C       		.byte	0x9c
+ 706 01da 2C020000 		.4byte	0x22c
+ 707 01de 0D       		.uleb128 0xd
+ 708 01df C3000000 		.4byte	0xc3
+ 709 01e3 02000000 		.4byte	.LBB24
+ 710 01e7 18000000 		.4byte	.Ldebug_ranges0+0x18
+ 711 01eb 01       		.byte	0x1
+ 712 01ec 3D       		.byte	0x3d
+ 713 01ed 16       		.uleb128 0x16
+ 714 01ee CC000000 		.4byte	0xcc
+ 715 01f2 06000000 		.4byte	.LBB27
+ 716 01f6 30000000 		.4byte	.Ldebug_ranges0+0x30
+ 717 01fa 01       		.byte	0x1
+ 718 01fb 40       		.byte	0x40
+ 719 01fc 0D020000 		.4byte	0x20d
+ 720 0200 11       		.uleb128 0x11
+ 721 0201 D8000000 		.4byte	0xd8
+ 722 0205 06       		.uleb128 0x6
+ 723 0206 03       		.byte	0x3
+ 724 0207 00000000 		.4byte	ADC_ISR_Interrupt
+ 725 020b 9F       		.byte	0x9f
+ 726 020c 00       		.byte	0
+ 727 020d 0D       		.uleb128 0xd
+ 728 020e E4000000 		.4byte	0xe4
+ 729 0212 14000000 		.4byte	.LBB34
+ 730 0216 50000000 		.4byte	.Ldebug_ranges0+0x50
+ 731 021a 01       		.byte	0x1
+ 732 021b 46       		.byte	0x46
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 22
+
+
+ 733 021c 17       		.uleb128 0x17
+ 734 021d 14000000 		.4byte	.LVL7
+ 735 0221 76010000 		.4byte	0x176
+ 736 0225 18       		.uleb128 0x18
+ 737 0226 01       		.uleb128 0x1
+ 738 0227 50       		.byte	0x50
+ 739 0228 01       		.uleb128 0x1
+ 740 0229 33       		.byte	0x33
+ 741 022a 00       		.byte	0
+ 742 022b 00       		.byte	0
+ 743 022c 0B       		.uleb128 0xb
+ 744 022d C3020000 		.4byte	.LASF25
+ 745 0231 01       		.byte	0x1
+ 746 0232 65       		.byte	0x65
+ 747 0233 00000000 		.4byte	.LFB35
+ 748 0237 24000000 		.4byte	.LFE35-.LFB35
+ 749 023b 01       		.uleb128 0x1
+ 750 023c 9C       		.byte	0x9c
+ 751 023d 9B020000 		.4byte	0x29b
+ 752 0241 13       		.uleb128 0x13
+ 753 0242 ED010000 		.4byte	.LASF27
+ 754 0246 01       		.byte	0x1
+ 755 0247 65       		.byte	0x65
+ 756 0248 A9000000 		.4byte	0xa9
+ 757 024c 34000000 		.4byte	.LLST2
+ 758 0250 0D       		.uleb128 0xd
+ 759 0251 C3000000 		.4byte	0xc3
+ 760 0255 02000000 		.4byte	.LBB38
+ 761 0259 68000000 		.4byte	.Ldebug_ranges0+0x68
+ 762 025d 01       		.byte	0x1
+ 763 025e 68       		.byte	0x68
+ 764 025f 19       		.uleb128 0x19
+ 765 0260 CC000000 		.4byte	0xcc
+ 766 0264 08000000 		.4byte	.LBB42
+ 767 0268 04000000 		.4byte	.LBE42-.LBB42
+ 768 026c 01       		.byte	0x1
+ 769 026d 6B       		.byte	0x6b
+ 770 026e 7C020000 		.4byte	0x27c
+ 771 0272 1A       		.uleb128 0x1a
+ 772 0273 D8000000 		.4byte	0xd8
+ 773 0277 62000000 		.4byte	.LLST3
+ 774 027b 00       		.byte	0
+ 775 027c 1B       		.uleb128 0x1b
+ 776 027d E4000000 		.4byte	0xe4
+ 777 0281 12000000 		.4byte	.LBB44
+ 778 0285 04000000 		.4byte	.LBE44-.LBB44
+ 779 0289 01       		.byte	0x1
+ 780 028a 71       		.byte	0x71
+ 781 028b 17       		.uleb128 0x17
+ 782 028c 12000000 		.4byte	.LVL11
+ 783 0290 76010000 		.4byte	0x176
+ 784 0294 18       		.uleb128 0x18
+ 785 0295 01       		.uleb128 0x1
+ 786 0296 50       		.byte	0x50
+ 787 0297 01       		.uleb128 0x1
+ 788 0298 33       		.byte	0x33
+ 789 0299 00       		.byte	0
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 23
+
+
+ 790 029a 00       		.byte	0
+ 791 029b 1C       		.uleb128 0x1c
+ 792 029c 61020000 		.4byte	.LASF37
+ 793 02a0 01       		.byte	0x1
+ 794 02a1 1901     		.2byte	0x119
+ 795 02a3 6B000000 		.4byte	0x6b
+ 796 02a7 00000000 		.4byte	.LFB41
+ 797 02ab 10000000 		.4byte	.LFE41-.LFB41
+ 798 02af 01       		.uleb128 0x1
+ 799 02b0 9C       		.byte	0x9c
+ 800 02b1 D3020000 		.4byte	0x2d3
+ 801 02b5 1D       		.uleb128 0x1d
+ 802 02b6 99010000 		.4byte	.LASF26
+ 803 02ba 01       		.byte	0x1
+ 804 02bb 1B01     		.2byte	0x11b
+ 805 02bd 77000000 		.4byte	0x77
+ 806 02c1 90000000 		.4byte	.LLST4
+ 807 02c5 15       		.uleb128 0x15
+ 808 02c6 8C020000 		.4byte	.LASF23
+ 809 02ca 01       		.byte	0x1
+ 810 02cb 1C01     		.2byte	0x11c
+ 811 02cd 77000000 		.4byte	0x77
+ 812 02d1 06       		.byte	0x6
+ 813 02d2 00       		.byte	0
+ 814 02d3 1E       		.uleb128 0x1e
+ 815 02d4 E4000000 		.4byte	0xe4
+ 816 02d8 00000000 		.4byte	.LFB42
+ 817 02dc 0C000000 		.4byte	.LFE42-.LFB42
+ 818 02e0 01       		.uleb128 0x1
+ 819 02e1 9C       		.byte	0x9c
+ 820 02e2 1F       		.uleb128 0x1f
+ 821 02e3 1A020000 		.4byte	.LASF29
+ 822 02e7 01       		.byte	0x1
+ 823 02e8 4901     		.2byte	0x149
+ 824 02ea 6B000000 		.4byte	0x6b
+ 825 02ee 00000000 		.4byte	.LFB43
+ 826 02f2 10000000 		.4byte	.LFE43-.LFB43
+ 827 02f6 01       		.uleb128 0x1
+ 828 02f7 9C       		.byte	0x9c
+ 829 02f8 1E       		.uleb128 0x1e
+ 830 02f9 C3000000 		.4byte	0xc3
+ 831 02fd 00000000 		.4byte	.LFB44
+ 832 0301 0C000000 		.4byte	.LFE44-.LFB44
+ 833 0305 01       		.uleb128 0x1
+ 834 0306 9C       		.byte	0x9c
+ 835 0307 20       		.uleb128 0x20
+ 836 0308 A4020000 		.4byte	.LASF30
+ 837 030c 01       		.byte	0x1
+ 838 030d 7901     		.2byte	0x179
+ 839 030f 00000000 		.4byte	.LFB45
+ 840 0313 0C000000 		.4byte	.LFE45-.LFB45
+ 841 0317 01       		.uleb128 0x1
+ 842 0318 9C       		.byte	0x9c
+ 843 0319 20       		.uleb128 0x20
+ 844 031a 00000000 		.4byte	.LASF31
+ 845 031e 01       		.byte	0x1
+ 846 031f 9201     		.2byte	0x192
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 24
+
+
+ 847 0321 00000000 		.4byte	.LFB46
+ 848 0325 0C000000 		.4byte	.LFE46-.LFB46
+ 849 0329 01       		.uleb128 0x1
+ 850 032a 9C       		.byte	0x9c
+ 851 032b 21       		.uleb128 0x21
+ 852 032c A9000000 		.4byte	0xa9
+ 853 0330 3B030000 		.4byte	0x33b
+ 854 0334 22       		.uleb128 0x22
+ 855 0335 BC000000 		.4byte	0xbc
+ 856 0339 2F       		.byte	0x2f
+ 857 033a 00       		.byte	0
+ 858 033b 23       		.uleb128 0x23
+ 859 033c 75020000 		.4byte	.LASF38
+ 860 0340 01       		.byte	0x1
+ 861 0341 23       		.byte	0x23
+ 862 0342 2B030000 		.4byte	0x32b
+ 863 0346 24       		.uleb128 0x24
+ 864 0347 A2010000 		.4byte	.LASF32
+ 865 034b 03       		.byte	0x3
+ 866 034c 22       		.byte	0x22
+ 867 034d 25       		.uleb128 0x25
+ 868 034e C9010000 		.4byte	.LASF39
+ 869 0352 04       		.byte	0x4
+ 870 0353 61       		.byte	0x61
+ 871 0354 6B000000 		.4byte	0x6b
+ 872 0358 26       		.uleb128 0x26
+ 873 0359 F5010000 		.4byte	.LASF40
+ 874 035d 04       		.byte	0x4
+ 875 035e 62       		.byte	0x62
+ 876 035f 27       		.uleb128 0x27
+ 877 0360 6B000000 		.4byte	0x6b
+ 878 0364 00       		.byte	0
+ 879 0365 00       		.byte	0
+ 880              		.section	.debug_abbrev,"",%progbits
+ 881              	.Ldebug_abbrev0:
+ 882 0000 01       		.uleb128 0x1
+ 883 0001 11       		.uleb128 0x11
+ 884 0002 01       		.byte	0x1
+ 885 0003 25       		.uleb128 0x25
+ 886 0004 0E       		.uleb128 0xe
+ 887 0005 13       		.uleb128 0x13
+ 888 0006 0B       		.uleb128 0xb
+ 889 0007 03       		.uleb128 0x3
+ 890 0008 0E       		.uleb128 0xe
+ 891 0009 1B       		.uleb128 0x1b
+ 892 000a 0E       		.uleb128 0xe
+ 893 000b 55       		.uleb128 0x55
+ 894 000c 17       		.uleb128 0x17
+ 895 000d 11       		.uleb128 0x11
+ 896 000e 01       		.uleb128 0x1
+ 897 000f 10       		.uleb128 0x10
+ 898 0010 17       		.uleb128 0x17
+ 899 0011 00       		.byte	0
+ 900 0012 00       		.byte	0
+ 901 0013 02       		.uleb128 0x2
+ 902 0014 24       		.uleb128 0x24
+ 903 0015 00       		.byte	0
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 25
+
+
+ 904 0016 0B       		.uleb128 0xb
+ 905 0017 0B       		.uleb128 0xb
+ 906 0018 3E       		.uleb128 0x3e
+ 907 0019 0B       		.uleb128 0xb
+ 908 001a 03       		.uleb128 0x3
+ 909 001b 0E       		.uleb128 0xe
+ 910 001c 00       		.byte	0
+ 911 001d 00       		.byte	0
+ 912 001e 03       		.uleb128 0x3
+ 913 001f 24       		.uleb128 0x24
+ 914 0020 00       		.byte	0
+ 915 0021 0B       		.uleb128 0xb
+ 916 0022 0B       		.uleb128 0xb
+ 917 0023 3E       		.uleb128 0x3e
+ 918 0024 0B       		.uleb128 0xb
+ 919 0025 03       		.uleb128 0x3
+ 920 0026 08       		.uleb128 0x8
+ 921 0027 00       		.byte	0
+ 922 0028 00       		.byte	0
+ 923 0029 04       		.uleb128 0x4
+ 924 002a 16       		.uleb128 0x16
+ 925 002b 00       		.byte	0
+ 926 002c 03       		.uleb128 0x3
+ 927 002d 0E       		.uleb128 0xe
+ 928 002e 3A       		.uleb128 0x3a
+ 929 002f 0B       		.uleb128 0xb
+ 930 0030 3B       		.uleb128 0x3b
+ 931 0031 05       		.uleb128 0x5
+ 932 0032 49       		.uleb128 0x49
+ 933 0033 13       		.uleb128 0x13
+ 934 0034 00       		.byte	0
+ 935 0035 00       		.byte	0
+ 936 0036 05       		.uleb128 0x5
+ 937 0037 35       		.uleb128 0x35
+ 938 0038 00       		.byte	0
+ 939 0039 49       		.uleb128 0x49
+ 940 003a 13       		.uleb128 0x13
+ 941 003b 00       		.byte	0
+ 942 003c 00       		.byte	0
+ 943 003d 06       		.uleb128 0x6
+ 944 003e 0F       		.uleb128 0xf
+ 945 003f 00       		.byte	0
+ 946 0040 0B       		.uleb128 0xb
+ 947 0041 0B       		.uleb128 0xb
+ 948 0042 49       		.uleb128 0x49
+ 949 0043 13       		.uleb128 0x13
+ 950 0044 00       		.byte	0
+ 951 0045 00       		.byte	0
+ 952 0046 07       		.uleb128 0x7
+ 953 0047 15       		.uleb128 0x15
+ 954 0048 00       		.byte	0
+ 955 0049 27       		.uleb128 0x27
+ 956 004a 19       		.uleb128 0x19
+ 957 004b 00       		.byte	0
+ 958 004c 00       		.byte	0
+ 959 004d 08       		.uleb128 0x8
+ 960 004e 2E       		.uleb128 0x2e
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 26
+
+
+ 961 004f 00       		.byte	0
+ 962 0050 3F       		.uleb128 0x3f
+ 963 0051 19       		.uleb128 0x19
+ 964 0052 03       		.uleb128 0x3
+ 965 0053 0E       		.uleb128 0xe
+ 966 0054 3A       		.uleb128 0x3a
+ 967 0055 0B       		.uleb128 0xb
+ 968 0056 3B       		.uleb128 0x3b
+ 969 0057 05       		.uleb128 0x5
+ 970 0058 27       		.uleb128 0x27
+ 971 0059 19       		.uleb128 0x19
+ 972 005a 20       		.uleb128 0x20
+ 973 005b 0B       		.uleb128 0xb
+ 974 005c 00       		.byte	0
+ 975 005d 00       		.byte	0
+ 976 005e 09       		.uleb128 0x9
+ 977 005f 2E       		.uleb128 0x2e
+ 978 0060 01       		.byte	0x1
+ 979 0061 3F       		.uleb128 0x3f
+ 980 0062 19       		.uleb128 0x19
+ 981 0063 03       		.uleb128 0x3
+ 982 0064 0E       		.uleb128 0xe
+ 983 0065 3A       		.uleb128 0x3a
+ 984 0066 0B       		.uleb128 0xb
+ 985 0067 3B       		.uleb128 0x3b
+ 986 0068 0B       		.uleb128 0xb
+ 987 0069 27       		.uleb128 0x27
+ 988 006a 19       		.uleb128 0x19
+ 989 006b 20       		.uleb128 0x20
+ 990 006c 0B       		.uleb128 0xb
+ 991 006d 01       		.uleb128 0x1
+ 992 006e 13       		.uleb128 0x13
+ 993 006f 00       		.byte	0
+ 994 0070 00       		.byte	0
+ 995 0071 0A       		.uleb128 0xa
+ 996 0072 05       		.uleb128 0x5
+ 997 0073 00       		.byte	0
+ 998 0074 03       		.uleb128 0x3
+ 999 0075 0E       		.uleb128 0xe
+ 1000 0076 3A       		.uleb128 0x3a
+ 1001 0077 0B       		.uleb128 0xb
+ 1002 0078 3B       		.uleb128 0x3b
+ 1003 0079 0B       		.uleb128 0xb
+ 1004 007a 49       		.uleb128 0x49
+ 1005 007b 13       		.uleb128 0x13
+ 1006 007c 00       		.byte	0
+ 1007 007d 00       		.byte	0
+ 1008 007e 0B       		.uleb128 0xb
+ 1009 007f 2E       		.uleb128 0x2e
+ 1010 0080 01       		.byte	0x1
+ 1011 0081 3F       		.uleb128 0x3f
+ 1012 0082 19       		.uleb128 0x19
+ 1013 0083 03       		.uleb128 0x3
+ 1014 0084 0E       		.uleb128 0xe
+ 1015 0085 3A       		.uleb128 0x3a
+ 1016 0086 0B       		.uleb128 0xb
+ 1017 0087 3B       		.uleb128 0x3b
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 27
+
+
+ 1018 0088 0B       		.uleb128 0xb
+ 1019 0089 27       		.uleb128 0x27
+ 1020 008a 19       		.uleb128 0x19
+ 1021 008b 11       		.uleb128 0x11
+ 1022 008c 01       		.uleb128 0x1
+ 1023 008d 12       		.uleb128 0x12
+ 1024 008e 06       		.uleb128 0x6
+ 1025 008f 40       		.uleb128 0x40
+ 1026 0090 18       		.uleb128 0x18
+ 1027 0091 9742     		.uleb128 0x2117
+ 1028 0093 19       		.uleb128 0x19
+ 1029 0094 01       		.uleb128 0x1
+ 1030 0095 13       		.uleb128 0x13
+ 1031 0096 00       		.byte	0
+ 1032 0097 00       		.byte	0
+ 1033 0098 0C       		.uleb128 0xc
+ 1034 0099 898201   		.uleb128 0x4109
+ 1035 009c 00       		.byte	0
+ 1036 009d 11       		.uleb128 0x11
+ 1037 009e 01       		.uleb128 0x1
+ 1038 009f 31       		.uleb128 0x31
+ 1039 00a0 13       		.uleb128 0x13
+ 1040 00a1 00       		.byte	0
+ 1041 00a2 00       		.byte	0
+ 1042 00a3 0D       		.uleb128 0xd
+ 1043 00a4 1D       		.uleb128 0x1d
+ 1044 00a5 00       		.byte	0
+ 1045 00a6 31       		.uleb128 0x31
+ 1046 00a7 13       		.uleb128 0x13
+ 1047 00a8 52       		.uleb128 0x52
+ 1048 00a9 01       		.uleb128 0x1
+ 1049 00aa 55       		.uleb128 0x55
+ 1050 00ab 17       		.uleb128 0x17
+ 1051 00ac 58       		.uleb128 0x58
+ 1052 00ad 0B       		.uleb128 0xb
+ 1053 00ae 59       		.uleb128 0x59
+ 1054 00af 0B       		.uleb128 0xb
+ 1055 00b0 00       		.byte	0
+ 1056 00b1 00       		.byte	0
+ 1057 00b2 0E       		.uleb128 0xe
+ 1058 00b3 1D       		.uleb128 0x1d
+ 1059 00b4 01       		.byte	0x1
+ 1060 00b5 31       		.uleb128 0x31
+ 1061 00b6 13       		.uleb128 0x13
+ 1062 00b7 11       		.uleb128 0x11
+ 1063 00b8 01       		.uleb128 0x1
+ 1064 00b9 12       		.uleb128 0x12
+ 1065 00ba 06       		.uleb128 0x6
+ 1066 00bb 58       		.uleb128 0x58
+ 1067 00bc 0B       		.uleb128 0xb
+ 1068 00bd 59       		.uleb128 0x59
+ 1069 00be 0B       		.uleb128 0xb
+ 1070 00bf 00       		.byte	0
+ 1071 00c0 00       		.byte	0
+ 1072 00c1 0F       		.uleb128 0xf
+ 1073 00c2 05       		.uleb128 0x5
+ 1074 00c3 00       		.byte	0
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 28
+
+
+ 1075 00c4 31       		.uleb128 0x31
+ 1076 00c5 13       		.uleb128 0x13
+ 1077 00c6 00       		.byte	0
+ 1078 00c7 00       		.byte	0
+ 1079 00c8 10       		.uleb128 0x10
+ 1080 00c9 2E       		.uleb128 0x2e
+ 1081 00ca 01       		.byte	0x1
+ 1082 00cb 31       		.uleb128 0x31
+ 1083 00cc 13       		.uleb128 0x13
+ 1084 00cd 11       		.uleb128 0x11
+ 1085 00ce 01       		.uleb128 0x1
+ 1086 00cf 12       		.uleb128 0x12
+ 1087 00d0 06       		.uleb128 0x6
+ 1088 00d1 40       		.uleb128 0x40
+ 1089 00d2 18       		.uleb128 0x18
+ 1090 00d3 9742     		.uleb128 0x2117
+ 1091 00d5 19       		.uleb128 0x19
+ 1092 00d6 01       		.uleb128 0x1
+ 1093 00d7 13       		.uleb128 0x13
+ 1094 00d8 00       		.byte	0
+ 1095 00d9 00       		.byte	0
+ 1096 00da 11       		.uleb128 0x11
+ 1097 00db 05       		.uleb128 0x5
+ 1098 00dc 00       		.byte	0
+ 1099 00dd 31       		.uleb128 0x31
+ 1100 00de 13       		.uleb128 0x13
+ 1101 00df 02       		.uleb128 0x2
+ 1102 00e0 18       		.uleb128 0x18
+ 1103 00e1 00       		.byte	0
+ 1104 00e2 00       		.byte	0
+ 1105 00e3 12       		.uleb128 0x12
+ 1106 00e4 2E       		.uleb128 0x2e
+ 1107 00e5 00       		.byte	0
+ 1108 00e6 3F       		.uleb128 0x3f
+ 1109 00e7 19       		.uleb128 0x19
+ 1110 00e8 03       		.uleb128 0x3
+ 1111 00e9 0E       		.uleb128 0xe
+ 1112 00ea 3A       		.uleb128 0x3a
+ 1113 00eb 0B       		.uleb128 0xb
+ 1114 00ec 3B       		.uleb128 0x3b
+ 1115 00ed 0B       		.uleb128 0xb
+ 1116 00ee 27       		.uleb128 0x27
+ 1117 00ef 19       		.uleb128 0x19
+ 1118 00f0 49       		.uleb128 0x49
+ 1119 00f1 13       		.uleb128 0x13
+ 1120 00f2 11       		.uleb128 0x11
+ 1121 00f3 01       		.uleb128 0x1
+ 1122 00f4 12       		.uleb128 0x12
+ 1123 00f5 06       		.uleb128 0x6
+ 1124 00f6 40       		.uleb128 0x40
+ 1125 00f7 18       		.uleb128 0x18
+ 1126 00f8 9742     		.uleb128 0x2117
+ 1127 00fa 19       		.uleb128 0x19
+ 1128 00fb 00       		.byte	0
+ 1129 00fc 00       		.byte	0
+ 1130 00fd 13       		.uleb128 0x13
+ 1131 00fe 05       		.uleb128 0x5
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 29
+
+
+ 1132 00ff 00       		.byte	0
+ 1133 0100 03       		.uleb128 0x3
+ 1134 0101 0E       		.uleb128 0xe
+ 1135 0102 3A       		.uleb128 0x3a
+ 1136 0103 0B       		.uleb128 0xb
+ 1137 0104 3B       		.uleb128 0x3b
+ 1138 0105 0B       		.uleb128 0xb
+ 1139 0106 49       		.uleb128 0x49
+ 1140 0107 13       		.uleb128 0x13
+ 1141 0108 02       		.uleb128 0x2
+ 1142 0109 17       		.uleb128 0x17
+ 1143 010a 00       		.byte	0
+ 1144 010b 00       		.byte	0
+ 1145 010c 14       		.uleb128 0x14
+ 1146 010d 34       		.uleb128 0x34
+ 1147 010e 00       		.byte	0
+ 1148 010f 03       		.uleb128 0x3
+ 1149 0110 0E       		.uleb128 0xe
+ 1150 0111 3A       		.uleb128 0x3a
+ 1151 0112 0B       		.uleb128 0xb
+ 1152 0113 3B       		.uleb128 0x3b
+ 1153 0114 0B       		.uleb128 0xb
+ 1154 0115 49       		.uleb128 0x49
+ 1155 0116 13       		.uleb128 0x13
+ 1156 0117 02       		.uleb128 0x2
+ 1157 0118 17       		.uleb128 0x17
+ 1158 0119 00       		.byte	0
+ 1159 011a 00       		.byte	0
+ 1160 011b 15       		.uleb128 0x15
+ 1161 011c 34       		.uleb128 0x34
+ 1162 011d 00       		.byte	0
+ 1163 011e 03       		.uleb128 0x3
+ 1164 011f 0E       		.uleb128 0xe
+ 1165 0120 3A       		.uleb128 0x3a
+ 1166 0121 0B       		.uleb128 0xb
+ 1167 0122 3B       		.uleb128 0x3b
+ 1168 0123 05       		.uleb128 0x5
+ 1169 0124 49       		.uleb128 0x49
+ 1170 0125 13       		.uleb128 0x13
+ 1171 0126 1C       		.uleb128 0x1c
+ 1172 0127 0B       		.uleb128 0xb
+ 1173 0128 00       		.byte	0
+ 1174 0129 00       		.byte	0
+ 1175 012a 16       		.uleb128 0x16
+ 1176 012b 1D       		.uleb128 0x1d
+ 1177 012c 01       		.byte	0x1
+ 1178 012d 31       		.uleb128 0x31
+ 1179 012e 13       		.uleb128 0x13
+ 1180 012f 52       		.uleb128 0x52
+ 1181 0130 01       		.uleb128 0x1
+ 1182 0131 55       		.uleb128 0x55
+ 1183 0132 17       		.uleb128 0x17
+ 1184 0133 58       		.uleb128 0x58
+ 1185 0134 0B       		.uleb128 0xb
+ 1186 0135 59       		.uleb128 0x59
+ 1187 0136 0B       		.uleb128 0xb
+ 1188 0137 01       		.uleb128 0x1
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 30
+
+
+ 1189 0138 13       		.uleb128 0x13
+ 1190 0139 00       		.byte	0
+ 1191 013a 00       		.byte	0
+ 1192 013b 17       		.uleb128 0x17
+ 1193 013c 898201   		.uleb128 0x4109
+ 1194 013f 01       		.byte	0x1
+ 1195 0140 11       		.uleb128 0x11
+ 1196 0141 01       		.uleb128 0x1
+ 1197 0142 31       		.uleb128 0x31
+ 1198 0143 13       		.uleb128 0x13
+ 1199 0144 00       		.byte	0
+ 1200 0145 00       		.byte	0
+ 1201 0146 18       		.uleb128 0x18
+ 1202 0147 8A8201   		.uleb128 0x410a
+ 1203 014a 00       		.byte	0
+ 1204 014b 02       		.uleb128 0x2
+ 1205 014c 18       		.uleb128 0x18
+ 1206 014d 9142     		.uleb128 0x2111
+ 1207 014f 18       		.uleb128 0x18
+ 1208 0150 00       		.byte	0
+ 1209 0151 00       		.byte	0
+ 1210 0152 19       		.uleb128 0x19
+ 1211 0153 1D       		.uleb128 0x1d
+ 1212 0154 01       		.byte	0x1
+ 1213 0155 31       		.uleb128 0x31
+ 1214 0156 13       		.uleb128 0x13
+ 1215 0157 11       		.uleb128 0x11
+ 1216 0158 01       		.uleb128 0x1
+ 1217 0159 12       		.uleb128 0x12
+ 1218 015a 06       		.uleb128 0x6
+ 1219 015b 58       		.uleb128 0x58
+ 1220 015c 0B       		.uleb128 0xb
+ 1221 015d 59       		.uleb128 0x59
+ 1222 015e 0B       		.uleb128 0xb
+ 1223 015f 01       		.uleb128 0x1
+ 1224 0160 13       		.uleb128 0x13
+ 1225 0161 00       		.byte	0
+ 1226 0162 00       		.byte	0
+ 1227 0163 1A       		.uleb128 0x1a
+ 1228 0164 05       		.uleb128 0x5
+ 1229 0165 00       		.byte	0
+ 1230 0166 31       		.uleb128 0x31
+ 1231 0167 13       		.uleb128 0x13
+ 1232 0168 02       		.uleb128 0x2
+ 1233 0169 17       		.uleb128 0x17
+ 1234 016a 00       		.byte	0
+ 1235 016b 00       		.byte	0
+ 1236 016c 1B       		.uleb128 0x1b
+ 1237 016d 1D       		.uleb128 0x1d
+ 1238 016e 00       		.byte	0
+ 1239 016f 31       		.uleb128 0x31
+ 1240 0170 13       		.uleb128 0x13
+ 1241 0171 11       		.uleb128 0x11
+ 1242 0172 01       		.uleb128 0x1
+ 1243 0173 12       		.uleb128 0x12
+ 1244 0174 06       		.uleb128 0x6
+ 1245 0175 58       		.uleb128 0x58
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 31
+
+
+ 1246 0176 0B       		.uleb128 0xb
+ 1247 0177 59       		.uleb128 0x59
+ 1248 0178 0B       		.uleb128 0xb
+ 1249 0179 00       		.byte	0
+ 1250 017a 00       		.byte	0
+ 1251 017b 1C       		.uleb128 0x1c
+ 1252 017c 2E       		.uleb128 0x2e
+ 1253 017d 01       		.byte	0x1
+ 1254 017e 3F       		.uleb128 0x3f
+ 1255 017f 19       		.uleb128 0x19
+ 1256 0180 03       		.uleb128 0x3
+ 1257 0181 0E       		.uleb128 0xe
+ 1258 0182 3A       		.uleb128 0x3a
+ 1259 0183 0B       		.uleb128 0xb
+ 1260 0184 3B       		.uleb128 0x3b
+ 1261 0185 05       		.uleb128 0x5
+ 1262 0186 27       		.uleb128 0x27
+ 1263 0187 19       		.uleb128 0x19
+ 1264 0188 49       		.uleb128 0x49
+ 1265 0189 13       		.uleb128 0x13
+ 1266 018a 11       		.uleb128 0x11
+ 1267 018b 01       		.uleb128 0x1
+ 1268 018c 12       		.uleb128 0x12
+ 1269 018d 06       		.uleb128 0x6
+ 1270 018e 40       		.uleb128 0x40
+ 1271 018f 18       		.uleb128 0x18
+ 1272 0190 9742     		.uleb128 0x2117
+ 1273 0192 19       		.uleb128 0x19
+ 1274 0193 01       		.uleb128 0x1
+ 1275 0194 13       		.uleb128 0x13
+ 1276 0195 00       		.byte	0
+ 1277 0196 00       		.byte	0
+ 1278 0197 1D       		.uleb128 0x1d
+ 1279 0198 34       		.uleb128 0x34
+ 1280 0199 00       		.byte	0
+ 1281 019a 03       		.uleb128 0x3
+ 1282 019b 0E       		.uleb128 0xe
+ 1283 019c 3A       		.uleb128 0x3a
+ 1284 019d 0B       		.uleb128 0xb
+ 1285 019e 3B       		.uleb128 0x3b
+ 1286 019f 05       		.uleb128 0x5
+ 1287 01a0 49       		.uleb128 0x49
+ 1288 01a1 13       		.uleb128 0x13
+ 1289 01a2 02       		.uleb128 0x2
+ 1290 01a3 17       		.uleb128 0x17
+ 1291 01a4 00       		.byte	0
+ 1292 01a5 00       		.byte	0
+ 1293 01a6 1E       		.uleb128 0x1e
+ 1294 01a7 2E       		.uleb128 0x2e
+ 1295 01a8 00       		.byte	0
+ 1296 01a9 31       		.uleb128 0x31
+ 1297 01aa 13       		.uleb128 0x13
+ 1298 01ab 11       		.uleb128 0x11
+ 1299 01ac 01       		.uleb128 0x1
+ 1300 01ad 12       		.uleb128 0x12
+ 1301 01ae 06       		.uleb128 0x6
+ 1302 01af 40       		.uleb128 0x40
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 32
+
+
+ 1303 01b0 18       		.uleb128 0x18
+ 1304 01b1 9742     		.uleb128 0x2117
+ 1305 01b3 19       		.uleb128 0x19
+ 1306 01b4 00       		.byte	0
+ 1307 01b5 00       		.byte	0
+ 1308 01b6 1F       		.uleb128 0x1f
+ 1309 01b7 2E       		.uleb128 0x2e
+ 1310 01b8 00       		.byte	0
+ 1311 01b9 3F       		.uleb128 0x3f
+ 1312 01ba 19       		.uleb128 0x19
+ 1313 01bb 03       		.uleb128 0x3
+ 1314 01bc 0E       		.uleb128 0xe
+ 1315 01bd 3A       		.uleb128 0x3a
+ 1316 01be 0B       		.uleb128 0xb
+ 1317 01bf 3B       		.uleb128 0x3b
+ 1318 01c0 05       		.uleb128 0x5
+ 1319 01c1 27       		.uleb128 0x27
+ 1320 01c2 19       		.uleb128 0x19
+ 1321 01c3 49       		.uleb128 0x49
+ 1322 01c4 13       		.uleb128 0x13
+ 1323 01c5 11       		.uleb128 0x11
+ 1324 01c6 01       		.uleb128 0x1
+ 1325 01c7 12       		.uleb128 0x12
+ 1326 01c8 06       		.uleb128 0x6
+ 1327 01c9 40       		.uleb128 0x40
+ 1328 01ca 18       		.uleb128 0x18
+ 1329 01cb 9742     		.uleb128 0x2117
+ 1330 01cd 19       		.uleb128 0x19
+ 1331 01ce 00       		.byte	0
+ 1332 01cf 00       		.byte	0
+ 1333 01d0 20       		.uleb128 0x20
+ 1334 01d1 2E       		.uleb128 0x2e
+ 1335 01d2 00       		.byte	0
+ 1336 01d3 3F       		.uleb128 0x3f
+ 1337 01d4 19       		.uleb128 0x19
+ 1338 01d5 03       		.uleb128 0x3
+ 1339 01d6 0E       		.uleb128 0xe
+ 1340 01d7 3A       		.uleb128 0x3a
+ 1341 01d8 0B       		.uleb128 0xb
+ 1342 01d9 3B       		.uleb128 0x3b
+ 1343 01da 05       		.uleb128 0x5
+ 1344 01db 27       		.uleb128 0x27
+ 1345 01dc 19       		.uleb128 0x19
+ 1346 01dd 11       		.uleb128 0x11
+ 1347 01de 01       		.uleb128 0x1
+ 1348 01df 12       		.uleb128 0x12
+ 1349 01e0 06       		.uleb128 0x6
+ 1350 01e1 40       		.uleb128 0x40
+ 1351 01e2 18       		.uleb128 0x18
+ 1352 01e3 9742     		.uleb128 0x2117
+ 1353 01e5 19       		.uleb128 0x19
+ 1354 01e6 00       		.byte	0
+ 1355 01e7 00       		.byte	0
+ 1356 01e8 21       		.uleb128 0x21
+ 1357 01e9 01       		.uleb128 0x1
+ 1358 01ea 01       		.byte	0x1
+ 1359 01eb 49       		.uleb128 0x49
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 33
+
+
+ 1360 01ec 13       		.uleb128 0x13
+ 1361 01ed 01       		.uleb128 0x1
+ 1362 01ee 13       		.uleb128 0x13
+ 1363 01ef 00       		.byte	0
+ 1364 01f0 00       		.byte	0
+ 1365 01f1 22       		.uleb128 0x22
+ 1366 01f2 21       		.uleb128 0x21
+ 1367 01f3 00       		.byte	0
+ 1368 01f4 49       		.uleb128 0x49
+ 1369 01f5 13       		.uleb128 0x13
+ 1370 01f6 2F       		.uleb128 0x2f
+ 1371 01f7 0B       		.uleb128 0xb
+ 1372 01f8 00       		.byte	0
+ 1373 01f9 00       		.byte	0
+ 1374 01fa 23       		.uleb128 0x23
+ 1375 01fb 34       		.uleb128 0x34
+ 1376 01fc 00       		.byte	0
+ 1377 01fd 03       		.uleb128 0x3
+ 1378 01fe 0E       		.uleb128 0xe
+ 1379 01ff 3A       		.uleb128 0x3a
+ 1380 0200 0B       		.uleb128 0xb
+ 1381 0201 3B       		.uleb128 0x3b
+ 1382 0202 0B       		.uleb128 0xb
+ 1383 0203 49       		.uleb128 0x49
+ 1384 0204 13       		.uleb128 0x13
+ 1385 0205 3F       		.uleb128 0x3f
+ 1386 0206 19       		.uleb128 0x19
+ 1387 0207 3C       		.uleb128 0x3c
+ 1388 0208 19       		.uleb128 0x19
+ 1389 0209 00       		.byte	0
+ 1390 020a 00       		.byte	0
+ 1391 020b 24       		.uleb128 0x24
+ 1392 020c 2E       		.uleb128 0x2e
+ 1393 020d 00       		.byte	0
+ 1394 020e 3F       		.uleb128 0x3f
+ 1395 020f 19       		.uleb128 0x19
+ 1396 0210 03       		.uleb128 0x3
+ 1397 0211 0E       		.uleb128 0xe
+ 1398 0212 3A       		.uleb128 0x3a
+ 1399 0213 0B       		.uleb128 0xb
+ 1400 0214 3B       		.uleb128 0x3b
+ 1401 0215 0B       		.uleb128 0xb
+ 1402 0216 27       		.uleb128 0x27
+ 1403 0217 19       		.uleb128 0x19
+ 1404 0218 3C       		.uleb128 0x3c
+ 1405 0219 19       		.uleb128 0x19
+ 1406 021a 00       		.byte	0
+ 1407 021b 00       		.byte	0
+ 1408 021c 25       		.uleb128 0x25
+ 1409 021d 2E       		.uleb128 0x2e
+ 1410 021e 00       		.byte	0
+ 1411 021f 3F       		.uleb128 0x3f
+ 1412 0220 19       		.uleb128 0x19
+ 1413 0221 03       		.uleb128 0x3
+ 1414 0222 0E       		.uleb128 0xe
+ 1415 0223 3A       		.uleb128 0x3a
+ 1416 0224 0B       		.uleb128 0xb
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 34
+
+
+ 1417 0225 3B       		.uleb128 0x3b
+ 1418 0226 0B       		.uleb128 0xb
+ 1419 0227 27       		.uleb128 0x27
+ 1420 0228 19       		.uleb128 0x19
+ 1421 0229 49       		.uleb128 0x49
+ 1422 022a 13       		.uleb128 0x13
+ 1423 022b 3C       		.uleb128 0x3c
+ 1424 022c 19       		.uleb128 0x19
+ 1425 022d 00       		.byte	0
+ 1426 022e 00       		.byte	0
+ 1427 022f 26       		.uleb128 0x26
+ 1428 0230 2E       		.uleb128 0x2e
+ 1429 0231 01       		.byte	0x1
+ 1430 0232 3F       		.uleb128 0x3f
+ 1431 0233 19       		.uleb128 0x19
+ 1432 0234 03       		.uleb128 0x3
+ 1433 0235 0E       		.uleb128 0xe
+ 1434 0236 3A       		.uleb128 0x3a
+ 1435 0237 0B       		.uleb128 0xb
+ 1436 0238 3B       		.uleb128 0x3b
+ 1437 0239 0B       		.uleb128 0xb
+ 1438 023a 27       		.uleb128 0x27
+ 1439 023b 19       		.uleb128 0x19
+ 1440 023c 3C       		.uleb128 0x3c
+ 1441 023d 19       		.uleb128 0x19
+ 1442 023e 00       		.byte	0
+ 1443 023f 00       		.byte	0
+ 1444 0240 27       		.uleb128 0x27
+ 1445 0241 05       		.uleb128 0x5
+ 1446 0242 00       		.byte	0
+ 1447 0243 49       		.uleb128 0x49
+ 1448 0244 13       		.uleb128 0x13
+ 1449 0245 00       		.byte	0
+ 1450 0246 00       		.byte	0
+ 1451 0247 00       		.byte	0
+ 1452              		.section	.debug_loc,"",%progbits
+ 1453              	.Ldebug_loc0:
+ 1454              	.LLST0:
+ 1455 0000 00000000 		.4byte	.LVL3
+ 1456 0004 07000000 		.4byte	.LVL4-1
+ 1457 0008 0100     		.2byte	0x1
+ 1458 000a 50       		.byte	0x50
+ 1459 000b 07000000 		.4byte	.LVL4-1
+ 1460 000f 20000000 		.4byte	.LFE40
+ 1461 0013 0400     		.2byte	0x4
+ 1462 0015 F3       		.byte	0xf3
+ 1463 0016 01       		.uleb128 0x1
+ 1464 0017 50       		.byte	0x50
+ 1465 0018 9F       		.byte	0x9f
+ 1466 0019 00000000 		.4byte	0
+ 1467 001d 00000000 		.4byte	0
+ 1468              	.LLST1:
+ 1469 0021 08000000 		.4byte	.LVL4
+ 1470 0025 19000000 		.4byte	.LVL5-1
+ 1471 0029 0100     		.2byte	0x1
+ 1472 002b 50       		.byte	0x50
+ 1473 002c 00000000 		.4byte	0
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 35
+
+
+ 1474 0030 00000000 		.4byte	0
+ 1475              	.LLST2:
+ 1476 0034 00000000 		.4byte	.LVL8
+ 1477 0038 0E000000 		.4byte	.LVL10
+ 1478 003c 0100     		.2byte	0x1
+ 1479 003e 50       		.byte	0x50
+ 1480 003f 0E000000 		.4byte	.LVL10
+ 1481 0043 11000000 		.4byte	.LVL11-1
+ 1482 0047 0300     		.2byte	0x3
+ 1483 0049 73       		.byte	0x73
+ 1484 004a C000     		.sleb128 64
+ 1485 004c 11000000 		.4byte	.LVL11-1
+ 1486 0050 24000000 		.4byte	.LFE35
+ 1487 0054 0400     		.2byte	0x4
+ 1488 0056 F3       		.byte	0xf3
+ 1489 0057 01       		.uleb128 0x1
+ 1490 0058 50       		.byte	0x50
+ 1491 0059 9F       		.byte	0x9f
+ 1492 005a 00000000 		.4byte	0
+ 1493 005e 00000000 		.4byte	0
+ 1494              	.LLST3:
+ 1495 0062 08000000 		.4byte	.LVL9
+ 1496 0066 0E000000 		.4byte	.LVL10
+ 1497 006a 0100     		.2byte	0x1
+ 1498 006c 50       		.byte	0x50
+ 1499 006d 0E000000 		.4byte	.LVL10
+ 1500 0071 11000000 		.4byte	.LVL11-1
+ 1501 0075 0300     		.2byte	0x3
+ 1502 0077 73       		.byte	0x73
+ 1503 0078 C000     		.sleb128 64
+ 1504 007a 11000000 		.4byte	.LVL11-1
+ 1505 007e 24000000 		.4byte	.LFE35
+ 1506 0082 0400     		.2byte	0x4
+ 1507 0084 F3       		.byte	0xf3
+ 1508 0085 01       		.uleb128 0x1
+ 1509 0086 50       		.byte	0x50
+ 1510 0087 9F       		.byte	0x9f
+ 1511 0088 00000000 		.4byte	0
+ 1512 008c 00000000 		.4byte	0
+ 1513              	.LLST4:
+ 1514 0090 04000000 		.4byte	.LVL13
+ 1515 0094 06000000 		.4byte	.LVL14
+ 1516 0098 0800     		.2byte	0x8
+ 1517 009a 70       		.byte	0x70
+ 1518 009b 00       		.sleb128 0
+ 1519 009c 08       		.byte	0x8
+ 1520 009d C0       		.byte	0xc0
+ 1521 009e 1A       		.byte	0x1a
+ 1522 009f 36       		.byte	0x36
+ 1523 00a0 25       		.byte	0x25
+ 1524 00a1 9F       		.byte	0x9f
+ 1525 00a2 00000000 		.4byte	0
+ 1526 00a6 00000000 		.4byte	0
+ 1527              		.section	.debug_aranges,"",%progbits
+ 1528 0000 7C000000 		.4byte	0x7c
+ 1529 0004 0200     		.2byte	0x2
+ 1530 0006 00000000 		.4byte	.Ldebug_info0
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 36
+
+
+ 1531 000a 04       		.byte	0x4
+ 1532 000b 00       		.byte	0
+ 1533 000c 0000     		.2byte	0
+ 1534 000e 0000     		.2byte	0
+ 1535 0010 00000000 		.4byte	.LFB37
+ 1536 0014 08000000 		.4byte	.LFE37-.LFB37
+ 1537 0018 00000000 		.4byte	.LFB36
+ 1538 001c 1C000000 		.4byte	.LFE36-.LFB36
+ 1539 0020 00000000 		.4byte	.LFB38
+ 1540 0024 0C000000 		.4byte	.LFE38-.LFB38
+ 1541 0028 00000000 		.4byte	.LFB39
+ 1542 002c 0C000000 		.4byte	.LFE39-.LFB39
+ 1543 0030 00000000 		.4byte	.LFB40
+ 1544 0034 20000000 		.4byte	.LFE40-.LFB40
+ 1545 0038 00000000 		.4byte	.LFB34
+ 1546 003c 2C000000 		.4byte	.LFE34-.LFB34
+ 1547 0040 00000000 		.4byte	.LFB35
+ 1548 0044 24000000 		.4byte	.LFE35-.LFB35
+ 1549 0048 00000000 		.4byte	.LFB41
+ 1550 004c 10000000 		.4byte	.LFE41-.LFB41
+ 1551 0050 00000000 		.4byte	.LFB42
+ 1552 0054 0C000000 		.4byte	.LFE42-.LFB42
+ 1553 0058 00000000 		.4byte	.LFB43
+ 1554 005c 10000000 		.4byte	.LFE43-.LFB43
+ 1555 0060 00000000 		.4byte	.LFB44
+ 1556 0064 0C000000 		.4byte	.LFE44-.LFB44
+ 1557 0068 00000000 		.4byte	.LFB45
+ 1558 006c 0C000000 		.4byte	.LFE45-.LFB45
+ 1559 0070 00000000 		.4byte	.LFB46
+ 1560 0074 0C000000 		.4byte	.LFE46-.LFB46
+ 1561 0078 00000000 		.4byte	0
+ 1562 007c 00000000 		.4byte	0
+ 1563              		.section	.debug_ranges,"",%progbits
+ 1564              	.Ldebug_ranges0:
+ 1565 0000 00000000 		.4byte	.LBB18
+ 1566 0004 04000000 		.4byte	.LBE18
+ 1567 0008 04000000 		.4byte	.LBB21
+ 1568 000c 06000000 		.4byte	.LBE21
+ 1569 0010 00000000 		.4byte	0
+ 1570 0014 00000000 		.4byte	0
+ 1571 0018 02000000 		.4byte	.LBB24
+ 1572 001c 06000000 		.4byte	.LBE24
+ 1573 0020 08000000 		.4byte	.LBB31
+ 1574 0024 0A000000 		.4byte	.LBE31
+ 1575 0028 00000000 		.4byte	0
+ 1576 002c 00000000 		.4byte	0
+ 1577 0030 06000000 		.4byte	.LBB27
+ 1578 0034 08000000 		.4byte	.LBE27
+ 1579 0038 0A000000 		.4byte	.LBB32
+ 1580 003c 0C000000 		.4byte	.LBE32
+ 1581 0040 0E000000 		.4byte	.LBB33
+ 1582 0044 10000000 		.4byte	.LBE33
+ 1583 0048 00000000 		.4byte	0
+ 1584 004c 00000000 		.4byte	0
+ 1585 0050 14000000 		.4byte	.LBB34
+ 1586 0054 16000000 		.4byte	.LBE34
+ 1587 0058 16000000 		.4byte	.LBB37
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 37
+
+
+ 1588 005c 18000000 		.4byte	.LBE37
+ 1589 0060 00000000 		.4byte	0
+ 1590 0064 00000000 		.4byte	0
+ 1591 0068 02000000 		.4byte	.LBB38
+ 1592 006c 06000000 		.4byte	.LBE38
+ 1593 0070 06000000 		.4byte	.LBB41
+ 1594 0074 08000000 		.4byte	.LBE41
+ 1595 0078 00000000 		.4byte	0
+ 1596 007c 00000000 		.4byte	0
+ 1597 0080 00000000 		.4byte	.LFB37
+ 1598 0084 08000000 		.4byte	.LFE37
+ 1599 0088 00000000 		.4byte	.LFB36
+ 1600 008c 1C000000 		.4byte	.LFE36
+ 1601 0090 00000000 		.4byte	.LFB38
+ 1602 0094 0C000000 		.4byte	.LFE38
+ 1603 0098 00000000 		.4byte	.LFB39
+ 1604 009c 0C000000 		.4byte	.LFE39
+ 1605 00a0 00000000 		.4byte	.LFB40
+ 1606 00a4 20000000 		.4byte	.LFE40
+ 1607 00a8 00000000 		.4byte	.LFB34
+ 1608 00ac 2C000000 		.4byte	.LFE34
+ 1609 00b0 00000000 		.4byte	.LFB35
+ 1610 00b4 24000000 		.4byte	.LFE35
+ 1611 00b8 00000000 		.4byte	.LFB41
+ 1612 00bc 10000000 		.4byte	.LFE41
+ 1613 00c0 00000000 		.4byte	.LFB42
+ 1614 00c4 0C000000 		.4byte	.LFE42
+ 1615 00c8 00000000 		.4byte	.LFB43
+ 1616 00cc 10000000 		.4byte	.LFE43
+ 1617 00d0 00000000 		.4byte	.LFB44
+ 1618 00d4 0C000000 		.4byte	.LFE44
+ 1619 00d8 00000000 		.4byte	.LFB45
+ 1620 00dc 0C000000 		.4byte	.LFE45
+ 1621 00e0 00000000 		.4byte	.LFB46
+ 1622 00e4 0C000000 		.4byte	.LFE46
+ 1623 00e8 00000000 		.4byte	0
+ 1624 00ec 00000000 		.4byte	0
+ 1625              		.section	.debug_line,"",%progbits
+ 1626              	.Ldebug_line0:
+ 1627 0000 D7010000 		.section	.debug_str,"MS",%progbits,1
+ 1627      02007A00 
+ 1627      00000201 
+ 1627      FB0E0D00 
+ 1627      01010101 
+ 1628              	.LASF31:
+ 1629 0000 4144435F 		.ascii	"ADC_ISR_ClearPending\000"
+ 1629      4953525F 
+ 1629      436C6561 
+ 1629      7250656E 
+ 1629      64696E67 
+ 1630              	.LASF36:
+ 1631 0015 4144435F 		.ascii	"ADC_ISR_SetVector\000"
+ 1631      4953525F 
+ 1631      53657456 
+ 1631      6563746F 
+ 1631      7200
+ 1632              	.LASF14:
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 38
+
+
+ 1633 0027 72656733 		.ascii	"reg32\000"
+ 1633      3200
+ 1634              	.LASF21:
+ 1635 002d 4144435F 		.ascii	"ADC_ISR_SetPriority\000"
+ 1635      4953525F 
+ 1635      53657450 
+ 1635      72696F72 
+ 1635      69747900 
+ 1636              	.LASF33:
+ 1637 0041 474E5520 		.ascii	"GNU C 4.9.3 20150303 (release) [ARM/embedded-4_9-br"
+ 1637      4320342E 
+ 1637      392E3320 
+ 1637      32303135 
+ 1637      30333033 
+ 1638 0074 616E6368 		.ascii	"anch revision 221220] -mcpu=cortex-m0 -mthumb -g -O"
+ 1638      20726576 
+ 1638      6973696F 
+ 1638      6E203232 
+ 1638      31323230 
+ 1639 00a7 73202D66 		.ascii	"s -ffunction-sections -ffat-lto-objects\000"
+ 1639      66756E63 
+ 1639      74696F6E 
+ 1639      2D736563 
+ 1639      74696F6E 
+ 1640              	.LASF17:
+ 1641 00cf 4144435F 		.ascii	"ADC_ISR_Disable\000"
+ 1641      4953525F 
+ 1641      44697361 
+ 1641      626C6500 
+ 1642              	.LASF11:
+ 1643 00df 666C6F61 		.ascii	"float\000"
+ 1643      7400
+ 1644              	.LASF3:
+ 1645 00e5 73686F72 		.ascii	"short unsigned int\000"
+ 1645      7420756E 
+ 1645      7369676E 
+ 1645      65642069 
+ 1645      6E7400
+ 1646              	.LASF24:
+ 1647 00f8 4144435F 		.ascii	"ADC_ISR_Start\000"
+ 1647      4953525F 
+ 1647      53746172 
+ 1647      7400
+ 1648              	.LASF7:
+ 1649 0106 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 1649      206C6F6E 
+ 1649      6720756E 
+ 1649      7369676E 
+ 1649      65642069 
+ 1650              	.LASF1:
+ 1651 011d 756E7369 		.ascii	"unsigned char\000"
+ 1651      676E6564 
+ 1651      20636861 
+ 1651      7200
+ 1652              	.LASF22:
+ 1653 012b 696E7465 		.ascii	"interruptState\000"
+ 1653      72727570 
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 39
+
+
+ 1653      74537461 
+ 1653      746500
+ 1654              	.LASF5:
+ 1655 013a 6C6F6E67 		.ascii	"long unsigned int\000"
+ 1655      20756E73 
+ 1655      69676E65 
+ 1655      6420696E 
+ 1655      7400
+ 1656              	.LASF9:
+ 1657 014c 75696E74 		.ascii	"uint8\000"
+ 1657      3800
+ 1658              	.LASF28:
+ 1659 0152 4144435F 		.ascii	"ADC_ISR_GetVector\000"
+ 1659      4953525F 
+ 1659      47657456 
+ 1659      6563746F 
+ 1659      7200
+ 1660              	.LASF34:
+ 1661 0164 2E5C4765 		.ascii	".\\Generated_Source\\PSoC4\\ADC_ISR.c\000"
+ 1661      6E657261 
+ 1661      7465645F 
+ 1661      536F7572 
+ 1661      63655C50 
+ 1662              	.LASF19:
+ 1663 0187 4144435F 		.ascii	"ADC_ISR_Interrupt\000"
+ 1663      4953525F 
+ 1663      496E7465 
+ 1663      72727570 
+ 1663      7400
+ 1664              	.LASF26:
+ 1665 0199 7072696F 		.ascii	"priority\000"
+ 1665      72697479 
+ 1665      00
+ 1666              	.LASF32:
+ 1667 01a2 70726F63 		.ascii	"processTemperatureSample\000"
+ 1667      65737354 
+ 1667      656D7065 
+ 1667      72617475 
+ 1667      72655361 
+ 1668              	.LASF12:
+ 1669 01bb 646F7562 		.ascii	"double\000"
+ 1669      6C6500
+ 1670              	.LASF10:
+ 1671 01c2 75696E74 		.ascii	"uint32\000"
+ 1671      333200
+ 1672              	.LASF39:
+ 1673 01c9 4379456E 		.ascii	"CyEnterCriticalSection\000"
+ 1673      74657243 
+ 1673      72697469 
+ 1673      63616C53 
+ 1673      65637469 
+ 1674              	.LASF8:
+ 1675 01e0 756E7369 		.ascii	"unsigned int\000"
+ 1675      676E6564 
+ 1675      20696E74 
+ 1675      00
+ 1676              	.LASF27:
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 40
+
+
+ 1677 01ed 61646472 		.ascii	"address\000"
+ 1677      65737300 
+ 1678              	.LASF40:
+ 1679 01f5 43794578 		.ascii	"CyExitCriticalSection\000"
+ 1679      69744372 
+ 1679      69746963 
+ 1679      616C5365 
+ 1679      6374696F 
+ 1680              	.LASF18:
+ 1681 020b 4144435F 		.ascii	"ADC_ISR_Enable\000"
+ 1681      4953525F 
+ 1681      456E6162 
+ 1681      6C6500
+ 1682              	.LASF29:
+ 1683 021a 4144435F 		.ascii	"ADC_ISR_GetState\000"
+ 1683      4953525F 
+ 1683      47657453 
+ 1683      74617465 
+ 1683      00
+ 1684              	.LASF15:
+ 1685 022b 63796973 		.ascii	"cyisraddress\000"
+ 1685      72616464 
+ 1685      72657373 
+ 1685      00
+ 1686              	.LASF20:
+ 1687 0238 4144435F 		.ascii	"ADC_ISR_Stop\000"
+ 1687      4953525F 
+ 1687      53746F70 
+ 1687      00
+ 1688              	.LASF16:
+ 1689 0245 73697A65 		.ascii	"sizetype\000"
+ 1689      74797065 
+ 1689      00
+ 1690              	.LASF6:
+ 1691 024e 6C6F6E67 		.ascii	"long long int\000"
+ 1691      206C6F6E 
+ 1691      6720696E 
+ 1691      7400
+ 1692              	.LASF13:
+ 1693 025c 63686172 		.ascii	"char\000"
+ 1693      00
+ 1694              	.LASF37:
+ 1695 0261 4144435F 		.ascii	"ADC_ISR_GetPriority\000"
+ 1695      4953525F 
+ 1695      47657450 
+ 1695      72696F72 
+ 1695      69747900 
+ 1696              	.LASF38:
+ 1697 0275 43795261 		.ascii	"CyRamVectors\000"
+ 1697      6D566563 
+ 1697      746F7273 
+ 1697      00
+ 1698              	.LASF2:
+ 1699 0282 73686F72 		.ascii	"short int\000"
+ 1699      7420696E 
+ 1699      7400
+ 1700              	.LASF23:
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccitAhLJ.s 			page 41
+
+
+ 1701 028c 7072696F 		.ascii	"priorityOffset\000"
+ 1701      72697479 
+ 1701      4F666673 
+ 1701      657400
+ 1702              	.LASF4:
+ 1703 029b 6C6F6E67 		.ascii	"long int\000"
+ 1703      20696E74 
+ 1703      00
+ 1704              	.LASF30:
+ 1705 02a4 4144435F 		.ascii	"ADC_ISR_SetPending\000"
+ 1705      4953525F 
+ 1705      53657450 
+ 1705      656E6469 
+ 1705      6E6700
+ 1706              	.LASF0:
+ 1707 02b7 7369676E 		.ascii	"signed char\000"
+ 1707      65642063 
+ 1707      68617200 
+ 1708              	.LASF25:
+ 1709 02c3 4144435F 		.ascii	"ADC_ISR_StartEx\000"
+ 1709      4953525F 
+ 1709      53746172 
+ 1709      74457800 
+ 1710              	.LASF35:
+ 1711 02d3 433A5C55 		.ascii	"C:\\Users\\faithc\\Box Sync\\Feniex Firmware Files\\"
+ 1711      73657273 
+ 1711      5C666169 
+ 1711      7468635C 
+ 1711      426F7820 
+ 1712 0302 414C425C 		.ascii	"ALB\\81-00022-01 ALB LED Driver\\81-00022-01.cydsn\000"
+ 1712      38312D30 
+ 1712      30303232 
+ 1712      2D303120 
+ 1712      414C4220 
+ 1713              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 4.9.3 20150303 (release) [ARM/embedded-4_9-br

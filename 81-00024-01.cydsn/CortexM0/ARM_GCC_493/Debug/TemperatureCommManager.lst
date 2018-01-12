@@ -1,0 +1,3322 @@
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 1
+
+
+   1              		.cpu cortex-m0
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 1
+  10              		.eabi_attribute 34, 0
+  11              		.eabi_attribute 18, 4
+  12              		.code	16
+  13              		.file	"TemperatureCommManager.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.section	.text.getHighestTemperature,"ax",%progbits
+  18              		.align	2
+  19              		.code	16
+  20              		.thumb_func
+  21              		.type	getHighestTemperature, %function
+  22              	getHighestTemperature:
+  23              	.LFB45:
+  24              		.file 1 ".\\TemperatureCommManager.c"
+   1:.\TemperatureCommManager.c **** /* ========================================
+   2:.\TemperatureCommManager.c ****  *
+   3:.\TemperatureCommManager.c ****  * Copyright YOUR COMPANY, THE YEAR
+   4:.\TemperatureCommManager.c ****  * All Rights Reserved
+   5:.\TemperatureCommManager.c ****  * UNPUBLISHED, LICENSED SOFTWARE.
+   6:.\TemperatureCommManager.c ****  *
+   7:.\TemperatureCommManager.c ****  * CONFIDENTIAL AND PROPRIETARY INFORMATION
+   8:.\TemperatureCommManager.c ****  * WHICH IS THE PROPERTY OF your company.
+   9:.\TemperatureCommManager.c ****  *
+  10:.\TemperatureCommManager.c ****  * ========================================
+  11:.\TemperatureCommManager.c **** */
+  12:.\TemperatureCommManager.c **** /**********CHANGE LOG**********/
+  13:.\TemperatureCommManager.c **** 
+  14:.\TemperatureCommManager.c **** 
+  15:.\TemperatureCommManager.c **** /**********PREPROCESSOR DIRECTIVES**********/
+  16:.\TemperatureCommManager.c **** #include "CommonVariables.h"
+  17:.\TemperatureCommManager.c **** #include "TemperatureCommManager.h"
+  18:.\TemperatureCommManager.c **** #include "DriverControl.h"
+  19:.\TemperatureCommManager.c **** 
+  20:.\TemperatureCommManager.c **** #define MAX_PAYLOAD_BYTE_COUNT  MAX_DRIVER_COUNT * 2 + 2
+  21:.\TemperatureCommManager.c **** #define HEADER_BYTE_COUNT       2
+  22:.\TemperatureCommManager.c **** #define EOP_BYTE_COUNT          2
+  23:.\TemperatureCommManager.c **** #define MAX_PACKET_SIZE         HEADER_BYTE_COUNT + MAX_PAYLOAD_BYTE_COUNT + EOP_BYTE_COUNT
+  24:.\TemperatureCommManager.c **** 
+  25:.\TemperatureCommManager.c **** #define PACKET_TYPE_COUNT       6
+  26:.\TemperatureCommManager.c **** #define HEADER_START_INDEX      0
+  27:.\TemperatureCommManager.c **** #define PAYLOAD_START_INDEX     HEADER_BYTE_COUNT
+  28:.\TemperatureCommManager.c **** 
+  29:.\TemperatureCommManager.c **** #define TIMEOUT_LIMIT_IN_MILLISECONDS   30
+  30:.\TemperatureCommManager.c ****     
+  31:.\TemperatureCommManager.c **** /**********DEFINED CONSTANTS**********/
+  32:.\TemperatureCommManager.c **** enum PacketState
+  33:.\TemperatureCommManager.c **** {
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 2
+
+
+  34:.\TemperatureCommManager.c ****     HEADER_STATE,
+  35:.\TemperatureCommManager.c ****     PAYLOAD_STATE,
+  36:.\TemperatureCommManager.c ****     EOP_STATE
+  37:.\TemperatureCommManager.c **** };
+  38:.\TemperatureCommManager.c **** 
+  39:.\TemperatureCommManager.c **** /**********DATA STRUCTURES**********/
+  40:.\TemperatureCommManager.c **** typedef struct
+  41:.\TemperatureCommManager.c **** {
+  42:.\TemperatureCommManager.c ****     const uint8 HEADER_BYTE;
+  43:.\TemperatureCommManager.c ****     const uint8 PACKET_TYPE;
+  44:.\TemperatureCommManager.c ****     const uint8 PAYLOAD_SIZE;
+  45:.\TemperatureCommManager.c ****     const uint8 EOP_CARRIAGE_RETURN;
+  46:.\TemperatureCommManager.c ****     const uint8 EOP_LINE_FEED;
+  47:.\TemperatureCommManager.c **** }Packet;
+  48:.\TemperatureCommManager.c **** 
+  49:.\TemperatureCommManager.c **** static Packet PacketList[PACKET_TYPE_COUNT] = 
+  50:.\TemperatureCommManager.c **** {
+  51:.\TemperatureCommManager.c ****     {'~', 'C', 9, '\r', '\n'},          //Definition: Driver Count
+  52:.\TemperatureCommManager.c ****                                         //Payload:
+  53:.\TemperatureCommManager.c ****                                         //Byte 0: Number of Drivers, Value Range:1-8
+  54:.\TemperatureCommManager.c ****                                         //Byte1-Byte8:Driver ID, Value Range:1-8
+  55:.\TemperatureCommManager.c ****     {'~', 'A', 9, '\r', '\n'},          //Definition: Acknowledgement Packet
+  56:.\TemperatureCommManager.c ****                                         //Payload:
+  57:.\TemperatureCommManager.c ****                                         //Byte 0: Number of Drivers, Value Range:1-8
+  58:.\TemperatureCommManager.c ****                                         //Byte1-Byte8:Driver ID, Value Range:1-8
+  59:.\TemperatureCommManager.c ****     {'~', 'T', 18, '\r', '\n'},         //T for LED Temp, Modules 0(head)-7(Kaboose), Value Range: 
+  60:.\TemperatureCommManager.c ****     {'~', 'U', 18, '\r', '\n'},         //U for Switch Node Temp, Modules 0(head)-7(Kaboose), Value
+  61:.\TemperatureCommManager.c ****     {'~', 'W', 18, '\r', '\n'},         //W for Micro Temp, Modules 0(head)-7(Kaboose), Value Range
+  62:.\TemperatureCommManager.c ****     {'~', 'V', 18, '\r', '\n'}          //V for Ambient Temp, Modules 0(head)-7(Kaboose), Value Ran
+  63:.\TemperatureCommManager.c **** };   
+  64:.\TemperatureCommManager.c **** 
+  65:.\TemperatureCommManager.c **** static uint8 lastDriverPacket[MAX_PACKET_SIZE - 9];
+  66:.\TemperatureCommManager.c **** static uint8 temperaturePayload[ADC_SAMPLE_COUNT - 1][MAX_PAYLOAD_BYTE_COUNT];
+  67:.\TemperatureCommManager.c **** 
+  68:.\TemperatureCommManager.c **** /**********GLOBAL VARIABLES**********/
+  69:.\TemperatureCommManager.c **** static uint16 timerCount = 0;
+  70:.\TemperatureCommManager.c **** 
+  71:.\TemperatureCommManager.c **** static uint8 bLastDriverInChain = FALSE;
+  72:.\TemperatureCommManager.c **** 
+  73:.\TemperatureCommManager.c **** uint8 bReadyToSendNextBrightnessTimeoutPacket = FALSE;
+  74:.\TemperatureCommManager.c **** uint8 readyToSendThresholdCounter = 0;
+  75:.\TemperatureCommManager.c **** 
+  76:.\TemperatureCommManager.c **** 
+  77:.\TemperatureCommManager.c **** uint8 sendTempPacketBack = 0;
+  78:.\TemperatureCommManager.c **** /**********LOCAL FUNCTION PROTOTYPES**********/
+  79:.\TemperatureCommManager.c **** static void detectPacket(uint8 dataByte);
+  80:.\TemperatureCommManager.c **** static uint8 processTemperaturePacket(uint8* packet, uint8 length);
+  81:.\TemperatureCommManager.c **** static uint8 processFinalDriverCountPacket(uint8* packet, uint8 length);
+  82:.\TemperatureCommManager.c **** static uint8 processAckPacket(uint8* packet, uint8 length);
+  83:.\TemperatureCommManager.c **** static int16 getHighestTemperature(uint8* packet, uint8 length);
+  84:.\TemperatureCommManager.c **** 
+  85:.\TemperatureCommManager.c **** /**********DEFINED GLOBAL FUNCTIONS**********/
+  86:.\TemperatureCommManager.c **** 
+  87:.\TemperatureCommManager.c **** uint8 isReadyToSendNextBrightnessPacket(void)
+  88:.\TemperatureCommManager.c **** {
+  89:.\TemperatureCommManager.c ****    return bReadyToSendNextBrightnessTimeoutPacket;
+  90:.\TemperatureCommManager.c **** }
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 3
+
+
+  91:.\TemperatureCommManager.c **** 
+  92:.\TemperatureCommManager.c **** void clearIsReadyToSendNextBrightnessPacket(void)
+  93:.\TemperatureCommManager.c **** {
+  94:.\TemperatureCommManager.c ****     bReadyToSendNextBrightnessTimeoutPacket = FALSE;
+  95:.\TemperatureCommManager.c **** }
+  96:.\TemperatureCommManager.c **** 
+  97:.\TemperatureCommManager.c **** /*******************************************************************************
+  98:.\TemperatureCommManager.c **** * Function Name: isLastDriver
+  99:.\TemperatureCommManager.c **** ********************************************************************************
+ 100:.\TemperatureCommManager.c **** *
+ 101:.\TemperatureCommManager.c **** * Summary:
+ 102:.\TemperatureCommManager.c **** *  Returns if the current module is last driver in packet based on a ACK timeout.
+ 103:.\TemperatureCommManager.c **** *  An ACK timeout is when there is no ACK packet sent from the next module within 
+ 104:.\TemperatureCommManager.c **** *  the timeout perioud.
+ 105:.\TemperatureCommManager.c **** * Parameters:
+ 106:.\TemperatureCommManager.c **** *  None.
+ 107:.\TemperatureCommManager.c **** *
+ 108:.\TemperatureCommManager.c **** * Return:
+ 109:.\TemperatureCommManager.c **** *  TRUE if the module is the last in the chain.
+ 110:.\TemperatureCommManager.c **** *
+ 111:.\TemperatureCommManager.c **** *******************************************************************************/
+ 112:.\TemperatureCommManager.c **** uint8 isLastDriver(void)
+ 113:.\TemperatureCommManager.c **** {
+ 114:.\TemperatureCommManager.c ****     return bLastDriverInChain;
+ 115:.\TemperatureCommManager.c **** }
+ 116:.\TemperatureCommManager.c **** 
+ 117:.\TemperatureCommManager.c **** 
+ 118:.\TemperatureCommManager.c **** /*******************************************************************************
+ 119:.\TemperatureCommManager.c **** * Function Name: processTemperatureByteReceivedHandler
+ 120:.\TemperatureCommManager.c **** ********************************************************************************
+ 121:.\TemperatureCommManager.c **** *
+ 122:.\TemperatureCommManager.c **** * Summary:
+ 123:.\TemperatureCommManager.c **** *  Called in UART_In_ISR(), triggers when a byte is received from the end driver.
+ 124:.\TemperatureCommManager.c **** *
+ 125:.\TemperatureCommManager.c **** * Parameters:
+ 126:.\TemperatureCommManager.c **** *  None.
+ 127:.\TemperatureCommManager.c **** *
+ 128:.\TemperatureCommManager.c **** * Return:
+ 129:.\TemperatureCommManager.c **** *  None.
+ 130:.\TemperatureCommManager.c **** *
+ 131:.\TemperatureCommManager.c **** *******************************************************************************/
+ 132:.\TemperatureCommManager.c **** void processTemperatureByteReceivedHandler(void)
+ 133:.\TemperatureCommManager.c **** {
+ 134:.\TemperatureCommManager.c ****     //uint8 dataByte = 0;
+ 135:.\TemperatureCommManager.c ****     //uint32 interruptSource = 0;
+ 136:.\TemperatureCommManager.c ****     
+ 137:.\TemperatureCommManager.c ****     //do
+ 138:.\TemperatureCommManager.c ****     //{
+ 139:.\TemperatureCommManager.c ****     //    dataByte = (uint8)(UART_Temperature_UartGetByte() & 0xFF);
+ 140:.\TemperatureCommManager.c ****     //    detectPacket(dataByte);
+ 141:.\TemperatureCommManager.c ****     //}while(UART_Temperature_SpiUartGetRxBufferSize() > 0);
+ 142:.\TemperatureCommManager.c ****     
+ 143:.\TemperatureCommManager.c ****     //interruptSource = UART_Temperature_GetRxInterruptSourceMasked();
+ 144:.\TemperatureCommManager.c ****     //UART_Temperature_ClearRxInterruptSource(interruptSource);
+ 145:.\TemperatureCommManager.c **** }
+ 146:.\TemperatureCommManager.c **** 
+ 147:.\TemperatureCommManager.c **** 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 4
+
+
+ 148:.\TemperatureCommManager.c **** 
+ 149:.\TemperatureCommManager.c **** /*******************************************************************************
+ 150:.\TemperatureCommManager.c **** * Function Name: setLastDriverPacket
+ 151:.\TemperatureCommManager.c **** ********************************************************************************
+ 152:.\TemperatureCommManager.c **** *
+ 153:.\TemperatureCommManager.c **** * Summary:
+ 154:.\TemperatureCommManager.c **** *  Passes the Count packet from BrightnessCommManager to TemperatureCommManager.
+ 155:.\TemperatureCommManager.c **** *  This should only be called in the last driver of the chain.
+ 156:.\TemperatureCommManager.c **** *
+ 157:.\TemperatureCommManager.c **** * Parameters:
+ 158:.\TemperatureCommManager.c **** *  dataPacket: The reference to the packet being passed
+ 159:.\TemperatureCommManager.c **** *  length: The length of the packet in bytes
+ 160:.\TemperatureCommManager.c **** *
+ 161:.\TemperatureCommManager.c **** * Return:
+ 162:.\TemperatureCommManager.c **** *  SUCCESS for valid parameters, FAILURE otherwise
+ 163:.\TemperatureCommManager.c **** *
+ 164:.\TemperatureCommManager.c **** *******************************************************************************/
+ 165:.\TemperatureCommManager.c **** uint8 setLastDriverPacket(uint8* dataPacket, uint8 length)
+ 166:.\TemperatureCommManager.c **** {
+ 167:.\TemperatureCommManager.c ****     if((dataPacket == NULL) || (length != (MAX_PACKET_SIZE - 9)))
+ 168:.\TemperatureCommManager.c ****         return FAILURE;
+ 169:.\TemperatureCommManager.c ****     
+ 170:.\TemperatureCommManager.c ****     memcpy(lastDriverPacket, dataPacket, length);
+ 171:.\TemperatureCommManager.c ****     
+ 172:.\TemperatureCommManager.c ****     return SUCCESS;
+ 173:.\TemperatureCommManager.c **** }
+ 174:.\TemperatureCommManager.c **** 
+ 175:.\TemperatureCommManager.c **** /*******************************************************************************
+ 176:.\TemperatureCommManager.c **** * Function Name: processAckTimeoutRoutine
+ 177:.\TemperatureCommManager.c **** ********************************************************************************
+ 178:.\TemperatureCommManager.c **** *
+ 179:.\TemperatureCommManager.c **** * Summary:
+ 180:.\TemperatureCommManager.c **** *  Called in AckTimeoutISR(), counts up while waiting for an ACK from the next
+ 181:.\TemperatureCommManager.c **** *  driver in the chain. If the timer limit is reached, it is assumed that this
+ 182:.\TemperatureCommManager.c **** *  driver is the last driver of the chain.
+ 183:.\TemperatureCommManager.c **** *
+ 184:.\TemperatureCommManager.c **** * Parameters:
+ 185:.\TemperatureCommManager.c **** *  None.
+ 186:.\TemperatureCommManager.c **** *
+ 187:.\TemperatureCommManager.c **** * Return:
+ 188:.\TemperatureCommManager.c **** *  None.
+ 189:.\TemperatureCommManager.c **** *
+ 190:.\TemperatureCommManager.c **** *******************************************************************************/
+ 191:.\TemperatureCommManager.c **** void processAckTimeoutRoutine(void)
+ 192:.\TemperatureCommManager.c **** {
+ 193:.\TemperatureCommManager.c ****     AckTimer_ClearInterrupt(AckTimer_INTR_MASK_TC);
+ 194:.\TemperatureCommManager.c ****     
+ 195:.\TemperatureCommManager.c ****     if(timerCount < TIMEOUT_LIMIT_IN_MILLISECONDS)
+ 196:.\TemperatureCommManager.c ****     {
+ 197:.\TemperatureCommManager.c ****         
+ 198:.\TemperatureCommManager.c ****         //UART_LED_PutArray(lastDriverPacket, MAX_PACKET_SIZE - 9);
+ 199:.\TemperatureCommManager.c ****         timerCount++;
+ 200:.\TemperatureCommManager.c ****     }
+ 201:.\TemperatureCommManager.c ****     else
+ 202:.\TemperatureCommManager.c ****     {
+ 203:.\TemperatureCommManager.c ****         bLastDriverInChain = TRUE;
+ 204:.\TemperatureCommManager.c ****         //UART_LED_Control_Write(FALSE);
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 5
+
+
+ 205:.\TemperatureCommManager.c ****         AckTimer_Stop();
+ 206:.\TemperatureCommManager.c ****         timerCount = 0;
+ 207:.\TemperatureCommManager.c ****         setDriverCount(lastDriverPacket[PAYLOAD_START_INDEX]);
+ 208:.\TemperatureCommManager.c ****         //UART_Temperature_SpiUartPutArray(lastDriverPacket, MAX_PACKET_SIZE - 9);
+ 209:.\TemperatureCommManager.c ****         memset(lastDriverPacket, 0, MAX_PACKET_SIZE - 9);
+ 210:.\TemperatureCommManager.c ****     }
+ 211:.\TemperatureCommManager.c **** }
+ 212:.\TemperatureCommManager.c **** 
+ 213:.\TemperatureCommManager.c **** /*******************************************************************************
+ 214:.\TemperatureCommManager.c **** * Function Name: processSamplingTimerRoutine
+ 215:.\TemperatureCommManager.c **** ********************************************************************************
+ 216:.\TemperatureCommManager.c **** *
+ 217:.\TemperatureCommManager.c **** * Summary:
+ 218:.\TemperatureCommManager.c **** *  Called in SamplingTimerISR(), samples temperatures at a periodic rate. This timer
+ 219:.\TemperatureCommManager.c **** *  should only run in the last driver of the chain, since the last board drives
+ 220:.\TemperatureCommManager.c **** *  the sampling rate throughout the chain.
+ 221:.\TemperatureCommManager.c **** *
+ 222:.\TemperatureCommManager.c **** * Parameters:
+ 223:.\TemperatureCommManager.c **** *  None.
+ 224:.\TemperatureCommManager.c **** *
+ 225:.\TemperatureCommManager.c **** * Return:
+ 226:.\TemperatureCommManager.c **** *  None.
+ 227:.\TemperatureCommManager.c **** *
+ 228:.\TemperatureCommManager.c **** *******************************************************************************/
+ 229:.\TemperatureCommManager.c **** void processSamplingTimerRoutine(void)
+ 230:.\TemperatureCommManager.c **** {
+ 231:.\TemperatureCommManager.c ****     static int16 ADC_Data[ADC_SAMPLE_COUNT] = {0, 0, 0, 0};
+ 232:.\TemperatureCommManager.c ****     static int16 HighestTemperatures[ADC_SAMPLE_COUNT - 1] = {0, 0, 0};
+ 233:.\TemperatureCommManager.c ****     static enum TemperaturePoint channelNumber = LED;
+ 234:.\TemperatureCommManager.c ****     static uint8 temporaryPacket[5] = {'~', 'B', 0, '\r', '\n'};
+ 235:.\TemperatureCommManager.c ****     
+ 236:.\TemperatureCommManager.c ****     uint8 packet[MAX_PACKET_SIZE];
+ 237:.\TemperatureCommManager.c ****     uint8 driverID = 0;
+ 238:.\TemperatureCommManager.c ****     uint16 temperatureSample = 0;
+ 239:.\TemperatureCommManager.c ****     
+ 240:.\TemperatureCommManager.c ****     SamplingTimer_ClearInterrupt(SamplingTimer_INTR_MASK_TC);   
+ 241:.\TemperatureCommManager.c ****     
+ 242:.\TemperatureCommManager.c ****     readyToSendThresholdCounter++;
+ 243:.\TemperatureCommManager.c ****     
+ 244:.\TemperatureCommManager.c ****     if(readyToSendThresholdCounter>=4)
+ 245:.\TemperatureCommManager.c ****     {
+ 246:.\TemperatureCommManager.c ****         readyToSendThresholdCounter = 0;
+ 247:.\TemperatureCommManager.c ****         bReadyToSendNextBrightnessTimeoutPacket = TRUE;
+ 248:.\TemperatureCommManager.c ****     }
+ 249:.\TemperatureCommManager.c ****     
+ 250:.\TemperatureCommManager.c **** 
+ 251:.\TemperatureCommManager.c ****     //Get next temperature sample to add to array
+ 252:.\TemperatureCommManager.c ****     getTemperatureSample(FALSE, 0, ADC_Data, ADC_SAMPLE_COUNT);
+ 253:.\TemperatureCommManager.c ****     temperatureSample = ADC_Data[channelNumber];    
+ 254:.\TemperatureCommManager.c ****     driverID = getDriverID();
+ 255:.\TemperatureCommManager.c ****     
+ 256:.\TemperatureCommManager.c ****     //Create packet for temperature data
+ 257:.\TemperatureCommManager.c ****     memset(packet, 0, MAX_PACKET_SIZE);
+ 258:.\TemperatureCommManager.c ****     packet[HEADER_START_INDEX] = PacketList[channelNumber + 2].HEADER_BYTE;
+ 259:.\TemperatureCommManager.c ****     packet[HEADER_START_INDEX + 1] = PacketList[channelNumber + 2].PACKET_TYPE;
+ 260:.\TemperatureCommManager.c ****     packet[PAYLOAD_START_INDEX + PacketList[channelNumber + 2].PAYLOAD_SIZE] 
+ 261:.\TemperatureCommManager.c ****         = PacketList[channelNumber + 2].EOP_CARRIAGE_RETURN;
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 6
+
+
+ 262:.\TemperatureCommManager.c ****     packet[PAYLOAD_START_INDEX + PacketList[channelNumber + 2].PAYLOAD_SIZE + 1]
+ 263:.\TemperatureCommManager.c ****         = PacketList[channelNumber + 2].EOP_LINE_FEED;
+ 264:.\TemperatureCommManager.c ****         
+ 265:.\TemperatureCommManager.c ****     memcpy(&packet[PAYLOAD_START_INDEX], temperaturePayload[channelNumber],
+ 266:.\TemperatureCommManager.c ****         MAX_PAYLOAD_BYTE_COUNT);
+ 267:.\TemperatureCommManager.c ****     packet[PAYLOAD_START_INDEX + driverID * 2] = (temperatureSample >> 8) & 0xFF;
+ 268:.\TemperatureCommManager.c ****     packet[PAYLOAD_START_INDEX + driverID * 2 + 1] = temperatureSample & 0xFF;
+ 269:.\TemperatureCommManager.c ****     
+ 270:.\TemperatureCommManager.c ****     if(driverID == HEAD_MODULE_ID)
+ 271:.\TemperatureCommManager.c ****     {   //Add max temperature to packet if this is the head module
+ 272:.\TemperatureCommManager.c ****         //checkForUnderVoltage(ADC_Data[VOLTAGE_SENSE]);
+ 273:.\TemperatureCommManager.c ****         temperatureSample = (uint16)(getMaxTemperature(channelNumber));
+ 274:.\TemperatureCommManager.c ****         packet[PAYLOAD_START_INDEX] = (temperatureSample >> 8) & 0xFF;
+ 275:.\TemperatureCommManager.c ****         packet[PAYLOAD_START_INDEX + 1] = temperatureSample & 0xFF;
+ 276:.\TemperatureCommManager.c ****     }
+ 277:.\TemperatureCommManager.c ****     
+ 278:.\TemperatureCommManager.c ****     //Send off temperature packet
+ 279:.\TemperatureCommManager.c ****     //packet[getDriverID()+2] = getDriverID();
+ 280:.\TemperatureCommManager.c ****     
+ 281:.\TemperatureCommManager.c ****     sendTempPacketBack++;
+ 282:.\TemperatureCommManager.c ****     if(sendTempPacketBack>2)
+ 283:.\TemperatureCommManager.c ****     {
+ 284:.\TemperatureCommManager.c ****         sendTempPacketBack = 0;
+ 285:.\TemperatureCommManager.c ****         //UART_Temperature_SpiUartPutArray(packet, MAX_PACKET_SIZE);
+ 286:.\TemperatureCommManager.c ****     }
+ 287:.\TemperatureCommManager.c ****     HighestTemperatures[channelNumber] =
+ 288:.\TemperatureCommManager.c ****         getHighestTemperature(&packet[PAYLOAD_START_INDEX + 2], MAX_PAYLOAD_BYTE_COUNT);
+ 289:.\TemperatureCommManager.c ****     
+ 290:.\TemperatureCommManager.c ****     if((driverID == HEAD_MODULE_ID) && (channelNumber == SWITCH_NODE))
+ 291:.\TemperatureCommManager.c ****     {   //Adjust brightness based on temp and send new brightness
+ 292:.\TemperatureCommManager.c ****         regulateBrightness(HighestTemperatures, ADC_SAMPLE_COUNT - 1);             
+ 293:.\TemperatureCommManager.c ****         temporaryPacket[PAYLOAD_START_INDEX] = getNewMaxBrightness();
+ 294:.\TemperatureCommManager.c ****         //UART_Temperature_SpiUartPutArray(temporaryPacket, 5);
+ 295:.\TemperatureCommManager.c ****     }
+ 296:.\TemperatureCommManager.c ****     
+ 297:.\TemperatureCommManager.c ****     //Enable injection before obtaining the micro temp in the next iteration
+ 298:.\TemperatureCommManager.c ****     if(channelNumber == (MICRO - 1))
+ 299:.\TemperatureCommManager.c ****         ADC_SAR_Seq_EnableInjection();
+ 300:.\TemperatureCommManager.c ****     
+ 301:.\TemperatureCommManager.c ****     channelNumber = (channelNumber + 1) % (ADC_SAMPLE_COUNT - 1);
+ 302:.\TemperatureCommManager.c ****     
+ 303:.\TemperatureCommManager.c **** }
+ 304:.\TemperatureCommManager.c **** 
+ 305:.\TemperatureCommManager.c **** /**********DEFINED LOCAL FUNCTIONS**********/
+ 306:.\TemperatureCommManager.c **** /*******************************************************************************
+ 307:.\TemperatureCommManager.c **** * Function Name: detectPacket
+ 308:.\TemperatureCommManager.c **** ********************************************************************************
+ 309:.\TemperatureCommManager.c **** *
+ 310:.\TemperatureCommManager.c **** * Summary:
+ 311:.\TemperatureCommManager.c **** *  Determines if the incoming byte belongs to a valid packet. If the packet is
+ 312:.\TemperatureCommManager.c **** *  valid, then the payload is processed.
+ 313:.\TemperatureCommManager.c **** *
+ 314:.\TemperatureCommManager.c **** * Parameters:
+ 315:.\TemperatureCommManager.c **** *  dataByte: The next byte to check in the packet
+ 316:.\TemperatureCommManager.c **** *
+ 317:.\TemperatureCommManager.c **** * Return:
+ 318:.\TemperatureCommManager.c **** *  None.
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 7
+
+
+ 319:.\TemperatureCommManager.c **** *
+ 320:.\TemperatureCommManager.c **** *******************************************************************************/
+ 321:.\TemperatureCommManager.c **** static void detectPacket(uint8 dataByte)
+ 322:.\TemperatureCommManager.c **** {
+ 323:.\TemperatureCommManager.c ****     static uint8 packet[MAX_PACKET_SIZE];   
+ 324:.\TemperatureCommManager.c ****     static enum PacketState currentState = HEADER_STATE;
+ 325:.\TemperatureCommManager.c ****     static uint8 currentPacketIndex = HEADER_START_INDEX;
+ 326:.\TemperatureCommManager.c ****     static uint8 dataTypeIndex = 0;    
+ 327:.\TemperatureCommManager.c ****     uint8 loopIndex = 0;
+ 328:.\TemperatureCommManager.c ****     
+ 329:.\TemperatureCommManager.c ****     switch(currentState)
+ 330:.\TemperatureCommManager.c ****     {
+ 331:.\TemperatureCommManager.c ****         case HEADER_STATE:
+ 332:.\TemperatureCommManager.c ****             if((currentPacketIndex == HEADER_START_INDEX) &&
+ 333:.\TemperatureCommManager.c ****                 (dataByte == PacketList[dataTypeIndex].HEADER_BYTE))
+ 334:.\TemperatureCommManager.c ****             {
+ 335:.\TemperatureCommManager.c ****                 packet[currentPacketIndex] = dataByte;
+ 336:.\TemperatureCommManager.c ****                 currentPacketIndex++;
+ 337:.\TemperatureCommManager.c ****             }
+ 338:.\TemperatureCommManager.c ****             else if(currentPacketIndex == (HEADER_START_INDEX + 1))
+ 339:.\TemperatureCommManager.c ****             {
+ 340:.\TemperatureCommManager.c ****                 for(loopIndex = 0; loopIndex < PACKET_TYPE_COUNT; loopIndex++)
+ 341:.\TemperatureCommManager.c ****                 {
+ 342:.\TemperatureCommManager.c ****                     if(dataByte == PacketList[loopIndex].PACKET_TYPE)
+ 343:.\TemperatureCommManager.c ****                     {
+ 344:.\TemperatureCommManager.c ****                         dataTypeIndex = loopIndex;                        
+ 345:.\TemperatureCommManager.c ****                         packet[currentPacketIndex] = dataByte;
+ 346:.\TemperatureCommManager.c ****                         currentPacketIndex++;
+ 347:.\TemperatureCommManager.c ****                         currentState = PAYLOAD_STATE;
+ 348:.\TemperatureCommManager.c ****                         break;
+ 349:.\TemperatureCommManager.c ****                     }
+ 350:.\TemperatureCommManager.c ****                 }
+ 351:.\TemperatureCommManager.c ****                 
+ 352:.\TemperatureCommManager.c ****                 if(loopIndex >= PACKET_TYPE_COUNT)
+ 353:.\TemperatureCommManager.c ****                 {
+ 354:.\TemperatureCommManager.c ****                     currentPacketIndex = HEADER_START_INDEX;
+ 355:.\TemperatureCommManager.c ****                     dataTypeIndex = 0;
+ 356:.\TemperatureCommManager.c ****                 }
+ 357:.\TemperatureCommManager.c ****             }
+ 358:.\TemperatureCommManager.c ****             else
+ 359:.\TemperatureCommManager.c ****             {
+ 360:.\TemperatureCommManager.c ****                 currentPacketIndex = HEADER_START_INDEX;
+ 361:.\TemperatureCommManager.c ****                 dataTypeIndex = 0;
+ 362:.\TemperatureCommManager.c ****             }
+ 363:.\TemperatureCommManager.c ****             break;
+ 364:.\TemperatureCommManager.c ****         case PAYLOAD_STATE:
+ 365:.\TemperatureCommManager.c ****             packet[currentPacketIndex] = dataByte;
+ 366:.\TemperatureCommManager.c ****             currentPacketIndex++;
+ 367:.\TemperatureCommManager.c ****             
+ 368:.\TemperatureCommManager.c ****             if(currentPacketIndex >= (PAYLOAD_START_INDEX + PacketList[dataTypeIndex].PAYLOAD_SIZE)
+ 369:.\TemperatureCommManager.c ****                 currentState = EOP_STATE;
+ 370:.\TemperatureCommManager.c ****             break;
+ 371:.\TemperatureCommManager.c ****         case EOP_STATE:
+ 372:.\TemperatureCommManager.c ****             if((currentPacketIndex == (PAYLOAD_START_INDEX + PacketList[dataTypeIndex].PAYLOAD_SIZE
+ 373:.\TemperatureCommManager.c ****                 (dataByte == PacketList[dataTypeIndex].EOP_CARRIAGE_RETURN))
+ 374:.\TemperatureCommManager.c ****             {
+ 375:.\TemperatureCommManager.c ****                 packet[currentPacketIndex] = dataByte;
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 8
+
+
+ 376:.\TemperatureCommManager.c ****                 currentPacketIndex++;
+ 377:.\TemperatureCommManager.c ****             }
+ 378:.\TemperatureCommManager.c ****             else if((currentPacketIndex == (PAYLOAD_START_INDEX + PacketList[dataTypeIndex].PAYLOAD
+ 379:.\TemperatureCommManager.c ****                     && (dataByte == PacketList[dataTypeIndex].EOP_LINE_FEED))
+ 380:.\TemperatureCommManager.c ****             {
+ 381:.\TemperatureCommManager.c ****                 packet[currentPacketIndex] = dataByte;
+ 382:.\TemperatureCommManager.c **** 				
+ 383:.\TemperatureCommManager.c **** 				if(dataTypeIndex == 0)
+ 384:.\TemperatureCommManager.c ****                     processFinalDriverCountPacket(packet, MAX_PACKET_SIZE - 9);                   
+ 385:.\TemperatureCommManager.c **** 				else if(dataTypeIndex == 1)
+ 386:.\TemperatureCommManager.c ****                     processAckPacket(packet, MAX_PACKET_SIZE - 9);
+ 387:.\TemperatureCommManager.c ****                 else
+ 388:.\TemperatureCommManager.c ****                     processTemperaturePacket(packet, MAX_PACKET_SIZE);
+ 389:.\TemperatureCommManager.c ****     	        
+ 390:.\TemperatureCommManager.c ****                 currentPacketIndex = HEADER_START_INDEX;
+ 391:.\TemperatureCommManager.c ****                 currentState = HEADER_STATE;
+ 392:.\TemperatureCommManager.c ****                 dataTypeIndex = 0;
+ 393:.\TemperatureCommManager.c ****             }
+ 394:.\TemperatureCommManager.c ****             else
+ 395:.\TemperatureCommManager.c ****             {
+ 396:.\TemperatureCommManager.c ****                 currentPacketIndex = HEADER_START_INDEX;
+ 397:.\TemperatureCommManager.c ****                 currentState = HEADER_STATE;
+ 398:.\TemperatureCommManager.c ****                 dataTypeIndex = 0;
+ 399:.\TemperatureCommManager.c ****             }
+ 400:.\TemperatureCommManager.c ****             break;
+ 401:.\TemperatureCommManager.c ****     }
+ 402:.\TemperatureCommManager.c **** }
+ 403:.\TemperatureCommManager.c **** 
+ 404:.\TemperatureCommManager.c **** /*******************************************************************************
+ 405:.\TemperatureCommManager.c **** * Function Name: processTemperaturePacket
+ 406:.\TemperatureCommManager.c **** ********************************************************************************
+ 407:.\TemperatureCommManager.c **** *
+ 408:.\TemperatureCommManager.c **** * Summary:
+ 409:.\TemperatureCommManager.c **** *  Obtains the temperature for this module, adds the temperature to this packet, and
+ 410:.\TemperatureCommManager.c **** *  sends the packet to the previous module.
+ 411:.\TemperatureCommManager.c **** *
+ 412:.\TemperatureCommManager.c **** * Parameters:
+ 413:.\TemperatureCommManager.c **** *  packet: The reference to the temperature packet to process.
+ 414:.\TemperatureCommManager.c **** *  length: The byte count for this packet.
+ 415:.\TemperatureCommManager.c **** *
+ 416:.\TemperatureCommManager.c **** * Return:
+ 417:.\TemperatureCommManager.c **** *  SUCCESS for valid inputs, FAILURE otherwise
+ 418:.\TemperatureCommManager.c **** *
+ 419:.\TemperatureCommManager.c **** *******************************************************************************/
+ 420:.\TemperatureCommManager.c **** static uint8 processTemperaturePacket(uint8* packet, uint8 length)
+ 421:.\TemperatureCommManager.c **** {
+ 422:.\TemperatureCommManager.c ****     uint8 driverID = 0;
+ 423:.\TemperatureCommManager.c ****     uint8 channelNumber;
+ 424:.\TemperatureCommManager.c ****     
+ 425:.\TemperatureCommManager.c ****     if(packet == NULL || length != MAX_PACKET_SIZE)
+ 426:.\TemperatureCommManager.c ****         return FAILURE;
+ 427:.\TemperatureCommManager.c ****     
+ 428:.\TemperatureCommManager.c ****     driverID = getDriverID();
+ 429:.\TemperatureCommManager.c ****     if((driverID < HEAD_MODULE_ID) || (driverID > MAX_DRIVER_COUNT))
+ 430:.\TemperatureCommManager.c ****         return FAILURE;
+ 431:.\TemperatureCommManager.c ****     
+ 432:.\TemperatureCommManager.c ****     for(channelNumber = 0; channelNumber < ADC_SAMPLE_COUNT; channelNumber++)
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 9
+
+
+ 433:.\TemperatureCommManager.c ****     {   //Determining ADC channel number based on packet type
+ 434:.\TemperatureCommManager.c ****         if(packet[HEADER_START_INDEX + 1] == PacketList[channelNumber + 2].PACKET_TYPE)
+ 435:.\TemperatureCommManager.c ****             break;
+ 436:.\TemperatureCommManager.c ****     }
+ 437:.\TemperatureCommManager.c ****     
+ 438:.\TemperatureCommManager.c ****     memcpy(temperaturePayload[channelNumber],
+ 439:.\TemperatureCommManager.c ****         &packet[PAYLOAD_START_INDEX], MAX_PAYLOAD_BYTE_COUNT);
+ 440:.\TemperatureCommManager.c ****     
+ 441:.\TemperatureCommManager.c ****     return SUCCESS; //Return here if this is a head module
+ 442:.\TemperatureCommManager.c **** }
+ 443:.\TemperatureCommManager.c **** 
+ 444:.\TemperatureCommManager.c **** /*******************************************************************************
+ 445:.\TemperatureCommManager.c **** * Function Name: processFinalDriverCountPacket
+ 446:.\TemperatureCommManager.c **** ********************************************************************************
+ 447:.\TemperatureCommManager.c **** *
+ 448:.\TemperatureCommManager.c **** * Summary:
+ 449:.\TemperatureCommManager.c **** *  Sends the complete driver count packet to the previous module without modification.
+ 450:.\TemperatureCommManager.c **** *
+ 451:.\TemperatureCommManager.c **** * Parameters:
+ 452:.\TemperatureCommManager.c **** *  packet: The reference to the complete driver count packet.
+ 453:.\TemperatureCommManager.c **** *  length: The byte count for this packet.
+ 454:.\TemperatureCommManager.c **** *
+ 455:.\TemperatureCommManager.c **** * Return:
+ 456:.\TemperatureCommManager.c **** *  SUCCESS for valid inputs, FAILURE otherwise
+ 457:.\TemperatureCommManager.c **** *
+ 458:.\TemperatureCommManager.c **** *******************************************************************************/
+ 459:.\TemperatureCommManager.c **** static uint8 processFinalDriverCountPacket(uint8* packet, uint8 length)
+ 460:.\TemperatureCommManager.c **** {
+ 461:.\TemperatureCommManager.c ****     if(packet == NULL || (length != MAX_PACKET_SIZE - 9))
+ 462:.\TemperatureCommManager.c ****         return FAILURE;
+ 463:.\TemperatureCommManager.c ****     
+ 464:.\TemperatureCommManager.c ****     setDriverCount(packet[PAYLOAD_START_INDEX]);
+ 465:.\TemperatureCommManager.c ****     //UART_Temperature_SpiUartPutArray(packet, MAX_PACKET_SIZE - 9);
+ 466:.\TemperatureCommManager.c ****     
+ 467:.\TemperatureCommManager.c ****     
+ 468:.\TemperatureCommManager.c ****     if(getDriverID() == HEAD_MODULE_ID)
+ 469:.\TemperatureCommManager.c ****     {
+ 470:.\TemperatureCommManager.c ****         //UART_LED_Control_Write(TRUE); 
+ 471:.\TemperatureCommManager.c ****     }
+ 472:.\TemperatureCommManager.c ****     else
+ 473:.\TemperatureCommManager.c ****     {
+ 474:.\TemperatureCommManager.c ****         //UART_LED_Control_Write(FALSE);
+ 475:.\TemperatureCommManager.c ****     }
+ 476:.\TemperatureCommManager.c ****     return SUCCESS;
+ 477:.\TemperatureCommManager.c **** }
+ 478:.\TemperatureCommManager.c **** 
+ 479:.\TemperatureCommManager.c **** /*******************************************************************************
+ 480:.\TemperatureCommManager.c **** * Function Name: processAckPacket
+ 481:.\TemperatureCommManager.c **** ********************************************************************************
+ 482:.\TemperatureCommManager.c **** *
+ 483:.\TemperatureCommManager.c **** * Summary:
+ 484:.\TemperatureCommManager.c **** *  Receiving the ack packet indicates that there is a module appended to this one.
+ 485:.\TemperatureCommManager.c **** *
+ 486:.\TemperatureCommManager.c **** * Parameters:
+ 487:.\TemperatureCommManager.c **** *  packet: The reference to the ack packet.
+ 488:.\TemperatureCommManager.c **** *  length: The byte count for this packet.
+ 489:.\TemperatureCommManager.c **** *
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 10
+
+
+ 490:.\TemperatureCommManager.c **** * Return:
+ 491:.\TemperatureCommManager.c **** *  SUCCESS for valid inputs, FAILURE otherwise
+ 492:.\TemperatureCommManager.c **** *
+ 493:.\TemperatureCommManager.c **** *******************************************************************************/
+ 494:.\TemperatureCommManager.c **** static uint8 processAckPacket(uint8* packet, uint8 length)
+ 495:.\TemperatureCommManager.c **** {
+ 496:.\TemperatureCommManager.c ****     if(packet == NULL || length != (MAX_PACKET_SIZE - 9))
+ 497:.\TemperatureCommManager.c ****         return FAILURE;
+ 498:.\TemperatureCommManager.c ****     
+ 499:.\TemperatureCommManager.c ****     AckTimer_Stop();
+ 500:.\TemperatureCommManager.c ****     timerCount = 0;
+ 501:.\TemperatureCommManager.c ****     setAsNotLastDriverInChain();
+ 502:.\TemperatureCommManager.c ****     return SUCCESS;
+ 503:.\TemperatureCommManager.c **** }
+ 504:.\TemperatureCommManager.c **** 
+ 505:.\TemperatureCommManager.c **** /*******************************************************************************
+ 506:.\TemperatureCommManager.c **** * Function Name: getHighestTemperature
+ 507:.\TemperatureCommManager.c **** ********************************************************************************
+ 508:.\TemperatureCommManager.c **** *
+ 509:.\TemperatureCommManager.c **** * Summary:
+ 510:.\TemperatureCommManager.c **** *  Returns the highest temperature detected out of all modules.
+ 511:.\TemperatureCommManager.c **** *
+ 512:.\TemperatureCommManager.c **** * Parameters:
+ 513:.\TemperatureCommManager.c **** *  packet: The reference to the temperature packet to process.
+ 514:.\TemperatureCommManager.c **** *  length: The byte count for this packet.
+ 515:.\TemperatureCommManager.c **** *
+ 516:.\TemperatureCommManager.c **** * Return:
+ 517:.\TemperatureCommManager.c **** *  The highest temperature detected out of all modules, 0 if there is an input error
+ 518:.\TemperatureCommManager.c **** *
+ 519:.\TemperatureCommManager.c **** *******************************************************************************/
+ 520:.\TemperatureCommManager.c **** static int16 getHighestTemperature(uint8* packet, uint8 length)
+ 521:.\TemperatureCommManager.c **** {
+  25              		.loc 1 521 0
+  26              		.cfi_startproc
+  27              	.LVL0:
+  28 0000 30B5     		push	{r4, r5, lr}
+  29              		.cfi_def_cfa_offset 12
+  30              		.cfi_offset 4, -12
+  31              		.cfi_offset 5, -8
+  32              		.cfi_offset 14, -4
+  33              	.LVL1:
+ 522:.\TemperatureCommManager.c ****     int16 highestTemperature = 0;
+ 523:.\TemperatureCommManager.c ****     int16 temperatureToCheck = 0;
+ 524:.\TemperatureCommManager.c ****     uint8 moduleIndex = 0;
+ 525:.\TemperatureCommManager.c ****     
+ 526:.\TemperatureCommManager.c ****     if(packet == NULL || length != MAX_PAYLOAD_BYTE_COUNT)
+  34              		.loc 1 526 0
+  35 0002 0028     		cmp	r0, #0
+  36 0004 15D0     		beq	.L6
+  37              		.loc 1 526 0 is_stmt 0 discriminator 1
+  38 0006 1229     		cmp	r1, #18
+  39 0008 15D1     		bne	.L7
+  40 000a 0022     		mov	r2, #0
+  41 000c 0024     		mov	r4, #0
+  42 000e 0CE0     		b	.L3
+  43              	.LVL2:
+  44              	.L5:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 11
+
+
+ 527:.\TemperatureCommManager.c ****         return 0;
+ 528:.\TemperatureCommManager.c ****     
+ 529:.\TemperatureCommManager.c ****     for(moduleIndex = 0; moduleIndex < MAX_DRIVER_COUNT; moduleIndex++)
+ 530:.\TemperatureCommManager.c ****     {
+ 531:.\TemperatureCommManager.c ****         temperatureToCheck = 0;
+ 532:.\TemperatureCommManager.c ****         temperatureToCheck = (int16)(packet[moduleIndex * 2] << 8);
+  45              		.loc 1 532 0 is_stmt 1
+  46 0010 5100     		lsl	r1, r2, #1
+  47 0012 435C     		ldrb	r3, [r0, r1]
+  48 0014 1B02     		lsl	r3, r3, #8
+  49              	.LVL3:
+ 533:.\TemperatureCommManager.c ****         temperatureToCheck |= (int16)(packet[moduleIndex * 2 + 1]);
+  50              		.loc 1 533 0
+  51 0016 4118     		add	r1, r0, r1
+  52 0018 4978     		ldrb	r1, [r1, #1]
+  53 001a 0B43     		orr	r3, r1
+  54              	.LVL4:
+ 534:.\TemperatureCommManager.c ****         
+ 535:.\TemperatureCommManager.c ****         if(temperatureToCheck > highestTemperature)
+  55              		.loc 1 535 0
+  56 001c 1DB2     		sxth	r5, r3
+  57 001e 21B2     		sxth	r1, r4
+  58 0020 8D42     		cmp	r5, r1
+  59 0022 00DD     		ble	.L4
+ 536:.\TemperatureCommManager.c ****             highestTemperature = temperatureToCheck;
+  60              		.loc 1 536 0
+  61 0024 1C1C     		mov	r4, r3
+  62              	.LVL5:
+  63              	.L4:
+ 529:.\TemperatureCommManager.c ****     {
+  64              		.loc 1 529 0 discriminator 2
+  65 0026 0132     		add	r2, r2, #1
+  66              	.LVL6:
+  67 0028 D2B2     		uxtb	r2, r2
+  68              	.LVL7:
+  69              	.L3:
+ 529:.\TemperatureCommManager.c ****     {
+  70              		.loc 1 529 0 is_stmt 0 discriminator 1
+  71 002a 072A     		cmp	r2, #7
+  72 002c F0D9     		bls	.L5
+ 537:.\TemperatureCommManager.c ****     }
+ 538:.\TemperatureCommManager.c ****     
+ 539:.\TemperatureCommManager.c ****     return highestTemperature;
+  73              		.loc 1 539 0 is_stmt 1
+  74 002e A0B2     		uxth	r0, r4
+  75              	.LVL8:
+  76 0030 02E0     		b	.L2
+  77              	.LVL9:
+  78              	.L6:
+ 527:.\TemperatureCommManager.c ****     
+  79              		.loc 1 527 0
+  80 0032 0020     		mov	r0, #0
+  81              	.LVL10:
+  82 0034 00E0     		b	.L2
+  83              	.LVL11:
+  84              	.L7:
+  85 0036 0020     		mov	r0, #0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 12
+
+
+  86              	.LVL12:
+  87              	.L2:
+  88 0038 00B2     		sxth	r0, r0
+ 540:.\TemperatureCommManager.c **** }
+  89              		.loc 1 540 0
+  90              		@ sp needed
+  91 003a 30BD     		pop	{r4, r5, pc}
+  92              		.cfi_endproc
+  93              	.LFE45:
+  94              		.size	getHighestTemperature, .-getHighestTemperature
+  95              		.section	.text.isReadyToSendNextBrightnessPacket,"ax",%progbits
+  96              		.align	2
+  97              		.global	isReadyToSendNextBrightnessPacket
+  98              		.code	16
+  99              		.thumb_func
+ 100              		.type	isReadyToSendNextBrightnessPacket, %function
+ 101              	isReadyToSendNextBrightnessPacket:
+ 102              	.LFB34:
+  88:.\TemperatureCommManager.c ****    return bReadyToSendNextBrightnessTimeoutPacket;
+ 103              		.loc 1 88 0
+ 104              		.cfi_startproc
+  89:.\TemperatureCommManager.c **** }
+ 105              		.loc 1 89 0
+ 106 0000 014B     		ldr	r3, .L10
+ 107 0002 1878     		ldrb	r0, [r3]
+  90:.\TemperatureCommManager.c **** 
+ 108              		.loc 1 90 0
+ 109              		@ sp needed
+ 110 0004 7047     		bx	lr
+ 111              	.L11:
+ 112 0006 C046     		.align	2
+ 113              	.L10:
+ 114 0008 00000000 		.word	.LANCHOR0
+ 115              		.cfi_endproc
+ 116              	.LFE34:
+ 117              		.size	isReadyToSendNextBrightnessPacket, .-isReadyToSendNextBrightnessPacket
+ 118              		.section	.text.clearIsReadyToSendNextBrightnessPacket,"ax",%progbits
+ 119              		.align	2
+ 120              		.global	clearIsReadyToSendNextBrightnessPacket
+ 121              		.code	16
+ 122              		.thumb_func
+ 123              		.type	clearIsReadyToSendNextBrightnessPacket, %function
+ 124              	clearIsReadyToSendNextBrightnessPacket:
+ 125              	.LFB35:
+  93:.\TemperatureCommManager.c ****     bReadyToSendNextBrightnessTimeoutPacket = FALSE;
+ 126              		.loc 1 93 0
+ 127              		.cfi_startproc
+  94:.\TemperatureCommManager.c **** }
+ 128              		.loc 1 94 0
+ 129 0000 0022     		mov	r2, #0
+ 130 0002 014B     		ldr	r3, .L13
+ 131 0004 1A70     		strb	r2, [r3]
+  95:.\TemperatureCommManager.c **** 
+ 132              		.loc 1 95 0
+ 133              		@ sp needed
+ 134 0006 7047     		bx	lr
+ 135              	.L14:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 13
+
+
+ 136              		.align	2
+ 137              	.L13:
+ 138 0008 00000000 		.word	.LANCHOR0
+ 139              		.cfi_endproc
+ 140              	.LFE35:
+ 141              		.size	clearIsReadyToSendNextBrightnessPacket, .-clearIsReadyToSendNextBrightnessPacket
+ 142              		.section	.text.isLastDriver,"ax",%progbits
+ 143              		.align	2
+ 144              		.global	isLastDriver
+ 145              		.code	16
+ 146              		.thumb_func
+ 147              		.type	isLastDriver, %function
+ 148              	isLastDriver:
+ 149              	.LFB36:
+ 113:.\TemperatureCommManager.c ****     return bLastDriverInChain;
+ 150              		.loc 1 113 0
+ 151              		.cfi_startproc
+ 114:.\TemperatureCommManager.c **** }
+ 152              		.loc 1 114 0
+ 153 0000 014B     		ldr	r3, .L16
+ 154 0002 5878     		ldrb	r0, [r3, #1]
+ 115:.\TemperatureCommManager.c **** 
+ 155              		.loc 1 115 0
+ 156              		@ sp needed
+ 157 0004 7047     		bx	lr
+ 158              	.L17:
+ 159 0006 C046     		.align	2
+ 160              	.L16:
+ 161 0008 00000000 		.word	.LANCHOR0
+ 162              		.cfi_endproc
+ 163              	.LFE36:
+ 164              		.size	isLastDriver, .-isLastDriver
+ 165              		.section	.text.processTemperatureByteReceivedHandler,"ax",%progbits
+ 166              		.align	2
+ 167              		.global	processTemperatureByteReceivedHandler
+ 168              		.code	16
+ 169              		.thumb_func
+ 170              		.type	processTemperatureByteReceivedHandler, %function
+ 171              	processTemperatureByteReceivedHandler:
+ 172              	.LFB37:
+ 133:.\TemperatureCommManager.c ****     //uint8 dataByte = 0;
+ 173              		.loc 1 133 0
+ 174              		.cfi_startproc
+ 145:.\TemperatureCommManager.c **** 
+ 175              		.loc 1 145 0
+ 176              		@ sp needed
+ 177 0000 7047     		bx	lr
+ 178              		.cfi_endproc
+ 179              	.LFE37:
+ 180              		.size	processTemperatureByteReceivedHandler, .-processTemperatureByteReceivedHandler
+ 181 0002 C046     		.section	.text.setLastDriverPacket,"ax",%progbits
+ 182              		.align	2
+ 183              		.global	setLastDriverPacket
+ 184              		.code	16
+ 185              		.thumb_func
+ 186              		.type	setLastDriverPacket, %function
+ 187              	setLastDriverPacket:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 14
+
+
+ 188              	.LFB38:
+ 166:.\TemperatureCommManager.c ****     if((dataPacket == NULL) || (length != (MAX_PACKET_SIZE - 9)))
+ 189              		.loc 1 166 0
+ 190              		.cfi_startproc
+ 191              	.LVL13:
+ 192 0000 08B5     		push	{r3, lr}
+ 193              		.cfi_def_cfa_offset 8
+ 194              		.cfi_offset 3, -8
+ 195              		.cfi_offset 14, -4
+ 167:.\TemperatureCommManager.c ****         return FAILURE;
+ 196              		.loc 1 167 0
+ 197 0002 0028     		cmp	r0, #0
+ 198 0004 09D0     		beq	.L21
+ 167:.\TemperatureCommManager.c ****         return FAILURE;
+ 199              		.loc 1 167 0 is_stmt 0 discriminator 1
+ 200 0006 0D29     		cmp	r1, #13
+ 201 0008 09D1     		bne	.L22
+ 202 000a 0A1C     		mov	r2, r1
+ 203 000c 011C     		mov	r1, r0
+ 204              	.LVL14:
+ 170:.\TemperatureCommManager.c ****     
+ 205              		.loc 1 170 0 is_stmt 1
+ 206 000e 0548     		ldr	r0, .L23
+ 207              	.LVL15:
+ 208 0010 0430     		add	r0, r0, #4
+ 209 0012 FFF7FEFF 		bl	memcpy
+ 210              	.LVL16:
+ 172:.\TemperatureCommManager.c **** }
+ 211              		.loc 1 172 0
+ 212 0016 0020     		mov	r0, #0
+ 213 0018 02E0     		b	.L20
+ 214              	.LVL17:
+ 215              	.L21:
+ 168:.\TemperatureCommManager.c ****     
+ 216              		.loc 1 168 0
+ 217 001a 0120     		mov	r0, #1
+ 218              	.LVL18:
+ 219 001c 00E0     		b	.L20
+ 220              	.LVL19:
+ 221              	.L22:
+ 222 001e 0120     		mov	r0, #1
+ 223              	.LVL20:
+ 224              	.L20:
+ 173:.\TemperatureCommManager.c **** 
+ 225              		.loc 1 173 0
+ 226              		@ sp needed
+ 227 0020 08BD     		pop	{r3, pc}
+ 228              	.L24:
+ 229 0022 C046     		.align	2
+ 230              	.L23:
+ 231 0024 00000000 		.word	.LANCHOR0
+ 232              		.cfi_endproc
+ 233              	.LFE38:
+ 234              		.size	setLastDriverPacket, .-setLastDriverPacket
+ 235              		.section	.text.processAckTimeoutRoutine,"ax",%progbits
+ 236              		.align	2
+ 237              		.global	processAckTimeoutRoutine
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 15
+
+
+ 238              		.code	16
+ 239              		.thumb_func
+ 240              		.type	processAckTimeoutRoutine, %function
+ 241              	processAckTimeoutRoutine:
+ 242              	.LFB39:
+ 192:.\TemperatureCommManager.c ****     AckTimer_ClearInterrupt(AckTimer_INTR_MASK_TC);
+ 243              		.loc 1 192 0
+ 244              		.cfi_startproc
+ 245 0000 38B5     		push	{r3, r4, r5, lr}
+ 246              		.cfi_def_cfa_offset 16
+ 247              		.cfi_offset 3, -16
+ 248              		.cfi_offset 4, -12
+ 249              		.cfi_offset 5, -8
+ 250              		.cfi_offset 14, -4
+ 193:.\TemperatureCommManager.c ****     
+ 251              		.loc 1 193 0
+ 252 0002 0120     		mov	r0, #1
+ 253 0004 FFF7FEFF 		bl	AckTimer_ClearInterrupt
+ 254              	.LVL21:
+ 195:.\TemperatureCommManager.c ****     {
+ 255              		.loc 1 195 0
+ 256 0008 0B4B     		ldr	r3, .L28
+ 257 000a 5B8A     		ldrh	r3, [r3, #18]
+ 258 000c 1D2B     		cmp	r3, #29
+ 259 000e 03D8     		bhi	.L26
+ 199:.\TemperatureCommManager.c ****     }
+ 260              		.loc 1 199 0
+ 261 0010 0133     		add	r3, r3, #1
+ 262 0012 094A     		ldr	r2, .L28
+ 263 0014 5382     		strh	r3, [r2, #18]
+ 264 0016 0EE0     		b	.L25
+ 265              	.L26:
+ 203:.\TemperatureCommManager.c ****         //UART_LED_Control_Write(FALSE);
+ 266              		.loc 1 203 0
+ 267 0018 074C     		ldr	r4, .L28
+ 268 001a 0123     		mov	r3, #1
+ 269 001c 6370     		strb	r3, [r4, #1]
+ 205:.\TemperatureCommManager.c ****         timerCount = 0;
+ 270              		.loc 1 205 0
+ 271 001e FFF7FEFF 		bl	AckTimer_Stop
+ 272              	.LVL22:
+ 206:.\TemperatureCommManager.c ****         setDriverCount(lastDriverPacket[PAYLOAD_START_INDEX]);
+ 273              		.loc 1 206 0
+ 274 0022 0025     		mov	r5, #0
+ 275 0024 6582     		strh	r5, [r4, #18]
+ 207:.\TemperatureCommManager.c ****         //UART_Temperature_SpiUartPutArray(lastDriverPacket, MAX_PACKET_SIZE - 9);
+ 276              		.loc 1 207 0
+ 277 0026 A079     		ldrb	r0, [r4, #6]
+ 278 0028 FFF7FEFF 		bl	setDriverCount
+ 279              	.LVL23:
+ 209:.\TemperatureCommManager.c ****     }
+ 280              		.loc 1 209 0
+ 281 002c 6560     		str	r5, [r4, #4]
+ 282 002e A560     		str	r5, [r4, #8]
+ 283 0030 E560     		str	r5, [r4, #12]
+ 284 0032 0022     		mov	r2, #0
+ 285 0034 2274     		strb	r2, [r4, #16]
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 16
+
+
+ 286              	.L25:
+ 211:.\TemperatureCommManager.c **** 
+ 287              		.loc 1 211 0
+ 288              		@ sp needed
+ 289 0036 38BD     		pop	{r3, r4, r5, pc}
+ 290              	.L29:
+ 291              		.align	2
+ 292              	.L28:
+ 293 0038 00000000 		.word	.LANCHOR0
+ 294              		.cfi_endproc
+ 295              	.LFE39:
+ 296              		.size	processAckTimeoutRoutine, .-processAckTimeoutRoutine
+ 297              		.global	__aeabi_idivmod
+ 298              		.section	.text.processSamplingTimerRoutine,"ax",%progbits
+ 299              		.align	2
+ 300              		.global	processSamplingTimerRoutine
+ 301              		.code	16
+ 302              		.thumb_func
+ 303              		.type	processSamplingTimerRoutine, %function
+ 304              	processSamplingTimerRoutine:
+ 305              	.LFB40:
+ 230:.\TemperatureCommManager.c ****     static int16 ADC_Data[ADC_SAMPLE_COUNT] = {0, 0, 0, 0};
+ 306              		.loc 1 230 0
+ 307              		.cfi_startproc
+ 308 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+ 309              		.cfi_def_cfa_offset 20
+ 310              		.cfi_offset 4, -20
+ 311              		.cfi_offset 5, -16
+ 312              		.cfi_offset 6, -12
+ 313              		.cfi_offset 7, -8
+ 314              		.cfi_offset 14, -4
+ 315 0002 5746     		mov	r7, r10
+ 316 0004 4E46     		mov	r6, r9
+ 317 0006 4546     		mov	r5, r8
+ 318 0008 E0B4     		push	{r5, r6, r7}
+ 319              		.cfi_def_cfa_offset 32
+ 320              		.cfi_offset 8, -32
+ 321              		.cfi_offset 9, -28
+ 322              		.cfi_offset 10, -24
+ 323 000a 88B0     		sub	sp, sp, #32
+ 324              		.cfi_def_cfa_offset 64
+ 325              	.LVL24:
+ 240:.\TemperatureCommManager.c ****     
+ 326              		.loc 1 240 0
+ 327 000c 0120     		mov	r0, #1
+ 328 000e FFF7FEFF 		bl	SamplingTimer_ClearInterrupt
+ 329              	.LVL25:
+ 242:.\TemperatureCommManager.c ****     
+ 330              		.loc 1 242 0
+ 331 0012 494A     		ldr	r2, .L36
+ 332 0014 137D     		ldrb	r3, [r2, #20]
+ 333 0016 0133     		add	r3, r3, #1
+ 334 0018 DBB2     		uxtb	r3, r3
+ 335 001a 1375     		strb	r3, [r2, #20]
+ 244:.\TemperatureCommManager.c ****     {
+ 336              		.loc 1 244 0
+ 337 001c 032B     		cmp	r3, #3
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 17
+
+
+ 338 001e 04D9     		bls	.L31
+ 246:.\TemperatureCommManager.c ****         bReadyToSendNextBrightnessTimeoutPacket = TRUE;
+ 339              		.loc 1 246 0
+ 340 0020 131C     		mov	r3, r2
+ 341 0022 0022     		mov	r2, #0
+ 342 0024 1A75     		strb	r2, [r3, #20]
+ 247:.\TemperatureCommManager.c ****     }
+ 343              		.loc 1 247 0
+ 344 0026 0132     		add	r2, r2, #1
+ 345 0028 1A70     		strb	r2, [r3]
+ 346              	.L31:
+ 252:.\TemperatureCommManager.c ****     temperatureSample = ADC_Data[channelNumber];    
+ 347              		.loc 1 252 0
+ 348 002a 434D     		ldr	r5, .L36
+ 349 002c 2A1C     		mov	r2, r5
+ 350 002e 1832     		add	r2, r2, #24
+ 351 0030 0020     		mov	r0, #0
+ 352 0032 0021     		mov	r1, #0
+ 353 0034 0423     		mov	r3, #4
+ 354 0036 FFF7FEFF 		bl	getTemperatureSample
+ 355              	.LVL26:
+ 253:.\TemperatureCommManager.c ****     driverID = getDriverID();
+ 356              		.loc 1 253 0
+ 357 003a 2026     		mov	r6, #32
+ 358 003c AB5D     		ldrb	r3, [r5, r6]
+ 359 003e 5B00     		lsl	r3, r3, #1
+ 360 0040 EB18     		add	r3, r5, r3
+ 361 0042 1B8B     		ldrh	r3, [r3, #24]
+ 362 0044 9946     		mov	r9, r3
+ 363 0046 6A46     		mov	r2, sp
+ 364 0048 D380     		strh	r3, [r2, #6]
+ 365 004a D388     		ldrh	r3, [r2, #6]
+ 366 004c 9A46     		mov	r10, r3
+ 367              	.LVL27:
+ 254:.\TemperatureCommManager.c ****     
+ 368              		.loc 1 254 0
+ 369 004e FFF7FEFF 		bl	getDriverID
+ 370              	.LVL28:
+ 371 0052 041C     		mov	r4, r0
+ 372 0054 8046     		mov	r8, r0
+ 373              	.LVL29:
+ 257:.\TemperatureCommManager.c ****     packet[HEADER_START_INDEX] = PacketList[channelNumber + 2].HEADER_BYTE;
+ 374              		.loc 1 257 0
+ 375 0056 0023     		mov	r3, #0
+ 376 0058 0293     		str	r3, [sp, #8]
+ 377 005a 0393     		str	r3, [sp, #12]
+ 378 005c 0493     		str	r3, [sp, #16]
+ 379 005e 0593     		str	r3, [sp, #20]
+ 380 0060 0693     		str	r3, [sp, #24]
+ 381 0062 02AA     		add	r2, sp, #8
+ 382 0064 9382     		strh	r3, [r2, #20]
+ 258:.\TemperatureCommManager.c ****     packet[HEADER_START_INDEX + 1] = PacketList[channelNumber + 2].PACKET_TYPE;
+ 383              		.loc 1 258 0
+ 384 0066 AE5D     		ldrb	r6, [r5, r6]
+ 385 0068 B21C     		add	r2, r6, #2
+ 386 006a 3449     		ldr	r1, .L36+4
+ 387 006c 9300     		lsl	r3, r2, #2
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 18
+
+
+ 388 006e 9B18     		add	r3, r3, r2
+ 389 0070 5A5C     		ldrb	r2, [r3, r1]
+ 390 0072 02A8     		add	r0, sp, #8
+ 391 0074 0270     		strb	r2, [r0]
+ 259:.\TemperatureCommManager.c ****     packet[PAYLOAD_START_INDEX + PacketList[channelNumber + 2].PAYLOAD_SIZE] 
+ 392              		.loc 1 259 0
+ 393 0076 CB18     		add	r3, r1, r3
+ 394 0078 5A78     		ldrb	r2, [r3, #1]
+ 395 007a 4270     		strb	r2, [r0, #1]
+ 260:.\TemperatureCommManager.c ****         = PacketList[channelNumber + 2].EOP_CARRIAGE_RETURN;
+ 396              		.loc 1 260 0
+ 397 007c 9A78     		ldrb	r2, [r3, #2]
+ 398 007e 911C     		add	r1, r2, #2
+ 261:.\TemperatureCommManager.c ****     packet[PAYLOAD_START_INDEX + PacketList[channelNumber + 2].PAYLOAD_SIZE + 1]
+ 399              		.loc 1 261 0
+ 400 0080 D878     		ldrb	r0, [r3, #3]
+ 401 0082 02AF     		add	r7, sp, #8
+ 402 0084 7854     		strb	r0, [r7, r1]
+ 262:.\TemperatureCommManager.c ****         = PacketList[channelNumber + 2].EOP_LINE_FEED;
+ 403              		.loc 1 262 0
+ 404 0086 0332     		add	r2, r2, #3
+ 263:.\TemperatureCommManager.c ****         
+ 405              		.loc 1 263 0
+ 406 0088 1B79     		ldrb	r3, [r3, #4]
+ 407 008a BB54     		strb	r3, [r7, r2]
+ 265:.\TemperatureCommManager.c ****         MAX_PAYLOAD_BYTE_COUNT);
+ 408              		.loc 1 265 0
+ 409 008c F100     		lsl	r1, r6, #3
+ 410 008e 8919     		add	r1, r1, r6
+ 411 0090 4900     		lsl	r1, r1, #1
+ 412 0092 6918     		add	r1, r5, r1
+ 413 0094 2431     		add	r1, r1, #36
+ 414 0096 B81C     		add	r0, r7, #2
+ 415 0098 1222     		mov	r2, #18
+ 416 009a FFF7FEFF 		bl	memcpy
+ 417              	.LVL30:
+ 267:.\TemperatureCommManager.c ****     packet[PAYLOAD_START_INDEX + driverID * 2 + 1] = temperatureSample & 0xFF;
+ 418              		.loc 1 267 0
+ 419 009e 0134     		add	r4, r4, #1
+ 420              	.LVL31:
+ 421 00a0 6400     		lsl	r4, r4, #1
+ 422 00a2 5346     		mov	r3, r10
+ 423 00a4 1F0A     		lsr	r7, r3, #8
+ 424 00a6 02AB     		add	r3, sp, #8
+ 425 00a8 1F55     		strb	r7, [r3, r4]
+ 268:.\TemperatureCommManager.c ****     
+ 426              		.loc 1 268 0
+ 427 00aa 0134     		add	r4, r4, #1
+ 428 00ac 4A46     		mov	r2, r9
+ 429 00ae 1A55     		strb	r2, [r3, r4]
+ 270:.\TemperatureCommManager.c ****     {   //Add max temperature to packet if this is the head module
+ 430              		.loc 1 270 0
+ 431 00b0 4346     		mov	r3, r8
+ 432 00b2 012B     		cmp	r3, #1
+ 433 00b4 06D1     		bne	.L32
+ 273:.\TemperatureCommManager.c ****         packet[PAYLOAD_START_INDEX] = (temperatureSample >> 8) & 0xFF;
+ 434              		.loc 1 273 0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 19
+
+
+ 435 00b6 301C     		mov	r0, r6
+ 436 00b8 FFF7FEFF 		bl	getMaxTemperature
+ 437              	.LVL32:
+ 274:.\TemperatureCommManager.c ****         packet[PAYLOAD_START_INDEX + 1] = temperatureSample & 0xFF;
+ 438              		.loc 1 274 0
+ 439 00bc 030A     		lsr	r3, r0, #8
+ 440 00be 02AA     		add	r2, sp, #8
+ 441 00c0 9370     		strb	r3, [r2, #2]
+ 275:.\TemperatureCommManager.c ****     }
+ 442              		.loc 1 275 0
+ 443 00c2 D070     		strb	r0, [r2, #3]
+ 444              	.LVL33:
+ 445              	.L32:
+ 281:.\TemperatureCommManager.c ****     if(sendTempPacketBack>2)
+ 446              		.loc 1 281 0
+ 447 00c4 1C49     		ldr	r1, .L36
+ 448 00c6 5A22     		mov	r2, #90
+ 449 00c8 8B5C     		ldrb	r3, [r1, r2]
+ 450 00ca 0133     		add	r3, r3, #1
+ 451 00cc DBB2     		uxtb	r3, r3
+ 452 00ce 8B54     		strb	r3, [r1, r2]
+ 282:.\TemperatureCommManager.c ****     {
+ 453              		.loc 1 282 0
+ 454 00d0 022B     		cmp	r3, #2
+ 455 00d2 03D9     		bls	.L33
+ 284:.\TemperatureCommManager.c ****         //UART_Temperature_SpiUartPutArray(packet, MAX_PACKET_SIZE);
+ 456              		.loc 1 284 0
+ 457 00d4 0021     		mov	r1, #0
+ 458 00d6 5A23     		mov	r3, #90
+ 459 00d8 174A     		ldr	r2, .L36
+ 460 00da D154     		strb	r1, [r2, r3]
+ 461              	.L33:
+ 287:.\TemperatureCommManager.c ****         getHighestTemperature(&packet[PAYLOAD_START_INDEX + 2], MAX_PAYLOAD_BYTE_COUNT);
+ 462              		.loc 1 287 0
+ 463 00dc 164C     		ldr	r4, .L36
+ 464 00de 2023     		mov	r3, #32
+ 465 00e0 E55C     		ldrb	r5, [r4, r3]
+ 288:.\TemperatureCommManager.c ****     
+ 466              		.loc 1 288 0
+ 467 00e2 03A8     		add	r0, sp, #12
+ 468 00e4 1221     		mov	r1, #18
+ 469 00e6 FFF7FEFF 		bl	getHighestTemperature
+ 470              	.LVL34:
+ 287:.\TemperatureCommManager.c ****         getHighestTemperature(&packet[PAYLOAD_START_INDEX + 2], MAX_PAYLOAD_BYTE_COUNT);
+ 471              		.loc 1 287 0
+ 472 00ea 6B00     		lsl	r3, r5, #1
+ 473 00ec E318     		add	r3, r4, r3
+ 474 00ee 5C22     		mov	r2, #92
+ 475 00f0 9852     		strh	r0, [r3, r2]
+ 290:.\TemperatureCommManager.c ****     {   //Adjust brightness based on temp and send new brightness
+ 476              		.loc 1 290 0
+ 477 00f2 4346     		mov	r3, r8
+ 478 00f4 012B     		cmp	r3, #1
+ 479 00f6 0AD1     		bne	.L34
+ 290:.\TemperatureCommManager.c ****     {   //Adjust brightness based on temp and send new brightness
+ 480              		.loc 1 290 0 is_stmt 0 discriminator 1
+ 481 00f8 012D     		cmp	r5, #1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 20
+
+
+ 482 00fa 08D1     		bne	.L34
+ 292:.\TemperatureCommManager.c ****         temporaryPacket[PAYLOAD_START_INDEX] = getNewMaxBrightness();
+ 483              		.loc 1 292 0 is_stmt 1
+ 484 00fc 201C     		mov	r0, r4
+ 485 00fe 5C30     		add	r0, r0, #92
+ 486 0100 0321     		mov	r1, #3
+ 487 0102 FFF7FEFF 		bl	regulateBrightness
+ 488              	.LVL35:
+ 293:.\TemperatureCommManager.c ****         //UART_Temperature_SpiUartPutArray(temporaryPacket, 5);
+ 489              		.loc 1 293 0
+ 490 0106 FFF7FEFF 		bl	getNewMaxBrightness
+ 491              	.LVL36:
+ 492 010a 0D4B     		ldr	r3, .L36+8
+ 493 010c 9870     		strb	r0, [r3, #2]
+ 494              	.L34:
+ 298:.\TemperatureCommManager.c ****         ADC_SAR_Seq_EnableInjection();
+ 495              		.loc 1 298 0
+ 496 010e 2023     		mov	r3, #32
+ 497 0110 094A     		ldr	r2, .L36
+ 498 0112 D35C     		ldrb	r3, [r2, r3]
+ 499 0114 032B     		cmp	r3, #3
+ 500 0116 01D1     		bne	.L35
+ 299:.\TemperatureCommManager.c ****     
+ 501              		.loc 1 299 0
+ 502 0118 FFF7FEFF 		bl	ADC_SAR_Seq_EnableInjection
+ 503              	.LVL37:
+ 504              	.L35:
+ 301:.\TemperatureCommManager.c ****     
+ 505              		.loc 1 301 0
+ 506 011c 064D     		ldr	r5, .L36
+ 507 011e 2024     		mov	r4, #32
+ 508 0120 285D     		ldrb	r0, [r5, r4]
+ 509 0122 0130     		add	r0, r0, #1
+ 510 0124 0321     		mov	r1, #3
+ 511 0126 FFF7FEFF 		bl	__aeabi_idivmod
+ 512              	.LVL38:
+ 513 012a 2955     		strb	r1, [r5, r4]
+ 303:.\TemperatureCommManager.c **** 
+ 514              		.loc 1 303 0
+ 515 012c 08B0     		add	sp, sp, #32
+ 516              		@ sp needed
+ 517 012e 1CBC     		pop	{r2, r3, r4}
+ 518 0130 9046     		mov	r8, r2
+ 519 0132 9946     		mov	r9, r3
+ 520 0134 A246     		mov	r10, r4
+ 521 0136 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 522              	.L37:
+ 523              		.align	2
+ 524              	.L36:
+ 525 0138 00000000 		.word	.LANCHOR0
+ 526 013c 00000000 		.word	.LANCHOR1
+ 527 0140 00000000 		.word	.LANCHOR2
+ 528              		.cfi_endproc
+ 529              	.LFE40:
+ 530              		.size	processSamplingTimerRoutine, .-processSamplingTimerRoutine
+ 531              		.global	sendTempPacketBack
+ 532              		.global	readyToSendThresholdCounter
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 21
+
+
+ 533              		.global	bReadyToSendNextBrightnessTimeoutPacket
+ 534              		.section	.rodata
+ 535              		.align	2
+ 536              		.set	.LANCHOR1,. + 0
+ 537              		.type	PacketList, %object
+ 538              		.size	PacketList, 30
+ 539              	PacketList:
+ 540 0000 7E       		.byte	126
+ 541 0001 43       		.byte	67
+ 542 0002 09       		.byte	9
+ 543 0003 0D       		.byte	13
+ 544 0004 0A       		.byte	10
+ 545 0005 7E       		.byte	126
+ 546 0006 41       		.byte	65
+ 547 0007 09       		.byte	9
+ 548 0008 0D       		.byte	13
+ 549 0009 0A       		.byte	10
+ 550 000a 7E       		.byte	126
+ 551 000b 54       		.byte	84
+ 552 000c 12       		.byte	18
+ 553 000d 0D       		.byte	13
+ 554 000e 0A       		.byte	10
+ 555 000f 7E       		.byte	126
+ 556 0010 55       		.byte	85
+ 557 0011 12       		.byte	18
+ 558 0012 0D       		.byte	13
+ 559 0013 0A       		.byte	10
+ 560 0014 7E       		.byte	126
+ 561 0015 57       		.byte	87
+ 562 0016 12       		.byte	18
+ 563 0017 0D       		.byte	13
+ 564 0018 0A       		.byte	10
+ 565 0019 7E       		.byte	126
+ 566 001a 56       		.byte	86
+ 567 001b 12       		.byte	18
+ 568 001c 0D       		.byte	13
+ 569 001d 0A       		.byte	10
+ 570 001e 0000     		.data
+ 571              		.align	2
+ 572              		.set	.LANCHOR2,. + 0
+ 573              		.type	temporaryPacket.6332, %object
+ 574              		.size	temporaryPacket.6332, 5
+ 575              	temporaryPacket.6332:
+ 576 0000 7E       		.byte	126
+ 577 0001 42       		.byte	66
+ 578 0002 00       		.byte	0
+ 579 0003 0D       		.byte	13
+ 580 0004 0A       		.byte	10
+ 581 0005 000000   		.bss
+ 582              		.align	2
+ 583              		.set	.LANCHOR0,. + 0
+ 584              		.type	bReadyToSendNextBrightnessTimeoutPacket, %object
+ 585              		.size	bReadyToSendNextBrightnessTimeoutPacket, 1
+ 586              	bReadyToSendNextBrightnessTimeoutPacket:
+ 587 0000 00       		.space	1
+ 588              		.type	bLastDriverInChain, %object
+ 589              		.size	bLastDriverInChain, 1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 22
+
+
+ 590              	bLastDriverInChain:
+ 591 0001 00       		.space	1
+ 592 0002 0000     		.space	2
+ 593              		.type	lastDriverPacket, %object
+ 594              		.size	lastDriverPacket, 13
+ 595              	lastDriverPacket:
+ 596 0004 00000000 		.space	13
+ 596      00000000 
+ 596      00000000 
+ 596      00
+ 597 0011 00       		.space	1
+ 598              		.type	timerCount, %object
+ 599              		.size	timerCount, 2
+ 600              	timerCount:
+ 601 0012 0000     		.space	2
+ 602              		.type	readyToSendThresholdCounter, %object
+ 603              		.size	readyToSendThresholdCounter, 1
+ 604              	readyToSendThresholdCounter:
+ 605 0014 00       		.space	1
+ 606 0015 000000   		.space	3
+ 607              		.type	ADC_Data.6329, %object
+ 608              		.size	ADC_Data.6329, 8
+ 609              	ADC_Data.6329:
+ 610 0018 00000000 		.space	8
+ 610      00000000 
+ 611              		.type	channelNumber.6331, %object
+ 612              		.size	channelNumber.6331, 1
+ 613              	channelNumber.6331:
+ 614 0020 00       		.space	1
+ 615 0021 000000   		.space	3
+ 616              		.type	temperaturePayload, %object
+ 617              		.size	temperaturePayload, 54
+ 618              	temperaturePayload:
+ 619 0024 00000000 		.space	54
+ 619      00000000 
+ 619      00000000 
+ 619      00000000 
+ 619      00000000 
+ 620              		.type	sendTempPacketBack, %object
+ 621              		.size	sendTempPacketBack, 1
+ 622              	sendTempPacketBack:
+ 623 005a 00       		.space	1
+ 624 005b 00       		.space	1
+ 625              		.type	HighestTemperatures.6330, %object
+ 626              		.size	HighestTemperatures.6330, 6
+ 627              	HighestTemperatures.6330:
+ 628 005c 00000000 		.space	6
+ 628      0000
+ 629 0062 0000     		.text
+ 630              	.Letext0:
+ 631              		.file 2 "Generated_Source\\PSoC4/cytypes.h"
+ 632              		.file 3 "Generated_Source\\PSoC4/AckTimer.h"
+ 633              		.file 4 "Generated_Source\\PSoC4/SamplingTimer.h"
+ 634              		.file 5 ".\\DriverControl.h"
+ 635              		.file 6 "Generated_Source\\PSoC4/ADC_SAR_Seq.h"
+ 636              		.section	.debug_info,"",%progbits
+ 637              	.Ldebug_info0:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 23
+
+
+ 638 0000 AC050000 		.4byte	0x5ac
+ 639 0004 0400     		.2byte	0x4
+ 640 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 641 000a 04       		.byte	0x4
+ 642 000b 01       		.uleb128 0x1
+ 643 000c E0010000 		.4byte	.LASF64
+ 644 0010 01       		.byte	0x1
+ 645 0011 B2020000 		.4byte	.LASF65
+ 646 0015 6F000000 		.4byte	.LASF66
+ 647 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 648 001d 00000000 		.4byte	0
+ 649 0021 00000000 		.4byte	.Ldebug_line0
+ 650 0025 02       		.uleb128 0x2
+ 651 0026 01       		.byte	0x1
+ 652 0027 06       		.byte	0x6
+ 653 0028 57010000 		.4byte	.LASF0
+ 654 002c 02       		.uleb128 0x2
+ 655 002d 01       		.byte	0x1
+ 656 002e 08       		.byte	0x8
+ 657 002f D2010000 		.4byte	.LASF1
+ 658 0033 02       		.uleb128 0x2
+ 659 0034 02       		.byte	0x2
+ 660 0035 05       		.byte	0x5
+ 661 0036 47000000 		.4byte	.LASF2
+ 662 003a 02       		.uleb128 0x2
+ 663 003b 02       		.byte	0x2
+ 664 003c 07       		.byte	0x7
+ 665 003d BF030000 		.4byte	.LASF3
+ 666 0041 02       		.uleb128 0x2
+ 667 0042 04       		.byte	0x4
+ 668 0043 05       		.byte	0x5
+ 669 0044 9C010000 		.4byte	.LASF4
+ 670 0048 02       		.uleb128 0x2
+ 671 0049 04       		.byte	0x4
+ 672 004a 07       		.byte	0x7
+ 673 004b 5B040000 		.4byte	.LASF5
+ 674 004f 02       		.uleb128 0x2
+ 675 0050 08       		.byte	0x8
+ 676 0051 05       		.byte	0x5
+ 677 0052 69010000 		.4byte	.LASF6
+ 678 0056 02       		.uleb128 0x2
+ 679 0057 08       		.byte	0x8
+ 680 0058 07       		.byte	0x7
+ 681 0059 4F030000 		.4byte	.LASF7
+ 682 005d 03       		.uleb128 0x3
+ 683 005e 04       		.byte	0x4
+ 684 005f 05       		.byte	0x5
+ 685 0060 696E7400 		.ascii	"int\000"
+ 686 0064 02       		.uleb128 0x2
+ 687 0065 04       		.byte	0x4
+ 688 0066 07       		.byte	0x7
+ 689 0067 66030000 		.4byte	.LASF8
+ 690 006b 04       		.uleb128 0x4
+ 691 006c 22010000 		.4byte	.LASF9
+ 692 0070 02       		.byte	0x2
+ 693 0071 3801     		.2byte	0x138
+ 694 0073 2C000000 		.4byte	0x2c
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 24
+
+
+ 695 0077 04       		.uleb128 0x4
+ 696 0078 E8000000 		.4byte	.LASF10
+ 697 007c 02       		.byte	0x2
+ 698 007d 3901     		.2byte	0x139
+ 699 007f 3A000000 		.4byte	0x3a
+ 700 0083 04       		.uleb128 0x4
+ 701 0084 54040000 		.4byte	.LASF11
+ 702 0088 02       		.byte	0x2
+ 703 0089 3A01     		.2byte	0x13a
+ 704 008b 48000000 		.4byte	0x48
+ 705 008f 04       		.uleb128 0x4
+ 706 0090 1C010000 		.4byte	.LASF12
+ 707 0094 02       		.byte	0x2
+ 708 0095 3C01     		.2byte	0x13c
+ 709 0097 33000000 		.4byte	0x33
+ 710 009b 02       		.uleb128 0x2
+ 711 009c 04       		.byte	0x4
+ 712 009d 04       		.byte	0x4
+ 713 009e 63010000 		.4byte	.LASF13
+ 714 00a2 02       		.uleb128 0x2
+ 715 00a3 08       		.byte	0x8
+ 716 00a4 04       		.byte	0x4
+ 717 00a5 6D040000 		.4byte	.LASF14
+ 718 00a9 02       		.uleb128 0x2
+ 719 00aa 01       		.byte	0x1
+ 720 00ab 08       		.byte	0x8
+ 721 00ac 0E040000 		.4byte	.LASF15
+ 722 00b0 02       		.uleb128 0x2
+ 723 00b1 04       		.byte	0x4
+ 724 00b2 07       		.byte	0x7
+ 725 00b3 51000000 		.4byte	.LASF16
+ 726 00b7 05       		.uleb128 0x5
+ 727 00b8 04       		.byte	0x4
+ 728 00b9 06       		.uleb128 0x6
+ 729 00ba 04       		.byte	0x4
+ 730 00bb 6B000000 		.4byte	0x6b
+ 731 00bf 07       		.uleb128 0x7
+ 732 00c0 D8040000 		.4byte	.LASF67
+ 733 00c4 01       		.byte	0x1
+ 734 00c5 05       		.byte	0x5
+ 735 00c6 17       		.byte	0x17
+ 736 00c7 EA000000 		.4byte	0xea
+ 737 00cb 08       		.uleb128 0x8
+ 738 00cc 4C454400 		.ascii	"LED\000"
+ 739 00d0 00       		.sleb128 0
+ 740 00d1 09       		.uleb128 0x9
+ 741 00d2 48040000 		.4byte	.LASF17
+ 742 00d6 01       		.sleb128 1
+ 743 00d7 09       		.uleb128 0x9
+ 744 00d8 D2030000 		.4byte	.LASF18
+ 745 00dc 02       		.sleb128 2
+ 746 00dd 09       		.uleb128 0x9
+ 747 00de 19050000 		.4byte	.LASF19
+ 748 00e2 03       		.sleb128 3
+ 749 00e3 09       		.uleb128 0x9
+ 750 00e4 B9010000 		.4byte	.LASF20
+ 751 00e8 04       		.sleb128 4
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 25
+
+
+ 752 00e9 00       		.byte	0
+ 753 00ea 0A       		.uleb128 0xa
+ 754 00eb 05       		.byte	0x5
+ 755 00ec 01       		.byte	0x1
+ 756 00ed 28       		.byte	0x28
+ 757 00ee 2F010000 		.4byte	0x12f
+ 758 00f2 0B       		.uleb128 0xb
+ 759 00f3 AC040000 		.4byte	.LASF21
+ 760 00f7 01       		.byte	0x1
+ 761 00f8 2A       		.byte	0x2a
+ 762 00f9 2F010000 		.4byte	0x12f
+ 763 00fd 00       		.byte	0
+ 764 00fe 0B       		.uleb128 0xb
+ 765 00ff E8020000 		.4byte	.LASF22
+ 766 0103 01       		.byte	0x1
+ 767 0104 2B       		.byte	0x2b
+ 768 0105 2F010000 		.4byte	0x12f
+ 769 0109 01       		.byte	0x1
+ 770 010a 0B       		.uleb128 0xb
+ 771 010b CB040000 		.4byte	.LASF23
+ 772 010f 01       		.byte	0x1
+ 773 0110 2C       		.byte	0x2c
+ 774 0111 2F010000 		.4byte	0x12f
+ 775 0115 02       		.byte	0x2
+ 776 0116 0B       		.uleb128 0xb
+ 777 0117 26050000 		.4byte	.LASF24
+ 778 011b 01       		.byte	0x1
+ 779 011c 2D       		.byte	0x2d
+ 780 011d 2F010000 		.4byte	0x12f
+ 781 0121 03       		.byte	0x3
+ 782 0122 0B       		.uleb128 0xb
+ 783 0123 41030000 		.4byte	.LASF25
+ 784 0127 01       		.byte	0x1
+ 785 0128 2E       		.byte	0x2e
+ 786 0129 2F010000 		.4byte	0x12f
+ 787 012d 04       		.byte	0x4
+ 788 012e 00       		.byte	0
+ 789 012f 0C       		.uleb128 0xc
+ 790 0130 6B000000 		.4byte	0x6b
+ 791 0134 0D       		.uleb128 0xd
+ 792 0135 E1020000 		.4byte	.LASF26
+ 793 0139 01       		.byte	0x1
+ 794 013a 2F       		.byte	0x2f
+ 795 013b EA000000 		.4byte	0xea
+ 796 013f 0E       		.uleb128 0xe
+ 797 0140 95020000 		.4byte	.LASF68
+ 798 0144 01       		.byte	0x1
+ 799 0145 0802     		.2byte	0x208
+ 800 0147 8F000000 		.4byte	0x8f
+ 801 014b 00000000 		.4byte	.LFB45
+ 802 014f 3C000000 		.4byte	.LFE45-.LFB45
+ 803 0153 01       		.uleb128 0x1
+ 804 0154 9C       		.byte	0x9c
+ 805 0155 AA010000 		.4byte	0x1aa
+ 806 0159 0F       		.uleb128 0xf
+ 807 015a 50010000 		.4byte	.LASF27
+ 808 015e 01       		.byte	0x1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 26
+
+
+ 809 015f 0802     		.2byte	0x208
+ 810 0161 B9000000 		.4byte	0xb9
+ 811 0165 00000000 		.4byte	.LLST0
+ 812 0169 0F       		.uleb128 0xf
+ 813 016a AB020000 		.4byte	.LASF28
+ 814 016e 01       		.byte	0x1
+ 815 016f 0802     		.2byte	0x208
+ 816 0171 6B000000 		.4byte	0x6b
+ 817 0175 53000000 		.4byte	.LLST1
+ 818 0179 10       		.uleb128 0x10
+ 819 017a 35040000 		.4byte	.LASF29
+ 820 017e 01       		.byte	0x1
+ 821 017f 0A02     		.2byte	0x20a
+ 822 0181 8F000000 		.4byte	0x8f
+ 823 0185 8D000000 		.4byte	.LLST2
+ 824 0189 10       		.uleb128 0x10
+ 825 018a B8040000 		.4byte	.LASF30
+ 826 018e 01       		.byte	0x1
+ 827 018f 0B02     		.2byte	0x20b
+ 828 0191 8F000000 		.4byte	0x8f
+ 829 0195 B8000000 		.4byte	.LLST3
+ 830 0199 10       		.uleb128 0x10
+ 831 019a F8040000 		.4byte	.LASF31
+ 832 019e 01       		.byte	0x1
+ 833 019f 0C02     		.2byte	0x20c
+ 834 01a1 6B000000 		.4byte	0x6b
+ 835 01a5 E3000000 		.4byte	.LLST4
+ 836 01a9 00       		.byte	0
+ 837 01aa 11       		.uleb128 0x11
+ 838 01ab 13040000 		.4byte	.LASF32
+ 839 01af 01       		.byte	0x1
+ 840 01b0 57       		.byte	0x57
+ 841 01b1 6B000000 		.4byte	0x6b
+ 842 01b5 00000000 		.4byte	.LFB34
+ 843 01b9 0C000000 		.4byte	.LFE34-.LFB34
+ 844 01bd 01       		.uleb128 0x1
+ 845 01be 9C       		.byte	0x9c
+ 846 01bf 12       		.uleb128 0x12
+ 847 01c0 6E020000 		.4byte	.LASF34
+ 848 01c4 01       		.byte	0x1
+ 849 01c5 5C       		.byte	0x5c
+ 850 01c6 00000000 		.4byte	.LFB35
+ 851 01ca 0C000000 		.4byte	.LFE35-.LFB35
+ 852 01ce 01       		.uleb128 0x1
+ 853 01cf 9C       		.byte	0x9c
+ 854 01d0 11       		.uleb128 0x11
+ 855 01d1 00000000 		.4byte	.LASF33
+ 856 01d5 01       		.byte	0x1
+ 857 01d6 70       		.byte	0x70
+ 858 01d7 6B000000 		.4byte	0x6b
+ 859 01db 00000000 		.4byte	.LFB36
+ 860 01df 0C000000 		.4byte	.LFE36-.LFB36
+ 861 01e3 01       		.uleb128 0x1
+ 862 01e4 9C       		.byte	0x9c
+ 863 01e5 12       		.uleb128 0x12
+ 864 01e6 1B030000 		.4byte	.LASF35
+ 865 01ea 01       		.byte	0x1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 27
+
+
+ 866 01eb 84       		.byte	0x84
+ 867 01ec 00000000 		.4byte	.LFB37
+ 868 01f0 02000000 		.4byte	.LFE37-.LFB37
+ 869 01f4 01       		.uleb128 0x1
+ 870 01f5 9C       		.byte	0x9c
+ 871 01f6 13       		.uleb128 0x13
+ 872 01f7 8F040000 		.4byte	.LASF69
+ 873 01fb 01       		.byte	0x1
+ 874 01fc A5       		.byte	0xa5
+ 875 01fd 6B000000 		.4byte	0x6b
+ 876 0201 00000000 		.4byte	.LFB38
+ 877 0205 28000000 		.4byte	.LFE38-.LFB38
+ 878 0209 01       		.uleb128 0x1
+ 879 020a 9C       		.byte	0x9c
+ 880 020b 48020000 		.4byte	0x248
+ 881 020f 14       		.uleb128 0x14
+ 882 0210 74040000 		.4byte	.LASF36
+ 883 0214 01       		.byte	0x1
+ 884 0215 A5       		.byte	0xa5
+ 885 0216 B9000000 		.4byte	0xb9
+ 886 021a 19010000 		.4byte	.LLST5
+ 887 021e 14       		.uleb128 0x14
+ 888 021f AB020000 		.4byte	.LASF28
+ 889 0223 01       		.byte	0x1
+ 890 0224 A5       		.byte	0xa5
+ 891 0225 6B000000 		.4byte	0x6b
+ 892 0229 77010000 		.4byte	.LLST6
+ 893 022d 15       		.uleb128 0x15
+ 894 022e 16000000 		.4byte	.LVL16
+ 895 0232 D4040000 		.4byte	0x4d4
+ 896 0236 16       		.uleb128 0x16
+ 897 0237 01       		.uleb128 0x1
+ 898 0238 51       		.byte	0x51
+ 899 0239 03       		.uleb128 0x3
+ 900 023a F3       		.byte	0xf3
+ 901 023b 01       		.uleb128 0x1
+ 902 023c 50       		.byte	0x50
+ 903 023d 16       		.uleb128 0x16
+ 904 023e 01       		.uleb128 0x1
+ 905 023f 50       		.byte	0x50
+ 906 0240 05       		.uleb128 0x5
+ 907 0241 03       		.byte	0x3
+ 908 0242 04000000 		.4byte	.LANCHOR0+4
+ 909 0246 00       		.byte	0
+ 910 0247 00       		.byte	0
+ 911 0248 17       		.uleb128 0x17
+ 912 0249 02030000 		.4byte	.LASF37
+ 913 024d 01       		.byte	0x1
+ 914 024e BF       		.byte	0xbf
+ 915 024f 00000000 		.4byte	.LFB39
+ 916 0253 3C000000 		.4byte	.LFE39-.LFB39
+ 917 0257 01       		.uleb128 0x1
+ 918 0258 9C       		.byte	0x9c
+ 919 0259 83020000 		.4byte	0x283
+ 920 025d 18       		.uleb128 0x18
+ 921 025e 08000000 		.4byte	.LVL21
+ 922 0262 F8040000 		.4byte	0x4f8
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 28
+
+
+ 923 0266 70020000 		.4byte	0x270
+ 924 026a 16       		.uleb128 0x16
+ 925 026b 01       		.uleb128 0x1
+ 926 026c 50       		.byte	0x50
+ 927 026d 01       		.uleb128 0x1
+ 928 026e 31       		.byte	0x31
+ 929 026f 00       		.byte	0
+ 930 0270 19       		.uleb128 0x19
+ 931 0271 22000000 		.4byte	.LVL22
+ 932 0275 0A050000 		.4byte	0x50a
+ 933 0279 19       		.uleb128 0x19
+ 934 027a 2C000000 		.4byte	.LVL23
+ 935 027e 12050000 		.4byte	0x512
+ 936 0282 00       		.byte	0
+ 937 0283 1A       		.uleb128 0x1a
+ 938 0284 00010000 		.4byte	.LASF38
+ 939 0288 01       		.byte	0x1
+ 940 0289 E5       		.byte	0xe5
+ 941 028a 00000000 		.4byte	.LFB40
+ 942 028e 44010000 		.4byte	.LFE40-.LFB40
+ 943 0292 01       		.uleb128 0x1
+ 944 0293 9C       		.byte	0x9c
+ 945 0294 CC030000 		.4byte	0x3cc
+ 946 0298 1B       		.uleb128 0x1b
+ 947 0299 20000000 		.4byte	.LASF39
+ 948 029d 01       		.byte	0x1
+ 949 029e E7       		.byte	0xe7
+ 950 029f CC030000 		.4byte	0x3cc
+ 951 02a3 05       		.uleb128 0x5
+ 952 02a4 03       		.byte	0x3
+ 953 02a5 18000000 		.4byte	ADC_Data.6329
+ 954 02a9 1B       		.uleb128 0x1b
+ 955 02aa A5010000 		.4byte	.LASF40
+ 956 02ae 01       		.byte	0x1
+ 957 02af E8       		.byte	0xe8
+ 958 02b0 DC030000 		.4byte	0x3dc
+ 959 02b4 05       		.uleb128 0x5
+ 960 02b5 03       		.byte	0x3
+ 961 02b6 5C000000 		.4byte	HighestTemperatures.6330
+ 962 02ba 1B       		.uleb128 0x1b
+ 963 02bb F4020000 		.4byte	.LASF41
+ 964 02bf 01       		.byte	0x1
+ 965 02c0 E9       		.byte	0xe9
+ 966 02c1 BF000000 		.4byte	0xbf
+ 967 02c5 05       		.uleb128 0x5
+ 968 02c6 03       		.byte	0x3
+ 969 02c7 20000000 		.4byte	channelNumber.6331
+ 970 02cb 1B       		.uleb128 0x1b
+ 971 02cc 7F040000 		.4byte	.LASF42
+ 972 02d0 01       		.byte	0x1
+ 973 02d1 EA       		.byte	0xea
+ 974 02d2 EC030000 		.4byte	0x3ec
+ 975 02d6 05       		.uleb128 0x5
+ 976 02d7 03       		.byte	0x3
+ 977 02d8 00000000 		.4byte	temporaryPacket.6332
+ 978 02dc 1B       		.uleb128 0x1b
+ 979 02dd 50010000 		.4byte	.LASF27
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 29
+
+
+ 980 02e1 01       		.byte	0x1
+ 981 02e2 EC       		.byte	0xec
+ 982 02e3 FC030000 		.4byte	0x3fc
+ 983 02e7 02       		.uleb128 0x2
+ 984 02e8 91       		.byte	0x91
+ 985 02e9 48       		.sleb128 -56
+ 986 02ea 1C       		.uleb128 0x1c
+ 987 02eb A3040000 		.4byte	.LASF43
+ 988 02ef 01       		.byte	0x1
+ 989 02f0 ED       		.byte	0xed
+ 990 02f1 6B000000 		.4byte	0x6b
+ 991 02f5 B1010000 		.4byte	.LLST7
+ 992 02f9 1C       		.uleb128 0x1c
+ 993 02fa 29000000 		.4byte	.LASF44
+ 994 02fe 01       		.byte	0x1
+ 995 02ff EE       		.byte	0xee
+ 996 0300 77000000 		.4byte	0x77
+ 997 0304 D0010000 		.4byte	.LLST8
+ 998 0308 18       		.uleb128 0x18
+ 999 0309 12000000 		.4byte	.LVL25
+ 1000 030d 27050000 		.4byte	0x527
+ 1001 0311 1B030000 		.4byte	0x31b
+ 1002 0315 16       		.uleb128 0x16
+ 1003 0316 01       		.uleb128 0x1
+ 1004 0317 50       		.byte	0x50
+ 1005 0318 01       		.uleb128 0x1
+ 1006 0319 31       		.byte	0x31
+ 1007 031a 00       		.byte	0
+ 1008 031b 18       		.uleb128 0x18
+ 1009 031c 3A000000 		.4byte	.LVL26
+ 1010 0320 39050000 		.4byte	0x539
+ 1011 0324 3E030000 		.4byte	0x33e
+ 1012 0328 16       		.uleb128 0x16
+ 1013 0329 01       		.uleb128 0x1
+ 1014 032a 53       		.byte	0x53
+ 1015 032b 01       		.uleb128 0x1
+ 1016 032c 34       		.byte	0x34
+ 1017 032d 16       		.uleb128 0x16
+ 1018 032e 01       		.uleb128 0x1
+ 1019 032f 52       		.byte	0x52
+ 1020 0330 02       		.uleb128 0x2
+ 1021 0331 75       		.byte	0x75
+ 1022 0332 18       		.sleb128 24
+ 1023 0333 16       		.uleb128 0x16
+ 1024 0334 01       		.uleb128 0x1
+ 1025 0335 51       		.byte	0x51
+ 1026 0336 01       		.uleb128 0x1
+ 1027 0337 30       		.byte	0x30
+ 1028 0338 16       		.uleb128 0x16
+ 1029 0339 01       		.uleb128 0x1
+ 1030 033a 50       		.byte	0x50
+ 1031 033b 01       		.uleb128 0x1
+ 1032 033c 30       		.byte	0x30
+ 1033 033d 00       		.byte	0
+ 1034 033e 19       		.uleb128 0x19
+ 1035 033f 52000000 		.4byte	.LVL28
+ 1036 0343 63050000 		.4byte	0x563
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 30
+
+
+ 1037 0347 18       		.uleb128 0x18
+ 1038 0348 9E000000 		.4byte	.LVL30
+ 1039 034c D4040000 		.4byte	0x4d4
+ 1040 0350 72030000 		.4byte	0x372
+ 1041 0354 16       		.uleb128 0x16
+ 1042 0355 01       		.uleb128 0x1
+ 1043 0356 52       		.byte	0x52
+ 1044 0357 01       		.uleb128 0x1
+ 1045 0358 42       		.byte	0x42
+ 1046 0359 16       		.uleb128 0x16
+ 1047 035a 01       		.uleb128 0x1
+ 1048 035b 51       		.byte	0x51
+ 1049 035c 0E       		.uleb128 0xe
+ 1050 035d 76       		.byte	0x76
+ 1051 035e 00       		.sleb128 0
+ 1052 035f 33       		.byte	0x33
+ 1053 0360 24       		.byte	0x24
+ 1054 0361 76       		.byte	0x76
+ 1055 0362 00       		.sleb128 0
+ 1056 0363 22       		.byte	0x22
+ 1057 0364 31       		.byte	0x31
+ 1058 0365 24       		.byte	0x24
+ 1059 0366 75       		.byte	0x75
+ 1060 0367 00       		.sleb128 0
+ 1061 0368 22       		.byte	0x22
+ 1062 0369 23       		.byte	0x23
+ 1063 036a 24       		.uleb128 0x24
+ 1064 036b 16       		.uleb128 0x16
+ 1065 036c 01       		.uleb128 0x1
+ 1066 036d 50       		.byte	0x50
+ 1067 036e 02       		.uleb128 0x2
+ 1068 036f 77       		.byte	0x77
+ 1069 0370 02       		.sleb128 2
+ 1070 0371 00       		.byte	0
+ 1071 0372 18       		.uleb128 0x18
+ 1072 0373 BC000000 		.4byte	.LVL32
+ 1073 0377 6E050000 		.4byte	0x56e
+ 1074 037b 86030000 		.4byte	0x386
+ 1075 037f 16       		.uleb128 0x16
+ 1076 0380 01       		.uleb128 0x1
+ 1077 0381 50       		.byte	0x50
+ 1078 0382 02       		.uleb128 0x2
+ 1079 0383 76       		.byte	0x76
+ 1080 0384 00       		.sleb128 0
+ 1081 0385 00       		.byte	0
+ 1082 0386 18       		.uleb128 0x18
+ 1083 0387 EA000000 		.4byte	.LVL34
+ 1084 038b 3F010000 		.4byte	0x13f
+ 1085 038f 9F030000 		.4byte	0x39f
+ 1086 0393 16       		.uleb128 0x16
+ 1087 0394 01       		.uleb128 0x1
+ 1088 0395 51       		.byte	0x51
+ 1089 0396 01       		.uleb128 0x1
+ 1090 0397 42       		.byte	0x42
+ 1091 0398 16       		.uleb128 0x16
+ 1092 0399 01       		.uleb128 0x1
+ 1093 039a 50       		.byte	0x50
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 31
+
+
+ 1094 039b 02       		.uleb128 0x2
+ 1095 039c 91       		.byte	0x91
+ 1096 039d 4C       		.sleb128 -52
+ 1097 039e 00       		.byte	0
+ 1098 039f 18       		.uleb128 0x18
+ 1099 03a0 06010000 		.4byte	.LVL35
+ 1100 03a4 83050000 		.4byte	0x583
+ 1101 03a8 B9030000 		.4byte	0x3b9
+ 1102 03ac 16       		.uleb128 0x16
+ 1103 03ad 01       		.uleb128 0x1
+ 1104 03ae 51       		.byte	0x51
+ 1105 03af 01       		.uleb128 0x1
+ 1106 03b0 33       		.byte	0x33
+ 1107 03b1 16       		.uleb128 0x16
+ 1108 03b2 01       		.uleb128 0x1
+ 1109 03b3 50       		.byte	0x50
+ 1110 03b4 03       		.uleb128 0x3
+ 1111 03b5 74       		.byte	0x74
+ 1112 03b6 DC00     		.sleb128 92
+ 1113 03b8 00       		.byte	0
+ 1114 03b9 19       		.uleb128 0x19
+ 1115 03ba 0A010000 		.4byte	.LVL36
+ 1116 03be 9D050000 		.4byte	0x59d
+ 1117 03c2 19       		.uleb128 0x19
+ 1118 03c3 1C010000 		.4byte	.LVL37
+ 1119 03c7 A8050000 		.4byte	0x5a8
+ 1120 03cb 00       		.byte	0
+ 1121 03cc 1D       		.uleb128 0x1d
+ 1122 03cd 8F000000 		.4byte	0x8f
+ 1123 03d1 DC030000 		.4byte	0x3dc
+ 1124 03d5 1E       		.uleb128 0x1e
+ 1125 03d6 B0000000 		.4byte	0xb0
+ 1126 03da 03       		.byte	0x3
+ 1127 03db 00       		.byte	0
+ 1128 03dc 1D       		.uleb128 0x1d
+ 1129 03dd 8F000000 		.4byte	0x8f
+ 1130 03e1 EC030000 		.4byte	0x3ec
+ 1131 03e5 1E       		.uleb128 0x1e
+ 1132 03e6 B0000000 		.4byte	0xb0
+ 1133 03ea 02       		.byte	0x2
+ 1134 03eb 00       		.byte	0
+ 1135 03ec 1D       		.uleb128 0x1d
+ 1136 03ed 6B000000 		.4byte	0x6b
+ 1137 03f1 FC030000 		.4byte	0x3fc
+ 1138 03f5 1E       		.uleb128 0x1e
+ 1139 03f6 B0000000 		.4byte	0xb0
+ 1140 03fa 04       		.byte	0x4
+ 1141 03fb 00       		.byte	0
+ 1142 03fc 1D       		.uleb128 0x1d
+ 1143 03fd 6B000000 		.4byte	0x6b
+ 1144 0401 0C040000 		.4byte	0x40c
+ 1145 0405 1E       		.uleb128 0x1e
+ 1146 0406 B0000000 		.4byte	0xb0
+ 1147 040a 15       		.byte	0x15
+ 1148 040b 00       		.byte	0
+ 1149 040c 1D       		.uleb128 0x1d
+ 1150 040d 34010000 		.4byte	0x134
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 32
+
+
+ 1151 0411 1C040000 		.4byte	0x41c
+ 1152 0415 1E       		.uleb128 0x1e
+ 1153 0416 B0000000 		.4byte	0xb0
+ 1154 041a 05       		.byte	0x5
+ 1155 041b 00       		.byte	0
+ 1156 041c 1B       		.uleb128 0x1b
+ 1157 041d 03040000 		.4byte	.LASF45
+ 1158 0421 01       		.byte	0x1
+ 1159 0422 31       		.byte	0x31
+ 1160 0423 2D040000 		.4byte	0x42d
+ 1161 0427 05       		.uleb128 0x5
+ 1162 0428 03       		.byte	0x3
+ 1163 0429 00000000 		.4byte	PacketList
+ 1164 042d 0C       		.uleb128 0xc
+ 1165 042e 0C040000 		.4byte	0x40c
+ 1166 0432 1D       		.uleb128 0x1d
+ 1167 0433 6B000000 		.4byte	0x6b
+ 1168 0437 42040000 		.4byte	0x442
+ 1169 043b 1E       		.uleb128 0x1e
+ 1170 043c B0000000 		.4byte	0xb0
+ 1171 0440 0C       		.byte	0xc
+ 1172 0441 00       		.byte	0
+ 1173 0442 1B       		.uleb128 0x1b
+ 1174 0443 EF000000 		.4byte	.LASF46
+ 1175 0447 01       		.byte	0x1
+ 1176 0448 41       		.byte	0x41
+ 1177 0449 32040000 		.4byte	0x432
+ 1178 044d 05       		.uleb128 0x5
+ 1179 044e 03       		.byte	0x3
+ 1180 044f 04000000 		.4byte	lastDriverPacket
+ 1181 0453 1D       		.uleb128 0x1d
+ 1182 0454 6B000000 		.4byte	0x6b
+ 1183 0458 69040000 		.4byte	0x469
+ 1184 045c 1E       		.uleb128 0x1e
+ 1185 045d B0000000 		.4byte	0xb0
+ 1186 0461 02       		.byte	0x2
+ 1187 0462 1E       		.uleb128 0x1e
+ 1188 0463 B0000000 		.4byte	0xb0
+ 1189 0467 11       		.byte	0x11
+ 1190 0468 00       		.byte	0
+ 1191 0469 1B       		.uleb128 0x1b
+ 1192 046a 77010000 		.4byte	.LASF47
+ 1193 046e 01       		.byte	0x1
+ 1194 046f 42       		.byte	0x42
+ 1195 0470 7A040000 		.4byte	0x47a
+ 1196 0474 05       		.uleb128 0x5
+ 1197 0475 03       		.byte	0x3
+ 1198 0476 24000000 		.4byte	temperaturePayload
+ 1199 047a 0C       		.uleb128 0xc
+ 1200 047b 53040000 		.4byte	0x453
+ 1201 047f 1B       		.uleb128 0x1b
+ 1202 0480 E0030000 		.4byte	.LASF48
+ 1203 0484 01       		.byte	0x1
+ 1204 0485 45       		.byte	0x45
+ 1205 0486 77000000 		.4byte	0x77
+ 1206 048a 05       		.uleb128 0x5
+ 1207 048b 03       		.byte	0x3
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 33
+
+
+ 1208 048c 12000000 		.4byte	timerCount
+ 1209 0490 1B       		.uleb128 0x1b
+ 1210 0491 73030000 		.4byte	.LASF49
+ 1211 0495 01       		.byte	0x1
+ 1212 0496 47       		.byte	0x47
+ 1213 0497 6B000000 		.4byte	0x6b
+ 1214 049b 05       		.uleb128 0x5
+ 1215 049c 03       		.byte	0x3
+ 1216 049d 01000000 		.4byte	bLastDriverInChain
+ 1217 04a1 1F       		.uleb128 0x1f
+ 1218 04a2 28010000 		.4byte	.LASF50
+ 1219 04a6 01       		.byte	0x1
+ 1220 04a7 49       		.byte	0x49
+ 1221 04a8 6B000000 		.4byte	0x6b
+ 1222 04ac 05       		.uleb128 0x5
+ 1223 04ad 03       		.byte	0x3
+ 1224 04ae 00000000 		.4byte	bReadyToSendNextBrightnessTimeoutPacket
+ 1225 04b2 1F       		.uleb128 0x1f
+ 1226 04b3 CC000000 		.4byte	.LASF51
+ 1227 04b7 01       		.byte	0x1
+ 1228 04b8 4A       		.byte	0x4a
+ 1229 04b9 6B000000 		.4byte	0x6b
+ 1230 04bd 05       		.uleb128 0x5
+ 1231 04be 03       		.byte	0x3
+ 1232 04bf 00000000 		.4byte	readyToSendThresholdCounter
+ 1233 04c3 1F       		.uleb128 0x1f
+ 1234 04c4 BF010000 		.4byte	.LASF52
+ 1235 04c8 01       		.byte	0x1
+ 1236 04c9 4D       		.byte	0x4d
+ 1237 04ca 6B000000 		.4byte	0x6b
+ 1238 04ce 05       		.uleb128 0x5
+ 1239 04cf 03       		.byte	0x3
+ 1240 04d0 00000000 		.4byte	sendTempPacketBack
+ 1241 04d4 20       		.uleb128 0x20
+ 1242 04d5 68000000 		.4byte	.LASF53
+ 1243 04d9 B7000000 		.4byte	0xb7
+ 1244 04dd F1040000 		.4byte	0x4f1
+ 1245 04e1 21       		.uleb128 0x21
+ 1246 04e2 B7000000 		.4byte	0xb7
+ 1247 04e6 21       		.uleb128 0x21
+ 1248 04e7 F1040000 		.4byte	0x4f1
+ 1249 04eb 21       		.uleb128 0x21
+ 1250 04ec B0000000 		.4byte	0xb0
+ 1251 04f0 00       		.byte	0
+ 1252 04f1 06       		.uleb128 0x6
+ 1253 04f2 04       		.byte	0x4
+ 1254 04f3 F7040000 		.4byte	0x4f7
+ 1255 04f7 22       		.uleb128 0x22
+ 1256 04f8 23       		.uleb128 0x23
+ 1257 04f9 EB030000 		.4byte	.LASF54
+ 1258 04fd 03       		.byte	0x3
+ 1259 04fe 4701     		.2byte	0x147
+ 1260 0500 0A050000 		.4byte	0x50a
+ 1261 0504 21       		.uleb128 0x21
+ 1262 0505 83000000 		.4byte	0x83
+ 1263 0509 00       		.byte	0
+ 1264 050a 24       		.uleb128 0x24
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 34
+
+
+ 1265 050b 5A000000 		.4byte	.LASF62
+ 1266 050f 03       		.byte	0x3
+ 1267 0510 3301     		.2byte	0x133
+ 1268 0512 25       		.uleb128 0x25
+ 1269 0513 E9040000 		.4byte	.LASF56
+ 1270 0517 05       		.byte	0x5
+ 1271 0518 29       		.byte	0x29
+ 1272 0519 6B000000 		.4byte	0x6b
+ 1273 051d 27050000 		.4byte	0x527
+ 1274 0521 21       		.uleb128 0x21
+ 1275 0522 6B000000 		.4byte	0x6b
+ 1276 0526 00       		.byte	0
+ 1277 0527 23       		.uleb128 0x23
+ 1278 0528 A2030000 		.4byte	.LASF55
+ 1279 052c 04       		.byte	0x4
+ 1280 052d 4701     		.2byte	0x147
+ 1281 052f 39050000 		.4byte	0x539
+ 1282 0533 21       		.uleb128 0x21
+ 1283 0534 83000000 		.4byte	0x83
+ 1284 0538 00       		.byte	0
+ 1285 0539 25       		.uleb128 0x25
+ 1286 053a 04050000 		.4byte	.LASF57
+ 1287 053e 05       		.byte	0x5
+ 1288 053f 30       		.byte	0x30
+ 1289 0540 8F000000 		.4byte	0x8f
+ 1290 0544 5D050000 		.4byte	0x55d
+ 1291 0548 21       		.uleb128 0x21
+ 1292 0549 6B000000 		.4byte	0x6b
+ 1293 054d 21       		.uleb128 0x21
+ 1294 054e BF000000 		.4byte	0xbf
+ 1295 0552 21       		.uleb128 0x21
+ 1296 0553 5D050000 		.4byte	0x55d
+ 1297 0557 21       		.uleb128 0x21
+ 1298 0558 6B000000 		.4byte	0x6b
+ 1299 055c 00       		.byte	0
+ 1300 055d 06       		.uleb128 0x6
+ 1301 055e 04       		.byte	0x4
+ 1302 055f 8F000000 		.4byte	0x8f
+ 1303 0563 26       		.uleb128 0x26
+ 1304 0564 3B000000 		.4byte	.LASF60
+ 1305 0568 05       		.byte	0x5
+ 1306 0569 27       		.byte	0x27
+ 1307 056a 6B000000 		.4byte	0x6b
+ 1308 056e 25       		.uleb128 0x25
+ 1309 056f 8A010000 		.4byte	.LASF58
+ 1310 0573 05       		.byte	0x5
+ 1311 0574 2F       		.byte	0x2f
+ 1312 0575 8F000000 		.4byte	0x8f
+ 1313 0579 83050000 		.4byte	0x583
+ 1314 057d 21       		.uleb128 0x21
+ 1315 057e BF000000 		.4byte	0xbf
+ 1316 0582 00       		.byte	0
+ 1317 0583 25       		.uleb128 0x25
+ 1318 0584 0D000000 		.4byte	.LASF59
+ 1319 0588 05       		.byte	0x5
+ 1320 0589 33       		.byte	0x33
+ 1321 058a 6B000000 		.4byte	0x6b
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 35
+
+
+ 1322 058e 9D050000 		.4byte	0x59d
+ 1323 0592 21       		.uleb128 0x21
+ 1324 0593 5D050000 		.4byte	0x55d
+ 1325 0597 21       		.uleb128 0x21
+ 1326 0598 6B000000 		.4byte	0x6b
+ 1327 059c 00       		.byte	0
+ 1328 059d 26       		.uleb128 0x26
+ 1329 059e CD020000 		.4byte	.LASF61
+ 1330 05a2 05       		.byte	0x5
+ 1331 05a3 32       		.byte	0x32
+ 1332 05a4 6B000000 		.4byte	0x6b
+ 1333 05a8 27       		.uleb128 0x27
+ 1334 05a9 86030000 		.4byte	.LASF63
+ 1335 05ad 06       		.byte	0x6
+ 1336 05ae A8       		.byte	0xa8
+ 1337 05af 00       		.byte	0
+ 1338              		.section	.debug_abbrev,"",%progbits
+ 1339              	.Ldebug_abbrev0:
+ 1340 0000 01       		.uleb128 0x1
+ 1341 0001 11       		.uleb128 0x11
+ 1342 0002 01       		.byte	0x1
+ 1343 0003 25       		.uleb128 0x25
+ 1344 0004 0E       		.uleb128 0xe
+ 1345 0005 13       		.uleb128 0x13
+ 1346 0006 0B       		.uleb128 0xb
+ 1347 0007 03       		.uleb128 0x3
+ 1348 0008 0E       		.uleb128 0xe
+ 1349 0009 1B       		.uleb128 0x1b
+ 1350 000a 0E       		.uleb128 0xe
+ 1351 000b 55       		.uleb128 0x55
+ 1352 000c 17       		.uleb128 0x17
+ 1353 000d 11       		.uleb128 0x11
+ 1354 000e 01       		.uleb128 0x1
+ 1355 000f 10       		.uleb128 0x10
+ 1356 0010 17       		.uleb128 0x17
+ 1357 0011 00       		.byte	0
+ 1358 0012 00       		.byte	0
+ 1359 0013 02       		.uleb128 0x2
+ 1360 0014 24       		.uleb128 0x24
+ 1361 0015 00       		.byte	0
+ 1362 0016 0B       		.uleb128 0xb
+ 1363 0017 0B       		.uleb128 0xb
+ 1364 0018 3E       		.uleb128 0x3e
+ 1365 0019 0B       		.uleb128 0xb
+ 1366 001a 03       		.uleb128 0x3
+ 1367 001b 0E       		.uleb128 0xe
+ 1368 001c 00       		.byte	0
+ 1369 001d 00       		.byte	0
+ 1370 001e 03       		.uleb128 0x3
+ 1371 001f 24       		.uleb128 0x24
+ 1372 0020 00       		.byte	0
+ 1373 0021 0B       		.uleb128 0xb
+ 1374 0022 0B       		.uleb128 0xb
+ 1375 0023 3E       		.uleb128 0x3e
+ 1376 0024 0B       		.uleb128 0xb
+ 1377 0025 03       		.uleb128 0x3
+ 1378 0026 08       		.uleb128 0x8
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 36
+
+
+ 1379 0027 00       		.byte	0
+ 1380 0028 00       		.byte	0
+ 1381 0029 04       		.uleb128 0x4
+ 1382 002a 16       		.uleb128 0x16
+ 1383 002b 00       		.byte	0
+ 1384 002c 03       		.uleb128 0x3
+ 1385 002d 0E       		.uleb128 0xe
+ 1386 002e 3A       		.uleb128 0x3a
+ 1387 002f 0B       		.uleb128 0xb
+ 1388 0030 3B       		.uleb128 0x3b
+ 1389 0031 05       		.uleb128 0x5
+ 1390 0032 49       		.uleb128 0x49
+ 1391 0033 13       		.uleb128 0x13
+ 1392 0034 00       		.byte	0
+ 1393 0035 00       		.byte	0
+ 1394 0036 05       		.uleb128 0x5
+ 1395 0037 0F       		.uleb128 0xf
+ 1396 0038 00       		.byte	0
+ 1397 0039 0B       		.uleb128 0xb
+ 1398 003a 0B       		.uleb128 0xb
+ 1399 003b 00       		.byte	0
+ 1400 003c 00       		.byte	0
+ 1401 003d 06       		.uleb128 0x6
+ 1402 003e 0F       		.uleb128 0xf
+ 1403 003f 00       		.byte	0
+ 1404 0040 0B       		.uleb128 0xb
+ 1405 0041 0B       		.uleb128 0xb
+ 1406 0042 49       		.uleb128 0x49
+ 1407 0043 13       		.uleb128 0x13
+ 1408 0044 00       		.byte	0
+ 1409 0045 00       		.byte	0
+ 1410 0046 07       		.uleb128 0x7
+ 1411 0047 04       		.uleb128 0x4
+ 1412 0048 01       		.byte	0x1
+ 1413 0049 03       		.uleb128 0x3
+ 1414 004a 0E       		.uleb128 0xe
+ 1415 004b 0B       		.uleb128 0xb
+ 1416 004c 0B       		.uleb128 0xb
+ 1417 004d 3A       		.uleb128 0x3a
+ 1418 004e 0B       		.uleb128 0xb
+ 1419 004f 3B       		.uleb128 0x3b
+ 1420 0050 0B       		.uleb128 0xb
+ 1421 0051 01       		.uleb128 0x1
+ 1422 0052 13       		.uleb128 0x13
+ 1423 0053 00       		.byte	0
+ 1424 0054 00       		.byte	0
+ 1425 0055 08       		.uleb128 0x8
+ 1426 0056 28       		.uleb128 0x28
+ 1427 0057 00       		.byte	0
+ 1428 0058 03       		.uleb128 0x3
+ 1429 0059 08       		.uleb128 0x8
+ 1430 005a 1C       		.uleb128 0x1c
+ 1431 005b 0D       		.uleb128 0xd
+ 1432 005c 00       		.byte	0
+ 1433 005d 00       		.byte	0
+ 1434 005e 09       		.uleb128 0x9
+ 1435 005f 28       		.uleb128 0x28
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 37
+
+
+ 1436 0060 00       		.byte	0
+ 1437 0061 03       		.uleb128 0x3
+ 1438 0062 0E       		.uleb128 0xe
+ 1439 0063 1C       		.uleb128 0x1c
+ 1440 0064 0D       		.uleb128 0xd
+ 1441 0065 00       		.byte	0
+ 1442 0066 00       		.byte	0
+ 1443 0067 0A       		.uleb128 0xa
+ 1444 0068 13       		.uleb128 0x13
+ 1445 0069 01       		.byte	0x1
+ 1446 006a 0B       		.uleb128 0xb
+ 1447 006b 0B       		.uleb128 0xb
+ 1448 006c 3A       		.uleb128 0x3a
+ 1449 006d 0B       		.uleb128 0xb
+ 1450 006e 3B       		.uleb128 0x3b
+ 1451 006f 0B       		.uleb128 0xb
+ 1452 0070 01       		.uleb128 0x1
+ 1453 0071 13       		.uleb128 0x13
+ 1454 0072 00       		.byte	0
+ 1455 0073 00       		.byte	0
+ 1456 0074 0B       		.uleb128 0xb
+ 1457 0075 0D       		.uleb128 0xd
+ 1458 0076 00       		.byte	0
+ 1459 0077 03       		.uleb128 0x3
+ 1460 0078 0E       		.uleb128 0xe
+ 1461 0079 3A       		.uleb128 0x3a
+ 1462 007a 0B       		.uleb128 0xb
+ 1463 007b 3B       		.uleb128 0x3b
+ 1464 007c 0B       		.uleb128 0xb
+ 1465 007d 49       		.uleb128 0x49
+ 1466 007e 13       		.uleb128 0x13
+ 1467 007f 38       		.uleb128 0x38
+ 1468 0080 0B       		.uleb128 0xb
+ 1469 0081 00       		.byte	0
+ 1470 0082 00       		.byte	0
+ 1471 0083 0C       		.uleb128 0xc
+ 1472 0084 26       		.uleb128 0x26
+ 1473 0085 00       		.byte	0
+ 1474 0086 49       		.uleb128 0x49
+ 1475 0087 13       		.uleb128 0x13
+ 1476 0088 00       		.byte	0
+ 1477 0089 00       		.byte	0
+ 1478 008a 0D       		.uleb128 0xd
+ 1479 008b 16       		.uleb128 0x16
+ 1480 008c 00       		.byte	0
+ 1481 008d 03       		.uleb128 0x3
+ 1482 008e 0E       		.uleb128 0xe
+ 1483 008f 3A       		.uleb128 0x3a
+ 1484 0090 0B       		.uleb128 0xb
+ 1485 0091 3B       		.uleb128 0x3b
+ 1486 0092 0B       		.uleb128 0xb
+ 1487 0093 49       		.uleb128 0x49
+ 1488 0094 13       		.uleb128 0x13
+ 1489 0095 00       		.byte	0
+ 1490 0096 00       		.byte	0
+ 1491 0097 0E       		.uleb128 0xe
+ 1492 0098 2E       		.uleb128 0x2e
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 38
+
+
+ 1493 0099 01       		.byte	0x1
+ 1494 009a 03       		.uleb128 0x3
+ 1495 009b 0E       		.uleb128 0xe
+ 1496 009c 3A       		.uleb128 0x3a
+ 1497 009d 0B       		.uleb128 0xb
+ 1498 009e 3B       		.uleb128 0x3b
+ 1499 009f 05       		.uleb128 0x5
+ 1500 00a0 27       		.uleb128 0x27
+ 1501 00a1 19       		.uleb128 0x19
+ 1502 00a2 49       		.uleb128 0x49
+ 1503 00a3 13       		.uleb128 0x13
+ 1504 00a4 11       		.uleb128 0x11
+ 1505 00a5 01       		.uleb128 0x1
+ 1506 00a6 12       		.uleb128 0x12
+ 1507 00a7 06       		.uleb128 0x6
+ 1508 00a8 40       		.uleb128 0x40
+ 1509 00a9 18       		.uleb128 0x18
+ 1510 00aa 9742     		.uleb128 0x2117
+ 1511 00ac 19       		.uleb128 0x19
+ 1512 00ad 01       		.uleb128 0x1
+ 1513 00ae 13       		.uleb128 0x13
+ 1514 00af 00       		.byte	0
+ 1515 00b0 00       		.byte	0
+ 1516 00b1 0F       		.uleb128 0xf
+ 1517 00b2 05       		.uleb128 0x5
+ 1518 00b3 00       		.byte	0
+ 1519 00b4 03       		.uleb128 0x3
+ 1520 00b5 0E       		.uleb128 0xe
+ 1521 00b6 3A       		.uleb128 0x3a
+ 1522 00b7 0B       		.uleb128 0xb
+ 1523 00b8 3B       		.uleb128 0x3b
+ 1524 00b9 05       		.uleb128 0x5
+ 1525 00ba 49       		.uleb128 0x49
+ 1526 00bb 13       		.uleb128 0x13
+ 1527 00bc 02       		.uleb128 0x2
+ 1528 00bd 17       		.uleb128 0x17
+ 1529 00be 00       		.byte	0
+ 1530 00bf 00       		.byte	0
+ 1531 00c0 10       		.uleb128 0x10
+ 1532 00c1 34       		.uleb128 0x34
+ 1533 00c2 00       		.byte	0
+ 1534 00c3 03       		.uleb128 0x3
+ 1535 00c4 0E       		.uleb128 0xe
+ 1536 00c5 3A       		.uleb128 0x3a
+ 1537 00c6 0B       		.uleb128 0xb
+ 1538 00c7 3B       		.uleb128 0x3b
+ 1539 00c8 05       		.uleb128 0x5
+ 1540 00c9 49       		.uleb128 0x49
+ 1541 00ca 13       		.uleb128 0x13
+ 1542 00cb 02       		.uleb128 0x2
+ 1543 00cc 17       		.uleb128 0x17
+ 1544 00cd 00       		.byte	0
+ 1545 00ce 00       		.byte	0
+ 1546 00cf 11       		.uleb128 0x11
+ 1547 00d0 2E       		.uleb128 0x2e
+ 1548 00d1 00       		.byte	0
+ 1549 00d2 3F       		.uleb128 0x3f
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 39
+
+
+ 1550 00d3 19       		.uleb128 0x19
+ 1551 00d4 03       		.uleb128 0x3
+ 1552 00d5 0E       		.uleb128 0xe
+ 1553 00d6 3A       		.uleb128 0x3a
+ 1554 00d7 0B       		.uleb128 0xb
+ 1555 00d8 3B       		.uleb128 0x3b
+ 1556 00d9 0B       		.uleb128 0xb
+ 1557 00da 27       		.uleb128 0x27
+ 1558 00db 19       		.uleb128 0x19
+ 1559 00dc 49       		.uleb128 0x49
+ 1560 00dd 13       		.uleb128 0x13
+ 1561 00de 11       		.uleb128 0x11
+ 1562 00df 01       		.uleb128 0x1
+ 1563 00e0 12       		.uleb128 0x12
+ 1564 00e1 06       		.uleb128 0x6
+ 1565 00e2 40       		.uleb128 0x40
+ 1566 00e3 18       		.uleb128 0x18
+ 1567 00e4 9742     		.uleb128 0x2117
+ 1568 00e6 19       		.uleb128 0x19
+ 1569 00e7 00       		.byte	0
+ 1570 00e8 00       		.byte	0
+ 1571 00e9 12       		.uleb128 0x12
+ 1572 00ea 2E       		.uleb128 0x2e
+ 1573 00eb 00       		.byte	0
+ 1574 00ec 3F       		.uleb128 0x3f
+ 1575 00ed 19       		.uleb128 0x19
+ 1576 00ee 03       		.uleb128 0x3
+ 1577 00ef 0E       		.uleb128 0xe
+ 1578 00f0 3A       		.uleb128 0x3a
+ 1579 00f1 0B       		.uleb128 0xb
+ 1580 00f2 3B       		.uleb128 0x3b
+ 1581 00f3 0B       		.uleb128 0xb
+ 1582 00f4 27       		.uleb128 0x27
+ 1583 00f5 19       		.uleb128 0x19
+ 1584 00f6 11       		.uleb128 0x11
+ 1585 00f7 01       		.uleb128 0x1
+ 1586 00f8 12       		.uleb128 0x12
+ 1587 00f9 06       		.uleb128 0x6
+ 1588 00fa 40       		.uleb128 0x40
+ 1589 00fb 18       		.uleb128 0x18
+ 1590 00fc 9742     		.uleb128 0x2117
+ 1591 00fe 19       		.uleb128 0x19
+ 1592 00ff 00       		.byte	0
+ 1593 0100 00       		.byte	0
+ 1594 0101 13       		.uleb128 0x13
+ 1595 0102 2E       		.uleb128 0x2e
+ 1596 0103 01       		.byte	0x1
+ 1597 0104 3F       		.uleb128 0x3f
+ 1598 0105 19       		.uleb128 0x19
+ 1599 0106 03       		.uleb128 0x3
+ 1600 0107 0E       		.uleb128 0xe
+ 1601 0108 3A       		.uleb128 0x3a
+ 1602 0109 0B       		.uleb128 0xb
+ 1603 010a 3B       		.uleb128 0x3b
+ 1604 010b 0B       		.uleb128 0xb
+ 1605 010c 27       		.uleb128 0x27
+ 1606 010d 19       		.uleb128 0x19
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 40
+
+
+ 1607 010e 49       		.uleb128 0x49
+ 1608 010f 13       		.uleb128 0x13
+ 1609 0110 11       		.uleb128 0x11
+ 1610 0111 01       		.uleb128 0x1
+ 1611 0112 12       		.uleb128 0x12
+ 1612 0113 06       		.uleb128 0x6
+ 1613 0114 40       		.uleb128 0x40
+ 1614 0115 18       		.uleb128 0x18
+ 1615 0116 9742     		.uleb128 0x2117
+ 1616 0118 19       		.uleb128 0x19
+ 1617 0119 01       		.uleb128 0x1
+ 1618 011a 13       		.uleb128 0x13
+ 1619 011b 00       		.byte	0
+ 1620 011c 00       		.byte	0
+ 1621 011d 14       		.uleb128 0x14
+ 1622 011e 05       		.uleb128 0x5
+ 1623 011f 00       		.byte	0
+ 1624 0120 03       		.uleb128 0x3
+ 1625 0121 0E       		.uleb128 0xe
+ 1626 0122 3A       		.uleb128 0x3a
+ 1627 0123 0B       		.uleb128 0xb
+ 1628 0124 3B       		.uleb128 0x3b
+ 1629 0125 0B       		.uleb128 0xb
+ 1630 0126 49       		.uleb128 0x49
+ 1631 0127 13       		.uleb128 0x13
+ 1632 0128 02       		.uleb128 0x2
+ 1633 0129 17       		.uleb128 0x17
+ 1634 012a 00       		.byte	0
+ 1635 012b 00       		.byte	0
+ 1636 012c 15       		.uleb128 0x15
+ 1637 012d 898201   		.uleb128 0x4109
+ 1638 0130 01       		.byte	0x1
+ 1639 0131 11       		.uleb128 0x11
+ 1640 0132 01       		.uleb128 0x1
+ 1641 0133 31       		.uleb128 0x31
+ 1642 0134 13       		.uleb128 0x13
+ 1643 0135 00       		.byte	0
+ 1644 0136 00       		.byte	0
+ 1645 0137 16       		.uleb128 0x16
+ 1646 0138 8A8201   		.uleb128 0x410a
+ 1647 013b 00       		.byte	0
+ 1648 013c 02       		.uleb128 0x2
+ 1649 013d 18       		.uleb128 0x18
+ 1650 013e 9142     		.uleb128 0x2111
+ 1651 0140 18       		.uleb128 0x18
+ 1652 0141 00       		.byte	0
+ 1653 0142 00       		.byte	0
+ 1654 0143 17       		.uleb128 0x17
+ 1655 0144 2E       		.uleb128 0x2e
+ 1656 0145 01       		.byte	0x1
+ 1657 0146 3F       		.uleb128 0x3f
+ 1658 0147 19       		.uleb128 0x19
+ 1659 0148 03       		.uleb128 0x3
+ 1660 0149 0E       		.uleb128 0xe
+ 1661 014a 3A       		.uleb128 0x3a
+ 1662 014b 0B       		.uleb128 0xb
+ 1663 014c 3B       		.uleb128 0x3b
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 41
+
+
+ 1664 014d 0B       		.uleb128 0xb
+ 1665 014e 27       		.uleb128 0x27
+ 1666 014f 19       		.uleb128 0x19
+ 1667 0150 11       		.uleb128 0x11
+ 1668 0151 01       		.uleb128 0x1
+ 1669 0152 12       		.uleb128 0x12
+ 1670 0153 06       		.uleb128 0x6
+ 1671 0154 40       		.uleb128 0x40
+ 1672 0155 18       		.uleb128 0x18
+ 1673 0156 9742     		.uleb128 0x2117
+ 1674 0158 19       		.uleb128 0x19
+ 1675 0159 01       		.uleb128 0x1
+ 1676 015a 13       		.uleb128 0x13
+ 1677 015b 00       		.byte	0
+ 1678 015c 00       		.byte	0
+ 1679 015d 18       		.uleb128 0x18
+ 1680 015e 898201   		.uleb128 0x4109
+ 1681 0161 01       		.byte	0x1
+ 1682 0162 11       		.uleb128 0x11
+ 1683 0163 01       		.uleb128 0x1
+ 1684 0164 31       		.uleb128 0x31
+ 1685 0165 13       		.uleb128 0x13
+ 1686 0166 01       		.uleb128 0x1
+ 1687 0167 13       		.uleb128 0x13
+ 1688 0168 00       		.byte	0
+ 1689 0169 00       		.byte	0
+ 1690 016a 19       		.uleb128 0x19
+ 1691 016b 898201   		.uleb128 0x4109
+ 1692 016e 00       		.byte	0
+ 1693 016f 11       		.uleb128 0x11
+ 1694 0170 01       		.uleb128 0x1
+ 1695 0171 31       		.uleb128 0x31
+ 1696 0172 13       		.uleb128 0x13
+ 1697 0173 00       		.byte	0
+ 1698 0174 00       		.byte	0
+ 1699 0175 1A       		.uleb128 0x1a
+ 1700 0176 2E       		.uleb128 0x2e
+ 1701 0177 01       		.byte	0x1
+ 1702 0178 3F       		.uleb128 0x3f
+ 1703 0179 19       		.uleb128 0x19
+ 1704 017a 03       		.uleb128 0x3
+ 1705 017b 0E       		.uleb128 0xe
+ 1706 017c 3A       		.uleb128 0x3a
+ 1707 017d 0B       		.uleb128 0xb
+ 1708 017e 3B       		.uleb128 0x3b
+ 1709 017f 0B       		.uleb128 0xb
+ 1710 0180 27       		.uleb128 0x27
+ 1711 0181 19       		.uleb128 0x19
+ 1712 0182 11       		.uleb128 0x11
+ 1713 0183 01       		.uleb128 0x1
+ 1714 0184 12       		.uleb128 0x12
+ 1715 0185 06       		.uleb128 0x6
+ 1716 0186 40       		.uleb128 0x40
+ 1717 0187 18       		.uleb128 0x18
+ 1718 0188 9642     		.uleb128 0x2116
+ 1719 018a 19       		.uleb128 0x19
+ 1720 018b 01       		.uleb128 0x1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 42
+
+
+ 1721 018c 13       		.uleb128 0x13
+ 1722 018d 00       		.byte	0
+ 1723 018e 00       		.byte	0
+ 1724 018f 1B       		.uleb128 0x1b
+ 1725 0190 34       		.uleb128 0x34
+ 1726 0191 00       		.byte	0
+ 1727 0192 03       		.uleb128 0x3
+ 1728 0193 0E       		.uleb128 0xe
+ 1729 0194 3A       		.uleb128 0x3a
+ 1730 0195 0B       		.uleb128 0xb
+ 1731 0196 3B       		.uleb128 0x3b
+ 1732 0197 0B       		.uleb128 0xb
+ 1733 0198 49       		.uleb128 0x49
+ 1734 0199 13       		.uleb128 0x13
+ 1735 019a 02       		.uleb128 0x2
+ 1736 019b 18       		.uleb128 0x18
+ 1737 019c 00       		.byte	0
+ 1738 019d 00       		.byte	0
+ 1739 019e 1C       		.uleb128 0x1c
+ 1740 019f 34       		.uleb128 0x34
+ 1741 01a0 00       		.byte	0
+ 1742 01a1 03       		.uleb128 0x3
+ 1743 01a2 0E       		.uleb128 0xe
+ 1744 01a3 3A       		.uleb128 0x3a
+ 1745 01a4 0B       		.uleb128 0xb
+ 1746 01a5 3B       		.uleb128 0x3b
+ 1747 01a6 0B       		.uleb128 0xb
+ 1748 01a7 49       		.uleb128 0x49
+ 1749 01a8 13       		.uleb128 0x13
+ 1750 01a9 02       		.uleb128 0x2
+ 1751 01aa 17       		.uleb128 0x17
+ 1752 01ab 00       		.byte	0
+ 1753 01ac 00       		.byte	0
+ 1754 01ad 1D       		.uleb128 0x1d
+ 1755 01ae 01       		.uleb128 0x1
+ 1756 01af 01       		.byte	0x1
+ 1757 01b0 49       		.uleb128 0x49
+ 1758 01b1 13       		.uleb128 0x13
+ 1759 01b2 01       		.uleb128 0x1
+ 1760 01b3 13       		.uleb128 0x13
+ 1761 01b4 00       		.byte	0
+ 1762 01b5 00       		.byte	0
+ 1763 01b6 1E       		.uleb128 0x1e
+ 1764 01b7 21       		.uleb128 0x21
+ 1765 01b8 00       		.byte	0
+ 1766 01b9 49       		.uleb128 0x49
+ 1767 01ba 13       		.uleb128 0x13
+ 1768 01bb 2F       		.uleb128 0x2f
+ 1769 01bc 0B       		.uleb128 0xb
+ 1770 01bd 00       		.byte	0
+ 1771 01be 00       		.byte	0
+ 1772 01bf 1F       		.uleb128 0x1f
+ 1773 01c0 34       		.uleb128 0x34
+ 1774 01c1 00       		.byte	0
+ 1775 01c2 03       		.uleb128 0x3
+ 1776 01c3 0E       		.uleb128 0xe
+ 1777 01c4 3A       		.uleb128 0x3a
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 43
+
+
+ 1778 01c5 0B       		.uleb128 0xb
+ 1779 01c6 3B       		.uleb128 0x3b
+ 1780 01c7 0B       		.uleb128 0xb
+ 1781 01c8 49       		.uleb128 0x49
+ 1782 01c9 13       		.uleb128 0x13
+ 1783 01ca 3F       		.uleb128 0x3f
+ 1784 01cb 19       		.uleb128 0x19
+ 1785 01cc 02       		.uleb128 0x2
+ 1786 01cd 18       		.uleb128 0x18
+ 1787 01ce 00       		.byte	0
+ 1788 01cf 00       		.byte	0
+ 1789 01d0 20       		.uleb128 0x20
+ 1790 01d1 2E       		.uleb128 0x2e
+ 1791 01d2 01       		.byte	0x1
+ 1792 01d3 3F       		.uleb128 0x3f
+ 1793 01d4 19       		.uleb128 0x19
+ 1794 01d5 03       		.uleb128 0x3
+ 1795 01d6 0E       		.uleb128 0xe
+ 1796 01d7 27       		.uleb128 0x27
+ 1797 01d8 19       		.uleb128 0x19
+ 1798 01d9 49       		.uleb128 0x49
+ 1799 01da 13       		.uleb128 0x13
+ 1800 01db 34       		.uleb128 0x34
+ 1801 01dc 19       		.uleb128 0x19
+ 1802 01dd 3C       		.uleb128 0x3c
+ 1803 01de 19       		.uleb128 0x19
+ 1804 01df 01       		.uleb128 0x1
+ 1805 01e0 13       		.uleb128 0x13
+ 1806 01e1 00       		.byte	0
+ 1807 01e2 00       		.byte	0
+ 1808 01e3 21       		.uleb128 0x21
+ 1809 01e4 05       		.uleb128 0x5
+ 1810 01e5 00       		.byte	0
+ 1811 01e6 49       		.uleb128 0x49
+ 1812 01e7 13       		.uleb128 0x13
+ 1813 01e8 00       		.byte	0
+ 1814 01e9 00       		.byte	0
+ 1815 01ea 22       		.uleb128 0x22
+ 1816 01eb 26       		.uleb128 0x26
+ 1817 01ec 00       		.byte	0
+ 1818 01ed 00       		.byte	0
+ 1819 01ee 00       		.byte	0
+ 1820 01ef 23       		.uleb128 0x23
+ 1821 01f0 2E       		.uleb128 0x2e
+ 1822 01f1 01       		.byte	0x1
+ 1823 01f2 3F       		.uleb128 0x3f
+ 1824 01f3 19       		.uleb128 0x19
+ 1825 01f4 03       		.uleb128 0x3
+ 1826 01f5 0E       		.uleb128 0xe
+ 1827 01f6 3A       		.uleb128 0x3a
+ 1828 01f7 0B       		.uleb128 0xb
+ 1829 01f8 3B       		.uleb128 0x3b
+ 1830 01f9 05       		.uleb128 0x5
+ 1831 01fa 27       		.uleb128 0x27
+ 1832 01fb 19       		.uleb128 0x19
+ 1833 01fc 3C       		.uleb128 0x3c
+ 1834 01fd 19       		.uleb128 0x19
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 44
+
+
+ 1835 01fe 01       		.uleb128 0x1
+ 1836 01ff 13       		.uleb128 0x13
+ 1837 0200 00       		.byte	0
+ 1838 0201 00       		.byte	0
+ 1839 0202 24       		.uleb128 0x24
+ 1840 0203 2E       		.uleb128 0x2e
+ 1841 0204 00       		.byte	0
+ 1842 0205 3F       		.uleb128 0x3f
+ 1843 0206 19       		.uleb128 0x19
+ 1844 0207 03       		.uleb128 0x3
+ 1845 0208 0E       		.uleb128 0xe
+ 1846 0209 3A       		.uleb128 0x3a
+ 1847 020a 0B       		.uleb128 0xb
+ 1848 020b 3B       		.uleb128 0x3b
+ 1849 020c 05       		.uleb128 0x5
+ 1850 020d 27       		.uleb128 0x27
+ 1851 020e 19       		.uleb128 0x19
+ 1852 020f 3C       		.uleb128 0x3c
+ 1853 0210 19       		.uleb128 0x19
+ 1854 0211 00       		.byte	0
+ 1855 0212 00       		.byte	0
+ 1856 0213 25       		.uleb128 0x25
+ 1857 0214 2E       		.uleb128 0x2e
+ 1858 0215 01       		.byte	0x1
+ 1859 0216 3F       		.uleb128 0x3f
+ 1860 0217 19       		.uleb128 0x19
+ 1861 0218 03       		.uleb128 0x3
+ 1862 0219 0E       		.uleb128 0xe
+ 1863 021a 3A       		.uleb128 0x3a
+ 1864 021b 0B       		.uleb128 0xb
+ 1865 021c 3B       		.uleb128 0x3b
+ 1866 021d 0B       		.uleb128 0xb
+ 1867 021e 27       		.uleb128 0x27
+ 1868 021f 19       		.uleb128 0x19
+ 1869 0220 49       		.uleb128 0x49
+ 1870 0221 13       		.uleb128 0x13
+ 1871 0222 3C       		.uleb128 0x3c
+ 1872 0223 19       		.uleb128 0x19
+ 1873 0224 01       		.uleb128 0x1
+ 1874 0225 13       		.uleb128 0x13
+ 1875 0226 00       		.byte	0
+ 1876 0227 00       		.byte	0
+ 1877 0228 26       		.uleb128 0x26
+ 1878 0229 2E       		.uleb128 0x2e
+ 1879 022a 00       		.byte	0
+ 1880 022b 3F       		.uleb128 0x3f
+ 1881 022c 19       		.uleb128 0x19
+ 1882 022d 03       		.uleb128 0x3
+ 1883 022e 0E       		.uleb128 0xe
+ 1884 022f 3A       		.uleb128 0x3a
+ 1885 0230 0B       		.uleb128 0xb
+ 1886 0231 3B       		.uleb128 0x3b
+ 1887 0232 0B       		.uleb128 0xb
+ 1888 0233 27       		.uleb128 0x27
+ 1889 0234 19       		.uleb128 0x19
+ 1890 0235 49       		.uleb128 0x49
+ 1891 0236 13       		.uleb128 0x13
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 45
+
+
+ 1892 0237 3C       		.uleb128 0x3c
+ 1893 0238 19       		.uleb128 0x19
+ 1894 0239 00       		.byte	0
+ 1895 023a 00       		.byte	0
+ 1896 023b 27       		.uleb128 0x27
+ 1897 023c 2E       		.uleb128 0x2e
+ 1898 023d 00       		.byte	0
+ 1899 023e 3F       		.uleb128 0x3f
+ 1900 023f 19       		.uleb128 0x19
+ 1901 0240 03       		.uleb128 0x3
+ 1902 0241 0E       		.uleb128 0xe
+ 1903 0242 3A       		.uleb128 0x3a
+ 1904 0243 0B       		.uleb128 0xb
+ 1905 0244 3B       		.uleb128 0x3b
+ 1906 0245 0B       		.uleb128 0xb
+ 1907 0246 27       		.uleb128 0x27
+ 1908 0247 19       		.uleb128 0x19
+ 1909 0248 3C       		.uleb128 0x3c
+ 1910 0249 19       		.uleb128 0x19
+ 1911 024a 00       		.byte	0
+ 1912 024b 00       		.byte	0
+ 1913 024c 00       		.byte	0
+ 1914              		.section	.debug_loc,"",%progbits
+ 1915              	.Ldebug_loc0:
+ 1916              	.LLST0:
+ 1917 0000 00000000 		.4byte	.LVL0
+ 1918 0004 30000000 		.4byte	.LVL8
+ 1919 0008 0100     		.2byte	0x1
+ 1920 000a 50       		.byte	0x50
+ 1921 000b 30000000 		.4byte	.LVL8
+ 1922 000f 32000000 		.4byte	.LVL9
+ 1923 0013 0400     		.2byte	0x4
+ 1924 0015 F3       		.byte	0xf3
+ 1925 0016 01       		.uleb128 0x1
+ 1926 0017 50       		.byte	0x50
+ 1927 0018 9F       		.byte	0x9f
+ 1928 0019 32000000 		.4byte	.LVL9
+ 1929 001d 34000000 		.4byte	.LVL10
+ 1930 0021 0100     		.2byte	0x1
+ 1931 0023 50       		.byte	0x50
+ 1932 0024 34000000 		.4byte	.LVL10
+ 1933 0028 36000000 		.4byte	.LVL11
+ 1934 002c 0400     		.2byte	0x4
+ 1935 002e F3       		.byte	0xf3
+ 1936 002f 01       		.uleb128 0x1
+ 1937 0030 50       		.byte	0x50
+ 1938 0031 9F       		.byte	0x9f
+ 1939 0032 36000000 		.4byte	.LVL11
+ 1940 0036 38000000 		.4byte	.LVL12
+ 1941 003a 0100     		.2byte	0x1
+ 1942 003c 50       		.byte	0x50
+ 1943 003d 38000000 		.4byte	.LVL12
+ 1944 0041 3C000000 		.4byte	.LFE45
+ 1945 0045 0400     		.2byte	0x4
+ 1946 0047 F3       		.byte	0xf3
+ 1947 0048 01       		.uleb128 0x1
+ 1948 0049 50       		.byte	0x50
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 46
+
+
+ 1949 004a 9F       		.byte	0x9f
+ 1950 004b 00000000 		.4byte	0
+ 1951 004f 00000000 		.4byte	0
+ 1952              	.LLST1:
+ 1953 0053 00000000 		.4byte	.LVL0
+ 1954 0057 10000000 		.4byte	.LVL2
+ 1955 005b 0100     		.2byte	0x1
+ 1956 005d 51       		.byte	0x51
+ 1957 005e 10000000 		.4byte	.LVL2
+ 1958 0062 32000000 		.4byte	.LVL9
+ 1959 0066 0400     		.2byte	0x4
+ 1960 0068 F3       		.byte	0xf3
+ 1961 0069 01       		.uleb128 0x1
+ 1962 006a 51       		.byte	0x51
+ 1963 006b 9F       		.byte	0x9f
+ 1964 006c 32000000 		.4byte	.LVL9
+ 1965 0070 38000000 		.4byte	.LVL12
+ 1966 0074 0100     		.2byte	0x1
+ 1967 0076 51       		.byte	0x51
+ 1968 0077 38000000 		.4byte	.LVL12
+ 1969 007b 3C000000 		.4byte	.LFE45
+ 1970 007f 0400     		.2byte	0x4
+ 1971 0081 F3       		.byte	0xf3
+ 1972 0082 01       		.uleb128 0x1
+ 1973 0083 51       		.byte	0x51
+ 1974 0084 9F       		.byte	0x9f
+ 1975 0085 00000000 		.4byte	0
+ 1976 0089 00000000 		.4byte	0
+ 1977              	.LLST2:
+ 1978 008d 02000000 		.4byte	.LVL1
+ 1979 0091 10000000 		.4byte	.LVL2
+ 1980 0095 0200     		.2byte	0x2
+ 1981 0097 30       		.byte	0x30
+ 1982 0098 9F       		.byte	0x9f
+ 1983 0099 10000000 		.4byte	.LVL2
+ 1984 009d 32000000 		.4byte	.LVL9
+ 1985 00a1 0100     		.2byte	0x1
+ 1986 00a3 54       		.byte	0x54
+ 1987 00a4 32000000 		.4byte	.LVL9
+ 1988 00a8 38000000 		.4byte	.LVL12
+ 1989 00ac 0200     		.2byte	0x2
+ 1990 00ae 30       		.byte	0x30
+ 1991 00af 9F       		.byte	0x9f
+ 1992 00b0 00000000 		.4byte	0
+ 1993 00b4 00000000 		.4byte	0
+ 1994              	.LLST3:
+ 1995 00b8 02000000 		.4byte	.LVL1
+ 1996 00bc 16000000 		.4byte	.LVL3
+ 1997 00c0 0200     		.2byte	0x2
+ 1998 00c2 30       		.byte	0x30
+ 1999 00c3 9F       		.byte	0x9f
+ 2000 00c4 16000000 		.4byte	.LVL3
+ 2001 00c8 2A000000 		.4byte	.LVL7
+ 2002 00cc 0100     		.2byte	0x1
+ 2003 00ce 53       		.byte	0x53
+ 2004 00cf 32000000 		.4byte	.LVL9
+ 2005 00d3 38000000 		.4byte	.LVL12
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 47
+
+
+ 2006 00d7 0200     		.2byte	0x2
+ 2007 00d9 30       		.byte	0x30
+ 2008 00da 9F       		.byte	0x9f
+ 2009 00db 00000000 		.4byte	0
+ 2010 00df 00000000 		.4byte	0
+ 2011              	.LLST4:
+ 2012 00e3 02000000 		.4byte	.LVL1
+ 2013 00e7 10000000 		.4byte	.LVL2
+ 2014 00eb 0200     		.2byte	0x2
+ 2015 00ed 30       		.byte	0x30
+ 2016 00ee 9F       		.byte	0x9f
+ 2017 00ef 10000000 		.4byte	.LVL2
+ 2018 00f3 28000000 		.4byte	.LVL6
+ 2019 00f7 0100     		.2byte	0x1
+ 2020 00f9 52       		.byte	0x52
+ 2021 00fa 2A000000 		.4byte	.LVL7
+ 2022 00fe 32000000 		.4byte	.LVL9
+ 2023 0102 0100     		.2byte	0x1
+ 2024 0104 52       		.byte	0x52
+ 2025 0105 32000000 		.4byte	.LVL9
+ 2026 0109 38000000 		.4byte	.LVL12
+ 2027 010d 0200     		.2byte	0x2
+ 2028 010f 30       		.byte	0x30
+ 2029 0110 9F       		.byte	0x9f
+ 2030 0111 00000000 		.4byte	0
+ 2031 0115 00000000 		.4byte	0
+ 2032              	.LLST5:
+ 2033 0119 00000000 		.4byte	.LVL13
+ 2034 011d 10000000 		.4byte	.LVL15
+ 2035 0121 0100     		.2byte	0x1
+ 2036 0123 50       		.byte	0x50
+ 2037 0124 10000000 		.4byte	.LVL15
+ 2038 0128 15000000 		.4byte	.LVL16-1
+ 2039 012c 0100     		.2byte	0x1
+ 2040 012e 51       		.byte	0x51
+ 2041 012f 15000000 		.4byte	.LVL16-1
+ 2042 0133 1A000000 		.4byte	.LVL17
+ 2043 0137 0400     		.2byte	0x4
+ 2044 0139 F3       		.byte	0xf3
+ 2045 013a 01       		.uleb128 0x1
+ 2046 013b 50       		.byte	0x50
+ 2047 013c 9F       		.byte	0x9f
+ 2048 013d 1A000000 		.4byte	.LVL17
+ 2049 0141 1C000000 		.4byte	.LVL18
+ 2050 0145 0100     		.2byte	0x1
+ 2051 0147 50       		.byte	0x50
+ 2052 0148 1C000000 		.4byte	.LVL18
+ 2053 014c 1E000000 		.4byte	.LVL19
+ 2054 0150 0400     		.2byte	0x4
+ 2055 0152 F3       		.byte	0xf3
+ 2056 0153 01       		.uleb128 0x1
+ 2057 0154 50       		.byte	0x50
+ 2058 0155 9F       		.byte	0x9f
+ 2059 0156 1E000000 		.4byte	.LVL19
+ 2060 015a 20000000 		.4byte	.LVL20
+ 2061 015e 0100     		.2byte	0x1
+ 2062 0160 50       		.byte	0x50
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 48
+
+
+ 2063 0161 20000000 		.4byte	.LVL20
+ 2064 0165 28000000 		.4byte	.LFE38
+ 2065 0169 0400     		.2byte	0x4
+ 2066 016b F3       		.byte	0xf3
+ 2067 016c 01       		.uleb128 0x1
+ 2068 016d 50       		.byte	0x50
+ 2069 016e 9F       		.byte	0x9f
+ 2070 016f 00000000 		.4byte	0
+ 2071 0173 00000000 		.4byte	0
+ 2072              	.LLST6:
+ 2073 0177 00000000 		.4byte	.LVL13
+ 2074 017b 0E000000 		.4byte	.LVL14
+ 2075 017f 0100     		.2byte	0x1
+ 2076 0181 51       		.byte	0x51
+ 2077 0182 0E000000 		.4byte	.LVL14
+ 2078 0186 1A000000 		.4byte	.LVL17
+ 2079 018a 0400     		.2byte	0x4
+ 2080 018c F3       		.byte	0xf3
+ 2081 018d 01       		.uleb128 0x1
+ 2082 018e 51       		.byte	0x51
+ 2083 018f 9F       		.byte	0x9f
+ 2084 0190 1A000000 		.4byte	.LVL17
+ 2085 0194 20000000 		.4byte	.LVL20
+ 2086 0198 0100     		.2byte	0x1
+ 2087 019a 51       		.byte	0x51
+ 2088 019b 20000000 		.4byte	.LVL20
+ 2089 019f 28000000 		.4byte	.LFE38
+ 2090 01a3 0400     		.2byte	0x4
+ 2091 01a5 F3       		.byte	0xf3
+ 2092 01a6 01       		.uleb128 0x1
+ 2093 01a7 51       		.byte	0x51
+ 2094 01a8 9F       		.byte	0x9f
+ 2095 01a9 00000000 		.4byte	0
+ 2096 01ad 00000000 		.4byte	0
+ 2097              	.LLST7:
+ 2098 01b1 0C000000 		.4byte	.LVL24
+ 2099 01b5 56000000 		.4byte	.LVL29
+ 2100 01b9 0200     		.2byte	0x2
+ 2101 01bb 30       		.byte	0x30
+ 2102 01bc 9F       		.byte	0x9f
+ 2103 01bd 56000000 		.4byte	.LVL29
+ 2104 01c1 A0000000 		.4byte	.LVL31
+ 2105 01c5 0100     		.2byte	0x1
+ 2106 01c7 54       		.byte	0x54
+ 2107 01c8 00000000 		.4byte	0
+ 2108 01cc 00000000 		.4byte	0
+ 2109              	.LLST8:
+ 2110 01d0 0C000000 		.4byte	.LVL24
+ 2111 01d4 4E000000 		.4byte	.LVL27
+ 2112 01d8 0200     		.2byte	0x2
+ 2113 01da 30       		.byte	0x30
+ 2114 01db 9F       		.byte	0x9f
+ 2115 01dc 4E000000 		.4byte	.LVL27
+ 2116 01e0 BC000000 		.4byte	.LVL32
+ 2117 01e4 0100     		.2byte	0x1
+ 2118 01e6 5A       		.byte	0x5a
+ 2119 01e7 BC000000 		.4byte	.LVL32
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 49
+
+
+ 2120 01eb C4000000 		.4byte	.LVL33
+ 2121 01ef 0100     		.2byte	0x1
+ 2122 01f1 50       		.byte	0x50
+ 2123 01f2 00000000 		.4byte	0
+ 2124 01f6 00000000 		.4byte	0
+ 2125              		.section	.debug_aranges,"",%progbits
+ 2126 0000 54000000 		.4byte	0x54
+ 2127 0004 0200     		.2byte	0x2
+ 2128 0006 00000000 		.4byte	.Ldebug_info0
+ 2129 000a 04       		.byte	0x4
+ 2130 000b 00       		.byte	0
+ 2131 000c 0000     		.2byte	0
+ 2132 000e 0000     		.2byte	0
+ 2133 0010 00000000 		.4byte	.LFB45
+ 2134 0014 3C000000 		.4byte	.LFE45-.LFB45
+ 2135 0018 00000000 		.4byte	.LFB34
+ 2136 001c 0C000000 		.4byte	.LFE34-.LFB34
+ 2137 0020 00000000 		.4byte	.LFB35
+ 2138 0024 0C000000 		.4byte	.LFE35-.LFB35
+ 2139 0028 00000000 		.4byte	.LFB36
+ 2140 002c 0C000000 		.4byte	.LFE36-.LFB36
+ 2141 0030 00000000 		.4byte	.LFB37
+ 2142 0034 02000000 		.4byte	.LFE37-.LFB37
+ 2143 0038 00000000 		.4byte	.LFB38
+ 2144 003c 28000000 		.4byte	.LFE38-.LFB38
+ 2145 0040 00000000 		.4byte	.LFB39
+ 2146 0044 3C000000 		.4byte	.LFE39-.LFB39
+ 2147 0048 00000000 		.4byte	.LFB40
+ 2148 004c 44010000 		.4byte	.LFE40-.LFB40
+ 2149 0050 00000000 		.4byte	0
+ 2150 0054 00000000 		.4byte	0
+ 2151              		.section	.debug_ranges,"",%progbits
+ 2152              	.Ldebug_ranges0:
+ 2153 0000 00000000 		.4byte	.LFB45
+ 2154 0004 3C000000 		.4byte	.LFE45
+ 2155 0008 00000000 		.4byte	.LFB34
+ 2156 000c 0C000000 		.4byte	.LFE34
+ 2157 0010 00000000 		.4byte	.LFB35
+ 2158 0014 0C000000 		.4byte	.LFE35
+ 2159 0018 00000000 		.4byte	.LFB36
+ 2160 001c 0C000000 		.4byte	.LFE36
+ 2161 0020 00000000 		.4byte	.LFB37
+ 2162 0024 02000000 		.4byte	.LFE37
+ 2163 0028 00000000 		.4byte	.LFB38
+ 2164 002c 28000000 		.4byte	.LFE38
+ 2165 0030 00000000 		.4byte	.LFB39
+ 2166 0034 3C000000 		.4byte	.LFE39
+ 2167 0038 00000000 		.4byte	.LFB40
+ 2168 003c 44010000 		.4byte	.LFE40
+ 2169 0040 00000000 		.4byte	0
+ 2170 0044 00000000 		.4byte	0
+ 2171              		.section	.debug_line,"",%progbits
+ 2172              	.Ldebug_line0:
+ 2173 0000 8F010000 		.section	.debug_str,"MS",%progbits,1
+ 2173      02009C00 
+ 2173      00000201 
+ 2173      FB0E0D00 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 50
+
+
+ 2173      01010101 
+ 2174              	.LASF33:
+ 2175 0000 69734C61 		.ascii	"isLastDriver\000"
+ 2175      73744472 
+ 2175      69766572 
+ 2175      00
+ 2176              	.LASF59:
+ 2177 000d 72656775 		.ascii	"regulateBrightness\000"
+ 2177      6C617465 
+ 2177      42726967 
+ 2177      68746E65 
+ 2177      737300
+ 2178              	.LASF39:
+ 2179 0020 4144435F 		.ascii	"ADC_Data\000"
+ 2179      44617461 
+ 2179      00
+ 2180              	.LASF44:
+ 2181 0029 74656D70 		.ascii	"temperatureSample\000"
+ 2181      65726174 
+ 2181      75726553 
+ 2181      616D706C 
+ 2181      6500
+ 2182              	.LASF60:
+ 2183 003b 67657444 		.ascii	"getDriverID\000"
+ 2183      72697665 
+ 2183      72494400 
+ 2184              	.LASF2:
+ 2185 0047 73686F72 		.ascii	"short int\000"
+ 2185      7420696E 
+ 2185      7400
+ 2186              	.LASF16:
+ 2187 0051 73697A65 		.ascii	"sizetype\000"
+ 2187      74797065 
+ 2187      00
+ 2188              	.LASF62:
+ 2189 005a 41636B54 		.ascii	"AckTimer_Stop\000"
+ 2189      696D6572 
+ 2189      5F53746F 
+ 2189      7000
+ 2190              	.LASF53:
+ 2191 0068 6D656D63 		.ascii	"memcpy\000"
+ 2191      707900
+ 2192              	.LASF66:
+ 2193 006f 433A5C55 		.ascii	"C:\\Users\\kylep\\Box Sync\\Feniex Firmware Files\\"
+ 2193      73657273 
+ 2193      5C6B796C 
+ 2193      65705C42 
+ 2193      6F782053 
+ 2194 009d 414C4220 		.ascii	"ALB Cube\\81-00024-01 AI Cube\\81-00024-01.cydsn\000"
+ 2194      43756265 
+ 2194      5C38312D 
+ 2194      30303032 
+ 2194      342D3031 
+ 2195              	.LASF51:
+ 2196 00cc 72656164 		.ascii	"readyToSendThresholdCounter\000"
+ 2196      79546F53 
+ 2196      656E6454 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 51
+
+
+ 2196      68726573 
+ 2196      686F6C64 
+ 2197              	.LASF10:
+ 2198 00e8 75696E74 		.ascii	"uint16\000"
+ 2198      313600
+ 2199              	.LASF46:
+ 2200 00ef 6C617374 		.ascii	"lastDriverPacket\000"
+ 2200      44726976 
+ 2200      65725061 
+ 2200      636B6574 
+ 2200      00
+ 2201              	.LASF38:
+ 2202 0100 70726F63 		.ascii	"processSamplingTimerRoutine\000"
+ 2202      65737353 
+ 2202      616D706C 
+ 2202      696E6754 
+ 2202      696D6572 
+ 2203              	.LASF12:
+ 2204 011c 696E7431 		.ascii	"int16\000"
+ 2204      3600
+ 2205              	.LASF9:
+ 2206 0122 75696E74 		.ascii	"uint8\000"
+ 2206      3800
+ 2207              	.LASF50:
+ 2208 0128 62526561 		.ascii	"bReadyToSendNextBrightnessTimeoutPacket\000"
+ 2208      6479546F 
+ 2208      53656E64 
+ 2208      4E657874 
+ 2208      42726967 
+ 2209              	.LASF27:
+ 2210 0150 7061636B 		.ascii	"packet\000"
+ 2210      657400
+ 2211              	.LASF0:
+ 2212 0157 7369676E 		.ascii	"signed char\000"
+ 2212      65642063 
+ 2212      68617200 
+ 2213              	.LASF13:
+ 2214 0163 666C6F61 		.ascii	"float\000"
+ 2214      7400
+ 2215              	.LASF6:
+ 2216 0169 6C6F6E67 		.ascii	"long long int\000"
+ 2216      206C6F6E 
+ 2216      6720696E 
+ 2216      7400
+ 2217              	.LASF47:
+ 2218 0177 74656D70 		.ascii	"temperaturePayload\000"
+ 2218      65726174 
+ 2218      75726550 
+ 2218      61796C6F 
+ 2218      616400
+ 2219              	.LASF58:
+ 2220 018a 6765744D 		.ascii	"getMaxTemperature\000"
+ 2220      61785465 
+ 2220      6D706572 
+ 2220      61747572 
+ 2220      6500
+ 2221              	.LASF4:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 52
+
+
+ 2222 019c 6C6F6E67 		.ascii	"long int\000"
+ 2222      20696E74 
+ 2222      00
+ 2223              	.LASF40:
+ 2224 01a5 48696768 		.ascii	"HighestTemperatures\000"
+ 2224      65737454 
+ 2224      656D7065 
+ 2224      72617475 
+ 2224      72657300 
+ 2225              	.LASF20:
+ 2226 01b9 4D494352 		.ascii	"MICRO\000"
+ 2226      4F00
+ 2227              	.LASF52:
+ 2228 01bf 73656E64 		.ascii	"sendTempPacketBack\000"
+ 2228      54656D70 
+ 2228      5061636B 
+ 2228      65744261 
+ 2228      636B00
+ 2229              	.LASF1:
+ 2230 01d2 756E7369 		.ascii	"unsigned char\000"
+ 2230      676E6564 
+ 2230      20636861 
+ 2230      7200
+ 2231              	.LASF64:
+ 2232 01e0 474E5520 		.ascii	"GNU C 4.9.3 20150303 (release) [ARM/embedded-4_9-br"
+ 2232      4320342E 
+ 2232      392E3320 
+ 2232      32303135 
+ 2232      30333033 
+ 2233 0213 616E6368 		.ascii	"anch revision 221220] -mcpu=cortex-m0 -mthumb -g -O"
+ 2233      20726576 
+ 2233      6973696F 
+ 2233      6E203232 
+ 2233      31323230 
+ 2234 0246 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 2234      66756E63 
+ 2234      74696F6E 
+ 2234      2D736563 
+ 2234      74696F6E 
+ 2235              	.LASF34:
+ 2236 026e 636C6561 		.ascii	"clearIsReadyToSendNextBrightnessPacket\000"
+ 2236      72497352 
+ 2236      65616479 
+ 2236      546F5365 
+ 2236      6E644E65 
+ 2237              	.LASF68:
+ 2238 0295 67657448 		.ascii	"getHighestTemperature\000"
+ 2238      69676865 
+ 2238      73745465 
+ 2238      6D706572 
+ 2238      61747572 
+ 2239              	.LASF28:
+ 2240 02ab 6C656E67 		.ascii	"length\000"
+ 2240      746800
+ 2241              	.LASF65:
+ 2242 02b2 2E5C5465 		.ascii	".\\TemperatureCommManager.c\000"
+ 2242      6D706572 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 53
+
+
+ 2242      61747572 
+ 2242      65436F6D 
+ 2242      6D4D616E 
+ 2243              	.LASF61:
+ 2244 02cd 6765744E 		.ascii	"getNewMaxBrightness\000"
+ 2244      65774D61 
+ 2244      78427269 
+ 2244      6768746E 
+ 2244      65737300 
+ 2245              	.LASF26:
+ 2246 02e1 5061636B 		.ascii	"Packet\000"
+ 2246      657400
+ 2247              	.LASF22:
+ 2248 02e8 5041434B 		.ascii	"PACKET_TYPE\000"
+ 2248      45545F54 
+ 2248      59504500 
+ 2249              	.LASF41:
+ 2250 02f4 6368616E 		.ascii	"channelNumber\000"
+ 2250      6E656C4E 
+ 2250      756D6265 
+ 2250      7200
+ 2251              	.LASF37:
+ 2252 0302 70726F63 		.ascii	"processAckTimeoutRoutine\000"
+ 2252      65737341 
+ 2252      636B5469 
+ 2252      6D656F75 
+ 2252      74526F75 
+ 2253              	.LASF35:
+ 2254 031b 70726F63 		.ascii	"processTemperatureByteReceivedHandler\000"
+ 2254      65737354 
+ 2254      656D7065 
+ 2254      72617475 
+ 2254      72654279 
+ 2255              	.LASF25:
+ 2256 0341 454F505F 		.ascii	"EOP_LINE_FEED\000"
+ 2256      4C494E45 
+ 2256      5F464545 
+ 2256      4400
+ 2257              	.LASF7:
+ 2258 034f 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 2258      206C6F6E 
+ 2258      6720756E 
+ 2258      7369676E 
+ 2258      65642069 
+ 2259              	.LASF8:
+ 2260 0366 756E7369 		.ascii	"unsigned int\000"
+ 2260      676E6564 
+ 2260      20696E74 
+ 2260      00
+ 2261              	.LASF49:
+ 2262 0373 624C6173 		.ascii	"bLastDriverInChain\000"
+ 2262      74447269 
+ 2262      76657249 
+ 2262      6E436861 
+ 2262      696E00
+ 2263              	.LASF63:
+ 2264 0386 4144435F 		.ascii	"ADC_SAR_Seq_EnableInjection\000"
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 54
+
+
+ 2264      5341525F 
+ 2264      5365715F 
+ 2264      456E6162 
+ 2264      6C65496E 
+ 2265              	.LASF55:
+ 2266 03a2 53616D70 		.ascii	"SamplingTimer_ClearInterrupt\000"
+ 2266      6C696E67 
+ 2266      54696D65 
+ 2266      725F436C 
+ 2266      65617249 
+ 2267              	.LASF3:
+ 2268 03bf 73686F72 		.ascii	"short unsigned int\000"
+ 2268      7420756E 
+ 2268      7369676E 
+ 2268      65642069 
+ 2268      6E7400
+ 2269              	.LASF18:
+ 2270 03d2 564F4C54 		.ascii	"VOLTAGE_SENSE\000"
+ 2270      4147455F 
+ 2270      53454E53 
+ 2270      4500
+ 2271              	.LASF48:
+ 2272 03e0 74696D65 		.ascii	"timerCount\000"
+ 2272      72436F75 
+ 2272      6E7400
+ 2273              	.LASF54:
+ 2274 03eb 41636B54 		.ascii	"AckTimer_ClearInterrupt\000"
+ 2274      696D6572 
+ 2274      5F436C65 
+ 2274      6172496E 
+ 2274      74657272 
+ 2275              	.LASF45:
+ 2276 0403 5061636B 		.ascii	"PacketList\000"
+ 2276      65744C69 
+ 2276      737400
+ 2277              	.LASF15:
+ 2278 040e 63686172 		.ascii	"char\000"
+ 2278      00
+ 2279              	.LASF32:
+ 2280 0413 69735265 		.ascii	"isReadyToSendNextBrightnessPacket\000"
+ 2280      61647954 
+ 2280      6F53656E 
+ 2280      644E6578 
+ 2280      74427269 
+ 2281              	.LASF29:
+ 2282 0435 68696768 		.ascii	"highestTemperature\000"
+ 2282      65737454 
+ 2282      656D7065 
+ 2282      72617475 
+ 2282      726500
+ 2283              	.LASF17:
+ 2284 0448 53574954 		.ascii	"SWITCH_NODE\000"
+ 2284      43485F4E 
+ 2284      4F444500 
+ 2285              	.LASF11:
+ 2286 0454 75696E74 		.ascii	"uint32\000"
+ 2286      333200
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 55
+
+
+ 2287              	.LASF5:
+ 2288 045b 6C6F6E67 		.ascii	"long unsigned int\000"
+ 2288      20756E73 
+ 2288      69676E65 
+ 2288      6420696E 
+ 2288      7400
+ 2289              	.LASF14:
+ 2290 046d 646F7562 		.ascii	"double\000"
+ 2290      6C6500
+ 2291              	.LASF36:
+ 2292 0474 64617461 		.ascii	"dataPacket\000"
+ 2292      5061636B 
+ 2292      657400
+ 2293              	.LASF42:
+ 2294 047f 74656D70 		.ascii	"temporaryPacket\000"
+ 2294      6F726172 
+ 2294      79506163 
+ 2294      6B657400 
+ 2295              	.LASF69:
+ 2296 048f 7365744C 		.ascii	"setLastDriverPacket\000"
+ 2296      61737444 
+ 2296      72697665 
+ 2296      72506163 
+ 2296      6B657400 
+ 2297              	.LASF43:
+ 2298 04a3 64726976 		.ascii	"driverID\000"
+ 2298      65724944 
+ 2298      00
+ 2299              	.LASF21:
+ 2300 04ac 48454144 		.ascii	"HEADER_BYTE\000"
+ 2300      45525F42 
+ 2300      59544500 
+ 2301              	.LASF30:
+ 2302 04b8 74656D70 		.ascii	"temperatureToCheck\000"
+ 2302      65726174 
+ 2302      75726554 
+ 2302      6F436865 
+ 2302      636B00
+ 2303              	.LASF23:
+ 2304 04cb 5041594C 		.ascii	"PAYLOAD_SIZE\000"
+ 2304      4F41445F 
+ 2304      53495A45 
+ 2304      00
+ 2305              	.LASF67:
+ 2306 04d8 54656D70 		.ascii	"TemperaturePoint\000"
+ 2306      65726174 
+ 2306      75726550 
+ 2306      6F696E74 
+ 2306      00
+ 2307              	.LASF56:
+ 2308 04e9 73657444 		.ascii	"setDriverCount\000"
+ 2308      72697665 
+ 2308      72436F75 
+ 2308      6E7400
+ 2309              	.LASF31:
+ 2310 04f8 6D6F6475 		.ascii	"moduleIndex\000"
+ 2310      6C65496E 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc7tCmDj.s 			page 56
+
+
+ 2310      64657800 
+ 2311              	.LASF57:
+ 2312 0504 67657454 		.ascii	"getTemperatureSample\000"
+ 2312      656D7065 
+ 2312      72617475 
+ 2312      72655361 
+ 2312      6D706C65 
+ 2313              	.LASF19:
+ 2314 0519 53504143 		.ascii	"SPACE_HOLDER\000"
+ 2314      455F484F 
+ 2314      4C444552 
+ 2314      00
+ 2315              	.LASF24:
+ 2316 0526 454F505F 		.ascii	"EOP_CARRIAGE_RETURN\000"
+ 2316      43415252 
+ 2316      49414745 
+ 2316      5F524554 
+ 2316      55524E00 
+ 2317              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 4.9.3 20150303 (release) [ARM/embedded-4_9-br

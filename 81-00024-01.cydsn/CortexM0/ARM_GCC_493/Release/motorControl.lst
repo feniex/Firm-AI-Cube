@@ -1,0 +1,817 @@
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc5rN3fG.s 			page 1
+
+
+   1              		.cpu cortex-m0
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 34, 0
+  11              		.eabi_attribute 18, 4
+  12              		.code	16
+  13              		.file	"motorControl.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.section	.text.initializeMotor,"ax",%progbits
+  18              		.align	2
+  19              		.global	initializeMotor
+  20              		.code	16
+  21              		.thumb_func
+  22              		.type	initializeMotor, %function
+  23              	initializeMotor:
+  24              	.LFB34:
+  25              		.file 1 ".\\motorControl.c"
+   1:.\motorControl.c **** /* ========================================
+   2:.\motorControl.c ****  *
+   3:.\motorControl.c ****  * Copyright YOUR COMPANY, THE YEAR
+   4:.\motorControl.c ****  * All Rights Reserved
+   5:.\motorControl.c ****  * UNPUBLISHED, LICENSED SOFTWARE.
+   6:.\motorControl.c ****  *
+   7:.\motorControl.c ****  * CONFIDENTIAL AND PROPRIETARY INFORMATION
+   8:.\motorControl.c ****  * WHICH IS THE PROPERTY OF your company.
+   9:.\motorControl.c ****  *
+  10:.\motorControl.c ****  * ========================================
+  11:.\motorControl.c **** */
+  12:.\motorControl.c **** 
+  13:.\motorControl.c **** #include "motorControl.h"
+  14:.\motorControl.c **** 
+  15:.\motorControl.c **** /*******************************************************************************
+  16:.\motorControl.c **** * Function Name: initializeMotor
+  17:.\motorControl.c **** ********************************************************************************
+  18:.\motorControl.c **** *
+  19:.\motorControl.c **** * Summary:
+  20:.\motorControl.c **** *  Inititates the motor PWM module
+  21:.\motorControl.c **** *
+  22:.\motorControl.c **** * Parameters:  
+  23:.\motorControl.c **** *   None
+  24:.\motorControl.c **** *
+  25:.\motorControl.c **** * Return:
+  26:.\motorControl.c **** *   None
+  27:.\motorControl.c **** *
+  28:.\motorControl.c **** *******************************************************************************/
+  29:.\motorControl.c **** void initializeMotor(void)
+  30:.\motorControl.c **** {  
+  26              		.loc 1 30 0
+  27              		.cfi_startproc
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc5rN3fG.s 			page 2
+
+
+  28 0000 80B5     		push	{r7, lr}
+  29              		.cfi_def_cfa_offset 8
+  30              		.cfi_offset 7, -8
+  31              		.cfi_offset 14, -4
+  32 0002 00AF     		add	r7, sp, #0
+  33              		.cfi_def_cfa_register 7
+  31:.\motorControl.c ****     pwmClock_Enable();
+  34              		.loc 1 31 0
+  35 0004 FFF7FEFF 		bl	pwmClock_Start
+  32:.\motorControl.c ****     motorControlPWM_Start();
+  36              		.loc 1 32 0
+  37 0008 FFF7FEFF 		bl	motorControlPWM_Start
+  33:.\motorControl.c ****     motorControlPWM_SetCompareMode(motorControlPWM__B_PWM__LESS_THAN);
+  38              		.loc 1 33 0
+  39 000c 0120     		mov	r0, #1
+  40 000e FFF7FEFF 		bl	motorControlPWM_SetCompareMode
+  34:.\motorControl.c ****     motorControlPWM_WriteCompare(0x00);
+  41              		.loc 1 34 0
+  42 0012 0020     		mov	r0, #0
+  43 0014 FFF7FEFF 		bl	motorControlPWM_WriteCompare
+  35:.\motorControl.c ****     //aMux_Start();
+  36:.\motorControl.c **** }
+  44              		.loc 1 36 0
+  45 0018 BD46     		mov	sp, r7
+  46              		@ sp needed
+  47 001a 80BD     		pop	{r7, pc}
+  48              		.cfi_endproc
+  49              	.LFE34:
+  50              		.size	initializeMotor, .-initializeMotor
+  51              		.section	.text.setMotorOutputs,"ax",%progbits
+  52              		.align	2
+  53              		.global	setMotorOutputs
+  54              		.code	16
+  55              		.thumb_func
+  56              		.type	setMotorOutputs, %function
+  57              	setMotorOutputs:
+  58              	.LFB35:
+  37:.\motorControl.c **** 
+  38:.\motorControl.c **** /*******************************************************************************
+  39:.\motorControl.c **** * Function Name: setMotorOutputs
+  40:.\motorControl.c **** ********************************************************************************
+  41:.\motorControl.c **** *
+  42:.\motorControl.c **** * Summary:
+  43:.\motorControl.c **** *  Inititates the calibration sequence for the motor
+  44:.\motorControl.c **** *
+  45:.\motorControl.c **** * Parameters:  
+  46:.\motorControl.c **** *   Direction: 00 BRAKE
+  47:.\motorControl.c **** *              01 Forward
+  48:.\motorControl.c **** *              10 Reverse
+  49:.\motorControl.c **** *   Speed:     0-255 Steps of control
+  50:.\motorControl.c **** *
+  51:.\motorControl.c **** * Return:
+  52:.\motorControl.c **** *   None
+  53:.\motorControl.c **** *
+  54:.\motorControl.c **** *******************************************************************************/
+  55:.\motorControl.c **** 
+  56:.\motorControl.c **** 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc5rN3fG.s 			page 3
+
+
+  57:.\motorControl.c **** void setMotorOutputs(Direction direction, Speed speed)
+  58:.\motorControl.c **** {
+  59              		.loc 1 58 0
+  60              		.cfi_startproc
+  61 0000 80B5     		push	{r7, lr}
+  62              		.cfi_def_cfa_offset 8
+  63              		.cfi_offset 7, -8
+  64              		.cfi_offset 14, -4
+  65 0002 82B0     		sub	sp, sp, #8
+  66              		.cfi_def_cfa_offset 16
+  67 0004 00AF     		add	r7, sp, #0
+  68              		.cfi_def_cfa_register 7
+  69 0006 021C     		mov	r2, r0
+  70 0008 FB1D     		add	r3, r7, #7
+  71 000a 1A70     		strb	r2, [r3]
+  72 000c BB1D     		add	r3, r7, #6
+  73 000e 0A1C     		add	r2, r1, #0
+  74 0010 1A70     		strb	r2, [r3]
+  59:.\motorControl.c ****     if(direction == FORWARD)
+  75              		.loc 1 59 0
+  76 0012 FB1D     		add	r3, r7, #7
+  77 0014 1B78     		ldrb	r3, [r3]
+  78 0016 012B     		cmp	r3, #1
+  79 0018 0CD1     		bne	.L3
+  60:.\motorControl.c ****     {
+  61:.\motorControl.c ****         MOTOR_OUTB_LOW;
+  80              		.loc 1 61 0
+  81 001a 234B     		ldr	r3, .L7
+  82 001c 224A     		ldr	r2, .L7
+  83 001e 1268     		ldr	r2, [r2]
+  84 0020 4021     		mov	r1, #64
+  85 0022 8A43     		bic	r2, r1
+  86 0024 1A60     		str	r2, [r3]
+  62:.\motorControl.c ****         MOTOR_OUTA_HIGH;
+  87              		.loc 1 62 0
+  88 0026 204B     		ldr	r3, .L7
+  89 0028 1F4A     		ldr	r2, .L7
+  90 002a 1268     		ldr	r2, [r2]
+  91 002c 0421     		mov	r1, #4
+  92 002e 0A43     		orr	r2, r1
+  93 0030 1A60     		str	r2, [r3]
+  94 0032 31E0     		b	.L4
+  95              	.L3:
+  63:.\motorControl.c ****     }
+  64:.\motorControl.c ****     else if(direction == BACKWARDS)
+  96              		.loc 1 64 0
+  97 0034 FB1D     		add	r3, r7, #7
+  98 0036 1B78     		ldrb	r3, [r3]
+  99 0038 0A2B     		cmp	r3, #10
+ 100 003a 0CD1     		bne	.L5
+  65:.\motorControl.c ****     {
+  66:.\motorControl.c ****         MOTOR_OUTB_HIGH;
+ 101              		.loc 1 66 0
+ 102 003c 1A4B     		ldr	r3, .L7
+ 103 003e 1A4A     		ldr	r2, .L7
+ 104 0040 1268     		ldr	r2, [r2]
+ 105 0042 4021     		mov	r1, #64
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc5rN3fG.s 			page 4
+
+
+ 106 0044 0A43     		orr	r2, r1
+ 107 0046 1A60     		str	r2, [r3]
+  67:.\motorControl.c ****         MOTOR_OUTA_LOW;
+ 108              		.loc 1 67 0
+ 109 0048 174B     		ldr	r3, .L7
+ 110 004a 174A     		ldr	r2, .L7
+ 111 004c 1268     		ldr	r2, [r2]
+ 112 004e 0421     		mov	r1, #4
+ 113 0050 8A43     		bic	r2, r1
+ 114 0052 1A60     		str	r2, [r3]
+ 115 0054 20E0     		b	.L4
+ 116              	.L5:
+  68:.\motorControl.c ****     }
+  69:.\motorControl.c ****     else if(direction == BRAKE)
+ 117              		.loc 1 69 0
+ 118 0056 FB1D     		add	r3, r7, #7
+ 119 0058 1B78     		ldrb	r3, [r3]
+ 120 005a 002B     		cmp	r3, #0
+ 121 005c 0CD1     		bne	.L6
+  70:.\motorControl.c ****     {
+  71:.\motorControl.c ****         MOTOR_OUTB_LOW;
+ 122              		.loc 1 71 0
+ 123 005e 124B     		ldr	r3, .L7
+ 124 0060 114A     		ldr	r2, .L7
+ 125 0062 1268     		ldr	r2, [r2]
+ 126 0064 4021     		mov	r1, #64
+ 127 0066 8A43     		bic	r2, r1
+ 128 0068 1A60     		str	r2, [r3]
+  72:.\motorControl.c ****         MOTOR_OUTA_LOW;
+ 129              		.loc 1 72 0
+ 130 006a 0F4B     		ldr	r3, .L7
+ 131 006c 0E4A     		ldr	r2, .L7
+ 132 006e 1268     		ldr	r2, [r2]
+ 133 0070 0421     		mov	r1, #4
+ 134 0072 8A43     		bic	r2, r1
+ 135 0074 1A60     		str	r2, [r3]
+ 136 0076 0FE0     		b	.L4
+ 137              	.L6:
+  73:.\motorControl.c ****     }
+  74:.\motorControl.c ****     else if(direction == OFF_NOTHING)
+ 138              		.loc 1 74 0
+ 139 0078 FB1D     		add	r3, r7, #7
+ 140 007a 1B78     		ldrb	r3, [r3]
+ 141 007c 032B     		cmp	r3, #3
+ 142 007e 0BD1     		bne	.L4
+  75:.\motorControl.c ****     {
+  76:.\motorControl.c ****         MOTOR_OUTB_HIGH;
+ 143              		.loc 1 76 0
+ 144 0080 094B     		ldr	r3, .L7
+ 145 0082 094A     		ldr	r2, .L7
+ 146 0084 1268     		ldr	r2, [r2]
+ 147 0086 4021     		mov	r1, #64
+ 148 0088 0A43     		orr	r2, r1
+ 149 008a 1A60     		str	r2, [r3]
+  77:.\motorControl.c ****         MOTOR_OUTA_HIGH;
+ 150              		.loc 1 77 0
+ 151 008c 064B     		ldr	r3, .L7
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc5rN3fG.s 			page 5
+
+
+ 152 008e 064A     		ldr	r2, .L7
+ 153 0090 1268     		ldr	r2, [r2]
+ 154 0092 0421     		mov	r1, #4
+ 155 0094 0A43     		orr	r2, r1
+ 156 0096 1A60     		str	r2, [r3]
+ 157              	.L4:
+  78:.\motorControl.c ****     }
+  79:.\motorControl.c ****     
+  80:.\motorControl.c ****     motorControlPWM_WriteCompare(speed);
+ 158              		.loc 1 80 0
+ 159 0098 BB1D     		add	r3, r7, #6
+ 160 009a 1B78     		ldrb	r3, [r3]
+ 161 009c 181C     		mov	r0, r3
+ 162 009e FFF7FEFF 		bl	motorControlPWM_WriteCompare
+  81:.\motorControl.c **** }...
+ 163              		.loc 1 81 0
+ 164 00a2 BD46     		mov	sp, r7
+ 165 00a4 02B0     		add	sp, sp, #8
+ 166              		@ sp needed
+ 167 00a6 80BD     		pop	{r7, pc}
+ 168              	.L8:
+ 169              		.align	2
+ 170              	.L7:
+ 171 00a8 00000440 		.word	1074003968
+ 172              		.cfi_endproc
+ 173              	.LFE35:
+ 174              		.size	setMotorOutputs, .-setMotorOutputs
+ 175              		.text
+ 176              	.Letext0:
+ 177              		.file 2 "Generated_Source\\PSoC4/cytypes.h"
+ 178              		.file 3 ".\\motorControl.h"
+ 179              		.section	.debug_info,"",%progbits
+ 180              	.Ldebug_info0:
+ 181 0000 3B010000 		.4byte	0x13b
+ 182 0004 0400     		.2byte	0x4
+ 183 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 184 000a 04       		.byte	0x4
+ 185 000b 01       		.uleb128 0x1
+ 186 000c 02010000 		.4byte	.LASF27
+ 187 0010 01       		.byte	0x1
+ 188 0011 90010000 		.4byte	.LASF28
+ 189 0015 38000000 		.4byte	.LASF29
+ 190 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 191 001d 00000000 		.4byte	0
+ 192 0021 00000000 		.4byte	.Ldebug_line0
+ 193 0025 02       		.uleb128 0x2
+ 194 0026 01       		.byte	0x1
+ 195 0027 06       		.byte	0x6
+ 196 0028 3E020000 		.4byte	.LASF0
+ 197 002c 02       		.uleb128 0x2
+ 198 002d 01       		.byte	0x1
+ 199 002e 08       		.byte	0x8
+ 200 002f B8000000 		.4byte	.LASF1
+ 201 0033 02       		.uleb128 0x2
+ 202 0034 02       		.byte	0x2
+ 203 0035 05       		.byte	0x5
+ 204 0036 21020000 		.4byte	.LASF2
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc5rN3fG.s 			page 6
+
+
+ 205 003a 02       		.uleb128 0x2
+ 206 003b 02       		.byte	0x2
+ 207 003c 07       		.byte	0x7
+ 208 003d E8000000 		.4byte	.LASF3
+ 209 0041 02       		.uleb128 0x2
+ 210 0042 04       		.byte	0x4
+ 211 0043 05       		.byte	0x5
+ 212 0044 35020000 		.4byte	.LASF4
+ 213 0048 02       		.uleb128 0x2
+ 214 0049 04       		.byte	0x4
+ 215 004a 07       		.byte	0x7
+ 216 004b C6000000 		.4byte	.LASF5
+ 217 004f 02       		.uleb128 0x2
+ 218 0050 08       		.byte	0x8
+ 219 0051 05       		.byte	0x5
+ 220 0052 F9010000 		.4byte	.LASF6
+ 221 0056 02       		.uleb128 0x2
+ 222 0057 08       		.byte	0x8
+ 223 0058 07       		.byte	0x7
+ 224 0059 B5010000 		.4byte	.LASF7
+ 225 005d 03       		.uleb128 0x3
+ 226 005e 04       		.byte	0x4
+ 227 005f 05       		.byte	0x5
+ 228 0060 696E7400 		.ascii	"int\000"
+ 229 0064 02       		.uleb128 0x2
+ 230 0065 04       		.byte	0x4
+ 231 0066 07       		.byte	0x7
+ 232 0067 A8010000 		.4byte	.LASF8
+ 233 006b 04       		.uleb128 0x4
+ 234 006c A1010000 		.4byte	.LASF12
+ 235 0070 02       		.byte	0x2
+ 236 0071 3A01     		.2byte	0x13a
+ 237 0073 48000000 		.4byte	0x48
+ 238 0077 02       		.uleb128 0x2
+ 239 0078 04       		.byte	0x4
+ 240 0079 04       		.byte	0x4
+ 241 007a B2000000 		.4byte	.LASF9
+ 242 007e 02       		.uleb128 0x2
+ 243 007f 08       		.byte	0x8
+ 244 0080 04       		.byte	0x4
+ 245 0081 FB000000 		.4byte	.LASF10
+ 246 0085 02       		.uleb128 0x2
+ 247 0086 01       		.byte	0x1
+ 248 0087 08       		.byte	0x8
+ 249 0088 07020000 		.4byte	.LASF11
+ 250 008c 04       		.uleb128 0x4
+ 251 008d 20000000 		.4byte	.LASF13
+ 252 0091 02       		.byte	0x2
+ 253 0092 E401     		.2byte	0x1e4
+ 254 0094 98000000 		.4byte	0x98
+ 255 0098 05       		.uleb128 0x5
+ 256 0099 6B000000 		.4byte	0x6b
+ 257 009d 02       		.uleb128 0x2
+ 258 009e 04       		.byte	0x4
+ 259 009f 07       		.byte	0x7
+ 260 00a0 E0010000 		.4byte	.LASF14
+ 261 00a4 06       		.uleb128 0x6
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc5rN3fG.s 			page 7
+
+
+ 262 00a5 06000000 		.4byte	.LASF20
+ 263 00a9 01       		.byte	0x1
+ 264 00aa 03       		.byte	0x3
+ 265 00ab 15       		.byte	0x15
+ 266 00ac C9000000 		.4byte	0xc9
+ 267 00b0 07       		.uleb128 0x7
+ 268 00b1 AA000000 		.4byte	.LASF15
+ 269 00b5 01       		.sleb128 1
+ 270 00b6 07       		.uleb128 0x7
+ 271 00b7 0C020000 		.4byte	.LASF16
+ 272 00bb 0A       		.sleb128 10
+ 273 00bc 07       		.uleb128 0x7
+ 274 00bd 32000000 		.4byte	.LASF17
+ 275 00c1 00       		.sleb128 0
+ 276 00c2 07       		.uleb128 0x7
+ 277 00c3 26000000 		.4byte	.LASF18
+ 278 00c7 03       		.sleb128 3
+ 279 00c8 00       		.byte	0
+ 280 00c9 08       		.uleb128 0x8
+ 281 00ca 2B020000 		.4byte	.LASF19
+ 282 00ce 03       		.byte	0x3
+ 283 00cf 1B       		.byte	0x1b
+ 284 00d0 A4000000 		.4byte	0xa4
+ 285 00d4 06       		.uleb128 0x6
+ 286 00d5 16020000 		.4byte	.LASF21
+ 287 00d9 01       		.byte	0x1
+ 288 00da 03       		.byte	0x3
+ 289 00db 1D       		.byte	0x1d
+ 290 00dc F4000000 		.4byte	0xf4
+ 291 00e0 07       		.uleb128 0x7
+ 292 00e1 95000000 		.4byte	.LASF22
+ 293 00e5 FF01     		.sleb128 255
+ 294 00e7 09       		.uleb128 0x9
+ 295 00e8 4F464600 		.ascii	"OFF\000"
+ 296 00ec 00       		.sleb128 0
+ 297 00ed 07       		.uleb128 0x7
+ 298 00ee CC010000 		.4byte	.LASF23
+ 299 00f2 3F       		.sleb128 63
+ 300 00f3 00       		.byte	0
+ 301 00f4 08       		.uleb128 0x8
+ 302 00f5 00000000 		.4byte	.LASF24
+ 303 00f9 03       		.byte	0x3
+ 304 00fa 22       		.byte	0x22
+ 305 00fb D4000000 		.4byte	0xd4
+ 306 00ff 0A       		.uleb128 0xa
+ 307 0100 D8000000 		.4byte	.LASF30
+ 308 0104 01       		.byte	0x1
+ 309 0105 1D       		.byte	0x1d
+ 310 0106 00000000 		.4byte	.LFB34
+ 311 010a 1C000000 		.4byte	.LFE34-.LFB34
+ 312 010e 01       		.uleb128 0x1
+ 313 010f 9C       		.byte	0x9c
+ 314 0110 0B       		.uleb128 0xb
+ 315 0111 E9010000 		.4byte	.LASF31
+ 316 0115 01       		.byte	0x1
+ 317 0116 39       		.byte	0x39
+ 318 0117 00000000 		.4byte	.LFB35
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc5rN3fG.s 			page 8
+
+
+ 319 011b AC000000 		.4byte	.LFE35-.LFB35
+ 320 011f 01       		.uleb128 0x1
+ 321 0120 9C       		.byte	0x9c
+ 322 0121 0C       		.uleb128 0xc
+ 323 0122 A0000000 		.4byte	.LASF25
+ 324 0126 01       		.byte	0x1
+ 325 0127 39       		.byte	0x39
+ 326 0128 C9000000 		.4byte	0xc9
+ 327 012c 02       		.uleb128 0x2
+ 328 012d 91       		.byte	0x91
+ 329 012e 77       		.sleb128 -9
+ 330 012f 0C       		.uleb128 0xc
+ 331 0130 DA010000 		.4byte	.LASF26
+ 332 0134 01       		.byte	0x1
+ 333 0135 39       		.byte	0x39
+ 334 0136 F4000000 		.4byte	0xf4
+ 335 013a 02       		.uleb128 0x2
+ 336 013b 91       		.byte	0x91
+ 337 013c 76       		.sleb128 -10
+ 338 013d 00       		.byte	0
+ 339 013e 00       		.byte	0
+ 340              		.section	.debug_abbrev,"",%progbits
+ 341              	.Ldebug_abbrev0:
+ 342 0000 01       		.uleb128 0x1
+ 343 0001 11       		.uleb128 0x11
+ 344 0002 01       		.byte	0x1
+ 345 0003 25       		.uleb128 0x25
+ 346 0004 0E       		.uleb128 0xe
+ 347 0005 13       		.uleb128 0x13
+ 348 0006 0B       		.uleb128 0xb
+ 349 0007 03       		.uleb128 0x3
+ 350 0008 0E       		.uleb128 0xe
+ 351 0009 1B       		.uleb128 0x1b
+ 352 000a 0E       		.uleb128 0xe
+ 353 000b 55       		.uleb128 0x55
+ 354 000c 17       		.uleb128 0x17
+ 355 000d 11       		.uleb128 0x11
+ 356 000e 01       		.uleb128 0x1
+ 357 000f 10       		.uleb128 0x10
+ 358 0010 17       		.uleb128 0x17
+ 359 0011 00       		.byte	0
+ 360 0012 00       		.byte	0
+ 361 0013 02       		.uleb128 0x2
+ 362 0014 24       		.uleb128 0x24
+ 363 0015 00       		.byte	0
+ 364 0016 0B       		.uleb128 0xb
+ 365 0017 0B       		.uleb128 0xb
+ 366 0018 3E       		.uleb128 0x3e
+ 367 0019 0B       		.uleb128 0xb
+ 368 001a 03       		.uleb128 0x3
+ 369 001b 0E       		.uleb128 0xe
+ 370 001c 00       		.byte	0
+ 371 001d 00       		.byte	0
+ 372 001e 03       		.uleb128 0x3
+ 373 001f 24       		.uleb128 0x24
+ 374 0020 00       		.byte	0
+ 375 0021 0B       		.uleb128 0xb
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc5rN3fG.s 			page 9
+
+
+ 376 0022 0B       		.uleb128 0xb
+ 377 0023 3E       		.uleb128 0x3e
+ 378 0024 0B       		.uleb128 0xb
+ 379 0025 03       		.uleb128 0x3
+ 380 0026 08       		.uleb128 0x8
+ 381 0027 00       		.byte	0
+ 382 0028 00       		.byte	0
+ 383 0029 04       		.uleb128 0x4
+ 384 002a 16       		.uleb128 0x16
+ 385 002b 00       		.byte	0
+ 386 002c 03       		.uleb128 0x3
+ 387 002d 0E       		.uleb128 0xe
+ 388 002e 3A       		.uleb128 0x3a
+ 389 002f 0B       		.uleb128 0xb
+ 390 0030 3B       		.uleb128 0x3b
+ 391 0031 05       		.uleb128 0x5
+ 392 0032 49       		.uleb128 0x49
+ 393 0033 13       		.uleb128 0x13
+ 394 0034 00       		.byte	0
+ 395 0035 00       		.byte	0
+ 396 0036 05       		.uleb128 0x5
+ 397 0037 35       		.uleb128 0x35
+ 398 0038 00       		.byte	0
+ 399 0039 49       		.uleb128 0x49
+ 400 003a 13       		.uleb128 0x13
+ 401 003b 00       		.byte	0
+ 402 003c 00       		.byte	0
+ 403 003d 06       		.uleb128 0x6
+ 404 003e 04       		.uleb128 0x4
+ 405 003f 01       		.byte	0x1
+ 406 0040 03       		.uleb128 0x3
+ 407 0041 0E       		.uleb128 0xe
+ 408 0042 0B       		.uleb128 0xb
+ 409 0043 0B       		.uleb128 0xb
+ 410 0044 3A       		.uleb128 0x3a
+ 411 0045 0B       		.uleb128 0xb
+ 412 0046 3B       		.uleb128 0x3b
+ 413 0047 0B       		.uleb128 0xb
+ 414 0048 01       		.uleb128 0x1
+ 415 0049 13       		.uleb128 0x13
+ 416 004a 00       		.byte	0
+ 417 004b 00       		.byte	0
+ 418 004c 07       		.uleb128 0x7
+ 419 004d 28       		.uleb128 0x28
+ 420 004e 00       		.byte	0
+ 421 004f 03       		.uleb128 0x3
+ 422 0050 0E       		.uleb128 0xe
+ 423 0051 1C       		.uleb128 0x1c
+ 424 0052 0D       		.uleb128 0xd
+ 425 0053 00       		.byte	0
+ 426 0054 00       		.byte	0
+ 427 0055 08       		.uleb128 0x8
+ 428 0056 16       		.uleb128 0x16
+ 429 0057 00       		.byte	0
+ 430 0058 03       		.uleb128 0x3
+ 431 0059 0E       		.uleb128 0xe
+ 432 005a 3A       		.uleb128 0x3a
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc5rN3fG.s 			page 10
+
+
+ 433 005b 0B       		.uleb128 0xb
+ 434 005c 3B       		.uleb128 0x3b
+ 435 005d 0B       		.uleb128 0xb
+ 436 005e 49       		.uleb128 0x49
+ 437 005f 13       		.uleb128 0x13
+ 438 0060 00       		.byte	0
+ 439 0061 00       		.byte	0
+ 440 0062 09       		.uleb128 0x9
+ 441 0063 28       		.uleb128 0x28
+ 442 0064 00       		.byte	0
+ 443 0065 03       		.uleb128 0x3
+ 444 0066 08       		.uleb128 0x8
+ 445 0067 1C       		.uleb128 0x1c
+ 446 0068 0D       		.uleb128 0xd
+ 447 0069 00       		.byte	0
+ 448 006a 00       		.byte	0
+ 449 006b 0A       		.uleb128 0xa
+ 450 006c 2E       		.uleb128 0x2e
+ 451 006d 00       		.byte	0
+ 452 006e 3F       		.uleb128 0x3f
+ 453 006f 19       		.uleb128 0x19
+ 454 0070 03       		.uleb128 0x3
+ 455 0071 0E       		.uleb128 0xe
+ 456 0072 3A       		.uleb128 0x3a
+ 457 0073 0B       		.uleb128 0xb
+ 458 0074 3B       		.uleb128 0x3b
+ 459 0075 0B       		.uleb128 0xb
+ 460 0076 27       		.uleb128 0x27
+ 461 0077 19       		.uleb128 0x19
+ 462 0078 11       		.uleb128 0x11
+ 463 0079 01       		.uleb128 0x1
+ 464 007a 12       		.uleb128 0x12
+ 465 007b 06       		.uleb128 0x6
+ 466 007c 40       		.uleb128 0x40
+ 467 007d 18       		.uleb128 0x18
+ 468 007e 9642     		.uleb128 0x2116
+ 469 0080 19       		.uleb128 0x19
+ 470 0081 00       		.byte	0
+ 471 0082 00       		.byte	0
+ 472 0083 0B       		.uleb128 0xb
+ 473 0084 2E       		.uleb128 0x2e
+ 474 0085 01       		.byte	0x1
+ 475 0086 3F       		.uleb128 0x3f
+ 476 0087 19       		.uleb128 0x19
+ 477 0088 03       		.uleb128 0x3
+ 478 0089 0E       		.uleb128 0xe
+ 479 008a 3A       		.uleb128 0x3a
+ 480 008b 0B       		.uleb128 0xb
+ 481 008c 3B       		.uleb128 0x3b
+ 482 008d 0B       		.uleb128 0xb
+ 483 008e 27       		.uleb128 0x27
+ 484 008f 19       		.uleb128 0x19
+ 485 0090 11       		.uleb128 0x11
+ 486 0091 01       		.uleb128 0x1
+ 487 0092 12       		.uleb128 0x12
+ 488 0093 06       		.uleb128 0x6
+ 489 0094 40       		.uleb128 0x40
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc5rN3fG.s 			page 11
+
+
+ 490 0095 18       		.uleb128 0x18
+ 491 0096 9642     		.uleb128 0x2116
+ 492 0098 19       		.uleb128 0x19
+ 493 0099 00       		.byte	0
+ 494 009a 00       		.byte	0
+ 495 009b 0C       		.uleb128 0xc
+ 496 009c 05       		.uleb128 0x5
+ 497 009d 00       		.byte	0
+ 498 009e 03       		.uleb128 0x3
+ 499 009f 0E       		.uleb128 0xe
+ 500 00a0 3A       		.uleb128 0x3a
+ 501 00a1 0B       		.uleb128 0xb
+ 502 00a2 3B       		.uleb128 0x3b
+ 503 00a3 0B       		.uleb128 0xb
+ 504 00a4 49       		.uleb128 0x49
+ 505 00a5 13       		.uleb128 0x13
+ 506 00a6 02       		.uleb128 0x2
+ 507 00a7 18       		.uleb128 0x18
+ 508 00a8 00       		.byte	0
+ 509 00a9 00       		.byte	0
+ 510 00aa 00       		.byte	0
+ 511              		.section	.debug_aranges,"",%progbits
+ 512 0000 24000000 		.4byte	0x24
+ 513 0004 0200     		.2byte	0x2
+ 514 0006 00000000 		.4byte	.Ldebug_info0
+ 515 000a 04       		.byte	0x4
+ 516 000b 00       		.byte	0
+ 517 000c 0000     		.2byte	0
+ 518 000e 0000     		.2byte	0
+ 519 0010 00000000 		.4byte	.LFB34
+ 520 0014 1C000000 		.4byte	.LFE34-.LFB34
+ 521 0018 00000000 		.4byte	.LFB35
+ 522 001c AC000000 		.4byte	.LFE35-.LFB35
+ 523 0020 00000000 		.4byte	0
+ 524 0024 00000000 		.4byte	0
+ 525              		.section	.debug_ranges,"",%progbits
+ 526              	.Ldebug_ranges0:
+ 527 0000 00000000 		.4byte	.LFB34
+ 528 0004 1C000000 		.4byte	.LFE34
+ 529 0008 00000000 		.4byte	.LFB35
+ 530 000c AC000000 		.4byte	.LFE35
+ 531 0010 00000000 		.4byte	0
+ 532 0014 00000000 		.4byte	0
+ 533              		.section	.debug_line,"",%progbits
+ 534              	.Ldebug_line0:
+ 535 0000 96000000 		.section	.debug_str,"MS",%progbits,1
+ 535      02005F00 
+ 535      00000201 
+ 535      FB0E0D00 
+ 535      01010101 
+ 536              	.LASF24:
+ 537 0000 53706565 		.ascii	"Speed\000"
+ 537      6400
+ 538              	.LASF20:
+ 539 0006 4D6F746F 		.ascii	"MotorDirectionOFF_NOTHING\000"
+ 539      72446972 
+ 539      65637469 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc5rN3fG.s 			page 12
+
+
+ 539      6F6E4F46 
+ 539      465F4E4F 
+ 540              	.LASF13:
+ 541 0020 72656733 		.ascii	"reg32\000"
+ 541      3200
+ 542              	.LASF18:
+ 543 0026 4F46465F 		.ascii	"OFF_NOTHING\000"
+ 543      4E4F5448 
+ 543      494E4700 
+ 544              	.LASF17:
+ 545 0032 4252414B 		.ascii	"BRAKE\000"
+ 545      4500
+ 546              	.LASF29:
+ 547 0038 433A5C55 		.ascii	"C:\\Users\\kylep\\Box Sync\\Feniex Firmware Files\\"
+ 547      73657273 
+ 547      5C6B796C 
+ 547      65705C42 
+ 547      6F782053 
+ 548 0066 414C4220 		.ascii	"ALB Cube\\81-00024-01 AI Cube\\81-00024-01.cydsn\000"
+ 548      43756265 
+ 548      5C38312D 
+ 548      30303032 
+ 548      342D3031 
+ 549              	.LASF22:
+ 550 0095 46554C4C 		.ascii	"FULL_SPEED\000"
+ 550      5F535045 
+ 550      454400
+ 551              	.LASF25:
+ 552 00a0 64697265 		.ascii	"direction\000"
+ 552      6374696F 
+ 552      6E00
+ 553              	.LASF15:
+ 554 00aa 464F5257 		.ascii	"FORWARD\000"
+ 554      41524400 
+ 555              	.LASF9:
+ 556 00b2 666C6F61 		.ascii	"float\000"
+ 556      7400
+ 557              	.LASF1:
+ 558 00b8 756E7369 		.ascii	"unsigned char\000"
+ 558      676E6564 
+ 558      20636861 
+ 558      7200
+ 559              	.LASF5:
+ 560 00c6 6C6F6E67 		.ascii	"long unsigned int\000"
+ 560      20756E73 
+ 560      69676E65 
+ 560      6420696E 
+ 560      7400
+ 561              	.LASF30:
+ 562 00d8 696E6974 		.ascii	"initializeMotor\000"
+ 562      69616C69 
+ 562      7A654D6F 
+ 562      746F7200 
+ 563              	.LASF3:
+ 564 00e8 73686F72 		.ascii	"short unsigned int\000"
+ 564      7420756E 
+ 564      7369676E 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc5rN3fG.s 			page 13
+
+
+ 564      65642069 
+ 564      6E7400
+ 565              	.LASF10:
+ 566 00fb 646F7562 		.ascii	"double\000"
+ 566      6C6500
+ 567              	.LASF27:
+ 568 0102 474E5520 		.ascii	"GNU C 4.9.3 20150303 (release) [ARM/embedded-4_9-br"
+ 568      4320342E 
+ 568      392E3320 
+ 568      32303135 
+ 568      30333033 
+ 569 0135 616E6368 		.ascii	"anch revision 221220] -mcpu=cortex-m0 -mthumb -g -O"
+ 569      20726576 
+ 569      6973696F 
+ 569      6E203232 
+ 569      31323230 
+ 570 0168 30202D66 		.ascii	"0 -ffunction-sections -ffat-lto-objects\000"
+ 570      66756E63 
+ 570      74696F6E 
+ 570      2D736563 
+ 570      74696F6E 
+ 571              	.LASF28:
+ 572 0190 2E5C6D6F 		.ascii	".\\motorControl.c\000"
+ 572      746F7243 
+ 572      6F6E7472 
+ 572      6F6C2E63 
+ 572      00
+ 573              	.LASF12:
+ 574 01a1 75696E74 		.ascii	"uint32\000"
+ 574      333200
+ 575              	.LASF8:
+ 576 01a8 756E7369 		.ascii	"unsigned int\000"
+ 576      676E6564 
+ 576      20696E74 
+ 576      00
+ 577              	.LASF7:
+ 578 01b5 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 578      206C6F6E 
+ 578      6720756E 
+ 578      7369676E 
+ 578      65642069 
+ 579              	.LASF23:
+ 580 01cc 4D494E49 		.ascii	"MINIMUM_SPEED\000"
+ 580      4D554D5F 
+ 580      53504545 
+ 580      4400
+ 581              	.LASF26:
+ 582 01da 73706565 		.ascii	"speed\000"
+ 582      6400
+ 583              	.LASF14:
+ 584 01e0 73697A65 		.ascii	"sizetype\000"
+ 584      74797065 
+ 584      00
+ 585              	.LASF31:
+ 586 01e9 7365744D 		.ascii	"setMotorOutputs\000"
+ 586      6F746F72 
+ 586      4F757470 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc5rN3fG.s 			page 14
+
+
+ 586      75747300 
+ 587              	.LASF6:
+ 588 01f9 6C6F6E67 		.ascii	"long long int\000"
+ 588      206C6F6E 
+ 588      6720696E 
+ 588      7400
+ 589              	.LASF11:
+ 590 0207 63686172 		.ascii	"char\000"
+ 590      00
+ 591              	.LASF16:
+ 592 020c 4241434B 		.ascii	"BACKWARDS\000"
+ 592      57415244 
+ 592      5300
+ 593              	.LASF21:
+ 594 0216 4D6F746F 		.ascii	"MotorSpeed\000"
+ 594      72537065 
+ 594      656400
+ 595              	.LASF2:
+ 596 0221 73686F72 		.ascii	"short int\000"
+ 596      7420696E 
+ 596      7400
+ 597              	.LASF19:
+ 598 022b 44697265 		.ascii	"Direction\000"
+ 598      6374696F 
+ 598      6E00
+ 599              	.LASF4:
+ 600 0235 6C6F6E67 		.ascii	"long int\000"
+ 600      20696E74 
+ 600      00
+ 601              	.LASF0:
+ 602 023e 7369676E 		.ascii	"signed char\000"
+ 602      65642063 
+ 602      68617200 
+ 603              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 4.9.3 20150303 (release) [ARM/embedded-4_9-br

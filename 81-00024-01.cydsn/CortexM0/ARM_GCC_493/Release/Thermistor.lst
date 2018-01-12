@@ -1,0 +1,1196 @@
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccPEkxNg.s 			page 1
+
+
+   1              		.cpu cortex-m0
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 2
+  10              		.eabi_attribute 34, 0
+  11              		.eabi_attribute 18, 4
+  12              		.code	16
+  13              		.file	"Thermistor.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.global	__aeabi_idiv
+  18              		.section	.text.Thermistor_GetResistance,"ax",%progbits
+  19              		.align	2
+  20              		.global	Thermistor_GetResistance
+  21              		.code	16
+  22              		.thumb_func
+  23              		.type	Thermistor_GetResistance, %function
+  24              	Thermistor_GetResistance:
+  25              	.LFB0:
+  26              		.file 1 ".\\Generated_Source\\PSoC4\\Thermistor.c"
+   1:.\Generated_Source\PSoC4/Thermistor.c **** /*******************************************************************************
+   2:.\Generated_Source\PSoC4/Thermistor.c **** * File Name: Thermistor.c
+   3:.\Generated_Source\PSoC4/Thermistor.c **** * Version 1.20
+   4:.\Generated_Source\PSoC4/Thermistor.c **** *
+   5:.\Generated_Source\PSoC4/Thermistor.c **** * Description:
+   6:.\Generated_Source\PSoC4/Thermistor.c **** *  This file provides the source code to the API for the ThermistorCalc
+   7:.\Generated_Source\PSoC4/Thermistor.c **** *  Component.
+   8:.\Generated_Source\PSoC4/Thermistor.c **** *
+   9:.\Generated_Source\PSoC4/Thermistor.c **** * Note:
+  10:.\Generated_Source\PSoC4/Thermistor.c **** *  None.
+  11:.\Generated_Source\PSoC4/Thermistor.c **** *
+  12:.\Generated_Source\PSoC4/Thermistor.c **** ********************************************************************************
+  13:.\Generated_Source\PSoC4/Thermistor.c **** * Copyright 2013, Cypress Semiconductor Corporation.  All rights reserved.
+  14:.\Generated_Source\PSoC4/Thermistor.c **** * You may use this file only in accordance with the license, terms, conditions,
+  15:.\Generated_Source\PSoC4/Thermistor.c **** * disclaimers, and limitations in the end user license agreement accompanying
+  16:.\Generated_Source\PSoC4/Thermistor.c **** * the software package with which this file was provided.
+  17:.\Generated_Source\PSoC4/Thermistor.c **** *******************************************************************************/
+  18:.\Generated_Source\PSoC4/Thermistor.c **** 
+  19:.\Generated_Source\PSoC4/Thermistor.c **** #include "Thermistor.h"
+  20:.\Generated_Source\PSoC4/Thermistor.c **** 
+  21:.\Generated_Source\PSoC4/Thermistor.c **** 
+  22:.\Generated_Source\PSoC4/Thermistor.c **** /*******************************************************************************
+  23:.\Generated_Source\PSoC4/Thermistor.c **** * Function Name: Thermistor_GetResistance
+  24:.\Generated_Source\PSoC4/Thermistor.c **** ********************************************************************************
+  25:.\Generated_Source\PSoC4/Thermistor.c **** *
+  26:.\Generated_Source\PSoC4/Thermistor.c **** * Summary:
+  27:.\Generated_Source\PSoC4/Thermistor.c **** *  The digital values of the voltages across the reference resistor and the
+  28:.\Generated_Source\PSoC4/Thermistor.c **** *  thermistor are passed to this function as parameters. The function returns
+  29:.\Generated_Source\PSoC4/Thermistor.c **** *  the resistance, based on the voltage values.
+  30:.\Generated_Source\PSoC4/Thermistor.c **** *
+  31:.\Generated_Source\PSoC4/Thermistor.c **** * Parameters:
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccPEkxNg.s 			page 2
+
+
+  32:.\Generated_Source\PSoC4/Thermistor.c **** *  vReference: the voltage across the reference resistor;
+  33:.\Generated_Source\PSoC4/Thermistor.c **** *  vThermistor: the voltage across the thermistor.
+  34:.\Generated_Source\PSoC4/Thermistor.c **** *  The ratio of these two voltages is used by this function. Therefore, the
+  35:.\Generated_Source\PSoC4/Thermistor.c **** *  units for both parameters must be the same.
+  36:.\Generated_Source\PSoC4/Thermistor.c **** *
+  37:.\Generated_Source\PSoC4/Thermistor.c **** * Return:
+  38:.\Generated_Source\PSoC4/Thermistor.c **** *  The return value is the resistance across the thermistor. The value returned
+  39:.\Generated_Source\PSoC4/Thermistor.c **** *  is the resistance in Ohms.
+  40:.\Generated_Source\PSoC4/Thermistor.c **** *
+  41:.\Generated_Source\PSoC4/Thermistor.c **** *******************************************************************************/
+  42:.\Generated_Source\PSoC4/Thermistor.c **** uint32 Thermistor_GetResistance(int16 vReference, int16 vThermistor)
+  43:.\Generated_Source\PSoC4/Thermistor.c ****                                       
+  44:.\Generated_Source\PSoC4/Thermistor.c **** {
+  27              		.loc 1 44 0
+  28              		.cfi_startproc
+  29              	.LVL0:
+  30 0000 08B5     		push	{r3, lr}
+  31              		.cfi_def_cfa_offset 8
+  32              		.cfi_offset 3, -8
+  33              		.cfi_offset 14, -4
+  45:.\Generated_Source\PSoC4/Thermistor.c ****     int32 resT;
+  46:.\Generated_Source\PSoC4/Thermistor.c ****     int16 temp;
+  47:.\Generated_Source\PSoC4/Thermistor.c **** 
+  48:.\Generated_Source\PSoC4/Thermistor.c ****     /* Calculate thermistor resistance from the voltages */
+  49:.\Generated_Source\PSoC4/Thermistor.c ****     resT = Thermistor_REF_RESISTOR * ((int32)vThermistor);
+  34              		.loc 1 49 0
+  35 0002 094B     		ldr	r3, .L6
+  44:.\Generated_Source\PSoC4/Thermistor.c ****     int32 resT;
+  36              		.loc 1 44 0
+  37 0004 021C     		mov	r2, r0
+  38              		.loc 1 49 0
+  39 0006 5943     		mul	r1, r3
+  40              	.LVL1:
+  50:.\Generated_Source\PSoC4/Thermistor.c ****     if (vReference < 0)
+  41              		.loc 1 50 0
+  42 0008 0028     		cmp	r0, #0
+  43 000a 07DB     		blt	.L5
+  51:.\Generated_Source\PSoC4/Thermistor.c ****     {
+  52:.\Generated_Source\PSoC4/Thermistor.c ****         temp = -vReference;
+  53:.\Generated_Source\PSoC4/Thermistor.c ****         temp = (int16)((uint16)((uint16)temp >> 1u));
+  54:.\Generated_Source\PSoC4/Thermistor.c ****         temp = -temp;
+  55:.\Generated_Source\PSoC4/Thermistor.c ****     }
+  56:.\Generated_Source\PSoC4/Thermistor.c ****     else
+  57:.\Generated_Source\PSoC4/Thermistor.c ****     {
+  58:.\Generated_Source\PSoC4/Thermistor.c ****         temp = (int16)((uint16)((uint16)vReference >> 1u));
+  44              		.loc 1 58 0
+  45 000c 83B2     		uxth	r3, r0
+  46 000e 5B08     		lsr	r3, r3, #1
+  47              	.LVL2:
+  48              	.L3:
+  59:.\Generated_Source\PSoC4/Thermistor.c ****     }
+  60:.\Generated_Source\PSoC4/Thermistor.c ****     resT += temp;
+  49              		.loc 1 60 0
+  50 0010 1BB2     		sxth	r3, r3
+  51 0012 5818     		add	r0, r3, r1
+  52              	.LVL3:
+  61:.\Generated_Source\PSoC4/Thermistor.c ****     resT /= vReference;
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccPEkxNg.s 			page 3
+
+
+  53              		.loc 1 61 0
+  54 0014 111C     		mov	r1, r2
+  55 0016 FFF7FEFF 		bl	__aeabi_idiv
+  56              	.LVL4:
+  62:.\Generated_Source\PSoC4/Thermistor.c **** 
+  63:.\Generated_Source\PSoC4/Thermistor.c ****     /* The ordering of Reference resistor value is specifically designed to keep the result from ov
+  64:.\Generated_Source\PSoC4/Thermistor.c ****     return ((uint32)((uint32)resT << Thermistor_REF_RES_SHIFT));
+  65:.\Generated_Source\PSoC4/Thermistor.c **** }
+  57              		.loc 1 65 0
+  58              		@ sp needed
+  59 001a 08BD     		pop	{r3, pc}
+  60              	.LVL5:
+  61              	.L5:
+  52:.\Generated_Source\PSoC4/Thermistor.c ****         temp = (int16)((uint16)((uint16)temp >> 1u));
+  62              		.loc 1 52 0
+  63 001c 4342     		neg	r3, r0
+  53:.\Generated_Source\PSoC4/Thermistor.c ****         temp = -temp;
+  64              		.loc 1 53 0
+  65 001e 9BB2     		uxth	r3, r3
+  66 0020 5B08     		lsr	r3, r3, #1
+  54:.\Generated_Source\PSoC4/Thermistor.c ****     }
+  67              		.loc 1 54 0
+  68 0022 5B42     		neg	r3, r3
+  69 0024 9BB2     		uxth	r3, r3
+  70              	.LVL6:
+  71 0026 F3E7     		b	.L3
+  72              	.L7:
+  73              		.align	2
+  74              	.L6:
+  75 0028 10270000 		.word	10000
+  76              		.cfi_endproc
+  77              	.LFE0:
+  78              		.size	Thermistor_GetResistance, .-Thermistor_GetResistance
+  79              		.global	__aeabi_ui2d
+  80              		.global	__aeabi_d2f
+  81              		.global	__aeabi_f2d
+  82              		.global	__aeabi_dmul
+  83              		.global	__aeabi_dadd
+  84              		.global	__aeabi_ddiv
+  85              		.global	__aeabi_dsub
+  86              		.global	__aeabi_f2iz
+  87              		.section	.text.Thermistor_GetTemperature,"ax",%progbits
+  88              		.align	2
+  89              		.global	Thermistor_GetTemperature
+  90              		.code	16
+  91              		.thumb_func
+  92              		.type	Thermistor_GetTemperature, %function
+  93              	Thermistor_GetTemperature:
+  94              	.LFB1:
+  66:.\Generated_Source\PSoC4/Thermistor.c **** 
+  67:.\Generated_Source\PSoC4/Thermistor.c **** 
+  68:.\Generated_Source\PSoC4/Thermistor.c **** /*******************************************************************************
+  69:.\Generated_Source\PSoC4/Thermistor.c **** * Function Name: Thermistor_GetTemperature
+  70:.\Generated_Source\PSoC4/Thermistor.c **** ********************************************************************************
+  71:.\Generated_Source\PSoC4/Thermistor.c **** *
+  72:.\Generated_Source\PSoC4/Thermistor.c **** * Summary:
+  73:.\Generated_Source\PSoC4/Thermistor.c **** *  The value of the thermistor resistance is passed to this function as a
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccPEkxNg.s 			page 4
+
+
+  74:.\Generated_Source\PSoC4/Thermistor.c **** *  parameter. The function returns the temperature, based on the resistance
+  75:.\Generated_Source\PSoC4/Thermistor.c **** *  value. The method used to calculate the temperature is dependent on whether
+  76:.\Generated_Source\PSoC4/Thermistor.c **** *  Equation or LUT was selected in the Customizer.
+  77:.\Generated_Source\PSoC4/Thermistor.c **** *
+  78:.\Generated_Source\PSoC4/Thermistor.c **** * Parameters:
+  79:.\Generated_Source\PSoC4/Thermistor.c **** *  resT: the resistance across the thermistor in Ohms.
+  80:.\Generated_Source\PSoC4/Thermistor.c **** *
+  81:.\Generated_Source\PSoC4/Thermistor.c **** * Return:
+  82:.\Generated_Source\PSoC4/Thermistor.c **** *  The return value is the temperature in 1/100ths of degrees C. For example,
+  83:.\Generated_Source\PSoC4/Thermistor.c **** *  the return value is 2345, when the actual temperature is 23.45 degrees C.
+  84:.\Generated_Source\PSoC4/Thermistor.c **** *
+  85:.\Generated_Source\PSoC4/Thermistor.c **** *******************************************************************************/
+  86:.\Generated_Source\PSoC4/Thermistor.c **** int16 Thermistor_GetTemperature(uint32 resT) 
+  87:.\Generated_Source\PSoC4/Thermistor.c **** {
+  95              		.loc 1 87 0
+  96              		.cfi_startproc
+  97              	.LVL7:
+  98 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+  99              		.cfi_def_cfa_offset 24
+ 100              		.cfi_offset 3, -24
+ 101              		.cfi_offset 4, -20
+ 102              		.cfi_offset 5, -16
+ 103              		.cfi_offset 6, -12
+ 104              		.cfi_offset 7, -8
+ 105              		.cfi_offset 14, -4
+  88:.\Generated_Source\PSoC4/Thermistor.c ****     int16 tempTR;
+  89:.\Generated_Source\PSoC4/Thermistor.c ****     
+  90:.\Generated_Source\PSoC4/Thermistor.c ****     #if (Thermistor_IMPLEMENTATION == Thermistor_EQUATION_METHOD)
+  91:.\Generated_Source\PSoC4/Thermistor.c **** 
+  92:.\Generated_Source\PSoC4/Thermistor.c ****         float32 stEqn;
+  93:.\Generated_Source\PSoC4/Thermistor.c ****         float32 logrT;
+  94:.\Generated_Source\PSoC4/Thermistor.c **** 
+  95:.\Generated_Source\PSoC4/Thermistor.c ****         /* Calculate thermistor resistance from the voltages */
+  96:.\Generated_Source\PSoC4/Thermistor.c ****         #if(!CY_PSOC3)
+  97:.\Generated_Source\PSoC4/Thermistor.c ****             logrT = (float32)log((float64)resT);
+ 106              		.loc 1 97 0
+ 107 0002 FFF7FEFF 		bl	__aeabi_ui2d
+ 108              	.LVL8:
+ 109 0006 FFF7FEFF 		bl	log
+ 110              	.LVL9:
+ 111 000a FFF7FEFF 		bl	__aeabi_d2f
+ 112              	.LVL10:
+  98:.\Generated_Source\PSoC4/Thermistor.c ****         #else
+  99:.\Generated_Source\PSoC4/Thermistor.c ****             logrT = log((float32)resT);
+ 100:.\Generated_Source\PSoC4/Thermistor.c ****         #endif  /* (!CY_PSOC3) */
+ 101:.\Generated_Source\PSoC4/Thermistor.c **** 
+ 102:.\Generated_Source\PSoC4/Thermistor.c ****         /* Calculate temperature from the resistance of thermistor using Steinhart-Hart Equation */
+ 103:.\Generated_Source\PSoC4/Thermistor.c ****         #if(!CY_PSOC3)
+ 104:.\Generated_Source\PSoC4/Thermistor.c ****             stEqn = (float32)(Thermistor_THA + (Thermistor_THB * logrT) + 
+ 113              		.loc 1 104 0
+ 114 000e FFF7FEFF 		bl	__aeabi_f2d
+ 115              	.LVL11:
+ 105:.\Generated_Source\PSoC4/Thermistor.c ****                              (Thermistor_THC * pow((float64)logrT, (float32)3)));
+ 116              		.loc 1 105 0
+ 117 0012 0022     		mov	r2, #0
+ 118 0014 1D4B     		ldr	r3, .L9
+ 104:.\Generated_Source\PSoC4/Thermistor.c ****                              (Thermistor_THC * pow((float64)logrT, (float32)3)));
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccPEkxNg.s 			page 5
+
+
+ 119              		.loc 1 104 0
+ 120 0016 041C     		mov	r4, r0
+ 121 0018 0D1C     		mov	r5, r1
+ 122              		.loc 1 105 0
+ 123 001a FFF7FEFF 		bl	pow
+ 124              	.LVL12:
+ 104:.\Generated_Source\PSoC4/Thermistor.c ****                              (Thermistor_THC * pow((float64)logrT, (float32)3)));
+ 125              		.loc 1 104 0
+ 126 001e 1C4A     		ldr	r2, .L9+4
+ 127              		.loc 1 105 0
+ 128 0020 061C     		mov	r6, r0
+ 129 0022 0F1C     		mov	r7, r1
+ 130              	.LVL13:
+ 104:.\Generated_Source\PSoC4/Thermistor.c ****                              (Thermistor_THC * pow((float64)logrT, (float32)3)));
+ 131              		.loc 1 104 0
+ 132 0024 201C     		mov	r0, r4
+ 133 0026 291C     		mov	r1, r5
+ 134 0028 1A4B     		ldr	r3, .L9+8
+ 135 002a FFF7FEFF 		bl	__aeabi_dmul
+ 136              	.LVL14:
+ 137 002e 1A4A     		ldr	r2, .L9+12
+ 138 0030 1A4B     		ldr	r3, .L9+16
+ 139 0032 FFF7FEFF 		bl	__aeabi_dadd
+ 140              	.LVL15:
+ 141              		.loc 1 105 0
+ 142 0036 1A4A     		ldr	r2, .L9+20
+ 104:.\Generated_Source\PSoC4/Thermistor.c ****                              (Thermistor_THC * pow((float64)logrT, (float32)3)));
+ 143              		.loc 1 104 0
+ 144 0038 0D1C     		mov	r5, r1
+ 145 003a 041C     		mov	r4, r0
+ 146              	.LVL16:
+ 147              		.loc 1 105 0
+ 148 003c 391C     		mov	r1, r7
+ 149 003e 301C     		mov	r0, r6
+ 150 0040 184B     		ldr	r3, .L9+24
+ 151 0042 FFF7FEFF 		bl	__aeabi_dmul
+ 152              	.LVL17:
+ 153 0046 021C     		mov	r2, r0
+ 154 0048 0B1C     		mov	r3, r1
+ 104:.\Generated_Source\PSoC4/Thermistor.c ****                              (Thermistor_THC * pow((float64)logrT, (float32)3)));
+ 155              		.loc 1 104 0
+ 156 004a 201C     		mov	r0, r4
+ 157 004c 291C     		mov	r1, r5
+ 158 004e FFF7FEFF 		bl	__aeabi_dadd
+ 159              	.LVL18:
+ 160 0052 FFF7FEFF 		bl	__aeabi_d2f
+ 161              	.LVL19:
+ 106:.\Generated_Source\PSoC4/Thermistor.c ****         #else
+ 107:.\Generated_Source\PSoC4/Thermistor.c ****             stEqn = (float32)(Thermistor_THA + (Thermistor_THB * logrT) + 
+ 108:.\Generated_Source\PSoC4/Thermistor.c ****                              (Thermistor_THC * pow(logrT, (float32)3)));
+ 109:.\Generated_Source\PSoC4/Thermistor.c ****         #endif  /* (!CY_PSOC3) */
+ 110:.\Generated_Source\PSoC4/Thermistor.c **** 
+ 111:.\Generated_Source\PSoC4/Thermistor.c ****         tempTR = (int16)((float32)((((1.0 / stEqn) - Thermistor_K2C) * (float32)Thermistor_SCALE) +
+ 162              		.loc 1 111 0
+ 163 0056 FFF7FEFF 		bl	__aeabi_f2d
+ 164              	.LVL20:
+ 165 005a 021C     		mov	r2, r0
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccPEkxNg.s 			page 6
+
+
+ 166 005c 0B1C     		mov	r3, r1
+ 167 005e 0020     		mov	r0, #0
+ 168 0060 1149     		ldr	r1, .L9+28
+ 169 0062 FFF7FEFF 		bl	__aeabi_ddiv
+ 170              	.LVL21:
+ 171 0066 114A     		ldr	r2, .L9+32
+ 172 0068 114B     		ldr	r3, .L9+36
+ 173 006a FFF7FEFF 		bl	__aeabi_dsub
+ 174              	.LVL22:
+ 175 006e 0022     		mov	r2, #0
+ 176 0070 104B     		ldr	r3, .L9+40
+ 177 0072 FFF7FEFF 		bl	__aeabi_dmul
+ 178              	.LVL23:
+ 179 0076 0022     		mov	r2, #0
+ 180 0078 0F4B     		ldr	r3, .L9+44
+ 181 007a FFF7FEFF 		bl	__aeabi_dadd
+ 182              	.LVL24:
+ 183 007e FFF7FEFF 		bl	__aeabi_d2f
+ 184              	.LVL25:
+ 185 0082 FFF7FEFF 		bl	__aeabi_f2iz
+ 186              	.LVL26:
+ 112:.\Generated_Source\PSoC4/Thermistor.c **** 
+ 113:.\Generated_Source\PSoC4/Thermistor.c ****     #else /* Thermistor_IMPLEMENTATION == Thermistor_LUT_METHOD */
+ 114:.\Generated_Source\PSoC4/Thermistor.c **** 
+ 115:.\Generated_Source\PSoC4/Thermistor.c ****         uint16 mid;
+ 116:.\Generated_Source\PSoC4/Thermistor.c ****         uint16 first = 0u;
+ 117:.\Generated_Source\PSoC4/Thermistor.c ****         uint16 last = Thermistor_LUT_SIZE - 1u;
+ 118:.\Generated_Source\PSoC4/Thermistor.c **** 
+ 119:.\Generated_Source\PSoC4/Thermistor.c ****         /* Calculate temperature from the resistance of thermistor by using the LUT */
+ 120:.\Generated_Source\PSoC4/Thermistor.c ****         while (first < last)
+ 121:.\Generated_Source\PSoC4/Thermistor.c ****         {
+ 122:.\Generated_Source\PSoC4/Thermistor.c ****             mid = (first + last) >> 1u;
+ 123:.\Generated_Source\PSoC4/Thermistor.c **** 
+ 124:.\Generated_Source\PSoC4/Thermistor.c ****             if ((0u == mid) || ((Thermistor_LUT_SIZE - 1u) == mid) || (resT == Thermistor_LUT[mid])
+ 125:.\Generated_Source\PSoC4/Thermistor.c ****             {
+ 126:.\Generated_Source\PSoC4/Thermistor.c ****                 last = mid;
+ 127:.\Generated_Source\PSoC4/Thermistor.c ****                 break;
+ 128:.\Generated_Source\PSoC4/Thermistor.c ****             }
+ 129:.\Generated_Source\PSoC4/Thermistor.c ****             else if (Thermistor_LUT[mid] > resT)
+ 130:.\Generated_Source\PSoC4/Thermistor.c ****             {
+ 131:.\Generated_Source\PSoC4/Thermistor.c ****                 first = mid + 1u;
+ 132:.\Generated_Source\PSoC4/Thermistor.c ****             }
+ 133:.\Generated_Source\PSoC4/Thermistor.c ****             else /* (Thermistor_LUT[mid] < resT) */
+ 134:.\Generated_Source\PSoC4/Thermistor.c ****             {
+ 135:.\Generated_Source\PSoC4/Thermistor.c ****                 last = mid - 1u;
+ 136:.\Generated_Source\PSoC4/Thermistor.c ****             }
+ 137:.\Generated_Source\PSoC4/Thermistor.c ****         }
+ 138:.\Generated_Source\PSoC4/Thermistor.c **** 
+ 139:.\Generated_Source\PSoC4/Thermistor.c ****         /* Calculation the closest entry in the LUT */
+ 140:.\Generated_Source\PSoC4/Thermistor.c ****         if ((Thermistor_LUT[last] > resT) && (last < (Thermistor_LUT_SIZE - 1u)) &&
+ 141:.\Generated_Source\PSoC4/Thermistor.c ****            ((Thermistor_LUT[last] - resT) > (resT - Thermistor_LUT[last + 1u])))
+ 142:.\Generated_Source\PSoC4/Thermistor.c ****         {
+ 143:.\Generated_Source\PSoC4/Thermistor.c ****             last++;
+ 144:.\Generated_Source\PSoC4/Thermistor.c ****         }
+ 145:.\Generated_Source\PSoC4/Thermistor.c ****         else if ((Thermistor_LUT[last] < resT) && (last > 0u) &&
+ 146:.\Generated_Source\PSoC4/Thermistor.c ****                 ((Thermistor_LUT[last - 1u] - resT) < (resT - Thermistor_LUT[last])))
+ 147:.\Generated_Source\PSoC4/Thermistor.c ****         {
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccPEkxNg.s 			page 7
+
+
+ 148:.\Generated_Source\PSoC4/Thermistor.c ****             last--;
+ 149:.\Generated_Source\PSoC4/Thermistor.c ****         }
+ 150:.\Generated_Source\PSoC4/Thermistor.c ****         else
+ 151:.\Generated_Source\PSoC4/Thermistor.c ****         {
+ 152:.\Generated_Source\PSoC4/Thermistor.c ****             /* Closest entry in the LUT already found */
+ 153:.\Generated_Source\PSoC4/Thermistor.c ****         }
+ 154:.\Generated_Source\PSoC4/Thermistor.c **** 
+ 155:.\Generated_Source\PSoC4/Thermistor.c ****         tempTR = Thermistor_MIN_TEMP + (int16)((uint16)(last * Thermistor_ACCURACY));
+ 156:.\Generated_Source\PSoC4/Thermistor.c **** 
+ 157:.\Generated_Source\PSoC4/Thermistor.c ****     #endif /* (Thermistor_IMPLEMENTATION == Thermistor_EQUATION_METHOD) */
+ 158:.\Generated_Source\PSoC4/Thermistor.c **** 
+ 159:.\Generated_Source\PSoC4/Thermistor.c ****     return (tempTR);
+ 160:.\Generated_Source\PSoC4/Thermistor.c **** }
+ 187              		.loc 1 160 0
+ 188              		@ sp needed
+ 159:.\Generated_Source\PSoC4/Thermistor.c **** }
+ 189              		.loc 1 159 0
+ 190 0086 00B2     		sxth	r0, r0
+ 191              		.loc 1 160 0
+ 192 0088 F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 193              	.L10:
+ 194 008a C046     		.align	2
+ 195              	.L9:
+ 196 008c 00000840 		.word	1074266112
+ 197 0090 6943AA9A 		.word	-1700117655
+ 198 0094 B34D303F 		.word	1060130227
+ 199 0098 D8FD850B 		.word	193330648
+ 200 009c 29994D3F 		.word	1062050089
+ 201 00a0 4D33E444 		.word	1155806029
+ 202 00a4 25658B3E 		.word	1049322789
+ 203 00a8 0000F03F 		.word	1072693248
+ 204 00ac 66666666 		.word	1717986918
+ 205 00b0 66127140 		.word	1081152102
+ 206 00b4 00005940 		.word	1079574528
+ 207 00b8 0000E03F 		.word	1071644672
+ 208              		.cfi_endproc
+ 209              	.LFE1:
+ 210              		.size	Thermistor_GetTemperature, .-Thermistor_GetTemperature
+ 211              		.text
+ 212              	.Letext0:
+ 213              		.file 2 ".\\Generated_Source\\PSoC4\\cytypes.h"
+ 214              		.file 3 "c:\\program files (x86)\\cypress\\psoc creator\\3.3\\psoc creator\\import\\gnu\\arm\\4.9.
+ 215              		.section	.debug_info,"",%progbits
+ 216              	.Ldebug_info0:
+ 217 0000 BC010000 		.4byte	0x1bc
+ 218 0004 0400     		.2byte	0x4
+ 219 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 220 000a 04       		.byte	0x4
+ 221 000b 01       		.uleb128 0x1
+ 222 000c C7000000 		.4byte	.LASF29
+ 223 0010 01       		.byte	0x1
+ 224 0011 9A000000 		.4byte	.LASF30
+ 225 0015 F0010000 		.4byte	.LASF31
+ 226 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 227 001d 00000000 		.4byte	0
+ 228 0021 00000000 		.4byte	.Ldebug_line0
+ 229 0025 02       		.uleb128 0x2
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccPEkxNg.s 			page 8
+
+
+ 230 0026 08       		.byte	0x8
+ 231 0027 04       		.byte	0x4
+ 232 0028 8C000000 		.4byte	.LASF0
+ 233 002c 02       		.uleb128 0x2
+ 234 002d 04       		.byte	0x4
+ 235 002e 04       		.byte	0x4
+ 236 002f 2E000000 		.4byte	.LASF1
+ 237 0033 02       		.uleb128 0x2
+ 238 0034 02       		.byte	0x2
+ 239 0035 05       		.byte	0x5
+ 240 0036 A1010000 		.4byte	.LASF2
+ 241 003a 02       		.uleb128 0x2
+ 242 003b 01       		.byte	0x1
+ 243 003c 06       		.byte	0x6
+ 244 003d E4010000 		.4byte	.LASF3
+ 245 0041 02       		.uleb128 0x2
+ 246 0042 01       		.byte	0x1
+ 247 0043 08       		.byte	0x8
+ 248 0044 34000000 		.4byte	.LASF4
+ 249 0048 02       		.uleb128 0x2
+ 250 0049 02       		.byte	0x2
+ 251 004a 07       		.byte	0x7
+ 252 004b 13000000 		.4byte	.LASF5
+ 253 004f 02       		.uleb128 0x2
+ 254 0050 04       		.byte	0x4
+ 255 0051 05       		.byte	0x5
+ 256 0052 CA010000 		.4byte	.LASF6
+ 257 0056 02       		.uleb128 0x2
+ 258 0057 04       		.byte	0x4
+ 259 0058 07       		.byte	0x7
+ 260 0059 4E000000 		.4byte	.LASF7
+ 261 005d 02       		.uleb128 0x2
+ 262 005e 08       		.byte	0x8
+ 263 005f 05       		.byte	0x5
+ 264 0060 8E010000 		.4byte	.LASF8
+ 265 0064 02       		.uleb128 0x2
+ 266 0065 08       		.byte	0x8
+ 267 0066 07       		.byte	0x7
+ 268 0067 62010000 		.4byte	.LASF9
+ 269 006b 03       		.uleb128 0x3
+ 270 006c 04       		.byte	0x4
+ 271 006d 05       		.byte	0x5
+ 272 006e 696E7400 		.ascii	"int\000"
+ 273 0072 02       		.uleb128 0x2
+ 274 0073 04       		.byte	0x4
+ 275 0074 07       		.byte	0x7
+ 276 0075 55010000 		.4byte	.LASF10
+ 277 0079 04       		.uleb128 0x4
+ 278 007a 93000000 		.4byte	.LASF11
+ 279 007e 02       		.byte	0x2
+ 280 007f 3901     		.2byte	0x139
+ 281 0081 48000000 		.4byte	0x48
+ 282 0085 04       		.uleb128 0x4
+ 283 0086 C0000000 		.4byte	.LASF12
+ 284 008a 02       		.byte	0x2
+ 285 008b 3A01     		.2byte	0x13a
+ 286 008d 56000000 		.4byte	0x56
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccPEkxNg.s 			page 9
+
+
+ 287 0091 04       		.uleb128 0x4
+ 288 0092 48000000 		.4byte	.LASF13
+ 289 0096 02       		.byte	0x2
+ 290 0097 3C01     		.2byte	0x13c
+ 291 0099 33000000 		.4byte	0x33
+ 292 009d 04       		.uleb128 0x4
+ 293 009e 65000000 		.4byte	.LASF14
+ 294 00a2 02       		.byte	0x2
+ 295 00a3 3D01     		.2byte	0x13d
+ 296 00a5 4F000000 		.4byte	0x4f
+ 297 00a9 04       		.uleb128 0x4
+ 298 00aa 26000000 		.4byte	.LASF15
+ 299 00ae 02       		.byte	0x2
+ 300 00af 3E01     		.2byte	0x13e
+ 301 00b1 2C000000 		.4byte	0x2c
+ 302 00b5 04       		.uleb128 0x4
+ 303 00b6 00000000 		.4byte	.LASF16
+ 304 00ba 02       		.byte	0x2
+ 305 00bb 4201     		.2byte	0x142
+ 306 00bd 25000000 		.4byte	0x25
+ 307 00c1 02       		.uleb128 0x2
+ 308 00c2 01       		.byte	0x1
+ 309 00c3 08       		.byte	0x8
+ 310 00c4 9C010000 		.4byte	.LASF17
+ 311 00c8 02       		.uleb128 0x2
+ 312 00c9 04       		.byte	0x4
+ 313 00ca 07       		.byte	0x7
+ 314 00cb 85010000 		.4byte	.LASF18
+ 315 00cf 02       		.uleb128 0x2
+ 316 00d0 08       		.byte	0x8
+ 317 00d1 04       		.byte	0x4
+ 318 00d2 D8010000 		.4byte	.LASF19
+ 319 00d6 05       		.uleb128 0x5
+ 320 00d7 AB010000 		.4byte	.LASF24
+ 321 00db 01       		.byte	0x1
+ 322 00dc 2A       		.byte	0x2a
+ 323 00dd 85000000 		.4byte	0x85
+ 324 00e1 00000000 		.4byte	.LFB0
+ 325 00e5 2C000000 		.4byte	.LFE0-.LFB0
+ 326 00e9 01       		.uleb128 0x1
+ 327 00ea 9C       		.byte	0x9c
+ 328 00eb 2C010000 		.4byte	0x12c
+ 329 00ef 06       		.uleb128 0x6
+ 330 00f0 08000000 		.4byte	.LASF20
+ 331 00f4 01       		.byte	0x1
+ 332 00f5 2A       		.byte	0x2a
+ 333 00f6 91000000 		.4byte	0x91
+ 334 00fa 00000000 		.4byte	.LLST0
+ 335 00fe 06       		.uleb128 0x6
+ 336 00ff 79010000 		.4byte	.LASF21
+ 337 0103 01       		.byte	0x1
+ 338 0104 2A       		.byte	0x2a
+ 339 0105 91000000 		.4byte	0x91
+ 340 0109 2C000000 		.4byte	.LLST1
+ 341 010d 07       		.uleb128 0x7
+ 342 010e D3010000 		.4byte	.LASF22
+ 343 0112 01       		.byte	0x1
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccPEkxNg.s 			page 10
+
+
+ 344 0113 2D       		.byte	0x2d
+ 345 0114 9D000000 		.4byte	0x9d
+ 346 0118 4D000000 		.4byte	.LLST2
+ 347 011c 07       		.uleb128 0x7
+ 348 011d 60000000 		.4byte	.LASF23
+ 349 0121 01       		.byte	0x1
+ 350 0122 2E       		.byte	0x2e
+ 351 0123 91000000 		.4byte	0x91
+ 352 0127 7F000000 		.4byte	.LLST3
+ 353 012b 00       		.byte	0
+ 354 012c 05       		.uleb128 0x5
+ 355 012d 6B000000 		.4byte	.LASF25
+ 356 0131 01       		.byte	0x1
+ 357 0132 56       		.byte	0x56
+ 358 0133 91000000 		.4byte	0x91
+ 359 0137 00000000 		.4byte	.LFB1
+ 360 013b BC000000 		.4byte	.LFE1-.LFB1
+ 361 013f 01       		.uleb128 0x1
+ 362 0140 9C       		.byte	0x9c
+ 363 0141 94010000 		.4byte	0x194
+ 364 0145 06       		.uleb128 0x6
+ 365 0146 D3010000 		.4byte	.LASF22
+ 366 014a 01       		.byte	0x1
+ 367 014b 56       		.byte	0x56
+ 368 014c 85000000 		.4byte	0x85
+ 369 0150 AD000000 		.4byte	.LLST4
+ 370 0154 07       		.uleb128 0x7
+ 371 0155 85000000 		.4byte	.LASF26
+ 372 0159 01       		.byte	0x1
+ 373 015a 58       		.byte	0x58
+ 374 015b 91000000 		.4byte	0x91
+ 375 015f CE000000 		.4byte	.LLST5
+ 376 0163 07       		.uleb128 0x7
+ 377 0164 C4010000 		.4byte	.LASF27
+ 378 0168 01       		.byte	0x1
+ 379 0169 5C       		.byte	0x5c
+ 380 016a A9000000 		.4byte	0xa9
+ 381 016e 46010000 		.4byte	.LLST6
+ 382 0172 07       		.uleb128 0x7
+ 383 0173 42000000 		.4byte	.LASF28
+ 384 0177 01       		.byte	0x1
+ 385 0178 5D       		.byte	0x5d
+ 386 0179 A9000000 		.4byte	0xa9
+ 387 017d 86010000 		.4byte	.LLST7
+ 388 0181 08       		.uleb128 0x8
+ 389 0182 0A000000 		.4byte	.LVL9
+ 390 0186 94010000 		.4byte	0x194
+ 391 018a 08       		.uleb128 0x8
+ 392 018b 1E000000 		.4byte	.LVL12
+ 393 018f A9010000 		.4byte	0x1a9
+ 394 0193 00       		.byte	0
+ 395 0194 09       		.uleb128 0x9
+ 396 0195 6C6F6700 		.ascii	"log\000"
+ 397 0199 03       		.byte	0x3
+ 398 019a 83       		.byte	0x83
+ 399 019b 25000000 		.4byte	0x25
+ 400 019f A9010000 		.4byte	0x1a9
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccPEkxNg.s 			page 11
+
+
+ 401 01a3 0A       		.uleb128 0xa
+ 402 01a4 25000000 		.4byte	0x25
+ 403 01a8 00       		.byte	0
+ 404 01a9 0B       		.uleb128 0xb
+ 405 01aa 706F7700 		.ascii	"pow\000"
+ 406 01ae 03       		.byte	0x3
+ 407 01af 85       		.byte	0x85
+ 408 01b0 25000000 		.4byte	0x25
+ 409 01b4 0A       		.uleb128 0xa
+ 410 01b5 25000000 		.4byte	0x25
+ 411 01b9 0A       		.uleb128 0xa
+ 412 01ba 25000000 		.4byte	0x25
+ 413 01be 00       		.byte	0
+ 414 01bf 00       		.byte	0
+ 415              		.section	.debug_abbrev,"",%progbits
+ 416              	.Ldebug_abbrev0:
+ 417 0000 01       		.uleb128 0x1
+ 418 0001 11       		.uleb128 0x11
+ 419 0002 01       		.byte	0x1
+ 420 0003 25       		.uleb128 0x25
+ 421 0004 0E       		.uleb128 0xe
+ 422 0005 13       		.uleb128 0x13
+ 423 0006 0B       		.uleb128 0xb
+ 424 0007 03       		.uleb128 0x3
+ 425 0008 0E       		.uleb128 0xe
+ 426 0009 1B       		.uleb128 0x1b
+ 427 000a 0E       		.uleb128 0xe
+ 428 000b 55       		.uleb128 0x55
+ 429 000c 17       		.uleb128 0x17
+ 430 000d 11       		.uleb128 0x11
+ 431 000e 01       		.uleb128 0x1
+ 432 000f 10       		.uleb128 0x10
+ 433 0010 17       		.uleb128 0x17
+ 434 0011 00       		.byte	0
+ 435 0012 00       		.byte	0
+ 436 0013 02       		.uleb128 0x2
+ 437 0014 24       		.uleb128 0x24
+ 438 0015 00       		.byte	0
+ 439 0016 0B       		.uleb128 0xb
+ 440 0017 0B       		.uleb128 0xb
+ 441 0018 3E       		.uleb128 0x3e
+ 442 0019 0B       		.uleb128 0xb
+ 443 001a 03       		.uleb128 0x3
+ 444 001b 0E       		.uleb128 0xe
+ 445 001c 00       		.byte	0
+ 446 001d 00       		.byte	0
+ 447 001e 03       		.uleb128 0x3
+ 448 001f 24       		.uleb128 0x24
+ 449 0020 00       		.byte	0
+ 450 0021 0B       		.uleb128 0xb
+ 451 0022 0B       		.uleb128 0xb
+ 452 0023 3E       		.uleb128 0x3e
+ 453 0024 0B       		.uleb128 0xb
+ 454 0025 03       		.uleb128 0x3
+ 455 0026 08       		.uleb128 0x8
+ 456 0027 00       		.byte	0
+ 457 0028 00       		.byte	0
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccPEkxNg.s 			page 12
+
+
+ 458 0029 04       		.uleb128 0x4
+ 459 002a 16       		.uleb128 0x16
+ 460 002b 00       		.byte	0
+ 461 002c 03       		.uleb128 0x3
+ 462 002d 0E       		.uleb128 0xe
+ 463 002e 3A       		.uleb128 0x3a
+ 464 002f 0B       		.uleb128 0xb
+ 465 0030 3B       		.uleb128 0x3b
+ 466 0031 05       		.uleb128 0x5
+ 467 0032 49       		.uleb128 0x49
+ 468 0033 13       		.uleb128 0x13
+ 469 0034 00       		.byte	0
+ 470 0035 00       		.byte	0
+ 471 0036 05       		.uleb128 0x5
+ 472 0037 2E       		.uleb128 0x2e
+ 473 0038 01       		.byte	0x1
+ 474 0039 3F       		.uleb128 0x3f
+ 475 003a 19       		.uleb128 0x19
+ 476 003b 03       		.uleb128 0x3
+ 477 003c 0E       		.uleb128 0xe
+ 478 003d 3A       		.uleb128 0x3a
+ 479 003e 0B       		.uleb128 0xb
+ 480 003f 3B       		.uleb128 0x3b
+ 481 0040 0B       		.uleb128 0xb
+ 482 0041 27       		.uleb128 0x27
+ 483 0042 19       		.uleb128 0x19
+ 484 0043 49       		.uleb128 0x49
+ 485 0044 13       		.uleb128 0x13
+ 486 0045 11       		.uleb128 0x11
+ 487 0046 01       		.uleb128 0x1
+ 488 0047 12       		.uleb128 0x12
+ 489 0048 06       		.uleb128 0x6
+ 490 0049 40       		.uleb128 0x40
+ 491 004a 18       		.uleb128 0x18
+ 492 004b 9642     		.uleb128 0x2116
+ 493 004d 19       		.uleb128 0x19
+ 494 004e 01       		.uleb128 0x1
+ 495 004f 13       		.uleb128 0x13
+ 496 0050 00       		.byte	0
+ 497 0051 00       		.byte	0
+ 498 0052 06       		.uleb128 0x6
+ 499 0053 05       		.uleb128 0x5
+ 500 0054 00       		.byte	0
+ 501 0055 03       		.uleb128 0x3
+ 502 0056 0E       		.uleb128 0xe
+ 503 0057 3A       		.uleb128 0x3a
+ 504 0058 0B       		.uleb128 0xb
+ 505 0059 3B       		.uleb128 0x3b
+ 506 005a 0B       		.uleb128 0xb
+ 507 005b 49       		.uleb128 0x49
+ 508 005c 13       		.uleb128 0x13
+ 509 005d 02       		.uleb128 0x2
+ 510 005e 17       		.uleb128 0x17
+ 511 005f 00       		.byte	0
+ 512 0060 00       		.byte	0
+ 513 0061 07       		.uleb128 0x7
+ 514 0062 34       		.uleb128 0x34
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccPEkxNg.s 			page 13
+
+
+ 515 0063 00       		.byte	0
+ 516 0064 03       		.uleb128 0x3
+ 517 0065 0E       		.uleb128 0xe
+ 518 0066 3A       		.uleb128 0x3a
+ 519 0067 0B       		.uleb128 0xb
+ 520 0068 3B       		.uleb128 0x3b
+ 521 0069 0B       		.uleb128 0xb
+ 522 006a 49       		.uleb128 0x49
+ 523 006b 13       		.uleb128 0x13
+ 524 006c 02       		.uleb128 0x2
+ 525 006d 17       		.uleb128 0x17
+ 526 006e 00       		.byte	0
+ 527 006f 00       		.byte	0
+ 528 0070 08       		.uleb128 0x8
+ 529 0071 898201   		.uleb128 0x4109
+ 530 0074 00       		.byte	0
+ 531 0075 11       		.uleb128 0x11
+ 532 0076 01       		.uleb128 0x1
+ 533 0077 31       		.uleb128 0x31
+ 534 0078 13       		.uleb128 0x13
+ 535 0079 00       		.byte	0
+ 536 007a 00       		.byte	0
+ 537 007b 09       		.uleb128 0x9
+ 538 007c 2E       		.uleb128 0x2e
+ 539 007d 01       		.byte	0x1
+ 540 007e 3F       		.uleb128 0x3f
+ 541 007f 19       		.uleb128 0x19
+ 542 0080 03       		.uleb128 0x3
+ 543 0081 08       		.uleb128 0x8
+ 544 0082 3A       		.uleb128 0x3a
+ 545 0083 0B       		.uleb128 0xb
+ 546 0084 3B       		.uleb128 0x3b
+ 547 0085 0B       		.uleb128 0xb
+ 548 0086 27       		.uleb128 0x27
+ 549 0087 19       		.uleb128 0x19
+ 550 0088 49       		.uleb128 0x49
+ 551 0089 13       		.uleb128 0x13
+ 552 008a 3C       		.uleb128 0x3c
+ 553 008b 19       		.uleb128 0x19
+ 554 008c 01       		.uleb128 0x1
+ 555 008d 13       		.uleb128 0x13
+ 556 008e 00       		.byte	0
+ 557 008f 00       		.byte	0
+ 558 0090 0A       		.uleb128 0xa
+ 559 0091 05       		.uleb128 0x5
+ 560 0092 00       		.byte	0
+ 561 0093 49       		.uleb128 0x49
+ 562 0094 13       		.uleb128 0x13
+ 563 0095 00       		.byte	0
+ 564 0096 00       		.byte	0
+ 565 0097 0B       		.uleb128 0xb
+ 566 0098 2E       		.uleb128 0x2e
+ 567 0099 01       		.byte	0x1
+ 568 009a 3F       		.uleb128 0x3f
+ 569 009b 19       		.uleb128 0x19
+ 570 009c 03       		.uleb128 0x3
+ 571 009d 08       		.uleb128 0x8
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccPEkxNg.s 			page 14
+
+
+ 572 009e 3A       		.uleb128 0x3a
+ 573 009f 0B       		.uleb128 0xb
+ 574 00a0 3B       		.uleb128 0x3b
+ 575 00a1 0B       		.uleb128 0xb
+ 576 00a2 27       		.uleb128 0x27
+ 577 00a3 19       		.uleb128 0x19
+ 578 00a4 49       		.uleb128 0x49
+ 579 00a5 13       		.uleb128 0x13
+ 580 00a6 3C       		.uleb128 0x3c
+ 581 00a7 19       		.uleb128 0x19
+ 582 00a8 00       		.byte	0
+ 583 00a9 00       		.byte	0
+ 584 00aa 00       		.byte	0
+ 585              		.section	.debug_loc,"",%progbits
+ 586              	.Ldebug_loc0:
+ 587              	.LLST0:
+ 588 0000 00000000 		.4byte	.LVL0
+ 589 0004 14000000 		.4byte	.LVL3
+ 590 0008 0100     		.2byte	0x1
+ 591 000a 50       		.byte	0x50
+ 592 000b 14000000 		.4byte	.LVL3
+ 593 000f 1C000000 		.4byte	.LVL5
+ 594 0013 0400     		.2byte	0x4
+ 595 0015 F3       		.byte	0xf3
+ 596 0016 01       		.uleb128 0x1
+ 597 0017 50       		.byte	0x50
+ 598 0018 9F       		.byte	0x9f
+ 599 0019 1C000000 		.4byte	.LVL5
+ 600 001d 2C000000 		.4byte	.LFE0
+ 601 0021 0100     		.2byte	0x1
+ 602 0023 50       		.byte	0x50
+ 603 0024 00000000 		.4byte	0
+ 604 0028 00000000 		.4byte	0
+ 605              	.LLST1:
+ 606 002c 00000000 		.4byte	.LVL0
+ 607 0030 08000000 		.4byte	.LVL1
+ 608 0034 0100     		.2byte	0x1
+ 609 0036 51       		.byte	0x51
+ 610 0037 08000000 		.4byte	.LVL1
+ 611 003b 2C000000 		.4byte	.LFE0
+ 612 003f 0400     		.2byte	0x4
+ 613 0041 F3       		.byte	0xf3
+ 614 0042 01       		.uleb128 0x1
+ 615 0043 51       		.byte	0x51
+ 616 0044 9F       		.byte	0x9f
+ 617 0045 00000000 		.4byte	0
+ 618 0049 00000000 		.4byte	0
+ 619              	.LLST2:
+ 620 004d 08000000 		.4byte	.LVL1
+ 621 0051 14000000 		.4byte	.LVL3
+ 622 0055 0100     		.2byte	0x1
+ 623 0057 51       		.byte	0x51
+ 624 0058 14000000 		.4byte	.LVL3
+ 625 005c 19000000 		.4byte	.LVL4-1
+ 626 0060 0A00     		.2byte	0xa
+ 627 0062 70       		.byte	0x70
+ 628 0063 00       		.sleb128 0
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccPEkxNg.s 			page 15
+
+
+ 629 0064 72       		.byte	0x72
+ 630 0065 00       		.sleb128 0
+ 631 0066 40       		.byte	0x40
+ 632 0067 24       		.byte	0x24
+ 633 0068 40       		.byte	0x40
+ 634 0069 26       		.byte	0x26
+ 635 006a 1B       		.byte	0x1b
+ 636 006b 9F       		.byte	0x9f
+ 637 006c 1C000000 		.4byte	.LVL5
+ 638 0070 2C000000 		.4byte	.LFE0
+ 639 0074 0100     		.2byte	0x1
+ 640 0076 51       		.byte	0x51
+ 641 0077 00000000 		.4byte	0
+ 642 007b 00000000 		.4byte	0
+ 643              	.LLST3:
+ 644 007f 10000000 		.4byte	.LVL2
+ 645 0083 19000000 		.4byte	.LVL4-1
+ 646 0087 0100     		.2byte	0x1
+ 647 0089 53       		.byte	0x53
+ 648 008a 1C000000 		.4byte	.LVL5
+ 649 008e 26000000 		.4byte	.LVL6
+ 650 0092 0600     		.2byte	0x6
+ 651 0094 70       		.byte	0x70
+ 652 0095 00       		.sleb128 0
+ 653 0096 1F       		.byte	0x1f
+ 654 0097 31       		.byte	0x31
+ 655 0098 25       		.byte	0x25
+ 656 0099 9F       		.byte	0x9f
+ 657 009a 26000000 		.4byte	.LVL6
+ 658 009e 2C000000 		.4byte	.LFE0
+ 659 00a2 0100     		.2byte	0x1
+ 660 00a4 53       		.byte	0x53
+ 661 00a5 00000000 		.4byte	0
+ 662 00a9 00000000 		.4byte	0
+ 663              	.LLST4:
+ 664 00ad 00000000 		.4byte	.LVL7
+ 665 00b1 05000000 		.4byte	.LVL8-1
+ 666 00b5 0100     		.2byte	0x1
+ 667 00b7 50       		.byte	0x50
+ 668 00b8 05000000 		.4byte	.LVL8-1
+ 669 00bc BC000000 		.4byte	.LFE1
+ 670 00c0 0400     		.2byte	0x4
+ 671 00c2 F3       		.byte	0xf3
+ 672 00c3 01       		.uleb128 0x1
+ 673 00c4 50       		.byte	0x50
+ 674 00c5 9F       		.byte	0x9f
+ 675 00c6 00000000 		.4byte	0
+ 676 00ca 00000000 		.4byte	0
+ 677              	.LLST5:
+ 678 00ce 24000000 		.4byte	.LVL13
+ 679 00d2 3C000000 		.4byte	.LVL16
+ 680 00d6 6600     		.2byte	0x66
+ 681 00d8 F4       		.byte	0xf4
+ 682 00d9 25       		.uleb128 0x25
+ 683 00da 08       		.byte	0x8
+ 684 00db 00000000 		.4byte	0
+ 685 00df 0000F03F 		.4byte	0x3ff00000
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccPEkxNg.s 			page 16
+
+
+ 686 00e3 F5       		.byte	0xf5
+ 687 00e4 04       		.uleb128 0x4
+ 688 00e5 25       		.uleb128 0x25
+ 689 00e6 F4       		.byte	0xf4
+ 690 00e7 25       		.uleb128 0x25
+ 691 00e8 08       		.byte	0x8
+ 692 00e9 6943AA9A 		.4byte	0x9aaa4369
+ 693 00ed B34D303F 		.4byte	0x3f304db3
+ 694 00f1 1E       		.byte	0x1e
+ 695 00f2 F4       		.byte	0xf4
+ 696 00f3 25       		.uleb128 0x25
+ 697 00f4 08       		.byte	0x8
+ 698 00f5 D8FD850B 		.4byte	0xb85fdd8
+ 699 00f9 29994D3F 		.4byte	0x3f4d9929
+ 700 00fd 22       		.byte	0x22
+ 701 00fe F5       		.byte	0xf5
+ 702 00ff 06       		.uleb128 0x6
+ 703 0100 25       		.uleb128 0x25
+ 704 0101 F4       		.byte	0xf4
+ 705 0102 25       		.uleb128 0x25
+ 706 0103 08       		.byte	0x8
+ 707 0104 4D33E444 		.4byte	0x44e4334d
+ 708 0108 25658B3E 		.4byte	0x3e8b6525
+ 709 010c 1E       		.byte	0x1e
+ 710 010d 22       		.byte	0x22
+ 711 010e F7       		.byte	0xf7
+ 712 010f 2C       		.uleb128 0x2c
+ 713 0110 F7       		.byte	0xf7
+ 714 0111 25       		.uleb128 0x25
+ 715 0112 1B       		.byte	0x1b
+ 716 0113 F4       		.byte	0xf4
+ 717 0114 25       		.uleb128 0x25
+ 718 0115 08       		.byte	0x8
+ 719 0116 66666666 		.4byte	0x66666666
+ 720 011a 66127140 		.4byte	0x40711266
+ 721 011e 1C       		.byte	0x1c
+ 722 011f F4       		.byte	0xf4
+ 723 0120 25       		.uleb128 0x25
+ 724 0121 08       		.byte	0x8
+ 725 0122 00000000 		.4byte	0
+ 726 0126 00005940 		.4byte	0x40590000
+ 727 012a 1E       		.byte	0x1e
+ 728 012b F4       		.byte	0xf4
+ 729 012c 25       		.uleb128 0x25
+ 730 012d 08       		.byte	0x8
+ 731 012e 00000000 		.4byte	0
+ 732 0132 0000E03F 		.4byte	0x3fe00000
+ 733 0136 22       		.byte	0x22
+ 734 0137 F7       		.byte	0xf7
+ 735 0138 2C       		.uleb128 0x2c
+ 736 0139 F7       		.byte	0xf7
+ 737 013a 33       		.uleb128 0x33
+ 738 013b F7       		.byte	0xf7
+ 739 013c 00       		.uleb128 0
+ 740 013d 9F       		.byte	0x9f
+ 741 013e 00000000 		.4byte	0
+ 742 0142 00000000 		.4byte	0
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccPEkxNg.s 			page 17
+
+
+ 743              	.LLST6:
+ 744 0146 24000000 		.4byte	.LVL13
+ 745 014a 3C000000 		.4byte	.LVL16
+ 746 014e 2E00     		.2byte	0x2e
+ 747 0150 F5       		.byte	0xf5
+ 748 0151 04       		.uleb128 0x4
+ 749 0152 25       		.uleb128 0x25
+ 750 0153 F4       		.byte	0xf4
+ 751 0154 25       		.uleb128 0x25
+ 752 0155 08       		.byte	0x8
+ 753 0156 6943AA9A 		.4byte	0x9aaa4369
+ 754 015a B34D303F 		.4byte	0x3f304db3
+ 755 015e 1E       		.byte	0x1e
+ 756 015f F4       		.byte	0xf4
+ 757 0160 25       		.uleb128 0x25
+ 758 0161 08       		.byte	0x8
+ 759 0162 D8FD850B 		.4byte	0xb85fdd8
+ 760 0166 29994D3F 		.4byte	0x3f4d9929
+ 761 016a 22       		.byte	0x22
+ 762 016b F5       		.byte	0xf5
+ 763 016c 06       		.uleb128 0x6
+ 764 016d 25       		.uleb128 0x25
+ 765 016e F4       		.byte	0xf4
+ 766 016f 25       		.uleb128 0x25
+ 767 0170 08       		.byte	0x8
+ 768 0171 4D33E444 		.4byte	0x44e4334d
+ 769 0175 25658B3E 		.4byte	0x3e8b6525
+ 770 0179 1E       		.byte	0x1e
+ 771 017a 22       		.byte	0x22
+ 772 017b F7       		.byte	0xf7
+ 773 017c 2C       		.uleb128 0x2c
+ 774 017d 9F       		.byte	0x9f
+ 775 017e 00000000 		.4byte	0
+ 776 0182 00000000 		.4byte	0
+ 777              	.LLST7:
+ 778 0186 0A000000 		.4byte	.LVL9
+ 779 018a 0D000000 		.4byte	.LVL10-1
+ 780 018e 0600     		.2byte	0x6
+ 781 0190 F5       		.byte	0xf5
+ 782 0191 00       		.uleb128 0
+ 783 0192 25       		.uleb128 0x25
+ 784 0193 F7       		.byte	0xf7
+ 785 0194 2C       		.uleb128 0x2c
+ 786 0195 9F       		.byte	0x9f
+ 787 0196 00000000 		.4byte	0
+ 788 019a 00000000 		.4byte	0
+ 789              		.section	.debug_aranges,"",%progbits
+ 790 0000 24000000 		.4byte	0x24
+ 791 0004 0200     		.2byte	0x2
+ 792 0006 00000000 		.4byte	.Ldebug_info0
+ 793 000a 04       		.byte	0x4
+ 794 000b 00       		.byte	0
+ 795 000c 0000     		.2byte	0
+ 796 000e 0000     		.2byte	0
+ 797 0010 00000000 		.4byte	.LFB0
+ 798 0014 2C000000 		.4byte	.LFE0-.LFB0
+ 799 0018 00000000 		.4byte	.LFB1
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccPEkxNg.s 			page 18
+
+
+ 800 001c BC000000 		.4byte	.LFE1-.LFB1
+ 801 0020 00000000 		.4byte	0
+ 802 0024 00000000 		.4byte	0
+ 803              		.section	.debug_ranges,"",%progbits
+ 804              	.Ldebug_ranges0:
+ 805 0000 00000000 		.4byte	.LFB0
+ 806 0004 2C000000 		.4byte	.LFE0
+ 807 0008 00000000 		.4byte	.LFB1
+ 808 000c BC000000 		.4byte	.LFE1
+ 809 0010 00000000 		.4byte	0
+ 810 0014 00000000 		.4byte	0
+ 811              		.section	.debug_line,"",%progbits
+ 812              	.Ldebug_line0:
+ 813 0000 02010000 		.section	.debug_str,"MS",%progbits,1
+ 813      0200BB00 
+ 813      00000201 
+ 813      FB0E0D00 
+ 813      01010101 
+ 814              	.LASF16:
+ 815 0000 666C6F61 		.ascii	"float64\000"
+ 815      74363400 
+ 816              	.LASF20:
+ 817 0008 76526566 		.ascii	"vReference\000"
+ 817      6572656E 
+ 817      636500
+ 818              	.LASF5:
+ 819 0013 73686F72 		.ascii	"short unsigned int\000"
+ 819      7420756E 
+ 819      7369676E 
+ 819      65642069 
+ 819      6E7400
+ 820              	.LASF15:
+ 821 0026 666C6F61 		.ascii	"float32\000"
+ 821      74333200 
+ 822              	.LASF1:
+ 823 002e 666C6F61 		.ascii	"float\000"
+ 823      7400
+ 824              	.LASF4:
+ 825 0034 756E7369 		.ascii	"unsigned char\000"
+ 825      676E6564 
+ 825      20636861 
+ 825      7200
+ 826              	.LASF28:
+ 827 0042 6C6F6772 		.ascii	"logrT\000"
+ 827      5400
+ 828              	.LASF13:
+ 829 0048 696E7431 		.ascii	"int16\000"
+ 829      3600
+ 830              	.LASF7:
+ 831 004e 6C6F6E67 		.ascii	"long unsigned int\000"
+ 831      20756E73 
+ 831      69676E65 
+ 831      6420696E 
+ 831      7400
+ 832              	.LASF23:
+ 833 0060 74656D70 		.ascii	"temp\000"
+ 833      00
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccPEkxNg.s 			page 19
+
+
+ 834              	.LASF14:
+ 835 0065 696E7433 		.ascii	"int32\000"
+ 835      3200
+ 836              	.LASF25:
+ 837 006b 54686572 		.ascii	"Thermistor_GetTemperature\000"
+ 837      6D697374 
+ 837      6F725F47 
+ 837      65745465 
+ 837      6D706572 
+ 838              	.LASF26:
+ 839 0085 74656D70 		.ascii	"tempTR\000"
+ 839      545200
+ 840              	.LASF0:
+ 841 008c 646F7562 		.ascii	"double\000"
+ 841      6C6500
+ 842              	.LASF11:
+ 843 0093 75696E74 		.ascii	"uint16\000"
+ 843      313600
+ 844              	.LASF30:
+ 845 009a 2E5C4765 		.ascii	".\\Generated_Source\\PSoC4\\Thermistor.c\000"
+ 845      6E657261 
+ 845      7465645F 
+ 845      536F7572 
+ 845      63655C50 
+ 846              	.LASF12:
+ 847 00c0 75696E74 		.ascii	"uint32\000"
+ 847      333200
+ 848              	.LASF29:
+ 849 00c7 474E5520 		.ascii	"GNU C 4.9.3 20150303 (release) [ARM/embedded-4_9-br"
+ 849      4320342E 
+ 849      392E3320 
+ 849      32303135 
+ 849      30333033 
+ 850 00fa 616E6368 		.ascii	"anch revision 221220] -mcpu=cortex-m0 -mthumb -g -O"
+ 850      20726576 
+ 850      6973696F 
+ 850      6E203232 
+ 850      31323230 
+ 851 012d 33202D66 		.ascii	"3 -ffunction-sections -ffat-lto-objects\000"
+ 851      66756E63 
+ 851      74696F6E 
+ 851      2D736563 
+ 851      74696F6E 
+ 852              	.LASF10:
+ 853 0155 756E7369 		.ascii	"unsigned int\000"
+ 853      676E6564 
+ 853      20696E74 
+ 853      00
+ 854              	.LASF9:
+ 855 0162 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 855      206C6F6E 
+ 855      6720756E 
+ 855      7369676E 
+ 855      65642069 
+ 856              	.LASF21:
+ 857 0179 76546865 		.ascii	"vThermistor\000"
+ 857      726D6973 
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccPEkxNg.s 			page 20
+
+
+ 857      746F7200 
+ 858              	.LASF18:
+ 859 0185 73697A65 		.ascii	"sizetype\000"
+ 859      74797065 
+ 859      00
+ 860              	.LASF8:
+ 861 018e 6C6F6E67 		.ascii	"long long int\000"
+ 861      206C6F6E 
+ 861      6720696E 
+ 861      7400
+ 862              	.LASF17:
+ 863 019c 63686172 		.ascii	"char\000"
+ 863      00
+ 864              	.LASF2:
+ 865 01a1 73686F72 		.ascii	"short int\000"
+ 865      7420696E 
+ 865      7400
+ 866              	.LASF24:
+ 867 01ab 54686572 		.ascii	"Thermistor_GetResistance\000"
+ 867      6D697374 
+ 867      6F725F47 
+ 867      65745265 
+ 867      73697374 
+ 868              	.LASF27:
+ 869 01c4 73744571 		.ascii	"stEqn\000"
+ 869      6E00
+ 870              	.LASF6:
+ 871 01ca 6C6F6E67 		.ascii	"long int\000"
+ 871      20696E74 
+ 871      00
+ 872              	.LASF22:
+ 873 01d3 72657354 		.ascii	"resT\000"
+ 873      00
+ 874              	.LASF19:
+ 875 01d8 6C6F6E67 		.ascii	"long double\000"
+ 875      20646F75 
+ 875      626C6500 
+ 876              	.LASF3:
+ 877 01e4 7369676E 		.ascii	"signed char\000"
+ 877      65642063 
+ 877      68617200 
+ 878              	.LASF31:
+ 879 01f0 433A5C55 		.ascii	"C:\\Users\\faithc\\Box Sync\\Feniex Firmware Files\\"
+ 879      73657273 
+ 879      5C666169 
+ 879      7468635C 
+ 879      426F7820 
+ 880 021f 414C425C 		.ascii	"ALB\\81-00022-01 ALB LED Driver\\81-00022-01.cydsn\000"
+ 880      38312D30 
+ 880      30303232 
+ 880      2D303120 
+ 880      414C4220 
+ 881              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 4.9.3 20150303 (release) [ARM/embedded-4_9-br

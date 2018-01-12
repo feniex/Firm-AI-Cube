@@ -1,0 +1,2036 @@
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 1
+
+
+   1              		.cpu cortex-m0
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 1
+  10              		.eabi_attribute 34, 0
+  11              		.eabi_attribute 18, 4
+  12              		.code	16
+  13              		.file	"CommTimeoutISR.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.section	.text.CommTimeoutISR_Interrupt,"ax",%progbits
+  18              		.align	2
+  19              		.global	CommTimeoutISR_Interrupt
+  20              		.code	16
+  21              		.thumb_func
+  22              		.type	CommTimeoutISR_Interrupt, %function
+  23              	CommTimeoutISR_Interrupt:
+  24              	.LFB37:
+  25              		.file 1 ".\\Generated_Source\\PSoC4\\CommTimeoutISR.c"
+   1:.\Generated_Source\PSoC4/CommTimeoutISR.c **** /*******************************************************************************
+   2:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * File Name: CommTimeoutISR.c  
+   3:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Version 1.70
+   4:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+   5:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *  Description:
+   6:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   API for controlling the state of an interrupt.
+   7:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+   8:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+   9:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *  Note:
+  10:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+  11:.\Generated_Source\PSoC4/CommTimeoutISR.c **** ********************************************************************************
+  12:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+  13:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * You may use this file only in accordance with the license, terms, conditions, 
+  14:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * disclaimers, and limitations in the end user license agreement accompanying 
+  15:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * the software package with which this file was provided.
+  16:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *******************************************************************************/
+  17:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+  18:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+  19:.\Generated_Source\PSoC4/CommTimeoutISR.c **** #include <cydevice_trm.h>
+  20:.\Generated_Source\PSoC4/CommTimeoutISR.c **** #include <CyLib.h>
+  21:.\Generated_Source\PSoC4/CommTimeoutISR.c **** #include <CommTimeoutISR.h>
+  22:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+  23:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+  24:.\Generated_Source\PSoC4/CommTimeoutISR.c **** #if !defined(CommTimeoutISR__REMOVED) /* Check for removal by optimization */
+  25:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+  26:.\Generated_Source\PSoC4/CommTimeoutISR.c **** /*******************************************************************************
+  27:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *  Place your includes, defines and code here 
+  28:.\Generated_Source\PSoC4/CommTimeoutISR.c **** ********************************************************************************/
+  29:.\Generated_Source\PSoC4/CommTimeoutISR.c **** /* `#START CommTimeoutISR_intc` */
+  30:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+  31:.\Generated_Source\PSoC4/CommTimeoutISR.c **** #include "BrightnessCommManager.h"
+  32:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 2
+
+
+  33:.\Generated_Source\PSoC4/CommTimeoutISR.c **** /* `#END` */
+  34:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+  35:.\Generated_Source\PSoC4/CommTimeoutISR.c **** extern cyisraddress CyRamVectors[CYINT_IRQ_BASE + CY_NUM_INTERRUPTS];
+  36:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+  37:.\Generated_Source\PSoC4/CommTimeoutISR.c **** /* Declared in startup, used to set unused interrupts to. */
+  38:.\Generated_Source\PSoC4/CommTimeoutISR.c **** CY_ISR_PROTO(IntDefaultHandler);
+  39:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+  40:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+  41:.\Generated_Source\PSoC4/CommTimeoutISR.c **** /*******************************************************************************
+  42:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Function Name: CommTimeoutISR_Start
+  43:.\Generated_Source\PSoC4/CommTimeoutISR.c **** ********************************************************************************
+  44:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+  45:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Summary:
+  46:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *  Set up the interrupt and enable it. This function disables the interrupt, 
+  47:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *  sets the default interrupt vector, sets the priority from the value in the
+  48:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *  Design Wide Resources Interrupt Editor, then enables the interrupt to the 
+  49:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *  interrupt controller.
+  50:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+  51:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Parameters:  
+  52:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   None
+  53:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+  54:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Return:
+  55:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   None
+  56:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+  57:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *******************************************************************************/
+  58:.\Generated_Source\PSoC4/CommTimeoutISR.c **** void CommTimeoutISR_Start(void)
+  59:.\Generated_Source\PSoC4/CommTimeoutISR.c **** {
+  60:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     /* For all we know the interrupt is active. */
+  61:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     CommTimeoutISR_Disable();
+  62:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+  63:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     /* Set the ISR to point to the CommTimeoutISR Interrupt. */
+  64:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     CommTimeoutISR_SetVector(&CommTimeoutISR_Interrupt);
+  65:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+  66:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     /* Set the priority. */
+  67:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     CommTimeoutISR_SetPriority((uint8)CommTimeoutISR_INTC_PRIOR_NUMBER);
+  68:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+  69:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     /* Enable it. */
+  70:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     CommTimeoutISR_Enable();
+  71:.\Generated_Source\PSoC4/CommTimeoutISR.c **** }
+  72:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+  73:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+  74:.\Generated_Source\PSoC4/CommTimeoutISR.c **** /*******************************************************************************
+  75:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Function Name: CommTimeoutISR_StartEx
+  76:.\Generated_Source\PSoC4/CommTimeoutISR.c **** ********************************************************************************
+  77:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+  78:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Summary:
+  79:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *  Sets up the interrupt and enables it. This function disables the interrupt,
+  80:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *  sets the interrupt vector based on the address passed in, sets the priority 
+  81:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *  from the value in the Design Wide Resources Interrupt Editor, then enables 
+  82:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *  the interrupt to the interrupt controller.
+  83:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *  
+  84:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *  When defining ISR functions, the CY_ISR and CY_ISR_PROTO macros should be 
+  85:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *  used to provide consistent definition across compilers:
+  86:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *  
+  87:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *  Function definition example:
+  88:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   CY_ISR(MyISR)
+  89:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   {
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 3
+
+
+  90:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   }
+  91:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   Function prototype example:
+  92:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   CY_ISR_PROTO(MyISR);
+  93:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+  94:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Parameters:  
+  95:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   address: Address of the ISR to set in the interrupt vector table.
+  96:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+  97:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Return:
+  98:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   None
+  99:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 100:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *******************************************************************************/
+ 101:.\Generated_Source\PSoC4/CommTimeoutISR.c **** void CommTimeoutISR_StartEx(cyisraddress address)
+ 102:.\Generated_Source\PSoC4/CommTimeoutISR.c **** {
+ 103:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     /* For all we know the interrupt is active. */
+ 104:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     CommTimeoutISR_Disable();
+ 105:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 106:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     /* Set the ISR to point to the CommTimeoutISR Interrupt. */
+ 107:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     CommTimeoutISR_SetVector(address);
+ 108:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 109:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     /* Set the priority. */
+ 110:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     CommTimeoutISR_SetPriority((uint8)CommTimeoutISR_INTC_PRIOR_NUMBER);
+ 111:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 112:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     /* Enable it. */
+ 113:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     CommTimeoutISR_Enable();
+ 114:.\Generated_Source\PSoC4/CommTimeoutISR.c **** }
+ 115:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 116:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 117:.\Generated_Source\PSoC4/CommTimeoutISR.c **** /*******************************************************************************
+ 118:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Function Name: CommTimeoutISR_Stop
+ 119:.\Generated_Source\PSoC4/CommTimeoutISR.c **** ********************************************************************************
+ 120:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 121:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Summary:
+ 122:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   Disables and removes the interrupt.
+ 123:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 124:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Parameters:  
+ 125:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   None
+ 126:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 127:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Return:
+ 128:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   None
+ 129:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 130:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *******************************************************************************/
+ 131:.\Generated_Source\PSoC4/CommTimeoutISR.c **** void CommTimeoutISR_Stop(void)
+ 132:.\Generated_Source\PSoC4/CommTimeoutISR.c **** {
+ 133:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     /* Disable this interrupt. */
+ 134:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     CommTimeoutISR_Disable();
+ 135:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 136:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     /* Set the ISR to point to the passive one. */
+ 137:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     CommTimeoutISR_SetVector(&IntDefaultHandler);
+ 138:.\Generated_Source\PSoC4/CommTimeoutISR.c **** }
+ 139:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 140:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 141:.\Generated_Source\PSoC4/CommTimeoutISR.c **** /*******************************************************************************
+ 142:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Function Name: CommTimeoutISR_Interrupt
+ 143:.\Generated_Source\PSoC4/CommTimeoutISR.c **** ********************************************************************************
+ 144:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 145:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Summary:
+ 146:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   The default Interrupt Service Routine for CommTimeoutISR.
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 4
+
+
+ 147:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 148:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   Add custom code between the START and END comments to keep the next version
+ 149:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   of this file from over-writing your code.
+ 150:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 151:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   Note You may use either the default ISR by using this API, or you may define
+ 152:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   your own separate ISR through ISR_StartEx().
+ 153:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 154:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Parameters:  
+ 155:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   None
+ 156:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 157:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Return:
+ 158:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   None
+ 159:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 160:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *******************************************************************************/
+ 161:.\Generated_Source\PSoC4/CommTimeoutISR.c **** CY_ISR(CommTimeoutISR_Interrupt)
+ 162:.\Generated_Source\PSoC4/CommTimeoutISR.c **** {
+  26              		.loc 1 162 0
+  27              		.cfi_startproc
+  28 0000 08B5     		push	{r3, lr}
+  29              		.cfi_def_cfa_offset 8
+  30              		.cfi_offset 3, -8
+  31              		.cfi_offset 14, -4
+ 163:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     #ifdef CommTimeoutISR_INTERRUPT_INTERRUPT_CALLBACK
+ 164:.\Generated_Source\PSoC4/CommTimeoutISR.c ****         CommTimeoutISR_Interrupt_InterruptCallback();
+ 165:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     #endif /* CommTimeoutISR_INTERRUPT_INTERRUPT_CALLBACK */ 
+ 166:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 167:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     /*  Place your Interrupt code here. */
+ 168:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     /* `#START CommTimeoutISR_Interrupt` */
+ 169:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 170:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     processTimeoutTimerRoutine();
+  32              		.loc 1 170 0
+  33 0002 FFF7FEFF 		bl	processTimeoutTimerRoutine
+  34              	.LVL0:
+ 171:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     
+ 172:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     /* `#END` */
+ 173:.\Generated_Source\PSoC4/CommTimeoutISR.c **** }
+  35              		.loc 1 173 0
+  36              		@ sp needed
+  37 0006 08BD     		pop	{r3, pc}
+  38              		.cfi_endproc
+  39              	.LFE37:
+  40              		.size	CommTimeoutISR_Interrupt, .-CommTimeoutISR_Interrupt
+  41              		.section	.text.CommTimeoutISR_SetVector,"ax",%progbits
+  42              		.align	2
+  43              		.global	CommTimeoutISR_SetVector
+  44              		.code	16
+  45              		.thumb_func
+  46              		.type	CommTimeoutISR_SetVector, %function
+  47              	CommTimeoutISR_SetVector:
+  48              	.LFB38:
+ 174:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 175:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 176:.\Generated_Source\PSoC4/CommTimeoutISR.c **** /*******************************************************************************
+ 177:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Function Name: CommTimeoutISR_SetVector
+ 178:.\Generated_Source\PSoC4/CommTimeoutISR.c **** ********************************************************************************
+ 179:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 180:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Summary:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 5
+
+
+ 181:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   Change the ISR vector for the Interrupt. Note calling CommTimeoutISR_Start
+ 182:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   will override any effect this method would have had. To set the vector 
+ 183:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   before the component has been started use CommTimeoutISR_StartEx instead.
+ 184:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * 
+ 185:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   When defining ISR functions, the CY_ISR and CY_ISR_PROTO macros should be 
+ 186:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   used to provide consistent definition across compilers:
+ 187:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 188:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   Function definition example:
+ 189:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   CY_ISR(MyISR)
+ 190:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   {
+ 191:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   }
+ 192:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 193:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   Function prototype example:
+ 194:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *     CY_ISR_PROTO(MyISR);
+ 195:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 196:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Parameters:
+ 197:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   address: Address of the ISR to set in the interrupt vector table.
+ 198:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 199:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Return:
+ 200:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   None
+ 201:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 202:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *******************************************************************************/
+ 203:.\Generated_Source\PSoC4/CommTimeoutISR.c **** void CommTimeoutISR_SetVector(cyisraddress address)
+ 204:.\Generated_Source\PSoC4/CommTimeoutISR.c **** {
+  49              		.loc 1 204 0
+  50              		.cfi_startproc
+  51              	.LVL1:
+ 205:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     CyRamVectors[CYINT_IRQ_BASE + CommTimeoutISR__INTC_NUMBER] = address;
+  52              		.loc 1 205 0
+  53 0000 014B     		ldr	r3, .L3
+  54 0002 9864     		str	r0, [r3, #72]
+ 206:.\Generated_Source\PSoC4/CommTimeoutISR.c **** }
+  55              		.loc 1 206 0
+  56              		@ sp needed
+  57 0004 7047     		bx	lr
+  58              	.L4:
+  59 0006 C046     		.align	2
+  60              	.L3:
+  61 0008 00000000 		.word	CyRamVectors
+  62              		.cfi_endproc
+  63              	.LFE38:
+  64              		.size	CommTimeoutISR_SetVector, .-CommTimeoutISR_SetVector
+  65              		.section	.text.CommTimeoutISR_GetVector,"ax",%progbits
+  66              		.align	2
+  67              		.global	CommTimeoutISR_GetVector
+  68              		.code	16
+  69              		.thumb_func
+  70              		.type	CommTimeoutISR_GetVector, %function
+  71              	CommTimeoutISR_GetVector:
+  72              	.LFB39:
+ 207:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 208:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 209:.\Generated_Source\PSoC4/CommTimeoutISR.c **** /*******************************************************************************
+ 210:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Function Name: CommTimeoutISR_GetVector
+ 211:.\Generated_Source\PSoC4/CommTimeoutISR.c **** ********************************************************************************
+ 212:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 213:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Summary:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 6
+
+
+ 214:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   Gets the "address" of the current ISR vector for the Interrupt.
+ 215:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 216:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Parameters:
+ 217:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   None
+ 218:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 219:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Return:
+ 220:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   Address of the ISR in the interrupt vector table.
+ 221:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 222:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *******************************************************************************/
+ 223:.\Generated_Source\PSoC4/CommTimeoutISR.c **** cyisraddress CommTimeoutISR_GetVector(void)
+ 224:.\Generated_Source\PSoC4/CommTimeoutISR.c **** {
+  73              		.loc 1 224 0
+  74              		.cfi_startproc
+ 225:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     return CyRamVectors[CYINT_IRQ_BASE + CommTimeoutISR__INTC_NUMBER];
+  75              		.loc 1 225 0
+  76 0000 014B     		ldr	r3, .L6
+  77 0002 986C     		ldr	r0, [r3, #72]
+ 226:.\Generated_Source\PSoC4/CommTimeoutISR.c **** }
+  78              		.loc 1 226 0
+  79              		@ sp needed
+  80 0004 7047     		bx	lr
+  81              	.L7:
+  82 0006 C046     		.align	2
+  83              	.L6:
+  84 0008 00000000 		.word	CyRamVectors
+  85              		.cfi_endproc
+  86              	.LFE39:
+  87              		.size	CommTimeoutISR_GetVector, .-CommTimeoutISR_GetVector
+  88              		.section	.text.CommTimeoutISR_SetPriority,"ax",%progbits
+  89              		.align	2
+  90              		.global	CommTimeoutISR_SetPriority
+  91              		.code	16
+  92              		.thumb_func
+  93              		.type	CommTimeoutISR_SetPriority, %function
+  94              	CommTimeoutISR_SetPriority:
+  95              	.LFB40:
+ 227:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 228:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 229:.\Generated_Source\PSoC4/CommTimeoutISR.c **** /*******************************************************************************
+ 230:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Function Name: CommTimeoutISR_SetPriority
+ 231:.\Generated_Source\PSoC4/CommTimeoutISR.c **** ********************************************************************************
+ 232:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 233:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Summary:
+ 234:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   Sets the Priority of the Interrupt. 
+ 235:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 236:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   Note calling CommTimeoutISR_Start or CommTimeoutISR_StartEx will 
+ 237:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   override any effect this API would have had. This API should only be called
+ 238:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   after CommTimeoutISR_Start or CommTimeoutISR_StartEx has been called. 
+ 239:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   To set the initial priority for the component, use the Design-Wide Resources
+ 240:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   Interrupt Editor.
+ 241:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 242:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   Note This API has no effect on Non-maskable interrupt NMI).
+ 243:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 244:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Parameters:
+ 245:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   priority: Priority of the interrupt, 0 being the highest priority
+ 246:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *             PSoC 3 and PSoC 5LP: Priority is from 0 to 7.
+ 247:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *             PSoC 4: Priority is from 0 to 3.
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 7
+
+
+ 248:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 249:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Return:
+ 250:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   None
+ 251:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 252:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *******************************************************************************/
+ 253:.\Generated_Source\PSoC4/CommTimeoutISR.c **** void CommTimeoutISR_SetPriority(uint8 priority)
+ 254:.\Generated_Source\PSoC4/CommTimeoutISR.c **** {
+  96              		.loc 1 254 0
+  97              		.cfi_startproc
+  98              	.LVL2:
+  99 0000 10B5     		push	{r4, lr}
+ 100              		.cfi_def_cfa_offset 8
+ 101              		.cfi_offset 4, -8
+ 102              		.cfi_offset 14, -4
+ 103 0002 041C     		mov	r4, r0
+ 104              	.LVL3:
+ 255:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 	uint8 interruptState;
+ 256:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     uint32 priorityOffset = ((CommTimeoutISR__INTC_NUMBER % 4u) * 8u) + 6u;
+ 257:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     
+ 258:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 	interruptState = CyEnterCriticalSection();
+ 105              		.loc 1 258 0
+ 106 0004 FFF7FEFF 		bl	CyEnterCriticalSection
+ 107              	.LVL4:
+ 259:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     *CommTimeoutISR_INTC_PRIOR = (*CommTimeoutISR_INTC_PRIOR & (uint32)(~CommTimeoutISR__INTC_PRIOR
+ 108              		.loc 1 259 0
+ 109 0008 044A     		ldr	r2, .L9
+ 110 000a 1168     		ldr	r1, [r2]
+ 111 000c 044B     		ldr	r3, .L9+4
+ 112 000e 0B40     		and	r3, r1
+ 260:.\Generated_Source\PSoC4/CommTimeoutISR.c ****                                     ((uint32)priority << priorityOffset);
+ 113              		.loc 1 260 0
+ 114 0010 A405     		lsl	r4, r4, #22
+ 259:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     *CommTimeoutISR_INTC_PRIOR = (*CommTimeoutISR_INTC_PRIOR & (uint32)(~CommTimeoutISR__INTC_PRIOR
+ 115              		.loc 1 259 0
+ 116 0012 1C43     		orr	r4, r3
+ 117 0014 1460     		str	r4, [r2]
+ 261:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 	CyExitCriticalSection(interruptState);
+ 118              		.loc 1 261 0
+ 119 0016 FFF7FEFF 		bl	CyExitCriticalSection
+ 120              	.LVL5:
+ 262:.\Generated_Source\PSoC4/CommTimeoutISR.c **** }
+ 121              		.loc 1 262 0
+ 122              		@ sp needed
+ 123 001a 10BD     		pop	{r4, pc}
+ 124              	.L10:
+ 125              		.align	2
+ 126              	.L9:
+ 127 001c 00E400E0 		.word	-536812544
+ 128 0020 FFFF3FFF 		.word	-12582913
+ 129              		.cfi_endproc
+ 130              	.LFE40:
+ 131              		.size	CommTimeoutISR_SetPriority, .-CommTimeoutISR_SetPriority
+ 132              		.section	.text.CommTimeoutISR_GetPriority,"ax",%progbits
+ 133              		.align	2
+ 134              		.global	CommTimeoutISR_GetPriority
+ 135              		.code	16
+ 136              		.thumb_func
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 8
+
+
+ 137              		.type	CommTimeoutISR_GetPriority, %function
+ 138              	CommTimeoutISR_GetPriority:
+ 139              	.LFB41:
+ 263:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 264:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 265:.\Generated_Source\PSoC4/CommTimeoutISR.c **** /*******************************************************************************
+ 266:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Function Name: CommTimeoutISR_GetPriority
+ 267:.\Generated_Source\PSoC4/CommTimeoutISR.c **** ********************************************************************************
+ 268:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 269:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Summary:
+ 270:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   Gets the Priority of the Interrupt.
+ 271:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 272:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Parameters:
+ 273:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   None
+ 274:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 275:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Return:
+ 276:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   Priority of the interrupt, 0 being the highest priority
+ 277:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *    PSoC 3 and PSoC 5LP: Priority is from 0 to 7.
+ 278:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *    PSoC 4: Priority is from 0 to 3.
+ 279:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 280:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *******************************************************************************/
+ 281:.\Generated_Source\PSoC4/CommTimeoutISR.c **** uint8 CommTimeoutISR_GetPriority(void)
+ 282:.\Generated_Source\PSoC4/CommTimeoutISR.c **** {
+ 140              		.loc 1 282 0
+ 141              		.cfi_startproc
+ 142              	.LVL6:
+ 283:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     uint32 priority;
+ 284:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 	uint32 priorityOffset = ((CommTimeoutISR__INTC_NUMBER % 4u) * 8u) + 6u;
+ 285:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 286:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     priority = (*CommTimeoutISR_INTC_PRIOR & CommTimeoutISR__INTC_PRIOR_MASK) >> priorityOffset;
+ 143              		.loc 1 286 0
+ 144 0000 024B     		ldr	r3, .L12
+ 145 0002 1868     		ldr	r0, [r3]
+ 146 0004 0002     		lsl	r0, r0, #8
+ 147              	.LVL7:
+ 287:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 288:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     return (uint8)priority;
+ 148              		.loc 1 288 0
+ 149 0006 800F     		lsr	r0, r0, #30
+ 150              	.LVL8:
+ 289:.\Generated_Source\PSoC4/CommTimeoutISR.c **** }
+ 151              		.loc 1 289 0
+ 152              		@ sp needed
+ 153 0008 7047     		bx	lr
+ 154              	.L13:
+ 155 000a C046     		.align	2
+ 156              	.L12:
+ 157 000c 00E400E0 		.word	-536812544
+ 158              		.cfi_endproc
+ 159              	.LFE41:
+ 160              		.size	CommTimeoutISR_GetPriority, .-CommTimeoutISR_GetPriority
+ 161              		.section	.text.CommTimeoutISR_Enable,"ax",%progbits
+ 162              		.align	2
+ 163              		.global	CommTimeoutISR_Enable
+ 164              		.code	16
+ 165              		.thumb_func
+ 166              		.type	CommTimeoutISR_Enable, %function
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 9
+
+
+ 167              	CommTimeoutISR_Enable:
+ 168              	.LFB42:
+ 290:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 291:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 292:.\Generated_Source\PSoC4/CommTimeoutISR.c **** /*******************************************************************************
+ 293:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Function Name: CommTimeoutISR_Enable
+ 294:.\Generated_Source\PSoC4/CommTimeoutISR.c **** ********************************************************************************
+ 295:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 296:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Summary:
+ 297:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   Enables the interrupt to the interrupt controller. Do not call this function
+ 298:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   unless ISR_Start() has been called or the functionality of the ISR_Start() 
+ 299:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   function, which sets the vector and the priority, has been called.
+ 300:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 301:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Parameters:
+ 302:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   None
+ 303:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 304:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Return:
+ 305:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   None
+ 306:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 307:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *******************************************************************************/
+ 308:.\Generated_Source\PSoC4/CommTimeoutISR.c **** void CommTimeoutISR_Enable(void)
+ 309:.\Generated_Source\PSoC4/CommTimeoutISR.c **** {
+ 169              		.loc 1 309 0
+ 170              		.cfi_startproc
+ 310:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     /* Enable the general interrupt. */
+ 311:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     *CommTimeoutISR_INTC_SET_EN = CommTimeoutISR__INTC_MASK;
+ 171              		.loc 1 311 0
+ 172 0000 0422     		mov	r2, #4
+ 173 0002 014B     		ldr	r3, .L15
+ 174 0004 1A60     		str	r2, [r3]
+ 312:.\Generated_Source\PSoC4/CommTimeoutISR.c **** }
+ 175              		.loc 1 312 0
+ 176              		@ sp needed
+ 177 0006 7047     		bx	lr
+ 178              	.L16:
+ 179              		.align	2
+ 180              	.L15:
+ 181 0008 00E100E0 		.word	-536813312
+ 182              		.cfi_endproc
+ 183              	.LFE42:
+ 184              		.size	CommTimeoutISR_Enable, .-CommTimeoutISR_Enable
+ 185              		.section	.text.CommTimeoutISR_GetState,"ax",%progbits
+ 186              		.align	2
+ 187              		.global	CommTimeoutISR_GetState
+ 188              		.code	16
+ 189              		.thumb_func
+ 190              		.type	CommTimeoutISR_GetState, %function
+ 191              	CommTimeoutISR_GetState:
+ 192              	.LFB43:
+ 313:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 314:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 315:.\Generated_Source\PSoC4/CommTimeoutISR.c **** /*******************************************************************************
+ 316:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Function Name: CommTimeoutISR_GetState
+ 317:.\Generated_Source\PSoC4/CommTimeoutISR.c **** ********************************************************************************
+ 318:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 319:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Summary:
+ 320:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   Gets the state (enabled, disabled) of the Interrupt.
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 10
+
+
+ 321:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 322:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Parameters:
+ 323:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   None
+ 324:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 325:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Return:
+ 326:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   1 if enabled, 0 if disabled.
+ 327:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 328:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *******************************************************************************/
+ 329:.\Generated_Source\PSoC4/CommTimeoutISR.c **** uint8 CommTimeoutISR_GetState(void)
+ 330:.\Generated_Source\PSoC4/CommTimeoutISR.c **** {
+ 193              		.loc 1 330 0
+ 194              		.cfi_startproc
+ 331:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     /* Get the state of the general interrupt. */
+ 332:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     return ((*CommTimeoutISR_INTC_SET_EN & (uint32)CommTimeoutISR__INTC_MASK) != 0u) ? 1u:0u;
+ 195              		.loc 1 332 0
+ 196 0000 034B     		ldr	r3, .L20
+ 197 0002 1B68     		ldr	r3, [r3]
+ 198 0004 5B07     		lsl	r3, r3, #29
+ 199 0006 01D5     		bpl	.L19
+ 200 0008 0120     		mov	r0, #1
+ 201 000a 00E0     		b	.L18
+ 202              	.L19:
+ 203 000c 0020     		mov	r0, #0
+ 204              	.L18:
+ 333:.\Generated_Source\PSoC4/CommTimeoutISR.c **** }
+ 205              		.loc 1 333 0 discriminator 4
+ 206              		@ sp needed
+ 207 000e 7047     		bx	lr
+ 208              	.L21:
+ 209              		.align	2
+ 210              	.L20:
+ 211 0010 00E100E0 		.word	-536813312
+ 212              		.cfi_endproc
+ 213              	.LFE43:
+ 214              		.size	CommTimeoutISR_GetState, .-CommTimeoutISR_GetState
+ 215              		.section	.text.CommTimeoutISR_Disable,"ax",%progbits
+ 216              		.align	2
+ 217              		.global	CommTimeoutISR_Disable
+ 218              		.code	16
+ 219              		.thumb_func
+ 220              		.type	CommTimeoutISR_Disable, %function
+ 221              	CommTimeoutISR_Disable:
+ 222              	.LFB44:
+ 334:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 335:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 336:.\Generated_Source\PSoC4/CommTimeoutISR.c **** /*******************************************************************************
+ 337:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Function Name: CommTimeoutISR_Disable
+ 338:.\Generated_Source\PSoC4/CommTimeoutISR.c **** ********************************************************************************
+ 339:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 340:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Summary:
+ 341:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   Disables the Interrupt in the interrupt controller.
+ 342:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 343:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Parameters:
+ 344:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   None
+ 345:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 346:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Return:
+ 347:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   None
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 11
+
+
+ 348:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 349:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *******************************************************************************/
+ 350:.\Generated_Source\PSoC4/CommTimeoutISR.c **** void CommTimeoutISR_Disable(void)
+ 351:.\Generated_Source\PSoC4/CommTimeoutISR.c **** {
+ 223              		.loc 1 351 0
+ 224              		.cfi_startproc
+ 352:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     /* Disable the general interrupt. */
+ 353:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     *CommTimeoutISR_INTC_CLR_EN = CommTimeoutISR__INTC_MASK;
+ 225              		.loc 1 353 0
+ 226 0000 0422     		mov	r2, #4
+ 227 0002 014B     		ldr	r3, .L23
+ 228 0004 1A60     		str	r2, [r3]
+ 354:.\Generated_Source\PSoC4/CommTimeoutISR.c **** }
+ 229              		.loc 1 354 0
+ 230              		@ sp needed
+ 231 0006 7047     		bx	lr
+ 232              	.L24:
+ 233              		.align	2
+ 234              	.L23:
+ 235 0008 80E100E0 		.word	-536813184
+ 236              		.cfi_endproc
+ 237              	.LFE44:
+ 238              		.size	CommTimeoutISR_Disable, .-CommTimeoutISR_Disable
+ 239              		.section	.text.CommTimeoutISR_Start,"ax",%progbits
+ 240              		.align	2
+ 241              		.global	CommTimeoutISR_Start
+ 242              		.code	16
+ 243              		.thumb_func
+ 244              		.type	CommTimeoutISR_Start, %function
+ 245              	CommTimeoutISR_Start:
+ 246              	.LFB34:
+  59:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     /* For all we know the interrupt is active. */
+ 247              		.loc 1 59 0
+ 248              		.cfi_startproc
+ 249 0000 08B5     		push	{r3, lr}
+ 250              		.cfi_def_cfa_offset 8
+ 251              		.cfi_offset 3, -8
+ 252              		.cfi_offset 14, -4
+  61:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 253              		.loc 1 61 0
+ 254 0002 FFF7FEFF 		bl	CommTimeoutISR_Disable
+ 255              	.LVL9:
+  64:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 256              		.loc 1 64 0
+ 257 0006 0448     		ldr	r0, .L26
+ 258 0008 FFF7FEFF 		bl	CommTimeoutISR_SetVector
+ 259              	.LVL10:
+  67:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 260              		.loc 1 67 0
+ 261 000c 0320     		mov	r0, #3
+ 262 000e FFF7FEFF 		bl	CommTimeoutISR_SetPriority
+ 263              	.LVL11:
+  70:.\Generated_Source\PSoC4/CommTimeoutISR.c **** }
+ 264              		.loc 1 70 0
+ 265 0012 FFF7FEFF 		bl	CommTimeoutISR_Enable
+ 266              	.LVL12:
+  71:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 12
+
+
+ 267              		.loc 1 71 0
+ 268              		@ sp needed
+ 269 0016 08BD     		pop	{r3, pc}
+ 270              	.L27:
+ 271              		.align	2
+ 272              	.L26:
+ 273 0018 00000000 		.word	CommTimeoutISR_Interrupt
+ 274              		.cfi_endproc
+ 275              	.LFE34:
+ 276              		.size	CommTimeoutISR_Start, .-CommTimeoutISR_Start
+ 277              		.section	.text.CommTimeoutISR_StartEx,"ax",%progbits
+ 278              		.align	2
+ 279              		.global	CommTimeoutISR_StartEx
+ 280              		.code	16
+ 281              		.thumb_func
+ 282              		.type	CommTimeoutISR_StartEx, %function
+ 283              	CommTimeoutISR_StartEx:
+ 284              	.LFB35:
+ 102:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     /* For all we know the interrupt is active. */
+ 285              		.loc 1 102 0
+ 286              		.cfi_startproc
+ 287              	.LVL13:
+ 288 0000 10B5     		push	{r4, lr}
+ 289              		.cfi_def_cfa_offset 8
+ 290              		.cfi_offset 4, -8
+ 291              		.cfi_offset 14, -4
+ 292 0002 041C     		mov	r4, r0
+ 104:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 293              		.loc 1 104 0
+ 294 0004 FFF7FEFF 		bl	CommTimeoutISR_Disable
+ 295              	.LVL14:
+ 107:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 296              		.loc 1 107 0
+ 297 0008 201C     		mov	r0, r4
+ 298 000a FFF7FEFF 		bl	CommTimeoutISR_SetVector
+ 299              	.LVL15:
+ 110:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 300              		.loc 1 110 0
+ 301 000e 0320     		mov	r0, #3
+ 302 0010 FFF7FEFF 		bl	CommTimeoutISR_SetPriority
+ 303              	.LVL16:
+ 113:.\Generated_Source\PSoC4/CommTimeoutISR.c **** }
+ 304              		.loc 1 113 0
+ 305 0014 FFF7FEFF 		bl	CommTimeoutISR_Enable
+ 306              	.LVL17:
+ 114:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 307              		.loc 1 114 0
+ 308              		@ sp needed
+ 309              	.LVL18:
+ 310 0018 10BD     		pop	{r4, pc}
+ 311              		.cfi_endproc
+ 312              	.LFE35:
+ 313              		.size	CommTimeoutISR_StartEx, .-CommTimeoutISR_StartEx
+ 314 001a C046     		.section	.text.CommTimeoutISR_Stop,"ax",%progbits
+ 315              		.align	2
+ 316              		.global	CommTimeoutISR_Stop
+ 317              		.code	16
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 13
+
+
+ 318              		.thumb_func
+ 319              		.type	CommTimeoutISR_Stop, %function
+ 320              	CommTimeoutISR_Stop:
+ 321              	.LFB36:
+ 132:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     /* Disable this interrupt. */
+ 322              		.loc 1 132 0
+ 323              		.cfi_startproc
+ 324 0000 08B5     		push	{r3, lr}
+ 325              		.cfi_def_cfa_offset 8
+ 326              		.cfi_offset 3, -8
+ 327              		.cfi_offset 14, -4
+ 134:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 328              		.loc 1 134 0
+ 329 0002 FFF7FEFF 		bl	CommTimeoutISR_Disable
+ 330              	.LVL19:
+ 137:.\Generated_Source\PSoC4/CommTimeoutISR.c **** }
+ 331              		.loc 1 137 0
+ 332 0006 0248     		ldr	r0, .L30
+ 333 0008 FFF7FEFF 		bl	CommTimeoutISR_SetVector
+ 334              	.LVL20:
+ 138:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 335              		.loc 1 138 0
+ 336              		@ sp needed
+ 337 000c 08BD     		pop	{r3, pc}
+ 338              	.L31:
+ 339 000e C046     		.align	2
+ 340              	.L30:
+ 341 0010 00000000 		.word	IntDefaultHandler
+ 342              		.cfi_endproc
+ 343              	.LFE36:
+ 344              		.size	CommTimeoutISR_Stop, .-CommTimeoutISR_Stop
+ 345              		.section	.text.CommTimeoutISR_SetPending,"ax",%progbits
+ 346              		.align	2
+ 347              		.global	CommTimeoutISR_SetPending
+ 348              		.code	16
+ 349              		.thumb_func
+ 350              		.type	CommTimeoutISR_SetPending, %function
+ 351              	CommTimeoutISR_SetPending:
+ 352              	.LFB45:
+ 355:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 356:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 357:.\Generated_Source\PSoC4/CommTimeoutISR.c **** /*******************************************************************************
+ 358:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Function Name: CommTimeoutISR_SetPending
+ 359:.\Generated_Source\PSoC4/CommTimeoutISR.c **** ********************************************************************************
+ 360:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 361:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Summary:
+ 362:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   Causes the Interrupt to enter the pending state, a software method of
+ 363:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   generating the interrupt.
+ 364:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 365:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Parameters:
+ 366:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   None
+ 367:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 368:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Return:
+ 369:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   None
+ 370:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 371:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Side Effects:
+ 372:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   If interrupts are enabled and the interrupt is set up properly, the ISR is
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 14
+
+
+ 373:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   entered (depending on the priority of this interrupt and other pending 
+ 374:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   interrupts).
+ 375:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 376:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *******************************************************************************/
+ 377:.\Generated_Source\PSoC4/CommTimeoutISR.c **** void CommTimeoutISR_SetPending(void)
+ 378:.\Generated_Source\PSoC4/CommTimeoutISR.c **** {
+ 353              		.loc 1 378 0
+ 354              		.cfi_startproc
+ 379:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     *CommTimeoutISR_INTC_SET_PD = CommTimeoutISR__INTC_MASK;
+ 355              		.loc 1 379 0
+ 356 0000 0422     		mov	r2, #4
+ 357 0002 014B     		ldr	r3, .L33
+ 358 0004 1A60     		str	r2, [r3]
+ 380:.\Generated_Source\PSoC4/CommTimeoutISR.c **** }
+ 359              		.loc 1 380 0
+ 360              		@ sp needed
+ 361 0006 7047     		bx	lr
+ 362              	.L34:
+ 363              		.align	2
+ 364              	.L33:
+ 365 0008 00E200E0 		.word	-536813056
+ 366              		.cfi_endproc
+ 367              	.LFE45:
+ 368              		.size	CommTimeoutISR_SetPending, .-CommTimeoutISR_SetPending
+ 369              		.section	.text.CommTimeoutISR_ClearPending,"ax",%progbits
+ 370              		.align	2
+ 371              		.global	CommTimeoutISR_ClearPending
+ 372              		.code	16
+ 373              		.thumb_func
+ 374              		.type	CommTimeoutISR_ClearPending, %function
+ 375              	CommTimeoutISR_ClearPending:
+ 376              	.LFB46:
+ 381:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 382:.\Generated_Source\PSoC4/CommTimeoutISR.c **** 
+ 383:.\Generated_Source\PSoC4/CommTimeoutISR.c **** /*******************************************************************************
+ 384:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Function Name: CommTimeoutISR_ClearPending
+ 385:.\Generated_Source\PSoC4/CommTimeoutISR.c **** ********************************************************************************
+ 386:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 387:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Summary:
+ 388:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   Clears a pending interrupt in the interrupt controller.
+ 389:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 390:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   Note Some interrupt sources are clear-on-read and require the block 
+ 391:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   interrupt/status register to be read/cleared with the appropriate block API 
+ 392:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   (GPIO, UART, and so on). Otherwise the ISR will continue to remain in 
+ 393:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   pending state even though the interrupt itself is cleared using this API.
+ 394:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 395:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Parameters:
+ 396:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   None
+ 397:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 398:.\Generated_Source\PSoC4/CommTimeoutISR.c **** * Return:
+ 399:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *   None
+ 400:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *
+ 401:.\Generated_Source\PSoC4/CommTimeoutISR.c **** *******************************************************************************/
+ 402:.\Generated_Source\PSoC4/CommTimeoutISR.c **** void CommTimeoutISR_ClearPending(void)
+ 403:.\Generated_Source\PSoC4/CommTimeoutISR.c **** {
+ 377              		.loc 1 403 0
+ 378              		.cfi_startproc
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 15
+
+
+ 404:.\Generated_Source\PSoC4/CommTimeoutISR.c ****     *CommTimeoutISR_INTC_CLR_PD = CommTimeoutISR__INTC_MASK;
+ 379              		.loc 1 404 0
+ 380 0000 0422     		mov	r2, #4
+ 381 0002 014B     		ldr	r3, .L36
+ 382 0004 1A60     		str	r2, [r3]
+ 405:.\Generated_Source\PSoC4/CommTimeoutISR.c **** }
+ 383              		.loc 1 405 0
+ 384              		@ sp needed
+ 385 0006 7047     		bx	lr
+ 386              	.L37:
+ 387              		.align	2
+ 388              	.L36:
+ 389 0008 80E200E0 		.word	-536812928
+ 390              		.cfi_endproc
+ 391              	.LFE46:
+ 392              		.size	CommTimeoutISR_ClearPending, .-CommTimeoutISR_ClearPending
+ 393              		.text
+ 394              	.Letext0:
+ 395              		.file 2 "Generated_Source\\PSoC4/cytypes.h"
+ 396              		.file 3 "./BrightnessCommManager.h"
+ 397              		.file 4 "Generated_Source\\PSoC4/CyLib.h"
+ 398              		.section	.debug_info,"",%progbits
+ 399              	.Ldebug_info0:
+ 400 0000 12030000 		.4byte	0x312
+ 401 0004 0400     		.2byte	0x4
+ 402 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 403 000a 04       		.byte	0x4
+ 404 000b 01       		.uleb128 0x1
+ 405 000c 7C020000 		.4byte	.LASF33
+ 406 0010 01       		.byte	0x1
+ 407 0011 43010000 		.4byte	.LASF34
+ 408 0015 06000000 		.4byte	.LASF35
+ 409 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 410 001d 00000000 		.4byte	0
+ 411 0021 00000000 		.4byte	.Ldebug_line0
+ 412 0025 02       		.uleb128 0x2
+ 413 0026 01       		.byte	0x1
+ 414 0027 06       		.byte	0x6
+ 415 0028 58030000 		.4byte	.LASF0
+ 416 002c 02       		.uleb128 0x2
+ 417 002d 01       		.byte	0x1
+ 418 002e 08       		.byte	0x8
+ 419 002f E9000000 		.4byte	.LASF1
+ 420 0033 02       		.uleb128 0x2
+ 421 0034 02       		.byte	0x2
+ 422 0035 05       		.byte	0x5
+ 423 0036 0A030000 		.4byte	.LASF2
+ 424 003a 02       		.uleb128 0x2
+ 425 003b 02       		.byte	0x2
+ 426 003c 07       		.byte	0x7
+ 427 003d A8000000 		.4byte	.LASF3
+ 428 0041 02       		.uleb128 0x2
+ 429 0042 04       		.byte	0x4
+ 430 0043 05       		.byte	0x5
+ 431 0044 4F030000 		.4byte	.LASF4
+ 432 0048 02       		.uleb128 0x2
+ 433 0049 04       		.byte	0x4
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 16
+
+
+ 434 004a 07       		.byte	0x7
+ 435 004b 22010000 		.4byte	.LASF5
+ 436 004f 02       		.uleb128 0x2
+ 437 0050 08       		.byte	0x8
+ 438 0051 05       		.byte	0x5
+ 439 0052 35020000 		.4byte	.LASF6
+ 440 0056 02       		.uleb128 0x2
+ 441 0057 08       		.byte	0x8
+ 442 0058 07       		.byte	0x7
+ 443 0059 D2000000 		.4byte	.LASF7
+ 444 005d 03       		.uleb128 0x3
+ 445 005e 04       		.byte	0x4
+ 446 005f 05       		.byte	0x5
+ 447 0060 696E7400 		.ascii	"int\000"
+ 448 0064 02       		.uleb128 0x2
+ 449 0065 04       		.byte	0x4
+ 450 0066 07       		.byte	0x7
+ 451 0067 C3010000 		.4byte	.LASF8
+ 452 006b 04       		.uleb128 0x4
+ 453 006c 34010000 		.4byte	.LASF9
+ 454 0070 02       		.byte	0x2
+ 455 0071 3801     		.2byte	0x138
+ 456 0073 2C000000 		.4byte	0x2c
+ 457 0077 04       		.uleb128 0x4
+ 458 0078 A5010000 		.4byte	.LASF10
+ 459 007c 02       		.byte	0x2
+ 460 007d 3A01     		.2byte	0x13a
+ 461 007f 48000000 		.4byte	0x48
+ 462 0083 02       		.uleb128 0x2
+ 463 0084 04       		.byte	0x4
+ 464 0085 04       		.byte	0x4
+ 465 0086 70000000 		.4byte	.LASF11
+ 466 008a 02       		.uleb128 0x2
+ 467 008b 08       		.byte	0x8
+ 468 008c 04       		.byte	0x4
+ 469 008d 9E010000 		.4byte	.LASF12
+ 470 0091 02       		.uleb128 0x2
+ 471 0092 01       		.byte	0x1
+ 472 0093 08       		.byte	0x8
+ 473 0094 5C020000 		.4byte	.LASF13
+ 474 0098 04       		.uleb128 0x4
+ 475 0099 00000000 		.4byte	.LASF14
+ 476 009d 02       		.byte	0x2
+ 477 009e E401     		.2byte	0x1e4
+ 478 00a0 A4000000 		.4byte	0xa4
+ 479 00a4 05       		.uleb128 0x5
+ 480 00a5 77000000 		.4byte	0x77
+ 481 00a9 04       		.uleb128 0x4
+ 482 00aa 1F020000 		.4byte	.LASF15
+ 483 00ae 02       		.byte	0x2
+ 484 00af F401     		.2byte	0x1f4
+ 485 00b1 B5000000 		.4byte	0xb5
+ 486 00b5 06       		.uleb128 0x6
+ 487 00b6 04       		.byte	0x4
+ 488 00b7 BB000000 		.4byte	0xbb
+ 489 00bb 07       		.uleb128 0x7
+ 490 00bc 02       		.uleb128 0x2
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 17
+
+
+ 491 00bd 04       		.byte	0x4
+ 492 00be 07       		.byte	0x7
+ 493 00bf 2C020000 		.4byte	.LASF16
+ 494 00c3 08       		.uleb128 0x8
+ 495 00c4 8F000000 		.4byte	.LASF17
+ 496 00c8 01       		.byte	0x1
+ 497 00c9 A1       		.byte	0xa1
+ 498 00ca 00000000 		.4byte	.LFB37
+ 499 00ce 08000000 		.4byte	.LFE37-.LFB37
+ 500 00d2 01       		.uleb128 0x1
+ 501 00d3 9C       		.byte	0x9c
+ 502 00d4 E2000000 		.4byte	0xe2
+ 503 00d8 09       		.uleb128 0x9
+ 504 00d9 06000000 		.4byte	.LVL0
+ 505 00dd F6020000 		.4byte	0x2f6
+ 506 00e1 00       		.byte	0
+ 507 00e2 08       		.uleb128 0x8
+ 508 00e3 43020000 		.4byte	.LASF18
+ 509 00e7 01       		.byte	0x1
+ 510 00e8 CB       		.byte	0xcb
+ 511 00e9 00000000 		.4byte	.LFB38
+ 512 00ed 0C000000 		.4byte	.LFE38-.LFB38
+ 513 00f1 01       		.uleb128 0x1
+ 514 00f2 9C       		.byte	0x9c
+ 515 00f3 05010000 		.4byte	0x105
+ 516 00f7 0A       		.uleb128 0xa
+ 517 00f8 D0010000 		.4byte	.LASF20
+ 518 00fc 01       		.byte	0x1
+ 519 00fd CB       		.byte	0xcb
+ 520 00fe A9000000 		.4byte	0xa9
+ 521 0102 01       		.uleb128 0x1
+ 522 0103 50       		.byte	0x50
+ 523 0104 00       		.byte	0
+ 524 0105 0B       		.uleb128 0xb
+ 525 0106 76000000 		.4byte	.LASF24
+ 526 010a 01       		.byte	0x1
+ 527 010b DF       		.byte	0xdf
+ 528 010c A9000000 		.4byte	0xa9
+ 529 0110 00000000 		.4byte	.LFB39
+ 530 0114 0C000000 		.4byte	.LFE39-.LFB39
+ 531 0118 01       		.uleb128 0x1
+ 532 0119 9C       		.byte	0x9c
+ 533 011a 08       		.uleb128 0x8
+ 534 011b 64030000 		.4byte	.LASF19
+ 535 011f 01       		.byte	0x1
+ 536 0120 FD       		.byte	0xfd
+ 537 0121 00000000 		.4byte	.LFB40
+ 538 0125 24000000 		.4byte	.LFE40-.LFB40
+ 539 0129 01       		.uleb128 0x1
+ 540 012a 9C       		.byte	0x9c
+ 541 012b 6D010000 		.4byte	0x16d
+ 542 012f 0C       		.uleb128 0xc
+ 543 0130 3A010000 		.4byte	.LASF21
+ 544 0134 01       		.byte	0x1
+ 545 0135 FD       		.byte	0xfd
+ 546 0136 6B000000 		.4byte	0x6b
+ 547 013a 00000000 		.4byte	.LLST0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 18
+
+
+ 548 013e 0D       		.uleb128 0xd
+ 549 013f 13010000 		.4byte	.LASF22
+ 550 0143 01       		.byte	0x1
+ 551 0144 FF       		.byte	0xff
+ 552 0145 6B000000 		.4byte	0x6b
+ 553 0149 21000000 		.4byte	.LLST1
+ 554 014d 0E       		.uleb128 0xe
+ 555 014e 2C030000 		.4byte	.LASF23
+ 556 0152 01       		.byte	0x1
+ 557 0153 0001     		.2byte	0x100
+ 558 0155 77000000 		.4byte	0x77
+ 559 0159 16       		.byte	0x16
+ 560 015a 09       		.uleb128 0x9
+ 561 015b 08000000 		.4byte	.LVL4
+ 562 015f FD020000 		.4byte	0x2fd
+ 563 0163 09       		.uleb128 0x9
+ 564 0164 1A000000 		.4byte	.LVL5
+ 565 0168 08030000 		.4byte	0x308
+ 566 016c 00       		.byte	0
+ 567 016d 0F       		.uleb128 0xf
+ 568 016e 61020000 		.4byte	.LASF36
+ 569 0172 01       		.byte	0x1
+ 570 0173 1901     		.2byte	0x119
+ 571 0175 6B000000 		.4byte	0x6b
+ 572 0179 00000000 		.4byte	.LFB41
+ 573 017d 10000000 		.4byte	.LFE41-.LFB41
+ 574 0181 01       		.uleb128 0x1
+ 575 0182 9C       		.byte	0x9c
+ 576 0183 A5010000 		.4byte	0x1a5
+ 577 0187 10       		.uleb128 0x10
+ 578 0188 3A010000 		.4byte	.LASF21
+ 579 018c 01       		.byte	0x1
+ 580 018d 1B01     		.2byte	0x11b
+ 581 018f 77000000 		.4byte	0x77
+ 582 0193 34000000 		.4byte	.LLST2
+ 583 0197 0E       		.uleb128 0xe
+ 584 0198 2C030000 		.4byte	.LASF23
+ 585 019c 01       		.byte	0x1
+ 586 019d 1C01     		.2byte	0x11c
+ 587 019f 77000000 		.4byte	0x77
+ 588 01a3 16       		.byte	0x16
+ 589 01a4 00       		.byte	0
+ 590 01a5 11       		.uleb128 0x11
+ 591 01a6 EE010000 		.4byte	.LASF26
+ 592 01aa 01       		.byte	0x1
+ 593 01ab 3401     		.2byte	0x134
+ 594 01ad 00000000 		.4byte	.LFB42
+ 595 01b1 0C000000 		.4byte	.LFE42-.LFB42
+ 596 01b5 01       		.uleb128 0x1
+ 597 01b6 9C       		.byte	0x9c
+ 598 01b7 12       		.uleb128 0x12
+ 599 01b8 14030000 		.4byte	.LASF25
+ 600 01bc 01       		.byte	0x1
+ 601 01bd 4901     		.2byte	0x149
+ 602 01bf 6B000000 		.4byte	0x6b
+ 603 01c3 00000000 		.4byte	.LFB43
+ 604 01c7 14000000 		.4byte	.LFE43-.LFB43
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 19
+
+
+ 605 01cb 01       		.uleb128 0x1
+ 606 01cc 9C       		.byte	0x9c
+ 607 01cd 11       		.uleb128 0x11
+ 608 01ce 6D010000 		.4byte	.LASF27
+ 609 01d2 01       		.byte	0x1
+ 610 01d3 5E01     		.2byte	0x15e
+ 611 01d5 00000000 		.4byte	.LFB44
+ 612 01d9 0C000000 		.4byte	.LFE44-.LFB44
+ 613 01dd 01       		.uleb128 0x1
+ 614 01de 9C       		.byte	0x9c
+ 615 01df 08       		.uleb128 0x8
+ 616 01e0 7F030000 		.4byte	.LASF28
+ 617 01e4 01       		.byte	0x1
+ 618 01e5 3A       		.byte	0x3a
+ 619 01e6 00000000 		.4byte	.LFB34
+ 620 01ea 1C000000 		.4byte	.LFE34-.LFB34
+ 621 01ee 01       		.uleb128 0x1
+ 622 01ef 9C       		.byte	0x9c
+ 623 01f0 31020000 		.4byte	0x231
+ 624 01f4 09       		.uleb128 0x9
+ 625 01f5 06000000 		.4byte	.LVL9
+ 626 01f9 CD010000 		.4byte	0x1cd
+ 627 01fd 13       		.uleb128 0x13
+ 628 01fe 0C000000 		.4byte	.LVL10
+ 629 0202 E2000000 		.4byte	0xe2
+ 630 0206 14020000 		.4byte	0x214
+ 631 020a 14       		.uleb128 0x14
+ 632 020b 01       		.uleb128 0x1
+ 633 020c 50       		.byte	0x50
+ 634 020d 05       		.uleb128 0x5
+ 635 020e 03       		.byte	0x3
+ 636 020f 00000000 		.4byte	CommTimeoutISR_Interrupt
+ 637 0213 00       		.byte	0
+ 638 0214 13       		.uleb128 0x13
+ 639 0215 12000000 		.4byte	.LVL11
+ 640 0219 1A010000 		.4byte	0x11a
+ 641 021d 27020000 		.4byte	0x227
+ 642 0221 14       		.uleb128 0x14
+ 643 0222 01       		.uleb128 0x1
+ 644 0223 50       		.byte	0x50
+ 645 0224 01       		.uleb128 0x1
+ 646 0225 33       		.byte	0x33
+ 647 0226 00       		.byte	0
+ 648 0227 09       		.uleb128 0x9
+ 649 0228 16000000 		.4byte	.LVL12
+ 650 022c A5010000 		.4byte	0x1a5
+ 651 0230 00       		.byte	0
+ 652 0231 08       		.uleb128 0x8
+ 653 0232 BB000000 		.4byte	.LASF29
+ 654 0236 01       		.byte	0x1
+ 655 0237 65       		.byte	0x65
+ 656 0238 00000000 		.4byte	.LFB35
+ 657 023c 1A000000 		.4byte	.LFE35-.LFB35
+ 658 0240 01       		.uleb128 0x1
+ 659 0241 9C       		.byte	0x9c
+ 660 0242 8F020000 		.4byte	0x28f
+ 661 0246 0C       		.uleb128 0xc
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 20
+
+
+ 662 0247 D0010000 		.4byte	.LASF20
+ 663 024b 01       		.byte	0x1
+ 664 024c 65       		.byte	0x65
+ 665 024d A9000000 		.4byte	0xa9
+ 666 0251 56000000 		.4byte	.LLST3
+ 667 0255 09       		.uleb128 0x9
+ 668 0256 08000000 		.4byte	.LVL14
+ 669 025a CD010000 		.4byte	0x1cd
+ 670 025e 13       		.uleb128 0x13
+ 671 025f 0E000000 		.4byte	.LVL15
+ 672 0263 E2000000 		.4byte	0xe2
+ 673 0267 72020000 		.4byte	0x272
+ 674 026b 14       		.uleb128 0x14
+ 675 026c 01       		.uleb128 0x1
+ 676 026d 50       		.byte	0x50
+ 677 026e 02       		.uleb128 0x2
+ 678 026f 74       		.byte	0x74
+ 679 0270 00       		.sleb128 0
+ 680 0271 00       		.byte	0
+ 681 0272 13       		.uleb128 0x13
+ 682 0273 14000000 		.4byte	.LVL16
+ 683 0277 1A010000 		.4byte	0x11a
+ 684 027b 85020000 		.4byte	0x285
+ 685 027f 14       		.uleb128 0x14
+ 686 0280 01       		.uleb128 0x1
+ 687 0281 50       		.byte	0x50
+ 688 0282 01       		.uleb128 0x1
+ 689 0283 33       		.byte	0x33
+ 690 0284 00       		.byte	0
+ 691 0285 09       		.uleb128 0x9
+ 692 0286 18000000 		.4byte	.LVL17
+ 693 028a A5010000 		.4byte	0x1a5
+ 694 028e 00       		.byte	0
+ 695 028f 08       		.uleb128 0x8
+ 696 0290 3B030000 		.4byte	.LASF30
+ 697 0294 01       		.byte	0x1
+ 698 0295 83       		.byte	0x83
+ 699 0296 00000000 		.4byte	.LFB36
+ 700 029a 14000000 		.4byte	.LFE36-.LFB36
+ 701 029e 01       		.uleb128 0x1
+ 702 029f 9C       		.byte	0x9c
+ 703 02a0 B7020000 		.4byte	0x2b7
+ 704 02a4 09       		.uleb128 0x9
+ 705 02a5 06000000 		.4byte	.LVL19
+ 706 02a9 CD010000 		.4byte	0x1cd
+ 707 02ad 09       		.uleb128 0x9
+ 708 02ae 0C000000 		.4byte	.LVL20
+ 709 02b2 E2000000 		.4byte	0xe2
+ 710 02b6 00       		.byte	0
+ 711 02b7 11       		.uleb128 0x11
+ 712 02b8 84010000 		.4byte	.LASF31
+ 713 02bc 01       		.byte	0x1
+ 714 02bd 7901     		.2byte	0x179
+ 715 02bf 00000000 		.4byte	.LFB45
+ 716 02c3 0C000000 		.4byte	.LFE45-.LFB45
+ 717 02c7 01       		.uleb128 0x1
+ 718 02c8 9C       		.byte	0x9c
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 21
+
+
+ 719 02c9 11       		.uleb128 0x11
+ 720 02ca F7000000 		.4byte	.LASF32
+ 721 02ce 01       		.byte	0x1
+ 722 02cf 9201     		.2byte	0x192
+ 723 02d1 00000000 		.4byte	.LFB46
+ 724 02d5 0C000000 		.4byte	.LFE46-.LFB46
+ 725 02d9 01       		.uleb128 0x1
+ 726 02da 9C       		.byte	0x9c
+ 727 02db 15       		.uleb128 0x15
+ 728 02dc A9000000 		.4byte	0xa9
+ 729 02e0 EB020000 		.4byte	0x2eb
+ 730 02e4 16       		.uleb128 0x16
+ 731 02e5 BC000000 		.4byte	0xbc
+ 732 02e9 2F       		.byte	0x2f
+ 733 02ea 00       		.byte	0
+ 734 02eb 17       		.uleb128 0x17
+ 735 02ec 63000000 		.4byte	.LASF37
+ 736 02f0 01       		.byte	0x1
+ 737 02f1 23       		.byte	0x23
+ 738 02f2 DB020000 		.4byte	0x2db
+ 739 02f6 18       		.uleb128 0x18
+ 740 02f7 04020000 		.4byte	.LASF38
+ 741 02fb 03       		.byte	0x3
+ 742 02fc 33       		.byte	0x33
+ 743 02fd 19       		.uleb128 0x19
+ 744 02fe AC010000 		.4byte	.LASF39
+ 745 0302 04       		.byte	0x4
+ 746 0303 61       		.byte	0x61
+ 747 0304 6B000000 		.4byte	0x6b
+ 748 0308 1A       		.uleb128 0x1a
+ 749 0309 D8010000 		.4byte	.LASF40
+ 750 030d 04       		.byte	0x4
+ 751 030e 62       		.byte	0x62
+ 752 030f 1B       		.uleb128 0x1b
+ 753 0310 6B000000 		.4byte	0x6b
+ 754 0314 00       		.byte	0
+ 755 0315 00       		.byte	0
+ 756              		.section	.debug_abbrev,"",%progbits
+ 757              	.Ldebug_abbrev0:
+ 758 0000 01       		.uleb128 0x1
+ 759 0001 11       		.uleb128 0x11
+ 760 0002 01       		.byte	0x1
+ 761 0003 25       		.uleb128 0x25
+ 762 0004 0E       		.uleb128 0xe
+ 763 0005 13       		.uleb128 0x13
+ 764 0006 0B       		.uleb128 0xb
+ 765 0007 03       		.uleb128 0x3
+ 766 0008 0E       		.uleb128 0xe
+ 767 0009 1B       		.uleb128 0x1b
+ 768 000a 0E       		.uleb128 0xe
+ 769 000b 55       		.uleb128 0x55
+ 770 000c 17       		.uleb128 0x17
+ 771 000d 11       		.uleb128 0x11
+ 772 000e 01       		.uleb128 0x1
+ 773 000f 10       		.uleb128 0x10
+ 774 0010 17       		.uleb128 0x17
+ 775 0011 00       		.byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 22
+
+
+ 776 0012 00       		.byte	0
+ 777 0013 02       		.uleb128 0x2
+ 778 0014 24       		.uleb128 0x24
+ 779 0015 00       		.byte	0
+ 780 0016 0B       		.uleb128 0xb
+ 781 0017 0B       		.uleb128 0xb
+ 782 0018 3E       		.uleb128 0x3e
+ 783 0019 0B       		.uleb128 0xb
+ 784 001a 03       		.uleb128 0x3
+ 785 001b 0E       		.uleb128 0xe
+ 786 001c 00       		.byte	0
+ 787 001d 00       		.byte	0
+ 788 001e 03       		.uleb128 0x3
+ 789 001f 24       		.uleb128 0x24
+ 790 0020 00       		.byte	0
+ 791 0021 0B       		.uleb128 0xb
+ 792 0022 0B       		.uleb128 0xb
+ 793 0023 3E       		.uleb128 0x3e
+ 794 0024 0B       		.uleb128 0xb
+ 795 0025 03       		.uleb128 0x3
+ 796 0026 08       		.uleb128 0x8
+ 797 0027 00       		.byte	0
+ 798 0028 00       		.byte	0
+ 799 0029 04       		.uleb128 0x4
+ 800 002a 16       		.uleb128 0x16
+ 801 002b 00       		.byte	0
+ 802 002c 03       		.uleb128 0x3
+ 803 002d 0E       		.uleb128 0xe
+ 804 002e 3A       		.uleb128 0x3a
+ 805 002f 0B       		.uleb128 0xb
+ 806 0030 3B       		.uleb128 0x3b
+ 807 0031 05       		.uleb128 0x5
+ 808 0032 49       		.uleb128 0x49
+ 809 0033 13       		.uleb128 0x13
+ 810 0034 00       		.byte	0
+ 811 0035 00       		.byte	0
+ 812 0036 05       		.uleb128 0x5
+ 813 0037 35       		.uleb128 0x35
+ 814 0038 00       		.byte	0
+ 815 0039 49       		.uleb128 0x49
+ 816 003a 13       		.uleb128 0x13
+ 817 003b 00       		.byte	0
+ 818 003c 00       		.byte	0
+ 819 003d 06       		.uleb128 0x6
+ 820 003e 0F       		.uleb128 0xf
+ 821 003f 00       		.byte	0
+ 822 0040 0B       		.uleb128 0xb
+ 823 0041 0B       		.uleb128 0xb
+ 824 0042 49       		.uleb128 0x49
+ 825 0043 13       		.uleb128 0x13
+ 826 0044 00       		.byte	0
+ 827 0045 00       		.byte	0
+ 828 0046 07       		.uleb128 0x7
+ 829 0047 15       		.uleb128 0x15
+ 830 0048 00       		.byte	0
+ 831 0049 27       		.uleb128 0x27
+ 832 004a 19       		.uleb128 0x19
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 23
+
+
+ 833 004b 00       		.byte	0
+ 834 004c 00       		.byte	0
+ 835 004d 08       		.uleb128 0x8
+ 836 004e 2E       		.uleb128 0x2e
+ 837 004f 01       		.byte	0x1
+ 838 0050 3F       		.uleb128 0x3f
+ 839 0051 19       		.uleb128 0x19
+ 840 0052 03       		.uleb128 0x3
+ 841 0053 0E       		.uleb128 0xe
+ 842 0054 3A       		.uleb128 0x3a
+ 843 0055 0B       		.uleb128 0xb
+ 844 0056 3B       		.uleb128 0x3b
+ 845 0057 0B       		.uleb128 0xb
+ 846 0058 27       		.uleb128 0x27
+ 847 0059 19       		.uleb128 0x19
+ 848 005a 11       		.uleb128 0x11
+ 849 005b 01       		.uleb128 0x1
+ 850 005c 12       		.uleb128 0x12
+ 851 005d 06       		.uleb128 0x6
+ 852 005e 40       		.uleb128 0x40
+ 853 005f 18       		.uleb128 0x18
+ 854 0060 9742     		.uleb128 0x2117
+ 855 0062 19       		.uleb128 0x19
+ 856 0063 01       		.uleb128 0x1
+ 857 0064 13       		.uleb128 0x13
+ 858 0065 00       		.byte	0
+ 859 0066 00       		.byte	0
+ 860 0067 09       		.uleb128 0x9
+ 861 0068 898201   		.uleb128 0x4109
+ 862 006b 00       		.byte	0
+ 863 006c 11       		.uleb128 0x11
+ 864 006d 01       		.uleb128 0x1
+ 865 006e 31       		.uleb128 0x31
+ 866 006f 13       		.uleb128 0x13
+ 867 0070 00       		.byte	0
+ 868 0071 00       		.byte	0
+ 869 0072 0A       		.uleb128 0xa
+ 870 0073 05       		.uleb128 0x5
+ 871 0074 00       		.byte	0
+ 872 0075 03       		.uleb128 0x3
+ 873 0076 0E       		.uleb128 0xe
+ 874 0077 3A       		.uleb128 0x3a
+ 875 0078 0B       		.uleb128 0xb
+ 876 0079 3B       		.uleb128 0x3b
+ 877 007a 0B       		.uleb128 0xb
+ 878 007b 49       		.uleb128 0x49
+ 879 007c 13       		.uleb128 0x13
+ 880 007d 02       		.uleb128 0x2
+ 881 007e 18       		.uleb128 0x18
+ 882 007f 00       		.byte	0
+ 883 0080 00       		.byte	0
+ 884 0081 0B       		.uleb128 0xb
+ 885 0082 2E       		.uleb128 0x2e
+ 886 0083 00       		.byte	0
+ 887 0084 3F       		.uleb128 0x3f
+ 888 0085 19       		.uleb128 0x19
+ 889 0086 03       		.uleb128 0x3
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 24
+
+
+ 890 0087 0E       		.uleb128 0xe
+ 891 0088 3A       		.uleb128 0x3a
+ 892 0089 0B       		.uleb128 0xb
+ 893 008a 3B       		.uleb128 0x3b
+ 894 008b 0B       		.uleb128 0xb
+ 895 008c 27       		.uleb128 0x27
+ 896 008d 19       		.uleb128 0x19
+ 897 008e 49       		.uleb128 0x49
+ 898 008f 13       		.uleb128 0x13
+ 899 0090 11       		.uleb128 0x11
+ 900 0091 01       		.uleb128 0x1
+ 901 0092 12       		.uleb128 0x12
+ 902 0093 06       		.uleb128 0x6
+ 903 0094 40       		.uleb128 0x40
+ 904 0095 18       		.uleb128 0x18
+ 905 0096 9742     		.uleb128 0x2117
+ 906 0098 19       		.uleb128 0x19
+ 907 0099 00       		.byte	0
+ 908 009a 00       		.byte	0
+ 909 009b 0C       		.uleb128 0xc
+ 910 009c 05       		.uleb128 0x5
+ 911 009d 00       		.byte	0
+ 912 009e 03       		.uleb128 0x3
+ 913 009f 0E       		.uleb128 0xe
+ 914 00a0 3A       		.uleb128 0x3a
+ 915 00a1 0B       		.uleb128 0xb
+ 916 00a2 3B       		.uleb128 0x3b
+ 917 00a3 0B       		.uleb128 0xb
+ 918 00a4 49       		.uleb128 0x49
+ 919 00a5 13       		.uleb128 0x13
+ 920 00a6 02       		.uleb128 0x2
+ 921 00a7 17       		.uleb128 0x17
+ 922 00a8 00       		.byte	0
+ 923 00a9 00       		.byte	0
+ 924 00aa 0D       		.uleb128 0xd
+ 925 00ab 34       		.uleb128 0x34
+ 926 00ac 00       		.byte	0
+ 927 00ad 03       		.uleb128 0x3
+ 928 00ae 0E       		.uleb128 0xe
+ 929 00af 3A       		.uleb128 0x3a
+ 930 00b0 0B       		.uleb128 0xb
+ 931 00b1 3B       		.uleb128 0x3b
+ 932 00b2 0B       		.uleb128 0xb
+ 933 00b3 49       		.uleb128 0x49
+ 934 00b4 13       		.uleb128 0x13
+ 935 00b5 02       		.uleb128 0x2
+ 936 00b6 17       		.uleb128 0x17
+ 937 00b7 00       		.byte	0
+ 938 00b8 00       		.byte	0
+ 939 00b9 0E       		.uleb128 0xe
+ 940 00ba 34       		.uleb128 0x34
+ 941 00bb 00       		.byte	0
+ 942 00bc 03       		.uleb128 0x3
+ 943 00bd 0E       		.uleb128 0xe
+ 944 00be 3A       		.uleb128 0x3a
+ 945 00bf 0B       		.uleb128 0xb
+ 946 00c0 3B       		.uleb128 0x3b
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 25
+
+
+ 947 00c1 05       		.uleb128 0x5
+ 948 00c2 49       		.uleb128 0x49
+ 949 00c3 13       		.uleb128 0x13
+ 950 00c4 1C       		.uleb128 0x1c
+ 951 00c5 0B       		.uleb128 0xb
+ 952 00c6 00       		.byte	0
+ 953 00c7 00       		.byte	0
+ 954 00c8 0F       		.uleb128 0xf
+ 955 00c9 2E       		.uleb128 0x2e
+ 956 00ca 01       		.byte	0x1
+ 957 00cb 3F       		.uleb128 0x3f
+ 958 00cc 19       		.uleb128 0x19
+ 959 00cd 03       		.uleb128 0x3
+ 960 00ce 0E       		.uleb128 0xe
+ 961 00cf 3A       		.uleb128 0x3a
+ 962 00d0 0B       		.uleb128 0xb
+ 963 00d1 3B       		.uleb128 0x3b
+ 964 00d2 05       		.uleb128 0x5
+ 965 00d3 27       		.uleb128 0x27
+ 966 00d4 19       		.uleb128 0x19
+ 967 00d5 49       		.uleb128 0x49
+ 968 00d6 13       		.uleb128 0x13
+ 969 00d7 11       		.uleb128 0x11
+ 970 00d8 01       		.uleb128 0x1
+ 971 00d9 12       		.uleb128 0x12
+ 972 00da 06       		.uleb128 0x6
+ 973 00db 40       		.uleb128 0x40
+ 974 00dc 18       		.uleb128 0x18
+ 975 00dd 9742     		.uleb128 0x2117
+ 976 00df 19       		.uleb128 0x19
+ 977 00e0 01       		.uleb128 0x1
+ 978 00e1 13       		.uleb128 0x13
+ 979 00e2 00       		.byte	0
+ 980 00e3 00       		.byte	0
+ 981 00e4 10       		.uleb128 0x10
+ 982 00e5 34       		.uleb128 0x34
+ 983 00e6 00       		.byte	0
+ 984 00e7 03       		.uleb128 0x3
+ 985 00e8 0E       		.uleb128 0xe
+ 986 00e9 3A       		.uleb128 0x3a
+ 987 00ea 0B       		.uleb128 0xb
+ 988 00eb 3B       		.uleb128 0x3b
+ 989 00ec 05       		.uleb128 0x5
+ 990 00ed 49       		.uleb128 0x49
+ 991 00ee 13       		.uleb128 0x13
+ 992 00ef 02       		.uleb128 0x2
+ 993 00f0 17       		.uleb128 0x17
+ 994 00f1 00       		.byte	0
+ 995 00f2 00       		.byte	0
+ 996 00f3 11       		.uleb128 0x11
+ 997 00f4 2E       		.uleb128 0x2e
+ 998 00f5 00       		.byte	0
+ 999 00f6 3F       		.uleb128 0x3f
+ 1000 00f7 19       		.uleb128 0x19
+ 1001 00f8 03       		.uleb128 0x3
+ 1002 00f9 0E       		.uleb128 0xe
+ 1003 00fa 3A       		.uleb128 0x3a
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 26
+
+
+ 1004 00fb 0B       		.uleb128 0xb
+ 1005 00fc 3B       		.uleb128 0x3b
+ 1006 00fd 05       		.uleb128 0x5
+ 1007 00fe 27       		.uleb128 0x27
+ 1008 00ff 19       		.uleb128 0x19
+ 1009 0100 11       		.uleb128 0x11
+ 1010 0101 01       		.uleb128 0x1
+ 1011 0102 12       		.uleb128 0x12
+ 1012 0103 06       		.uleb128 0x6
+ 1013 0104 40       		.uleb128 0x40
+ 1014 0105 18       		.uleb128 0x18
+ 1015 0106 9742     		.uleb128 0x2117
+ 1016 0108 19       		.uleb128 0x19
+ 1017 0109 00       		.byte	0
+ 1018 010a 00       		.byte	0
+ 1019 010b 12       		.uleb128 0x12
+ 1020 010c 2E       		.uleb128 0x2e
+ 1021 010d 00       		.byte	0
+ 1022 010e 3F       		.uleb128 0x3f
+ 1023 010f 19       		.uleb128 0x19
+ 1024 0110 03       		.uleb128 0x3
+ 1025 0111 0E       		.uleb128 0xe
+ 1026 0112 3A       		.uleb128 0x3a
+ 1027 0113 0B       		.uleb128 0xb
+ 1028 0114 3B       		.uleb128 0x3b
+ 1029 0115 05       		.uleb128 0x5
+ 1030 0116 27       		.uleb128 0x27
+ 1031 0117 19       		.uleb128 0x19
+ 1032 0118 49       		.uleb128 0x49
+ 1033 0119 13       		.uleb128 0x13
+ 1034 011a 11       		.uleb128 0x11
+ 1035 011b 01       		.uleb128 0x1
+ 1036 011c 12       		.uleb128 0x12
+ 1037 011d 06       		.uleb128 0x6
+ 1038 011e 40       		.uleb128 0x40
+ 1039 011f 18       		.uleb128 0x18
+ 1040 0120 9742     		.uleb128 0x2117
+ 1041 0122 19       		.uleb128 0x19
+ 1042 0123 00       		.byte	0
+ 1043 0124 00       		.byte	0
+ 1044 0125 13       		.uleb128 0x13
+ 1045 0126 898201   		.uleb128 0x4109
+ 1046 0129 01       		.byte	0x1
+ 1047 012a 11       		.uleb128 0x11
+ 1048 012b 01       		.uleb128 0x1
+ 1049 012c 31       		.uleb128 0x31
+ 1050 012d 13       		.uleb128 0x13
+ 1051 012e 01       		.uleb128 0x1
+ 1052 012f 13       		.uleb128 0x13
+ 1053 0130 00       		.byte	0
+ 1054 0131 00       		.byte	0
+ 1055 0132 14       		.uleb128 0x14
+ 1056 0133 8A8201   		.uleb128 0x410a
+ 1057 0136 00       		.byte	0
+ 1058 0137 02       		.uleb128 0x2
+ 1059 0138 18       		.uleb128 0x18
+ 1060 0139 9142     		.uleb128 0x2111
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 27
+
+
+ 1061 013b 18       		.uleb128 0x18
+ 1062 013c 00       		.byte	0
+ 1063 013d 00       		.byte	0
+ 1064 013e 15       		.uleb128 0x15
+ 1065 013f 01       		.uleb128 0x1
+ 1066 0140 01       		.byte	0x1
+ 1067 0141 49       		.uleb128 0x49
+ 1068 0142 13       		.uleb128 0x13
+ 1069 0143 01       		.uleb128 0x1
+ 1070 0144 13       		.uleb128 0x13
+ 1071 0145 00       		.byte	0
+ 1072 0146 00       		.byte	0
+ 1073 0147 16       		.uleb128 0x16
+ 1074 0148 21       		.uleb128 0x21
+ 1075 0149 00       		.byte	0
+ 1076 014a 49       		.uleb128 0x49
+ 1077 014b 13       		.uleb128 0x13
+ 1078 014c 2F       		.uleb128 0x2f
+ 1079 014d 0B       		.uleb128 0xb
+ 1080 014e 00       		.byte	0
+ 1081 014f 00       		.byte	0
+ 1082 0150 17       		.uleb128 0x17
+ 1083 0151 34       		.uleb128 0x34
+ 1084 0152 00       		.byte	0
+ 1085 0153 03       		.uleb128 0x3
+ 1086 0154 0E       		.uleb128 0xe
+ 1087 0155 3A       		.uleb128 0x3a
+ 1088 0156 0B       		.uleb128 0xb
+ 1089 0157 3B       		.uleb128 0x3b
+ 1090 0158 0B       		.uleb128 0xb
+ 1091 0159 49       		.uleb128 0x49
+ 1092 015a 13       		.uleb128 0x13
+ 1093 015b 3F       		.uleb128 0x3f
+ 1094 015c 19       		.uleb128 0x19
+ 1095 015d 3C       		.uleb128 0x3c
+ 1096 015e 19       		.uleb128 0x19
+ 1097 015f 00       		.byte	0
+ 1098 0160 00       		.byte	0
+ 1099 0161 18       		.uleb128 0x18
+ 1100 0162 2E       		.uleb128 0x2e
+ 1101 0163 00       		.byte	0
+ 1102 0164 3F       		.uleb128 0x3f
+ 1103 0165 19       		.uleb128 0x19
+ 1104 0166 03       		.uleb128 0x3
+ 1105 0167 0E       		.uleb128 0xe
+ 1106 0168 3A       		.uleb128 0x3a
+ 1107 0169 0B       		.uleb128 0xb
+ 1108 016a 3B       		.uleb128 0x3b
+ 1109 016b 0B       		.uleb128 0xb
+ 1110 016c 27       		.uleb128 0x27
+ 1111 016d 19       		.uleb128 0x19
+ 1112 016e 3C       		.uleb128 0x3c
+ 1113 016f 19       		.uleb128 0x19
+ 1114 0170 00       		.byte	0
+ 1115 0171 00       		.byte	0
+ 1116 0172 19       		.uleb128 0x19
+ 1117 0173 2E       		.uleb128 0x2e
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 28
+
+
+ 1118 0174 00       		.byte	0
+ 1119 0175 3F       		.uleb128 0x3f
+ 1120 0176 19       		.uleb128 0x19
+ 1121 0177 03       		.uleb128 0x3
+ 1122 0178 0E       		.uleb128 0xe
+ 1123 0179 3A       		.uleb128 0x3a
+ 1124 017a 0B       		.uleb128 0xb
+ 1125 017b 3B       		.uleb128 0x3b
+ 1126 017c 0B       		.uleb128 0xb
+ 1127 017d 27       		.uleb128 0x27
+ 1128 017e 19       		.uleb128 0x19
+ 1129 017f 49       		.uleb128 0x49
+ 1130 0180 13       		.uleb128 0x13
+ 1131 0181 3C       		.uleb128 0x3c
+ 1132 0182 19       		.uleb128 0x19
+ 1133 0183 00       		.byte	0
+ 1134 0184 00       		.byte	0
+ 1135 0185 1A       		.uleb128 0x1a
+ 1136 0186 2E       		.uleb128 0x2e
+ 1137 0187 01       		.byte	0x1
+ 1138 0188 3F       		.uleb128 0x3f
+ 1139 0189 19       		.uleb128 0x19
+ 1140 018a 03       		.uleb128 0x3
+ 1141 018b 0E       		.uleb128 0xe
+ 1142 018c 3A       		.uleb128 0x3a
+ 1143 018d 0B       		.uleb128 0xb
+ 1144 018e 3B       		.uleb128 0x3b
+ 1145 018f 0B       		.uleb128 0xb
+ 1146 0190 27       		.uleb128 0x27
+ 1147 0191 19       		.uleb128 0x19
+ 1148 0192 3C       		.uleb128 0x3c
+ 1149 0193 19       		.uleb128 0x19
+ 1150 0194 00       		.byte	0
+ 1151 0195 00       		.byte	0
+ 1152 0196 1B       		.uleb128 0x1b
+ 1153 0197 05       		.uleb128 0x5
+ 1154 0198 00       		.byte	0
+ 1155 0199 49       		.uleb128 0x49
+ 1156 019a 13       		.uleb128 0x13
+ 1157 019b 00       		.byte	0
+ 1158 019c 00       		.byte	0
+ 1159 019d 00       		.byte	0
+ 1160              		.section	.debug_loc,"",%progbits
+ 1161              	.Ldebug_loc0:
+ 1162              	.LLST0:
+ 1163 0000 00000000 		.4byte	.LVL2
+ 1164 0004 07000000 		.4byte	.LVL4-1
+ 1165 0008 0100     		.2byte	0x1
+ 1166 000a 50       		.byte	0x50
+ 1167 000b 07000000 		.4byte	.LVL4-1
+ 1168 000f 24000000 		.4byte	.LFE40
+ 1169 0013 0400     		.2byte	0x4
+ 1170 0015 F3       		.byte	0xf3
+ 1171 0016 01       		.uleb128 0x1
+ 1172 0017 50       		.byte	0x50
+ 1173 0018 9F       		.byte	0x9f
+ 1174 0019 00000000 		.4byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 29
+
+
+ 1175 001d 00000000 		.4byte	0
+ 1176              	.LLST1:
+ 1177 0021 08000000 		.4byte	.LVL4
+ 1178 0025 19000000 		.4byte	.LVL5-1
+ 1179 0029 0100     		.2byte	0x1
+ 1180 002b 50       		.byte	0x50
+ 1181 002c 00000000 		.4byte	0
+ 1182 0030 00000000 		.4byte	0
+ 1183              	.LLST2:
+ 1184 0034 06000000 		.4byte	.LVL7
+ 1185 0038 08000000 		.4byte	.LVL8
+ 1186 003c 0500     		.2byte	0x5
+ 1187 003e 70       		.byte	0x70
+ 1188 003f 00       		.sleb128 0
+ 1189 0040 4E       		.byte	0x4e
+ 1190 0041 25       		.byte	0x25
+ 1191 0042 9F       		.byte	0x9f
+ 1192 0043 08000000 		.4byte	.LVL8
+ 1193 0047 10000000 		.4byte	.LFE41
+ 1194 004b 0100     		.2byte	0x1
+ 1195 004d 50       		.byte	0x50
+ 1196 004e 00000000 		.4byte	0
+ 1197 0052 00000000 		.4byte	0
+ 1198              	.LLST3:
+ 1199 0056 00000000 		.4byte	.LVL13
+ 1200 005a 07000000 		.4byte	.LVL14-1
+ 1201 005e 0100     		.2byte	0x1
+ 1202 0060 50       		.byte	0x50
+ 1203 0061 07000000 		.4byte	.LVL14-1
+ 1204 0065 18000000 		.4byte	.LVL18
+ 1205 0069 0100     		.2byte	0x1
+ 1206 006b 54       		.byte	0x54
+ 1207 006c 18000000 		.4byte	.LVL18
+ 1208 0070 1A000000 		.4byte	.LFE35
+ 1209 0074 0400     		.2byte	0x4
+ 1210 0076 F3       		.byte	0xf3
+ 1211 0077 01       		.uleb128 0x1
+ 1212 0078 50       		.byte	0x50
+ 1213 0079 9F       		.byte	0x9f
+ 1214 007a 00000000 		.4byte	0
+ 1215 007e 00000000 		.4byte	0
+ 1216              		.section	.debug_aranges,"",%progbits
+ 1217 0000 7C000000 		.4byte	0x7c
+ 1218 0004 0200     		.2byte	0x2
+ 1219 0006 00000000 		.4byte	.Ldebug_info0
+ 1220 000a 04       		.byte	0x4
+ 1221 000b 00       		.byte	0
+ 1222 000c 0000     		.2byte	0
+ 1223 000e 0000     		.2byte	0
+ 1224 0010 00000000 		.4byte	.LFB37
+ 1225 0014 08000000 		.4byte	.LFE37-.LFB37
+ 1226 0018 00000000 		.4byte	.LFB38
+ 1227 001c 0C000000 		.4byte	.LFE38-.LFB38
+ 1228 0020 00000000 		.4byte	.LFB39
+ 1229 0024 0C000000 		.4byte	.LFE39-.LFB39
+ 1230 0028 00000000 		.4byte	.LFB40
+ 1231 002c 24000000 		.4byte	.LFE40-.LFB40
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 30
+
+
+ 1232 0030 00000000 		.4byte	.LFB41
+ 1233 0034 10000000 		.4byte	.LFE41-.LFB41
+ 1234 0038 00000000 		.4byte	.LFB42
+ 1235 003c 0C000000 		.4byte	.LFE42-.LFB42
+ 1236 0040 00000000 		.4byte	.LFB43
+ 1237 0044 14000000 		.4byte	.LFE43-.LFB43
+ 1238 0048 00000000 		.4byte	.LFB44
+ 1239 004c 0C000000 		.4byte	.LFE44-.LFB44
+ 1240 0050 00000000 		.4byte	.LFB34
+ 1241 0054 1C000000 		.4byte	.LFE34-.LFB34
+ 1242 0058 00000000 		.4byte	.LFB35
+ 1243 005c 1A000000 		.4byte	.LFE35-.LFB35
+ 1244 0060 00000000 		.4byte	.LFB36
+ 1245 0064 14000000 		.4byte	.LFE36-.LFB36
+ 1246 0068 00000000 		.4byte	.LFB45
+ 1247 006c 0C000000 		.4byte	.LFE45-.LFB45
+ 1248 0070 00000000 		.4byte	.LFB46
+ 1249 0074 0C000000 		.4byte	.LFE46-.LFB46
+ 1250 0078 00000000 		.4byte	0
+ 1251 007c 00000000 		.4byte	0
+ 1252              		.section	.debug_ranges,"",%progbits
+ 1253              	.Ldebug_ranges0:
+ 1254 0000 00000000 		.4byte	.LFB37
+ 1255 0004 08000000 		.4byte	.LFE37
+ 1256 0008 00000000 		.4byte	.LFB38
+ 1257 000c 0C000000 		.4byte	.LFE38
+ 1258 0010 00000000 		.4byte	.LFB39
+ 1259 0014 0C000000 		.4byte	.LFE39
+ 1260 0018 00000000 		.4byte	.LFB40
+ 1261 001c 24000000 		.4byte	.LFE40
+ 1262 0020 00000000 		.4byte	.LFB41
+ 1263 0024 10000000 		.4byte	.LFE41
+ 1264 0028 00000000 		.4byte	.LFB42
+ 1265 002c 0C000000 		.4byte	.LFE42
+ 1266 0030 00000000 		.4byte	.LFB43
+ 1267 0034 14000000 		.4byte	.LFE43
+ 1268 0038 00000000 		.4byte	.LFB44
+ 1269 003c 0C000000 		.4byte	.LFE44
+ 1270 0040 00000000 		.4byte	.LFB34
+ 1271 0044 1C000000 		.4byte	.LFE34
+ 1272 0048 00000000 		.4byte	.LFB35
+ 1273 004c 1A000000 		.4byte	.LFE35
+ 1274 0050 00000000 		.4byte	.LFB36
+ 1275 0054 14000000 		.4byte	.LFE36
+ 1276 0058 00000000 		.4byte	.LFB45
+ 1277 005c 0C000000 		.4byte	.LFE45
+ 1278 0060 00000000 		.4byte	.LFB46
+ 1279 0064 0C000000 		.4byte	.LFE46
+ 1280 0068 00000000 		.4byte	0
+ 1281 006c 00000000 		.4byte	0
+ 1282              		.section	.debug_line,"",%progbits
+ 1283              	.Ldebug_line0:
+ 1284 0000 8B010000 		.section	.debug_str,"MS",%progbits,1
+ 1284      02008C00 
+ 1284      00000201 
+ 1284      FB0E0D00 
+ 1284      01010101 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 31
+
+
+ 1285              	.LASF14:
+ 1286 0000 72656733 		.ascii	"reg32\000"
+ 1286      3200
+ 1287              	.LASF35:
+ 1288 0006 433A5C55 		.ascii	"C:\\Users\\kylep\\Box Sync\\Feniex Firmware Files\\"
+ 1288      73657273 
+ 1288      5C6B796C 
+ 1288      65705C42 
+ 1288      6F782053 
+ 1289 0034 414C4220 		.ascii	"ALB Cube\\81-00024-01 AI Cube\\81-00024-01.cydsn\000"
+ 1289      43756265 
+ 1289      5C38312D 
+ 1289      30303032 
+ 1289      342D3031 
+ 1290              	.LASF37:
+ 1291 0063 43795261 		.ascii	"CyRamVectors\000"
+ 1291      6D566563 
+ 1291      746F7273 
+ 1291      00
+ 1292              	.LASF11:
+ 1293 0070 666C6F61 		.ascii	"float\000"
+ 1293      7400
+ 1294              	.LASF24:
+ 1295 0076 436F6D6D 		.ascii	"CommTimeoutISR_GetVector\000"
+ 1295      54696D65 
+ 1295      6F757449 
+ 1295      53525F47 
+ 1295      65745665 
+ 1296              	.LASF17:
+ 1297 008f 436F6D6D 		.ascii	"CommTimeoutISR_Interrupt\000"
+ 1297      54696D65 
+ 1297      6F757449 
+ 1297      53525F49 
+ 1297      6E746572 
+ 1298              	.LASF3:
+ 1299 00a8 73686F72 		.ascii	"short unsigned int\000"
+ 1299      7420756E 
+ 1299      7369676E 
+ 1299      65642069 
+ 1299      6E7400
+ 1300              	.LASF29:
+ 1301 00bb 436F6D6D 		.ascii	"CommTimeoutISR_StartEx\000"
+ 1301      54696D65 
+ 1301      6F757449 
+ 1301      53525F53 
+ 1301      74617274 
+ 1302              	.LASF7:
+ 1303 00d2 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 1303      206C6F6E 
+ 1303      6720756E 
+ 1303      7369676E 
+ 1303      65642069 
+ 1304              	.LASF1:
+ 1305 00e9 756E7369 		.ascii	"unsigned char\000"
+ 1305      676E6564 
+ 1305      20636861 
+ 1305      7200
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 32
+
+
+ 1306              	.LASF32:
+ 1307 00f7 436F6D6D 		.ascii	"CommTimeoutISR_ClearPending\000"
+ 1307      54696D65 
+ 1307      6F757449 
+ 1307      53525F43 
+ 1307      6C656172 
+ 1308              	.LASF22:
+ 1309 0113 696E7465 		.ascii	"interruptState\000"
+ 1309      72727570 
+ 1309      74537461 
+ 1309      746500
+ 1310              	.LASF5:
+ 1311 0122 6C6F6E67 		.ascii	"long unsigned int\000"
+ 1311      20756E73 
+ 1311      69676E65 
+ 1311      6420696E 
+ 1311      7400
+ 1312              	.LASF9:
+ 1313 0134 75696E74 		.ascii	"uint8\000"
+ 1313      3800
+ 1314              	.LASF21:
+ 1315 013a 7072696F 		.ascii	"priority\000"
+ 1315      72697479 
+ 1315      00
+ 1316              	.LASF34:
+ 1317 0143 2E5C4765 		.ascii	".\\Generated_Source\\PSoC4\\CommTimeoutISR.c\000"
+ 1317      6E657261 
+ 1317      7465645F 
+ 1317      536F7572 
+ 1317      63655C50 
+ 1318              	.LASF27:
+ 1319 016d 436F6D6D 		.ascii	"CommTimeoutISR_Disable\000"
+ 1319      54696D65 
+ 1319      6F757449 
+ 1319      53525F44 
+ 1319      69736162 
+ 1320              	.LASF31:
+ 1321 0184 436F6D6D 		.ascii	"CommTimeoutISR_SetPending\000"
+ 1321      54696D65 
+ 1321      6F757449 
+ 1321      53525F53 
+ 1321      65745065 
+ 1322              	.LASF12:
+ 1323 019e 646F7562 		.ascii	"double\000"
+ 1323      6C6500
+ 1324              	.LASF10:
+ 1325 01a5 75696E74 		.ascii	"uint32\000"
+ 1325      333200
+ 1326              	.LASF39:
+ 1327 01ac 4379456E 		.ascii	"CyEnterCriticalSection\000"
+ 1327      74657243 
+ 1327      72697469 
+ 1327      63616C53 
+ 1327      65637469 
+ 1328              	.LASF8:
+ 1329 01c3 756E7369 		.ascii	"unsigned int\000"
+ 1329      676E6564 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 33
+
+
+ 1329      20696E74 
+ 1329      00
+ 1330              	.LASF20:
+ 1331 01d0 61646472 		.ascii	"address\000"
+ 1331      65737300 
+ 1332              	.LASF40:
+ 1333 01d8 43794578 		.ascii	"CyExitCriticalSection\000"
+ 1333      69744372 
+ 1333      69746963 
+ 1333      616C5365 
+ 1333      6374696F 
+ 1334              	.LASF26:
+ 1335 01ee 436F6D6D 		.ascii	"CommTimeoutISR_Enable\000"
+ 1335      54696D65 
+ 1335      6F757449 
+ 1335      53525F45 
+ 1335      6E61626C 
+ 1336              	.LASF38:
+ 1337 0204 70726F63 		.ascii	"processTimeoutTimerRoutine\000"
+ 1337      65737354 
+ 1337      696D656F 
+ 1337      75745469 
+ 1337      6D657252 
+ 1338              	.LASF15:
+ 1339 021f 63796973 		.ascii	"cyisraddress\000"
+ 1339      72616464 
+ 1339      72657373 
+ 1339      00
+ 1340              	.LASF16:
+ 1341 022c 73697A65 		.ascii	"sizetype\000"
+ 1341      74797065 
+ 1341      00
+ 1342              	.LASF6:
+ 1343 0235 6C6F6E67 		.ascii	"long long int\000"
+ 1343      206C6F6E 
+ 1343      6720696E 
+ 1343      7400
+ 1344              	.LASF18:
+ 1345 0243 436F6D6D 		.ascii	"CommTimeoutISR_SetVector\000"
+ 1345      54696D65 
+ 1345      6F757449 
+ 1345      53525F53 
+ 1345      65745665 
+ 1346              	.LASF13:
+ 1347 025c 63686172 		.ascii	"char\000"
+ 1347      00
+ 1348              	.LASF36:
+ 1349 0261 436F6D6D 		.ascii	"CommTimeoutISR_GetPriority\000"
+ 1349      54696D65 
+ 1349      6F757449 
+ 1349      53525F47 
+ 1349      65745072 
+ 1350              	.LASF33:
+ 1351 027c 474E5520 		.ascii	"GNU C 4.9.3 20150303 (release) [ARM/embedded-4_9-br"
+ 1351      4320342E 
+ 1351      392E3320 
+ 1351      32303135 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccYOPxnt.s 			page 34
+
+
+ 1351      30333033 
+ 1352 02af 616E6368 		.ascii	"anch revision 221220] -mcpu=cortex-m0 -mthumb -g -O"
+ 1352      20726576 
+ 1352      6973696F 
+ 1352      6E203232 
+ 1352      31323230 
+ 1353 02e2 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 1353      66756E63 
+ 1353      74696F6E 
+ 1353      2D736563 
+ 1353      74696F6E 
+ 1354              	.LASF2:
+ 1355 030a 73686F72 		.ascii	"short int\000"
+ 1355      7420696E 
+ 1355      7400
+ 1356              	.LASF25:
+ 1357 0314 436F6D6D 		.ascii	"CommTimeoutISR_GetState\000"
+ 1357      54696D65 
+ 1357      6F757449 
+ 1357      53525F47 
+ 1357      65745374 
+ 1358              	.LASF23:
+ 1359 032c 7072696F 		.ascii	"priorityOffset\000"
+ 1359      72697479 
+ 1359      4F666673 
+ 1359      657400
+ 1360              	.LASF30:
+ 1361 033b 436F6D6D 		.ascii	"CommTimeoutISR_Stop\000"
+ 1361      54696D65 
+ 1361      6F757449 
+ 1361      53525F53 
+ 1361      746F7000 
+ 1362              	.LASF4:
+ 1363 034f 6C6F6E67 		.ascii	"long int\000"
+ 1363      20696E74 
+ 1363      00
+ 1364              	.LASF0:
+ 1365 0358 7369676E 		.ascii	"signed char\000"
+ 1365      65642063 
+ 1365      68617200 
+ 1366              	.LASF19:
+ 1367 0364 436F6D6D 		.ascii	"CommTimeoutISR_SetPriority\000"
+ 1367      54696D65 
+ 1367      6F757449 
+ 1367      53525F53 
+ 1367      65745072 
+ 1368              	.LASF28:
+ 1369 037f 436F6D6D 		.ascii	"CommTimeoutISR_Start\000"
+ 1369      54696D65 
+ 1369      6F757449 
+ 1369      53525F53 
+ 1369      74617274 
+ 1370              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 4.9.3 20150303 (release) [ARM/embedded-4_9-br

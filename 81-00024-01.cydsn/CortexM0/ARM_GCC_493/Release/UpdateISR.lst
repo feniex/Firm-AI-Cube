@@ -1,0 +1,1889 @@
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 1
+
+
+   1              		.cpu cortex-m0
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 34, 0
+  11              		.eabi_attribute 18, 4
+  12              		.code	16
+  13              		.file	"UpdateISR.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.section	.text.UpdateISR_Start,"ax",%progbits
+  18              		.align	2
+  19              		.global	UpdateISR_Start
+  20              		.code	16
+  21              		.thumb_func
+  22              		.type	UpdateISR_Start, %function
+  23              	UpdateISR_Start:
+  24              	.LFB34:
+  25              		.file 1 ".\\Generated_Source\\PSoC4\\UpdateISR.c"
+   1:.\Generated_Source\PSoC4/UpdateISR.c **** /*******************************************************************************
+   2:.\Generated_Source\PSoC4/UpdateISR.c **** * File Name: UpdateISR.c  
+   3:.\Generated_Source\PSoC4/UpdateISR.c **** * Version 1.70
+   4:.\Generated_Source\PSoC4/UpdateISR.c **** *
+   5:.\Generated_Source\PSoC4/UpdateISR.c **** *  Description:
+   6:.\Generated_Source\PSoC4/UpdateISR.c **** *   API for controlling the state of an interrupt.
+   7:.\Generated_Source\PSoC4/UpdateISR.c **** *
+   8:.\Generated_Source\PSoC4/UpdateISR.c **** *
+   9:.\Generated_Source\PSoC4/UpdateISR.c **** *  Note:
+  10:.\Generated_Source\PSoC4/UpdateISR.c **** *
+  11:.\Generated_Source\PSoC4/UpdateISR.c **** ********************************************************************************
+  12:.\Generated_Source\PSoC4/UpdateISR.c **** * Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+  13:.\Generated_Source\PSoC4/UpdateISR.c **** * You may use this file only in accordance with the license, terms, conditions, 
+  14:.\Generated_Source\PSoC4/UpdateISR.c **** * disclaimers, and limitations in the end user license agreement accompanying 
+  15:.\Generated_Source\PSoC4/UpdateISR.c **** * the software package with which this file was provided.
+  16:.\Generated_Source\PSoC4/UpdateISR.c **** *******************************************************************************/
+  17:.\Generated_Source\PSoC4/UpdateISR.c **** 
+  18:.\Generated_Source\PSoC4/UpdateISR.c **** 
+  19:.\Generated_Source\PSoC4/UpdateISR.c **** #include <cydevice_trm.h>
+  20:.\Generated_Source\PSoC4/UpdateISR.c **** #include <CyLib.h>
+  21:.\Generated_Source\PSoC4/UpdateISR.c **** #include <UpdateISR.h>
+  22:.\Generated_Source\PSoC4/UpdateISR.c **** 
+  23:.\Generated_Source\PSoC4/UpdateISR.c **** 
+  24:.\Generated_Source\PSoC4/UpdateISR.c **** #if !defined(UpdateISR__REMOVED) /* Check for removal by optimization */
+  25:.\Generated_Source\PSoC4/UpdateISR.c **** 
+  26:.\Generated_Source\PSoC4/UpdateISR.c **** /*******************************************************************************
+  27:.\Generated_Source\PSoC4/UpdateISR.c **** *  Place your includes, defines and code here 
+  28:.\Generated_Source\PSoC4/UpdateISR.c **** ********************************************************************************/
+  29:.\Generated_Source\PSoC4/UpdateISR.c **** /* `#START UpdateISR_intc` */
+  30:.\Generated_Source\PSoC4/UpdateISR.c **** 
+  31:.\Generated_Source\PSoC4/UpdateISR.c **** #include "BrightnessCommManager.h"
+  32:.\Generated_Source\PSoC4/UpdateISR.c ****     
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 2
+
+
+  33:.\Generated_Source\PSoC4/UpdateISR.c **** /* `#END` */
+  34:.\Generated_Source\PSoC4/UpdateISR.c **** 
+  35:.\Generated_Source\PSoC4/UpdateISR.c **** extern cyisraddress CyRamVectors[CYINT_IRQ_BASE + CY_NUM_INTERRUPTS];
+  36:.\Generated_Source\PSoC4/UpdateISR.c **** 
+  37:.\Generated_Source\PSoC4/UpdateISR.c **** /* Declared in startup, used to set unused interrupts to. */
+  38:.\Generated_Source\PSoC4/UpdateISR.c **** CY_ISR_PROTO(IntDefaultHandler);
+  39:.\Generated_Source\PSoC4/UpdateISR.c **** 
+  40:.\Generated_Source\PSoC4/UpdateISR.c **** 
+  41:.\Generated_Source\PSoC4/UpdateISR.c **** /*******************************************************************************
+  42:.\Generated_Source\PSoC4/UpdateISR.c **** * Function Name: UpdateISR_Start
+  43:.\Generated_Source\PSoC4/UpdateISR.c **** ********************************************************************************
+  44:.\Generated_Source\PSoC4/UpdateISR.c **** *
+  45:.\Generated_Source\PSoC4/UpdateISR.c **** * Summary:
+  46:.\Generated_Source\PSoC4/UpdateISR.c **** *  Set up the interrupt and enable it. This function disables the interrupt, 
+  47:.\Generated_Source\PSoC4/UpdateISR.c **** *  sets the default interrupt vector, sets the priority from the value in the
+  48:.\Generated_Source\PSoC4/UpdateISR.c **** *  Design Wide Resources Interrupt Editor, then enables the interrupt to the 
+  49:.\Generated_Source\PSoC4/UpdateISR.c **** *  interrupt controller.
+  50:.\Generated_Source\PSoC4/UpdateISR.c **** *
+  51:.\Generated_Source\PSoC4/UpdateISR.c **** * Parameters:  
+  52:.\Generated_Source\PSoC4/UpdateISR.c **** *   None
+  53:.\Generated_Source\PSoC4/UpdateISR.c **** *
+  54:.\Generated_Source\PSoC4/UpdateISR.c **** * Return:
+  55:.\Generated_Source\PSoC4/UpdateISR.c **** *   None
+  56:.\Generated_Source\PSoC4/UpdateISR.c **** *
+  57:.\Generated_Source\PSoC4/UpdateISR.c **** *******************************************************************************/
+  58:.\Generated_Source\PSoC4/UpdateISR.c **** void UpdateISR_Start(void)
+  59:.\Generated_Source\PSoC4/UpdateISR.c **** {
+  26              		.loc 1 59 0
+  27              		.cfi_startproc
+  28 0000 80B5     		push	{r7, lr}
+  29              		.cfi_def_cfa_offset 8
+  30              		.cfi_offset 7, -8
+  31              		.cfi_offset 14, -4
+  32 0002 00AF     		add	r7, sp, #0
+  33              		.cfi_def_cfa_register 7
+  60:.\Generated_Source\PSoC4/UpdateISR.c ****     /* For all we know the interrupt is active. */
+  61:.\Generated_Source\PSoC4/UpdateISR.c ****     UpdateISR_Disable();
+  34              		.loc 1 61 0
+  35 0004 FFF7FEFF 		bl	UpdateISR_Disable
+  62:.\Generated_Source\PSoC4/UpdateISR.c **** 
+  63:.\Generated_Source\PSoC4/UpdateISR.c ****     /* Set the ISR to point to the UpdateISR Interrupt. */
+  64:.\Generated_Source\PSoC4/UpdateISR.c ****     UpdateISR_SetVector(&UpdateISR_Interrupt);
+  36              		.loc 1 64 0
+  37 0008 054B     		ldr	r3, .L2
+  38 000a 181C     		mov	r0, r3
+  39 000c FFF7FEFF 		bl	UpdateISR_SetVector
+  65:.\Generated_Source\PSoC4/UpdateISR.c **** 
+  66:.\Generated_Source\PSoC4/UpdateISR.c ****     /* Set the priority. */
+  67:.\Generated_Source\PSoC4/UpdateISR.c ****     UpdateISR_SetPriority((uint8)UpdateISR_INTC_PRIOR_NUMBER);
+  40              		.loc 1 67 0
+  41 0010 0320     		mov	r0, #3
+  42 0012 FFF7FEFF 		bl	UpdateISR_SetPriority
+  68:.\Generated_Source\PSoC4/UpdateISR.c **** 
+  69:.\Generated_Source\PSoC4/UpdateISR.c ****     /* Enable it. */
+  70:.\Generated_Source\PSoC4/UpdateISR.c ****     UpdateISR_Enable();
+  43              		.loc 1 70 0
+  44 0016 FFF7FEFF 		bl	UpdateISR_Enable
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 3
+
+
+  71:.\Generated_Source\PSoC4/UpdateISR.c **** }
+  45              		.loc 1 71 0
+  46 001a BD46     		mov	sp, r7
+  47              		@ sp needed
+  48 001c 80BD     		pop	{r7, pc}
+  49              	.L3:
+  50 001e C046     		.align	2
+  51              	.L2:
+  52 0020 00000000 		.word	UpdateISR_Interrupt
+  53              		.cfi_endproc
+  54              	.LFE34:
+  55              		.size	UpdateISR_Start, .-UpdateISR_Start
+  56              		.section	.text.UpdateISR_StartEx,"ax",%progbits
+  57              		.align	2
+  58              		.global	UpdateISR_StartEx
+  59              		.code	16
+  60              		.thumb_func
+  61              		.type	UpdateISR_StartEx, %function
+  62              	UpdateISR_StartEx:
+  63              	.LFB35:
+  72:.\Generated_Source\PSoC4/UpdateISR.c **** 
+  73:.\Generated_Source\PSoC4/UpdateISR.c **** 
+  74:.\Generated_Source\PSoC4/UpdateISR.c **** /*******************************************************************************
+  75:.\Generated_Source\PSoC4/UpdateISR.c **** * Function Name: UpdateISR_StartEx
+  76:.\Generated_Source\PSoC4/UpdateISR.c **** ********************************************************************************
+  77:.\Generated_Source\PSoC4/UpdateISR.c **** *
+  78:.\Generated_Source\PSoC4/UpdateISR.c **** * Summary:
+  79:.\Generated_Source\PSoC4/UpdateISR.c **** *  Sets up the interrupt and enables it. This function disables the interrupt,
+  80:.\Generated_Source\PSoC4/UpdateISR.c **** *  sets the interrupt vector based on the address passed in, sets the priority 
+  81:.\Generated_Source\PSoC4/UpdateISR.c **** *  from the value in the Design Wide Resources Interrupt Editor, then enables 
+  82:.\Generated_Source\PSoC4/UpdateISR.c **** *  the interrupt to the interrupt controller.
+  83:.\Generated_Source\PSoC4/UpdateISR.c **** *  
+  84:.\Generated_Source\PSoC4/UpdateISR.c **** *  When defining ISR functions, the CY_ISR and CY_ISR_PROTO macros should be 
+  85:.\Generated_Source\PSoC4/UpdateISR.c **** *  used to provide consistent definition across compilers:
+  86:.\Generated_Source\PSoC4/UpdateISR.c **** *  
+  87:.\Generated_Source\PSoC4/UpdateISR.c **** *  Function definition example:
+  88:.\Generated_Source\PSoC4/UpdateISR.c **** *   CY_ISR(MyISR)
+  89:.\Generated_Source\PSoC4/UpdateISR.c **** *   {
+  90:.\Generated_Source\PSoC4/UpdateISR.c **** *   }
+  91:.\Generated_Source\PSoC4/UpdateISR.c **** *   Function prototype example:
+  92:.\Generated_Source\PSoC4/UpdateISR.c **** *   CY_ISR_PROTO(MyISR);
+  93:.\Generated_Source\PSoC4/UpdateISR.c **** *
+  94:.\Generated_Source\PSoC4/UpdateISR.c **** * Parameters:  
+  95:.\Generated_Source\PSoC4/UpdateISR.c **** *   address: Address of the ISR to set in the interrupt vector table.
+  96:.\Generated_Source\PSoC4/UpdateISR.c **** *
+  97:.\Generated_Source\PSoC4/UpdateISR.c **** * Return:
+  98:.\Generated_Source\PSoC4/UpdateISR.c **** *   None
+  99:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 100:.\Generated_Source\PSoC4/UpdateISR.c **** *******************************************************************************/
+ 101:.\Generated_Source\PSoC4/UpdateISR.c **** void UpdateISR_StartEx(cyisraddress address)
+ 102:.\Generated_Source\PSoC4/UpdateISR.c **** {
+  64              		.loc 1 102 0
+  65              		.cfi_startproc
+  66 0000 80B5     		push	{r7, lr}
+  67              		.cfi_def_cfa_offset 8
+  68              		.cfi_offset 7, -8
+  69              		.cfi_offset 14, -4
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 4
+
+
+  70 0002 82B0     		sub	sp, sp, #8
+  71              		.cfi_def_cfa_offset 16
+  72 0004 00AF     		add	r7, sp, #0
+  73              		.cfi_def_cfa_register 7
+  74 0006 7860     		str	r0, [r7, #4]
+ 103:.\Generated_Source\PSoC4/UpdateISR.c ****     /* For all we know the interrupt is active. */
+ 104:.\Generated_Source\PSoC4/UpdateISR.c ****     UpdateISR_Disable();
+  75              		.loc 1 104 0
+  76 0008 FFF7FEFF 		bl	UpdateISR_Disable
+ 105:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 106:.\Generated_Source\PSoC4/UpdateISR.c ****     /* Set the ISR to point to the UpdateISR Interrupt. */
+ 107:.\Generated_Source\PSoC4/UpdateISR.c ****     UpdateISR_SetVector(address);
+  77              		.loc 1 107 0
+  78 000c 7B68     		ldr	r3, [r7, #4]
+  79 000e 181C     		mov	r0, r3
+  80 0010 FFF7FEFF 		bl	UpdateISR_SetVector
+ 108:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 109:.\Generated_Source\PSoC4/UpdateISR.c ****     /* Set the priority. */
+ 110:.\Generated_Source\PSoC4/UpdateISR.c ****     UpdateISR_SetPriority((uint8)UpdateISR_INTC_PRIOR_NUMBER);
+  81              		.loc 1 110 0
+  82 0014 0320     		mov	r0, #3
+  83 0016 FFF7FEFF 		bl	UpdateISR_SetPriority
+ 111:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 112:.\Generated_Source\PSoC4/UpdateISR.c ****     /* Enable it. */
+ 113:.\Generated_Source\PSoC4/UpdateISR.c ****     UpdateISR_Enable();
+  84              		.loc 1 113 0
+  85 001a FFF7FEFF 		bl	UpdateISR_Enable
+ 114:.\Generated_Source\PSoC4/UpdateISR.c **** }
+  86              		.loc 1 114 0
+  87 001e BD46     		mov	sp, r7
+  88 0020 02B0     		add	sp, sp, #8
+  89              		@ sp needed
+  90 0022 80BD     		pop	{r7, pc}
+  91              		.cfi_endproc
+  92              	.LFE35:
+  93              		.size	UpdateISR_StartEx, .-UpdateISR_StartEx
+  94              		.section	.text.UpdateISR_Stop,"ax",%progbits
+  95              		.align	2
+  96              		.global	UpdateISR_Stop
+  97              		.code	16
+  98              		.thumb_func
+  99              		.type	UpdateISR_Stop, %function
+ 100              	UpdateISR_Stop:
+ 101              	.LFB36:
+ 115:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 116:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 117:.\Generated_Source\PSoC4/UpdateISR.c **** /*******************************************************************************
+ 118:.\Generated_Source\PSoC4/UpdateISR.c **** * Function Name: UpdateISR_Stop
+ 119:.\Generated_Source\PSoC4/UpdateISR.c **** ********************************************************************************
+ 120:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 121:.\Generated_Source\PSoC4/UpdateISR.c **** * Summary:
+ 122:.\Generated_Source\PSoC4/UpdateISR.c **** *   Disables and removes the interrupt.
+ 123:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 124:.\Generated_Source\PSoC4/UpdateISR.c **** * Parameters:  
+ 125:.\Generated_Source\PSoC4/UpdateISR.c **** *   None
+ 126:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 127:.\Generated_Source\PSoC4/UpdateISR.c **** * Return:
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 5
+
+
+ 128:.\Generated_Source\PSoC4/UpdateISR.c **** *   None
+ 129:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 130:.\Generated_Source\PSoC4/UpdateISR.c **** *******************************************************************************/
+ 131:.\Generated_Source\PSoC4/UpdateISR.c **** void UpdateISR_Stop(void)
+ 132:.\Generated_Source\PSoC4/UpdateISR.c **** {
+ 102              		.loc 1 132 0
+ 103              		.cfi_startproc
+ 104 0000 80B5     		push	{r7, lr}
+ 105              		.cfi_def_cfa_offset 8
+ 106              		.cfi_offset 7, -8
+ 107              		.cfi_offset 14, -4
+ 108 0002 00AF     		add	r7, sp, #0
+ 109              		.cfi_def_cfa_register 7
+ 133:.\Generated_Source\PSoC4/UpdateISR.c ****     /* Disable this interrupt. */
+ 134:.\Generated_Source\PSoC4/UpdateISR.c ****     UpdateISR_Disable();
+ 110              		.loc 1 134 0
+ 111 0004 FFF7FEFF 		bl	UpdateISR_Disable
+ 135:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 136:.\Generated_Source\PSoC4/UpdateISR.c ****     /* Set the ISR to point to the passive one. */
+ 137:.\Generated_Source\PSoC4/UpdateISR.c ****     UpdateISR_SetVector(&IntDefaultHandler);
+ 112              		.loc 1 137 0
+ 113 0008 024B     		ldr	r3, .L6
+ 114 000a 181C     		mov	r0, r3
+ 115 000c FFF7FEFF 		bl	UpdateISR_SetVector
+ 138:.\Generated_Source\PSoC4/UpdateISR.c **** }
+ 116              		.loc 1 138 0
+ 117 0010 BD46     		mov	sp, r7
+ 118              		@ sp needed
+ 119 0012 80BD     		pop	{r7, pc}
+ 120              	.L7:
+ 121              		.align	2
+ 122              	.L6:
+ 123 0014 00000000 		.word	IntDefaultHandler
+ 124              		.cfi_endproc
+ 125              	.LFE36:
+ 126              		.size	UpdateISR_Stop, .-UpdateISR_Stop
+ 127              		.section	.text.UpdateISR_Interrupt,"ax",%progbits
+ 128              		.align	2
+ 129              		.global	UpdateISR_Interrupt
+ 130              		.code	16
+ 131              		.thumb_func
+ 132              		.type	UpdateISR_Interrupt, %function
+ 133              	UpdateISR_Interrupt:
+ 134              	.LFB37:
+ 139:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 140:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 141:.\Generated_Source\PSoC4/UpdateISR.c **** /*******************************************************************************
+ 142:.\Generated_Source\PSoC4/UpdateISR.c **** * Function Name: UpdateISR_Interrupt
+ 143:.\Generated_Source\PSoC4/UpdateISR.c **** ********************************************************************************
+ 144:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 145:.\Generated_Source\PSoC4/UpdateISR.c **** * Summary:
+ 146:.\Generated_Source\PSoC4/UpdateISR.c **** *   The default Interrupt Service Routine for UpdateISR.
+ 147:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 148:.\Generated_Source\PSoC4/UpdateISR.c **** *   Add custom code between the START and END comments to keep the next version
+ 149:.\Generated_Source\PSoC4/UpdateISR.c **** *   of this file from over-writing your code.
+ 150:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 151:.\Generated_Source\PSoC4/UpdateISR.c **** *   Note You may use either the default ISR by using this API, or you may define
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 6
+
+
+ 152:.\Generated_Source\PSoC4/UpdateISR.c **** *   your own separate ISR through ISR_StartEx().
+ 153:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 154:.\Generated_Source\PSoC4/UpdateISR.c **** * Parameters:  
+ 155:.\Generated_Source\PSoC4/UpdateISR.c **** *   None
+ 156:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 157:.\Generated_Source\PSoC4/UpdateISR.c **** * Return:
+ 158:.\Generated_Source\PSoC4/UpdateISR.c **** *   None
+ 159:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 160:.\Generated_Source\PSoC4/UpdateISR.c **** *******************************************************************************/
+ 161:.\Generated_Source\PSoC4/UpdateISR.c **** CY_ISR(UpdateISR_Interrupt)
+ 162:.\Generated_Source\PSoC4/UpdateISR.c **** {
+ 135              		.loc 1 162 0
+ 136              		.cfi_startproc
+ 137 0000 80B5     		push	{r7, lr}
+ 138              		.cfi_def_cfa_offset 8
+ 139              		.cfi_offset 7, -8
+ 140              		.cfi_offset 14, -4
+ 141 0002 00AF     		add	r7, sp, #0
+ 142              		.cfi_def_cfa_register 7
+ 163:.\Generated_Source\PSoC4/UpdateISR.c ****     #ifdef UpdateISR_INTERRUPT_INTERRUPT_CALLBACK
+ 164:.\Generated_Source\PSoC4/UpdateISR.c ****         UpdateISR_Interrupt_InterruptCallback();
+ 165:.\Generated_Source\PSoC4/UpdateISR.c ****     #endif /* UpdateISR_INTERRUPT_INTERRUPT_CALLBACK */ 
+ 166:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 167:.\Generated_Source\PSoC4/UpdateISR.c ****     /*  Place your Interrupt code here. */
+ 168:.\Generated_Source\PSoC4/UpdateISR.c ****     /* `#START UpdateISR_Interrupt` */
+ 169:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 170:.\Generated_Source\PSoC4/UpdateISR.c ****     processUpdateTimerRoutine();
+ 143              		.loc 1 170 0
+ 144 0004 FFF7FEFF 		bl	processUpdateTimerRoutine
+ 171:.\Generated_Source\PSoC4/UpdateISR.c ****     
+ 172:.\Generated_Source\PSoC4/UpdateISR.c ****     /* `#END` */
+ 173:.\Generated_Source\PSoC4/UpdateISR.c **** }
+ 145              		.loc 1 173 0
+ 146 0008 BD46     		mov	sp, r7
+ 147              		@ sp needed
+ 148 000a 80BD     		pop	{r7, pc}
+ 149              		.cfi_endproc
+ 150              	.LFE37:
+ 151              		.size	UpdateISR_Interrupt, .-UpdateISR_Interrupt
+ 152              		.section	.text.UpdateISR_SetVector,"ax",%progbits
+ 153              		.align	2
+ 154              		.global	UpdateISR_SetVector
+ 155              		.code	16
+ 156              		.thumb_func
+ 157              		.type	UpdateISR_SetVector, %function
+ 158              	UpdateISR_SetVector:
+ 159              	.LFB38:
+ 174:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 175:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 176:.\Generated_Source\PSoC4/UpdateISR.c **** /*******************************************************************************
+ 177:.\Generated_Source\PSoC4/UpdateISR.c **** * Function Name: UpdateISR_SetVector
+ 178:.\Generated_Source\PSoC4/UpdateISR.c **** ********************************************************************************
+ 179:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 180:.\Generated_Source\PSoC4/UpdateISR.c **** * Summary:
+ 181:.\Generated_Source\PSoC4/UpdateISR.c **** *   Change the ISR vector for the Interrupt. Note calling UpdateISR_Start
+ 182:.\Generated_Source\PSoC4/UpdateISR.c **** *   will override any effect this method would have had. To set the vector 
+ 183:.\Generated_Source\PSoC4/UpdateISR.c **** *   before the component has been started use UpdateISR_StartEx instead.
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 7
+
+
+ 184:.\Generated_Source\PSoC4/UpdateISR.c **** * 
+ 185:.\Generated_Source\PSoC4/UpdateISR.c **** *   When defining ISR functions, the CY_ISR and CY_ISR_PROTO macros should be 
+ 186:.\Generated_Source\PSoC4/UpdateISR.c **** *   used to provide consistent definition across compilers:
+ 187:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 188:.\Generated_Source\PSoC4/UpdateISR.c **** *   Function definition example:
+ 189:.\Generated_Source\PSoC4/UpdateISR.c **** *   CY_ISR(MyISR)
+ 190:.\Generated_Source\PSoC4/UpdateISR.c **** *   {
+ 191:.\Generated_Source\PSoC4/UpdateISR.c **** *   }
+ 192:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 193:.\Generated_Source\PSoC4/UpdateISR.c **** *   Function prototype example:
+ 194:.\Generated_Source\PSoC4/UpdateISR.c **** *     CY_ISR_PROTO(MyISR);
+ 195:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 196:.\Generated_Source\PSoC4/UpdateISR.c **** * Parameters:
+ 197:.\Generated_Source\PSoC4/UpdateISR.c **** *   address: Address of the ISR to set in the interrupt vector table.
+ 198:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 199:.\Generated_Source\PSoC4/UpdateISR.c **** * Return:
+ 200:.\Generated_Source\PSoC4/UpdateISR.c **** *   None
+ 201:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 202:.\Generated_Source\PSoC4/UpdateISR.c **** *******************************************************************************/
+ 203:.\Generated_Source\PSoC4/UpdateISR.c **** void UpdateISR_SetVector(cyisraddress address)
+ 204:.\Generated_Source\PSoC4/UpdateISR.c **** {
+ 160              		.loc 1 204 0
+ 161              		.cfi_startproc
+ 162 0000 80B5     		push	{r7, lr}
+ 163              		.cfi_def_cfa_offset 8
+ 164              		.cfi_offset 7, -8
+ 165              		.cfi_offset 14, -4
+ 166 0002 82B0     		sub	sp, sp, #8
+ 167              		.cfi_def_cfa_offset 16
+ 168 0004 00AF     		add	r7, sp, #0
+ 169              		.cfi_def_cfa_register 7
+ 170 0006 7860     		str	r0, [r7, #4]
+ 205:.\Generated_Source\PSoC4/UpdateISR.c ****     CyRamVectors[CYINT_IRQ_BASE + UpdateISR__INTC_NUMBER] = address;
+ 171              		.loc 1 205 0
+ 172 0008 024B     		ldr	r3, .L10
+ 173 000a 7A68     		ldr	r2, [r7, #4]
+ 174 000c 5A65     		str	r2, [r3, #84]
+ 206:.\Generated_Source\PSoC4/UpdateISR.c **** }
+ 175              		.loc 1 206 0
+ 176 000e BD46     		mov	sp, r7
+ 177 0010 02B0     		add	sp, sp, #8
+ 178              		@ sp needed
+ 179 0012 80BD     		pop	{r7, pc}
+ 180              	.L11:
+ 181              		.align	2
+ 182              	.L10:
+ 183 0014 00000000 		.word	CyRamVectors
+ 184              		.cfi_endproc
+ 185              	.LFE38:
+ 186              		.size	UpdateISR_SetVector, .-UpdateISR_SetVector
+ 187              		.section	.text.UpdateISR_GetVector,"ax",%progbits
+ 188              		.align	2
+ 189              		.global	UpdateISR_GetVector
+ 190              		.code	16
+ 191              		.thumb_func
+ 192              		.type	UpdateISR_GetVector, %function
+ 193              	UpdateISR_GetVector:
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 8
+
+
+ 194              	.LFB39:
+ 207:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 208:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 209:.\Generated_Source\PSoC4/UpdateISR.c **** /*******************************************************************************
+ 210:.\Generated_Source\PSoC4/UpdateISR.c **** * Function Name: UpdateISR_GetVector
+ 211:.\Generated_Source\PSoC4/UpdateISR.c **** ********************************************************************************
+ 212:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 213:.\Generated_Source\PSoC4/UpdateISR.c **** * Summary:
+ 214:.\Generated_Source\PSoC4/UpdateISR.c **** *   Gets the "address" of the current ISR vector for the Interrupt.
+ 215:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 216:.\Generated_Source\PSoC4/UpdateISR.c **** * Parameters:
+ 217:.\Generated_Source\PSoC4/UpdateISR.c **** *   None
+ 218:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 219:.\Generated_Source\PSoC4/UpdateISR.c **** * Return:
+ 220:.\Generated_Source\PSoC4/UpdateISR.c **** *   Address of the ISR in the interrupt vector table.
+ 221:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 222:.\Generated_Source\PSoC4/UpdateISR.c **** *******************************************************************************/
+ 223:.\Generated_Source\PSoC4/UpdateISR.c **** cyisraddress UpdateISR_GetVector(void)
+ 224:.\Generated_Source\PSoC4/UpdateISR.c **** {
+ 195              		.loc 1 224 0
+ 196              		.cfi_startproc
+ 197 0000 80B5     		push	{r7, lr}
+ 198              		.cfi_def_cfa_offset 8
+ 199              		.cfi_offset 7, -8
+ 200              		.cfi_offset 14, -4
+ 201 0002 00AF     		add	r7, sp, #0
+ 202              		.cfi_def_cfa_register 7
+ 225:.\Generated_Source\PSoC4/UpdateISR.c ****     return CyRamVectors[CYINT_IRQ_BASE + UpdateISR__INTC_NUMBER];
+ 203              		.loc 1 225 0
+ 204 0004 024B     		ldr	r3, .L14
+ 205 0006 5B6D     		ldr	r3, [r3, #84]
+ 226:.\Generated_Source\PSoC4/UpdateISR.c **** }
+ 206              		.loc 1 226 0
+ 207 0008 181C     		mov	r0, r3
+ 208 000a BD46     		mov	sp, r7
+ 209              		@ sp needed
+ 210 000c 80BD     		pop	{r7, pc}
+ 211              	.L15:
+ 212 000e C046     		.align	2
+ 213              	.L14:
+ 214 0010 00000000 		.word	CyRamVectors
+ 215              		.cfi_endproc
+ 216              	.LFE39:
+ 217              		.size	UpdateISR_GetVector, .-UpdateISR_GetVector
+ 218              		.section	.text.UpdateISR_SetPriority,"ax",%progbits
+ 219              		.align	2
+ 220              		.global	UpdateISR_SetPriority
+ 221              		.code	16
+ 222              		.thumb_func
+ 223              		.type	UpdateISR_SetPriority, %function
+ 224              	UpdateISR_SetPriority:
+ 225              	.LFB40:
+ 227:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 228:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 229:.\Generated_Source\PSoC4/UpdateISR.c **** /*******************************************************************************
+ 230:.\Generated_Source\PSoC4/UpdateISR.c **** * Function Name: UpdateISR_SetPriority
+ 231:.\Generated_Source\PSoC4/UpdateISR.c **** ********************************************************************************
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 9
+
+
+ 232:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 233:.\Generated_Source\PSoC4/UpdateISR.c **** * Summary:
+ 234:.\Generated_Source\PSoC4/UpdateISR.c **** *   Sets the Priority of the Interrupt. 
+ 235:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 236:.\Generated_Source\PSoC4/UpdateISR.c **** *   Note calling UpdateISR_Start or UpdateISR_StartEx will 
+ 237:.\Generated_Source\PSoC4/UpdateISR.c **** *   override any effect this API would have had. This API should only be called
+ 238:.\Generated_Source\PSoC4/UpdateISR.c **** *   after UpdateISR_Start or UpdateISR_StartEx has been called. 
+ 239:.\Generated_Source\PSoC4/UpdateISR.c **** *   To set the initial priority for the component, use the Design-Wide Resources
+ 240:.\Generated_Source\PSoC4/UpdateISR.c **** *   Interrupt Editor.
+ 241:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 242:.\Generated_Source\PSoC4/UpdateISR.c **** *   Note This API has no effect on Non-maskable interrupt NMI).
+ 243:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 244:.\Generated_Source\PSoC4/UpdateISR.c **** * Parameters:
+ 245:.\Generated_Source\PSoC4/UpdateISR.c **** *   priority: Priority of the interrupt, 0 being the highest priority
+ 246:.\Generated_Source\PSoC4/UpdateISR.c **** *             PSoC 3 and PSoC 5LP: Priority is from 0 to 7.
+ 247:.\Generated_Source\PSoC4/UpdateISR.c **** *             PSoC 4: Priority is from 0 to 3.
+ 248:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 249:.\Generated_Source\PSoC4/UpdateISR.c **** * Return:
+ 250:.\Generated_Source\PSoC4/UpdateISR.c **** *   None
+ 251:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 252:.\Generated_Source\PSoC4/UpdateISR.c **** *******************************************************************************/
+ 253:.\Generated_Source\PSoC4/UpdateISR.c **** void UpdateISR_SetPriority(uint8 priority)
+ 254:.\Generated_Source\PSoC4/UpdateISR.c **** {
+ 226              		.loc 1 254 0
+ 227              		.cfi_startproc
+ 228 0000 90B5     		push	{r4, r7, lr}
+ 229              		.cfi_def_cfa_offset 12
+ 230              		.cfi_offset 4, -12
+ 231              		.cfi_offset 7, -8
+ 232              		.cfi_offset 14, -4
+ 233 0002 85B0     		sub	sp, sp, #20
+ 234              		.cfi_def_cfa_offset 32
+ 235 0004 00AF     		add	r7, sp, #0
+ 236              		.cfi_def_cfa_register 7
+ 237 0006 021C     		mov	r2, r0
+ 238 0008 FB1D     		add	r3, r7, #7
+ 239 000a 1A70     		strb	r2, [r3]
+ 255:.\Generated_Source\PSoC4/UpdateISR.c **** 	uint8 interruptState;
+ 256:.\Generated_Source\PSoC4/UpdateISR.c ****     uint32 priorityOffset = ((UpdateISR__INTC_NUMBER % 4u) * 8u) + 6u;
+ 240              		.loc 1 256 0
+ 241 000c 0E23     		mov	r3, #14
+ 242 000e FB60     		str	r3, [r7, #12]
+ 257:.\Generated_Source\PSoC4/UpdateISR.c ****     
+ 258:.\Generated_Source\PSoC4/UpdateISR.c **** 	interruptState = CyEnterCriticalSection();
+ 243              		.loc 1 258 0
+ 244 0010 0B23     		mov	r3, #11
+ 245 0012 FC18     		add	r4, r7, r3
+ 246 0014 FFF7FEFF 		bl	CyEnterCriticalSection
+ 247 0018 031C     		mov	r3, r0
+ 248 001a 2370     		strb	r3, [r4]
+ 259:.\Generated_Source\PSoC4/UpdateISR.c ****     *UpdateISR_INTC_PRIOR = (*UpdateISR_INTC_PRIOR & (uint32)(~UpdateISR__INTC_PRIOR_MASK)) |
+ 249              		.loc 1 259 0
+ 250 001c 0A4B     		ldr	r3, .L17
+ 251 001e 0A4A     		ldr	r2, .L17
+ 252 0020 1268     		ldr	r2, [r2]
+ 253 0022 0A49     		ldr	r1, .L17+4
+ 254 0024 1140     		and	r1, r2
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 10
+
+
+ 260:.\Generated_Source\PSoC4/UpdateISR.c ****                                     ((uint32)priority << priorityOffset);
+ 255              		.loc 1 260 0
+ 256 0026 FA1D     		add	r2, r7, #7
+ 257 0028 1078     		ldrb	r0, [r2]
+ 258 002a FA68     		ldr	r2, [r7, #12]
+ 259 002c 9040     		lsl	r0, r0, r2
+ 260 002e 021C     		mov	r2, r0
+ 259:.\Generated_Source\PSoC4/UpdateISR.c ****     *UpdateISR_INTC_PRIOR = (*UpdateISR_INTC_PRIOR & (uint32)(~UpdateISR__INTC_PRIOR_MASK)) |
+ 261              		.loc 1 259 0
+ 262 0030 0A43     		orr	r2, r1
+ 263 0032 1A60     		str	r2, [r3]
+ 261:.\Generated_Source\PSoC4/UpdateISR.c **** 	CyExitCriticalSection(interruptState);
+ 264              		.loc 1 261 0
+ 265 0034 0B23     		mov	r3, #11
+ 266 0036 FB18     		add	r3, r7, r3
+ 267 0038 1B78     		ldrb	r3, [r3]
+ 268 003a 181C     		mov	r0, r3
+ 269 003c FFF7FEFF 		bl	CyExitCriticalSection
+ 262:.\Generated_Source\PSoC4/UpdateISR.c **** }
+ 270              		.loc 1 262 0
+ 271 0040 BD46     		mov	sp, r7
+ 272 0042 05B0     		add	sp, sp, #20
+ 273              		@ sp needed
+ 274 0044 90BD     		pop	{r4, r7, pc}
+ 275              	.L18:
+ 276 0046 C046     		.align	2
+ 277              	.L17:
+ 278 0048 04E400E0 		.word	-536812540
+ 279 004c FF3FFFFF 		.word	-49153
+ 280              		.cfi_endproc
+ 281              	.LFE40:
+ 282              		.size	UpdateISR_SetPriority, .-UpdateISR_SetPriority
+ 283              		.section	.text.UpdateISR_GetPriority,"ax",%progbits
+ 284              		.align	2
+ 285              		.global	UpdateISR_GetPriority
+ 286              		.code	16
+ 287              		.thumb_func
+ 288              		.type	UpdateISR_GetPriority, %function
+ 289              	UpdateISR_GetPriority:
+ 290              	.LFB41:
+ 263:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 264:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 265:.\Generated_Source\PSoC4/UpdateISR.c **** /*******************************************************************************
+ 266:.\Generated_Source\PSoC4/UpdateISR.c **** * Function Name: UpdateISR_GetPriority
+ 267:.\Generated_Source\PSoC4/UpdateISR.c **** ********************************************************************************
+ 268:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 269:.\Generated_Source\PSoC4/UpdateISR.c **** * Summary:
+ 270:.\Generated_Source\PSoC4/UpdateISR.c **** *   Gets the Priority of the Interrupt.
+ 271:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 272:.\Generated_Source\PSoC4/UpdateISR.c **** * Parameters:
+ 273:.\Generated_Source\PSoC4/UpdateISR.c **** *   None
+ 274:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 275:.\Generated_Source\PSoC4/UpdateISR.c **** * Return:
+ 276:.\Generated_Source\PSoC4/UpdateISR.c **** *   Priority of the interrupt, 0 being the highest priority
+ 277:.\Generated_Source\PSoC4/UpdateISR.c **** *    PSoC 3 and PSoC 5LP: Priority is from 0 to 7.
+ 278:.\Generated_Source\PSoC4/UpdateISR.c **** *    PSoC 4: Priority is from 0 to 3.
+ 279:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 11
+
+
+ 280:.\Generated_Source\PSoC4/UpdateISR.c **** *******************************************************************************/
+ 281:.\Generated_Source\PSoC4/UpdateISR.c **** uint8 UpdateISR_GetPriority(void)
+ 282:.\Generated_Source\PSoC4/UpdateISR.c **** {
+ 291              		.loc 1 282 0
+ 292              		.cfi_startproc
+ 293 0000 80B5     		push	{r7, lr}
+ 294              		.cfi_def_cfa_offset 8
+ 295              		.cfi_offset 7, -8
+ 296              		.cfi_offset 14, -4
+ 297 0002 82B0     		sub	sp, sp, #8
+ 298              		.cfi_def_cfa_offset 16
+ 299 0004 00AF     		add	r7, sp, #0
+ 300              		.cfi_def_cfa_register 7
+ 283:.\Generated_Source\PSoC4/UpdateISR.c ****     uint32 priority;
+ 284:.\Generated_Source\PSoC4/UpdateISR.c **** 	uint32 priorityOffset = ((UpdateISR__INTC_NUMBER % 4u) * 8u) + 6u;
+ 301              		.loc 1 284 0
+ 302 0006 0E23     		mov	r3, #14
+ 303 0008 7B60     		str	r3, [r7, #4]
+ 285:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 286:.\Generated_Source\PSoC4/UpdateISR.c ****     priority = (*UpdateISR_INTC_PRIOR & UpdateISR__INTC_PRIOR_MASK) >> priorityOffset;
+ 304              		.loc 1 286 0
+ 305 000a 074B     		ldr	r3, .L21
+ 306 000c 1A68     		ldr	r2, [r3]
+ 307 000e C023     		mov	r3, #192
+ 308 0010 1B02     		lsl	r3, r3, #8
+ 309 0012 1A40     		and	r2, r3
+ 310 0014 7B68     		ldr	r3, [r7, #4]
+ 311 0016 DA40     		lsr	r2, r2, r3
+ 312 0018 131C     		mov	r3, r2
+ 313 001a 3B60     		str	r3, [r7]
+ 287:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 288:.\Generated_Source\PSoC4/UpdateISR.c ****     return (uint8)priority;
+ 314              		.loc 1 288 0
+ 315 001c 3B68     		ldr	r3, [r7]
+ 316 001e DBB2     		uxtb	r3, r3
+ 289:.\Generated_Source\PSoC4/UpdateISR.c **** }
+ 317              		.loc 1 289 0
+ 318 0020 181C     		mov	r0, r3
+ 319 0022 BD46     		mov	sp, r7
+ 320 0024 02B0     		add	sp, sp, #8
+ 321              		@ sp needed
+ 322 0026 80BD     		pop	{r7, pc}
+ 323              	.L22:
+ 324              		.align	2
+ 325              	.L21:
+ 326 0028 04E400E0 		.word	-536812540
+ 327              		.cfi_endproc
+ 328              	.LFE41:
+ 329              		.size	UpdateISR_GetPriority, .-UpdateISR_GetPriority
+ 330              		.section	.text.UpdateISR_Enable,"ax",%progbits
+ 331              		.align	2
+ 332              		.global	UpdateISR_Enable
+ 333              		.code	16
+ 334              		.thumb_func
+ 335              		.type	UpdateISR_Enable, %function
+ 336              	UpdateISR_Enable:
+ 337              	.LFB42:
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 12
+
+
+ 290:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 291:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 292:.\Generated_Source\PSoC4/UpdateISR.c **** /*******************************************************************************
+ 293:.\Generated_Source\PSoC4/UpdateISR.c **** * Function Name: UpdateISR_Enable
+ 294:.\Generated_Source\PSoC4/UpdateISR.c **** ********************************************************************************
+ 295:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 296:.\Generated_Source\PSoC4/UpdateISR.c **** * Summary:
+ 297:.\Generated_Source\PSoC4/UpdateISR.c **** *   Enables the interrupt to the interrupt controller. Do not call this function
+ 298:.\Generated_Source\PSoC4/UpdateISR.c **** *   unless ISR_Start() has been called or the functionality of the ISR_Start() 
+ 299:.\Generated_Source\PSoC4/UpdateISR.c **** *   function, which sets the vector and the priority, has been called.
+ 300:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 301:.\Generated_Source\PSoC4/UpdateISR.c **** * Parameters:
+ 302:.\Generated_Source\PSoC4/UpdateISR.c **** *   None
+ 303:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 304:.\Generated_Source\PSoC4/UpdateISR.c **** * Return:
+ 305:.\Generated_Source\PSoC4/UpdateISR.c **** *   None
+ 306:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 307:.\Generated_Source\PSoC4/UpdateISR.c **** *******************************************************************************/
+ 308:.\Generated_Source\PSoC4/UpdateISR.c **** void UpdateISR_Enable(void)
+ 309:.\Generated_Source\PSoC4/UpdateISR.c **** {
+ 338              		.loc 1 309 0
+ 339              		.cfi_startproc
+ 340 0000 80B5     		push	{r7, lr}
+ 341              		.cfi_def_cfa_offset 8
+ 342              		.cfi_offset 7, -8
+ 343              		.cfi_offset 14, -4
+ 344 0002 00AF     		add	r7, sp, #0
+ 345              		.cfi_def_cfa_register 7
+ 310:.\Generated_Source\PSoC4/UpdateISR.c ****     /* Enable the general interrupt. */
+ 311:.\Generated_Source\PSoC4/UpdateISR.c ****     *UpdateISR_INTC_SET_EN = UpdateISR__INTC_MASK;
+ 346              		.loc 1 311 0
+ 347 0004 024B     		ldr	r3, .L24
+ 348 0006 2022     		mov	r2, #32
+ 349 0008 1A60     		str	r2, [r3]
+ 312:.\Generated_Source\PSoC4/UpdateISR.c **** }
+ 350              		.loc 1 312 0
+ 351 000a BD46     		mov	sp, r7
+ 352              		@ sp needed
+ 353 000c 80BD     		pop	{r7, pc}
+ 354              	.L25:
+ 355 000e C046     		.align	2
+ 356              	.L24:
+ 357 0010 00E100E0 		.word	-536813312
+ 358              		.cfi_endproc
+ 359              	.LFE42:
+ 360              		.size	UpdateISR_Enable, .-UpdateISR_Enable
+ 361              		.section	.text.UpdateISR_GetState,"ax",%progbits
+ 362              		.align	2
+ 363              		.global	UpdateISR_GetState
+ 364              		.code	16
+ 365              		.thumb_func
+ 366              		.type	UpdateISR_GetState, %function
+ 367              	UpdateISR_GetState:
+ 368              	.LFB43:
+ 313:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 314:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 315:.\Generated_Source\PSoC4/UpdateISR.c **** /*******************************************************************************
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 13
+
+
+ 316:.\Generated_Source\PSoC4/UpdateISR.c **** * Function Name: UpdateISR_GetState
+ 317:.\Generated_Source\PSoC4/UpdateISR.c **** ********************************************************************************
+ 318:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 319:.\Generated_Source\PSoC4/UpdateISR.c **** * Summary:
+ 320:.\Generated_Source\PSoC4/UpdateISR.c **** *   Gets the state (enabled, disabled) of the Interrupt.
+ 321:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 322:.\Generated_Source\PSoC4/UpdateISR.c **** * Parameters:
+ 323:.\Generated_Source\PSoC4/UpdateISR.c **** *   None
+ 324:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 325:.\Generated_Source\PSoC4/UpdateISR.c **** * Return:
+ 326:.\Generated_Source\PSoC4/UpdateISR.c **** *   1 if enabled, 0 if disabled.
+ 327:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 328:.\Generated_Source\PSoC4/UpdateISR.c **** *******************************************************************************/
+ 329:.\Generated_Source\PSoC4/UpdateISR.c **** uint8 UpdateISR_GetState(void)
+ 330:.\Generated_Source\PSoC4/UpdateISR.c **** {
+ 369              		.loc 1 330 0
+ 370              		.cfi_startproc
+ 371 0000 80B5     		push	{r7, lr}
+ 372              		.cfi_def_cfa_offset 8
+ 373              		.cfi_offset 7, -8
+ 374              		.cfi_offset 14, -4
+ 375 0002 00AF     		add	r7, sp, #0
+ 376              		.cfi_def_cfa_register 7
+ 331:.\Generated_Source\PSoC4/UpdateISR.c ****     /* Get the state of the general interrupt. */
+ 332:.\Generated_Source\PSoC4/UpdateISR.c ****     return ((*UpdateISR_INTC_SET_EN & (uint32)UpdateISR__INTC_MASK) != 0u) ? 1u:0u;
+ 377              		.loc 1 332 0
+ 378 0004 054B     		ldr	r3, .L30
+ 379 0006 1B68     		ldr	r3, [r3]
+ 380 0008 2022     		mov	r2, #32
+ 381 000a 1340     		and	r3, r2
+ 382 000c 01D0     		beq	.L27
+ 383              		.loc 1 332 0 is_stmt 0 discriminator 1
+ 384 000e 0123     		mov	r3, #1
+ 385 0010 00E0     		b	.L28
+ 386              	.L27:
+ 387              		.loc 1 332 0 discriminator 2
+ 388 0012 0023     		mov	r3, #0
+ 389              	.L28:
+ 333:.\Generated_Source\PSoC4/UpdateISR.c **** }
+ 390              		.loc 1 333 0 is_stmt 1 discriminator 4
+ 391 0014 181C     		mov	r0, r3
+ 392 0016 BD46     		mov	sp, r7
+ 393              		@ sp needed
+ 394 0018 80BD     		pop	{r7, pc}
+ 395              	.L31:
+ 396 001a C046     		.align	2
+ 397              	.L30:
+ 398 001c 00E100E0 		.word	-536813312
+ 399              		.cfi_endproc
+ 400              	.LFE43:
+ 401              		.size	UpdateISR_GetState, .-UpdateISR_GetState
+ 402              		.section	.text.UpdateISR_Disable,"ax",%progbits
+ 403              		.align	2
+ 404              		.global	UpdateISR_Disable
+ 405              		.code	16
+ 406              		.thumb_func
+ 407              		.type	UpdateISR_Disable, %function
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 14
+
+
+ 408              	UpdateISR_Disable:
+ 409              	.LFB44:
+ 334:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 335:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 336:.\Generated_Source\PSoC4/UpdateISR.c **** /*******************************************************************************
+ 337:.\Generated_Source\PSoC4/UpdateISR.c **** * Function Name: UpdateISR_Disable
+ 338:.\Generated_Source\PSoC4/UpdateISR.c **** ********************************************************************************
+ 339:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 340:.\Generated_Source\PSoC4/UpdateISR.c **** * Summary:
+ 341:.\Generated_Source\PSoC4/UpdateISR.c **** *   Disables the Interrupt in the interrupt controller.
+ 342:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 343:.\Generated_Source\PSoC4/UpdateISR.c **** * Parameters:
+ 344:.\Generated_Source\PSoC4/UpdateISR.c **** *   None
+ 345:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 346:.\Generated_Source\PSoC4/UpdateISR.c **** * Return:
+ 347:.\Generated_Source\PSoC4/UpdateISR.c **** *   None
+ 348:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 349:.\Generated_Source\PSoC4/UpdateISR.c **** *******************************************************************************/
+ 350:.\Generated_Source\PSoC4/UpdateISR.c **** void UpdateISR_Disable(void)
+ 351:.\Generated_Source\PSoC4/UpdateISR.c **** {
+ 410              		.loc 1 351 0
+ 411              		.cfi_startproc
+ 412 0000 80B5     		push	{r7, lr}
+ 413              		.cfi_def_cfa_offset 8
+ 414              		.cfi_offset 7, -8
+ 415              		.cfi_offset 14, -4
+ 416 0002 00AF     		add	r7, sp, #0
+ 417              		.cfi_def_cfa_register 7
+ 352:.\Generated_Source\PSoC4/UpdateISR.c ****     /* Disable the general interrupt. */
+ 353:.\Generated_Source\PSoC4/UpdateISR.c ****     *UpdateISR_INTC_CLR_EN = UpdateISR__INTC_MASK;
+ 418              		.loc 1 353 0
+ 419 0004 024B     		ldr	r3, .L33
+ 420 0006 2022     		mov	r2, #32
+ 421 0008 1A60     		str	r2, [r3]
+ 354:.\Generated_Source\PSoC4/UpdateISR.c **** }
+ 422              		.loc 1 354 0
+ 423 000a BD46     		mov	sp, r7
+ 424              		@ sp needed
+ 425 000c 80BD     		pop	{r7, pc}
+ 426              	.L34:
+ 427 000e C046     		.align	2
+ 428              	.L33:
+ 429 0010 80E100E0 		.word	-536813184
+ 430              		.cfi_endproc
+ 431              	.LFE44:
+ 432              		.size	UpdateISR_Disable, .-UpdateISR_Disable
+ 433              		.section	.text.UpdateISR_SetPending,"ax",%progbits
+ 434              		.align	2
+ 435              		.global	UpdateISR_SetPending
+ 436              		.code	16
+ 437              		.thumb_func
+ 438              		.type	UpdateISR_SetPending, %function
+ 439              	UpdateISR_SetPending:
+ 440              	.LFB45:
+ 355:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 356:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 357:.\Generated_Source\PSoC4/UpdateISR.c **** /*******************************************************************************
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 15
+
+
+ 358:.\Generated_Source\PSoC4/UpdateISR.c **** * Function Name: UpdateISR_SetPending
+ 359:.\Generated_Source\PSoC4/UpdateISR.c **** ********************************************************************************
+ 360:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 361:.\Generated_Source\PSoC4/UpdateISR.c **** * Summary:
+ 362:.\Generated_Source\PSoC4/UpdateISR.c **** *   Causes the Interrupt to enter the pending state, a software method of
+ 363:.\Generated_Source\PSoC4/UpdateISR.c **** *   generating the interrupt.
+ 364:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 365:.\Generated_Source\PSoC4/UpdateISR.c **** * Parameters:
+ 366:.\Generated_Source\PSoC4/UpdateISR.c **** *   None
+ 367:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 368:.\Generated_Source\PSoC4/UpdateISR.c **** * Return:
+ 369:.\Generated_Source\PSoC4/UpdateISR.c **** *   None
+ 370:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 371:.\Generated_Source\PSoC4/UpdateISR.c **** * Side Effects:
+ 372:.\Generated_Source\PSoC4/UpdateISR.c **** *   If interrupts are enabled and the interrupt is set up properly, the ISR is
+ 373:.\Generated_Source\PSoC4/UpdateISR.c **** *   entered (depending on the priority of this interrupt and other pending 
+ 374:.\Generated_Source\PSoC4/UpdateISR.c **** *   interrupts).
+ 375:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 376:.\Generated_Source\PSoC4/UpdateISR.c **** *******************************************************************************/
+ 377:.\Generated_Source\PSoC4/UpdateISR.c **** void UpdateISR_SetPending(void)
+ 378:.\Generated_Source\PSoC4/UpdateISR.c **** {
+ 441              		.loc 1 378 0
+ 442              		.cfi_startproc
+ 443 0000 80B5     		push	{r7, lr}
+ 444              		.cfi_def_cfa_offset 8
+ 445              		.cfi_offset 7, -8
+ 446              		.cfi_offset 14, -4
+ 447 0002 00AF     		add	r7, sp, #0
+ 448              		.cfi_def_cfa_register 7
+ 379:.\Generated_Source\PSoC4/UpdateISR.c ****     *UpdateISR_INTC_SET_PD = UpdateISR__INTC_MASK;
+ 449              		.loc 1 379 0
+ 450 0004 024B     		ldr	r3, .L36
+ 451 0006 2022     		mov	r2, #32
+ 452 0008 1A60     		str	r2, [r3]
+ 380:.\Generated_Source\PSoC4/UpdateISR.c **** }
+ 453              		.loc 1 380 0
+ 454 000a BD46     		mov	sp, r7
+ 455              		@ sp needed
+ 456 000c 80BD     		pop	{r7, pc}
+ 457              	.L37:
+ 458 000e C046     		.align	2
+ 459              	.L36:
+ 460 0010 00E200E0 		.word	-536813056
+ 461              		.cfi_endproc
+ 462              	.LFE45:
+ 463              		.size	UpdateISR_SetPending, .-UpdateISR_SetPending
+ 464              		.section	.text.UpdateISR_ClearPending,"ax",%progbits
+ 465              		.align	2
+ 466              		.global	UpdateISR_ClearPending
+ 467              		.code	16
+ 468              		.thumb_func
+ 469              		.type	UpdateISR_ClearPending, %function
+ 470              	UpdateISR_ClearPending:
+ 471              	.LFB46:
+ 381:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 382:.\Generated_Source\PSoC4/UpdateISR.c **** 
+ 383:.\Generated_Source\PSoC4/UpdateISR.c **** /*******************************************************************************
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 16
+
+
+ 384:.\Generated_Source\PSoC4/UpdateISR.c **** * Function Name: UpdateISR_ClearPending
+ 385:.\Generated_Source\PSoC4/UpdateISR.c **** ********************************************************************************
+ 386:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 387:.\Generated_Source\PSoC4/UpdateISR.c **** * Summary:
+ 388:.\Generated_Source\PSoC4/UpdateISR.c **** *   Clears a pending interrupt in the interrupt controller.
+ 389:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 390:.\Generated_Source\PSoC4/UpdateISR.c **** *   Note Some interrupt sources are clear-on-read and require the block 
+ 391:.\Generated_Source\PSoC4/UpdateISR.c **** *   interrupt/status register to be read/cleared with the appropriate block API 
+ 392:.\Generated_Source\PSoC4/UpdateISR.c **** *   (GPIO, UART, and so on). Otherwise the ISR will continue to remain in 
+ 393:.\Generated_Source\PSoC4/UpdateISR.c **** *   pending state even though the interrupt itself is cleared using this API.
+ 394:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 395:.\Generated_Source\PSoC4/UpdateISR.c **** * Parameters:
+ 396:.\Generated_Source\PSoC4/UpdateISR.c **** *   None
+ 397:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 398:.\Generated_Source\PSoC4/UpdateISR.c **** * Return:
+ 399:.\Generated_Source\PSoC4/UpdateISR.c **** *   None
+ 400:.\Generated_Source\PSoC4/UpdateISR.c **** *
+ 401:.\Generated_Source\PSoC4/UpdateISR.c **** *******************************************************************************/
+ 402:.\Generated_Source\PSoC4/UpdateISR.c **** void UpdateISR_ClearPending(void)
+ 403:.\Generated_Source\PSoC4/UpdateISR.c **** {
+ 472              		.loc 1 403 0
+ 473              		.cfi_startproc
+ 474 0000 80B5     		push	{r7, lr}
+ 475              		.cfi_def_cfa_offset 8
+ 476              		.cfi_offset 7, -8
+ 477              		.cfi_offset 14, -4
+ 478 0002 00AF     		add	r7, sp, #0
+ 479              		.cfi_def_cfa_register 7
+ 404:.\Generated_Source\PSoC4/UpdateISR.c ****     *UpdateISR_INTC_CLR_PD = UpdateISR__INTC_MASK;
+ 480              		.loc 1 404 0
+ 481 0004 024B     		ldr	r3, .L39
+ 482 0006 2022     		mov	r2, #32
+ 483 0008 1A60     		str	r2, [r3]
+ 405:.\Generated_Source\PSoC4/UpdateISR.c **** }
+ 484              		.loc 1 405 0
+ 485 000a BD46     		mov	sp, r7
+ 486              		@ sp needed
+ 487 000c 80BD     		pop	{r7, pc}
+ 488              	.L40:
+ 489 000e C046     		.align	2
+ 490              	.L39:
+ 491 0010 80E200E0 		.word	-536812928
+ 492              		.cfi_endproc
+ 493              	.LFE46:
+ 494              		.size	UpdateISR_ClearPending, .-UpdateISR_ClearPending
+ 495              		.text
+ 496              	.Letext0:
+ 497              		.file 2 "Generated_Source\\PSoC4/cytypes.h"
+ 498              		.section	.debug_info,"",%progbits
+ 499              	.Ldebug_info0:
+ 500 0000 43020000 		.4byte	0x243
+ 501 0004 0400     		.2byte	0x4
+ 502 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 503 000a 04       		.byte	0x4
+ 504 000b 01       		.uleb128 0x1
+ 505 000c 2B000000 		.4byte	.LASF33
+ 506 0010 01       		.byte	0x1
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 17
+
+
+ 507 0011 00000000 		.4byte	.LASF34
+ 508 0015 A9020000 		.4byte	.LASF35
+ 509 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 510 001d 00000000 		.4byte	0
+ 511 0021 00000000 		.4byte	.Ldebug_line0
+ 512 0025 02       		.uleb128 0x2
+ 513 0026 01       		.byte	0x1
+ 514 0027 06       		.byte	0x6
+ 515 0028 63020000 		.4byte	.LASF0
+ 516 002c 02       		.uleb128 0x2
+ 517 002d 01       		.byte	0x1
+ 518 002e 08       		.byte	0x8
+ 519 002f F0000000 		.4byte	.LASF1
+ 520 0033 02       		.uleb128 0x2
+ 521 0034 02       		.byte	0x2
+ 522 0035 05       		.byte	0x5
+ 523 0036 45010000 		.4byte	.LASF2
+ 524 003a 02       		.uleb128 0x2
+ 525 003b 02       		.byte	0x2
+ 526 003c 07       		.byte	0x7
+ 527 003d C6000000 		.4byte	.LASF3
+ 528 0041 02       		.uleb128 0x2
+ 529 0042 04       		.byte	0x4
+ 530 0043 05       		.byte	0x5
+ 531 0044 44020000 		.4byte	.LASF4
+ 532 0048 02       		.uleb128 0x2
+ 533 0049 04       		.byte	0x4
+ 534 004a 07       		.byte	0x7
+ 535 004b 0D010000 		.4byte	.LASF5
+ 536 004f 02       		.uleb128 0x2
+ 537 0050 08       		.byte	0x8
+ 538 0051 05       		.byte	0x5
+ 539 0052 01020000 		.4byte	.LASF6
+ 540 0056 02       		.uleb128 0x2
+ 541 0057 08       		.byte	0x8
+ 542 0058 07       		.byte	0x7
+ 543 0059 AB010000 		.4byte	.LASF7
+ 544 005d 03       		.uleb128 0x3
+ 545 005e 04       		.byte	0x4
+ 546 005f 05       		.byte	0x5
+ 547 0060 696E7400 		.ascii	"int\000"
+ 548 0064 02       		.uleb128 0x2
+ 549 0065 04       		.byte	0x4
+ 550 0066 07       		.byte	0x7
+ 551 0067 82010000 		.4byte	.LASF8
+ 552 006b 04       		.uleb128 0x4
+ 553 006c 1F010000 		.4byte	.LASF9
+ 554 0070 02       		.byte	0x2
+ 555 0071 3801     		.2byte	0x138
+ 556 0073 2C000000 		.4byte	0x2c
+ 557 0077 04       		.uleb128 0x4
+ 558 0078 7B010000 		.4byte	.LASF10
+ 559 007c 02       		.byte	0x2
+ 560 007d 3A01     		.2byte	0x13a
+ 561 007f 48000000 		.4byte	0x48
+ 562 0083 02       		.uleb128 0x2
+ 563 0084 04       		.byte	0x4
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 18
+
+
+ 564 0085 04       		.byte	0x4
+ 565 0086 EA000000 		.4byte	.LASF11
+ 566 008a 02       		.uleb128 0x2
+ 567 008b 08       		.byte	0x8
+ 568 008c 04       		.byte	0x4
+ 569 008d 3E010000 		.4byte	.LASF12
+ 570 0091 02       		.uleb128 0x2
+ 571 0092 01       		.byte	0x1
+ 572 0093 08       		.byte	0x8
+ 573 0094 0F020000 		.4byte	.LASF13
+ 574 0098 04       		.uleb128 0x4
+ 575 0099 25000000 		.4byte	.LASF14
+ 576 009d 02       		.byte	0x2
+ 577 009e E401     		.2byte	0x1e4
+ 578 00a0 A4000000 		.4byte	0xa4
+ 579 00a4 05       		.uleb128 0x5
+ 580 00a5 77000000 		.4byte	0x77
+ 581 00a9 04       		.uleb128 0x4
+ 582 00aa D8010000 		.4byte	.LASF15
+ 583 00ae 02       		.byte	0x2
+ 584 00af F401     		.2byte	0x1f4
+ 585 00b1 B5000000 		.4byte	0xb5
+ 586 00b5 06       		.uleb128 0x6
+ 587 00b6 04       		.byte	0x4
+ 588 00b7 BB000000 		.4byte	0xbb
+ 589 00bb 07       		.uleb128 0x7
+ 590 00bc 02       		.uleb128 0x2
+ 591 00bd 04       		.byte	0x4
+ 592 00be 07       		.byte	0x7
+ 593 00bf F8010000 		.4byte	.LASF16
+ 594 00c3 08       		.uleb128 0x8
+ 595 00c4 25010000 		.4byte	.LASF17
+ 596 00c8 01       		.byte	0x1
+ 597 00c9 3A       		.byte	0x3a
+ 598 00ca 00000000 		.4byte	.LFB34
+ 599 00ce 24000000 		.4byte	.LFE34-.LFB34
+ 600 00d2 01       		.uleb128 0x1
+ 601 00d3 9C       		.byte	0x9c
+ 602 00d4 09       		.uleb128 0x9
+ 603 00d5 14020000 		.4byte	.LASF20
+ 604 00d9 01       		.byte	0x1
+ 605 00da 65       		.byte	0x65
+ 606 00db 00000000 		.4byte	.LFB35
+ 607 00df 24000000 		.4byte	.LFE35-.LFB35
+ 608 00e3 01       		.uleb128 0x1
+ 609 00e4 9C       		.byte	0x9c
+ 610 00e5 F8000000 		.4byte	0xf8
+ 611 00e9 0A       		.uleb128 0xa
+ 612 00ea A3010000 		.4byte	.LASF22
+ 613 00ee 01       		.byte	0x1
+ 614 00ef 65       		.byte	0x65
+ 615 00f0 A9000000 		.4byte	0xa9
+ 616 00f4 02       		.uleb128 0x2
+ 617 00f5 91       		.byte	0x91
+ 618 00f6 74       		.sleb128 -12
+ 619 00f7 00       		.byte	0
+ 620 00f8 08       		.uleb128 0x8
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 19
+
+
+ 621 00f9 26020000 		.4byte	.LASF18
+ 622 00fd 01       		.byte	0x1
+ 623 00fe 83       		.byte	0x83
+ 624 00ff 00000000 		.4byte	.LFB36
+ 625 0103 18000000 		.4byte	.LFE36-.LFB36
+ 626 0107 01       		.uleb128 0x1
+ 627 0108 9C       		.byte	0x9c
+ 628 0109 08       		.uleb128 0x8
+ 629 010a 95020000 		.4byte	.LASF19
+ 630 010e 01       		.byte	0x1
+ 631 010f A1       		.byte	0xa1
+ 632 0110 00000000 		.4byte	.LFB37
+ 633 0114 0C000000 		.4byte	.LFE37-.LFB37
+ 634 0118 01       		.uleb128 0x1
+ 635 0119 9C       		.byte	0x9c
+ 636 011a 0B       		.uleb128 0xb
+ 637 011b 8F010000 		.4byte	.LASF21
+ 638 011f 01       		.byte	0x1
+ 639 0120 CB       		.byte	0xcb
+ 640 0121 00000000 		.4byte	.LFB38
+ 641 0125 18000000 		.4byte	.LFE38-.LFB38
+ 642 0129 01       		.uleb128 0x1
+ 643 012a 9C       		.byte	0x9c
+ 644 012b 3E010000 		.4byte	0x13e
+ 645 012f 0A       		.uleb128 0xa
+ 646 0130 A3010000 		.4byte	.LASF22
+ 647 0134 01       		.byte	0x1
+ 648 0135 CB       		.byte	0xcb
+ 649 0136 A9000000 		.4byte	0xa9
+ 650 013a 02       		.uleb128 0x2
+ 651 013b 91       		.byte	0x91
+ 652 013c 74       		.sleb128 -12
+ 653 013d 00       		.byte	0
+ 654 013e 0C       		.uleb128 0xc
+ 655 013f 6F020000 		.4byte	.LASF28
+ 656 0143 01       		.byte	0x1
+ 657 0144 DF       		.byte	0xdf
+ 658 0145 A9000000 		.4byte	0xa9
+ 659 0149 00000000 		.4byte	.LFB39
+ 660 014d 14000000 		.4byte	.LFE39-.LFB39
+ 661 0151 01       		.uleb128 0x1
+ 662 0152 9C       		.byte	0x9c
+ 663 0153 09       		.uleb128 0x9
+ 664 0154 4D020000 		.4byte	.LASF23
+ 665 0158 01       		.byte	0x1
+ 666 0159 FD       		.byte	0xfd
+ 667 015a 00000000 		.4byte	.LFB40
+ 668 015e 50000000 		.4byte	.LFE40-.LFB40
+ 669 0162 01       		.uleb128 0x1
+ 670 0163 9C       		.byte	0x9c
+ 671 0164 94010000 		.4byte	0x194
+ 672 0168 0A       		.uleb128 0xa
+ 673 0169 35010000 		.4byte	.LASF24
+ 674 016d 01       		.byte	0x1
+ 675 016e FD       		.byte	0xfd
+ 676 016f 6B000000 		.4byte	0x6b
+ 677 0173 02       		.uleb128 0x2
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 20
+
+
+ 678 0174 91       		.byte	0x91
+ 679 0175 67       		.sleb128 -25
+ 680 0176 0D       		.uleb128 0xd
+ 681 0177 FE000000 		.4byte	.LASF25
+ 682 017b 01       		.byte	0x1
+ 683 017c FF       		.byte	0xff
+ 684 017d 6B000000 		.4byte	0x6b
+ 685 0181 02       		.uleb128 0x2
+ 686 0182 91       		.byte	0x91
+ 687 0183 6B       		.sleb128 -21
+ 688 0184 0E       		.uleb128 0xe
+ 689 0185 35020000 		.4byte	.LASF26
+ 690 0189 01       		.byte	0x1
+ 691 018a 0001     		.2byte	0x100
+ 692 018c 77000000 		.4byte	0x77
+ 693 0190 02       		.uleb128 0x2
+ 694 0191 91       		.byte	0x91
+ 695 0192 6C       		.sleb128 -20
+ 696 0193 00       		.byte	0
+ 697 0194 0F       		.uleb128 0xf
+ 698 0195 C2010000 		.4byte	.LASF36
+ 699 0199 01       		.byte	0x1
+ 700 019a 1901     		.2byte	0x119
+ 701 019c 6B000000 		.4byte	0x6b
+ 702 01a0 00000000 		.4byte	.LFB41
+ 703 01a4 2C000000 		.4byte	.LFE41-.LFB41
+ 704 01a8 01       		.uleb128 0x1
+ 705 01a9 9C       		.byte	0x9c
+ 706 01aa CD010000 		.4byte	0x1cd
+ 707 01ae 0E       		.uleb128 0xe
+ 708 01af 35010000 		.4byte	.LASF24
+ 709 01b3 01       		.byte	0x1
+ 710 01b4 1B01     		.2byte	0x11b
+ 711 01b6 77000000 		.4byte	0x77
+ 712 01ba 02       		.uleb128 0x2
+ 713 01bb 91       		.byte	0x91
+ 714 01bc 70       		.sleb128 -16
+ 715 01bd 0E       		.uleb128 0xe
+ 716 01be 35020000 		.4byte	.LASF26
+ 717 01c2 01       		.byte	0x1
+ 718 01c3 1C01     		.2byte	0x11c
+ 719 01c5 77000000 		.4byte	0x77
+ 720 01c9 02       		.uleb128 0x2
+ 721 01ca 91       		.byte	0x91
+ 722 01cb 74       		.sleb128 -12
+ 723 01cc 00       		.byte	0
+ 724 01cd 10       		.uleb128 0x10
+ 725 01ce D9000000 		.4byte	.LASF27
+ 726 01d2 01       		.byte	0x1
+ 727 01d3 3401     		.2byte	0x134
+ 728 01d5 00000000 		.4byte	.LFB42
+ 729 01d9 14000000 		.4byte	.LFE42-.LFB42
+ 730 01dd 01       		.uleb128 0x1
+ 731 01de 9C       		.byte	0x9c
+ 732 01df 11       		.uleb128 0x11
+ 733 01e0 E5010000 		.4byte	.LASF29
+ 734 01e4 01       		.byte	0x1
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 21
+
+
+ 735 01e5 4901     		.2byte	0x149
+ 736 01e7 6B000000 		.4byte	0x6b
+ 737 01eb 00000000 		.4byte	.LFB43
+ 738 01ef 20000000 		.4byte	.LFE43-.LFB43
+ 739 01f3 01       		.uleb128 0x1
+ 740 01f4 9C       		.byte	0x9c
+ 741 01f5 10       		.uleb128 0x10
+ 742 01f6 83020000 		.4byte	.LASF30
+ 743 01fa 01       		.byte	0x1
+ 744 01fb 5E01     		.2byte	0x15e
+ 745 01fd 00000000 		.4byte	.LFB44
+ 746 0201 14000000 		.4byte	.LFE44-.LFB44
+ 747 0205 01       		.uleb128 0x1
+ 748 0206 9C       		.byte	0x9c
+ 749 0207 10       		.uleb128 0x10
+ 750 0208 66010000 		.4byte	.LASF31
+ 751 020c 01       		.byte	0x1
+ 752 020d 7901     		.2byte	0x179
+ 753 020f 00000000 		.4byte	.LFB45
+ 754 0213 14000000 		.4byte	.LFE45-.LFB45
+ 755 0217 01       		.uleb128 0x1
+ 756 0218 9C       		.byte	0x9c
+ 757 0219 10       		.uleb128 0x10
+ 758 021a 4F010000 		.4byte	.LASF32
+ 759 021e 01       		.byte	0x1
+ 760 021f 9201     		.2byte	0x192
+ 761 0221 00000000 		.4byte	.LFB46
+ 762 0225 14000000 		.4byte	.LFE46-.LFB46
+ 763 0229 01       		.uleb128 0x1
+ 764 022a 9C       		.byte	0x9c
+ 765 022b 12       		.uleb128 0x12
+ 766 022c A9000000 		.4byte	0xa9
+ 767 0230 3B020000 		.4byte	0x23b
+ 768 0234 13       		.uleb128 0x13
+ 769 0235 BC000000 		.4byte	0xbc
+ 770 0239 2F       		.byte	0x2f
+ 771 023a 00       		.byte	0
+ 772 023b 14       		.uleb128 0x14
+ 773 023c B9000000 		.4byte	.LASF37
+ 774 0240 01       		.byte	0x1
+ 775 0241 23       		.byte	0x23
+ 776 0242 2B020000 		.4byte	0x22b
+ 777 0246 00       		.byte	0
+ 778              		.section	.debug_abbrev,"",%progbits
+ 779              	.Ldebug_abbrev0:
+ 780 0000 01       		.uleb128 0x1
+ 781 0001 11       		.uleb128 0x11
+ 782 0002 01       		.byte	0x1
+ 783 0003 25       		.uleb128 0x25
+ 784 0004 0E       		.uleb128 0xe
+ 785 0005 13       		.uleb128 0x13
+ 786 0006 0B       		.uleb128 0xb
+ 787 0007 03       		.uleb128 0x3
+ 788 0008 0E       		.uleb128 0xe
+ 789 0009 1B       		.uleb128 0x1b
+ 790 000a 0E       		.uleb128 0xe
+ 791 000b 55       		.uleb128 0x55
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 22
+
+
+ 792 000c 17       		.uleb128 0x17
+ 793 000d 11       		.uleb128 0x11
+ 794 000e 01       		.uleb128 0x1
+ 795 000f 10       		.uleb128 0x10
+ 796 0010 17       		.uleb128 0x17
+ 797 0011 00       		.byte	0
+ 798 0012 00       		.byte	0
+ 799 0013 02       		.uleb128 0x2
+ 800 0014 24       		.uleb128 0x24
+ 801 0015 00       		.byte	0
+ 802 0016 0B       		.uleb128 0xb
+ 803 0017 0B       		.uleb128 0xb
+ 804 0018 3E       		.uleb128 0x3e
+ 805 0019 0B       		.uleb128 0xb
+ 806 001a 03       		.uleb128 0x3
+ 807 001b 0E       		.uleb128 0xe
+ 808 001c 00       		.byte	0
+ 809 001d 00       		.byte	0
+ 810 001e 03       		.uleb128 0x3
+ 811 001f 24       		.uleb128 0x24
+ 812 0020 00       		.byte	0
+ 813 0021 0B       		.uleb128 0xb
+ 814 0022 0B       		.uleb128 0xb
+ 815 0023 3E       		.uleb128 0x3e
+ 816 0024 0B       		.uleb128 0xb
+ 817 0025 03       		.uleb128 0x3
+ 818 0026 08       		.uleb128 0x8
+ 819 0027 00       		.byte	0
+ 820 0028 00       		.byte	0
+ 821 0029 04       		.uleb128 0x4
+ 822 002a 16       		.uleb128 0x16
+ 823 002b 00       		.byte	0
+ 824 002c 03       		.uleb128 0x3
+ 825 002d 0E       		.uleb128 0xe
+ 826 002e 3A       		.uleb128 0x3a
+ 827 002f 0B       		.uleb128 0xb
+ 828 0030 3B       		.uleb128 0x3b
+ 829 0031 05       		.uleb128 0x5
+ 830 0032 49       		.uleb128 0x49
+ 831 0033 13       		.uleb128 0x13
+ 832 0034 00       		.byte	0
+ 833 0035 00       		.byte	0
+ 834 0036 05       		.uleb128 0x5
+ 835 0037 35       		.uleb128 0x35
+ 836 0038 00       		.byte	0
+ 837 0039 49       		.uleb128 0x49
+ 838 003a 13       		.uleb128 0x13
+ 839 003b 00       		.byte	0
+ 840 003c 00       		.byte	0
+ 841 003d 06       		.uleb128 0x6
+ 842 003e 0F       		.uleb128 0xf
+ 843 003f 00       		.byte	0
+ 844 0040 0B       		.uleb128 0xb
+ 845 0041 0B       		.uleb128 0xb
+ 846 0042 49       		.uleb128 0x49
+ 847 0043 13       		.uleb128 0x13
+ 848 0044 00       		.byte	0
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 23
+
+
+ 849 0045 00       		.byte	0
+ 850 0046 07       		.uleb128 0x7
+ 851 0047 15       		.uleb128 0x15
+ 852 0048 00       		.byte	0
+ 853 0049 27       		.uleb128 0x27
+ 854 004a 19       		.uleb128 0x19
+ 855 004b 00       		.byte	0
+ 856 004c 00       		.byte	0
+ 857 004d 08       		.uleb128 0x8
+ 858 004e 2E       		.uleb128 0x2e
+ 859 004f 00       		.byte	0
+ 860 0050 3F       		.uleb128 0x3f
+ 861 0051 19       		.uleb128 0x19
+ 862 0052 03       		.uleb128 0x3
+ 863 0053 0E       		.uleb128 0xe
+ 864 0054 3A       		.uleb128 0x3a
+ 865 0055 0B       		.uleb128 0xb
+ 866 0056 3B       		.uleb128 0x3b
+ 867 0057 0B       		.uleb128 0xb
+ 868 0058 27       		.uleb128 0x27
+ 869 0059 19       		.uleb128 0x19
+ 870 005a 11       		.uleb128 0x11
+ 871 005b 01       		.uleb128 0x1
+ 872 005c 12       		.uleb128 0x12
+ 873 005d 06       		.uleb128 0x6
+ 874 005e 40       		.uleb128 0x40
+ 875 005f 18       		.uleb128 0x18
+ 876 0060 9642     		.uleb128 0x2116
+ 877 0062 19       		.uleb128 0x19
+ 878 0063 00       		.byte	0
+ 879 0064 00       		.byte	0
+ 880 0065 09       		.uleb128 0x9
+ 881 0066 2E       		.uleb128 0x2e
+ 882 0067 01       		.byte	0x1
+ 883 0068 3F       		.uleb128 0x3f
+ 884 0069 19       		.uleb128 0x19
+ 885 006a 03       		.uleb128 0x3
+ 886 006b 0E       		.uleb128 0xe
+ 887 006c 3A       		.uleb128 0x3a
+ 888 006d 0B       		.uleb128 0xb
+ 889 006e 3B       		.uleb128 0x3b
+ 890 006f 0B       		.uleb128 0xb
+ 891 0070 27       		.uleb128 0x27
+ 892 0071 19       		.uleb128 0x19
+ 893 0072 11       		.uleb128 0x11
+ 894 0073 01       		.uleb128 0x1
+ 895 0074 12       		.uleb128 0x12
+ 896 0075 06       		.uleb128 0x6
+ 897 0076 40       		.uleb128 0x40
+ 898 0077 18       		.uleb128 0x18
+ 899 0078 9642     		.uleb128 0x2116
+ 900 007a 19       		.uleb128 0x19
+ 901 007b 01       		.uleb128 0x1
+ 902 007c 13       		.uleb128 0x13
+ 903 007d 00       		.byte	0
+ 904 007e 00       		.byte	0
+ 905 007f 0A       		.uleb128 0xa
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 24
+
+
+ 906 0080 05       		.uleb128 0x5
+ 907 0081 00       		.byte	0
+ 908 0082 03       		.uleb128 0x3
+ 909 0083 0E       		.uleb128 0xe
+ 910 0084 3A       		.uleb128 0x3a
+ 911 0085 0B       		.uleb128 0xb
+ 912 0086 3B       		.uleb128 0x3b
+ 913 0087 0B       		.uleb128 0xb
+ 914 0088 49       		.uleb128 0x49
+ 915 0089 13       		.uleb128 0x13
+ 916 008a 02       		.uleb128 0x2
+ 917 008b 18       		.uleb128 0x18
+ 918 008c 00       		.byte	0
+ 919 008d 00       		.byte	0
+ 920 008e 0B       		.uleb128 0xb
+ 921 008f 2E       		.uleb128 0x2e
+ 922 0090 01       		.byte	0x1
+ 923 0091 3F       		.uleb128 0x3f
+ 924 0092 19       		.uleb128 0x19
+ 925 0093 03       		.uleb128 0x3
+ 926 0094 0E       		.uleb128 0xe
+ 927 0095 3A       		.uleb128 0x3a
+ 928 0096 0B       		.uleb128 0xb
+ 929 0097 3B       		.uleb128 0x3b
+ 930 0098 0B       		.uleb128 0xb
+ 931 0099 27       		.uleb128 0x27
+ 932 009a 19       		.uleb128 0x19
+ 933 009b 11       		.uleb128 0x11
+ 934 009c 01       		.uleb128 0x1
+ 935 009d 12       		.uleb128 0x12
+ 936 009e 06       		.uleb128 0x6
+ 937 009f 40       		.uleb128 0x40
+ 938 00a0 18       		.uleb128 0x18
+ 939 00a1 9742     		.uleb128 0x2117
+ 940 00a3 19       		.uleb128 0x19
+ 941 00a4 01       		.uleb128 0x1
+ 942 00a5 13       		.uleb128 0x13
+ 943 00a6 00       		.byte	0
+ 944 00a7 00       		.byte	0
+ 945 00a8 0C       		.uleb128 0xc
+ 946 00a9 2E       		.uleb128 0x2e
+ 947 00aa 00       		.byte	0
+ 948 00ab 3F       		.uleb128 0x3f
+ 949 00ac 19       		.uleb128 0x19
+ 950 00ad 03       		.uleb128 0x3
+ 951 00ae 0E       		.uleb128 0xe
+ 952 00af 3A       		.uleb128 0x3a
+ 953 00b0 0B       		.uleb128 0xb
+ 954 00b1 3B       		.uleb128 0x3b
+ 955 00b2 0B       		.uleb128 0xb
+ 956 00b3 27       		.uleb128 0x27
+ 957 00b4 19       		.uleb128 0x19
+ 958 00b5 49       		.uleb128 0x49
+ 959 00b6 13       		.uleb128 0x13
+ 960 00b7 11       		.uleb128 0x11
+ 961 00b8 01       		.uleb128 0x1
+ 962 00b9 12       		.uleb128 0x12
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 25
+
+
+ 963 00ba 06       		.uleb128 0x6
+ 964 00bb 40       		.uleb128 0x40
+ 965 00bc 18       		.uleb128 0x18
+ 966 00bd 9742     		.uleb128 0x2117
+ 967 00bf 19       		.uleb128 0x19
+ 968 00c0 00       		.byte	0
+ 969 00c1 00       		.byte	0
+ 970 00c2 0D       		.uleb128 0xd
+ 971 00c3 34       		.uleb128 0x34
+ 972 00c4 00       		.byte	0
+ 973 00c5 03       		.uleb128 0x3
+ 974 00c6 0E       		.uleb128 0xe
+ 975 00c7 3A       		.uleb128 0x3a
+ 976 00c8 0B       		.uleb128 0xb
+ 977 00c9 3B       		.uleb128 0x3b
+ 978 00ca 0B       		.uleb128 0xb
+ 979 00cb 49       		.uleb128 0x49
+ 980 00cc 13       		.uleb128 0x13
+ 981 00cd 02       		.uleb128 0x2
+ 982 00ce 18       		.uleb128 0x18
+ 983 00cf 00       		.byte	0
+ 984 00d0 00       		.byte	0
+ 985 00d1 0E       		.uleb128 0xe
+ 986 00d2 34       		.uleb128 0x34
+ 987 00d3 00       		.byte	0
+ 988 00d4 03       		.uleb128 0x3
+ 989 00d5 0E       		.uleb128 0xe
+ 990 00d6 3A       		.uleb128 0x3a
+ 991 00d7 0B       		.uleb128 0xb
+ 992 00d8 3B       		.uleb128 0x3b
+ 993 00d9 05       		.uleb128 0x5
+ 994 00da 49       		.uleb128 0x49
+ 995 00db 13       		.uleb128 0x13
+ 996 00dc 02       		.uleb128 0x2
+ 997 00dd 18       		.uleb128 0x18
+ 998 00de 00       		.byte	0
+ 999 00df 00       		.byte	0
+ 1000 00e0 0F       		.uleb128 0xf
+ 1001 00e1 2E       		.uleb128 0x2e
+ 1002 00e2 01       		.byte	0x1
+ 1003 00e3 3F       		.uleb128 0x3f
+ 1004 00e4 19       		.uleb128 0x19
+ 1005 00e5 03       		.uleb128 0x3
+ 1006 00e6 0E       		.uleb128 0xe
+ 1007 00e7 3A       		.uleb128 0x3a
+ 1008 00e8 0B       		.uleb128 0xb
+ 1009 00e9 3B       		.uleb128 0x3b
+ 1010 00ea 05       		.uleb128 0x5
+ 1011 00eb 27       		.uleb128 0x27
+ 1012 00ec 19       		.uleb128 0x19
+ 1013 00ed 49       		.uleb128 0x49
+ 1014 00ee 13       		.uleb128 0x13
+ 1015 00ef 11       		.uleb128 0x11
+ 1016 00f0 01       		.uleb128 0x1
+ 1017 00f1 12       		.uleb128 0x12
+ 1018 00f2 06       		.uleb128 0x6
+ 1019 00f3 40       		.uleb128 0x40
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 26
+
+
+ 1020 00f4 18       		.uleb128 0x18
+ 1021 00f5 9742     		.uleb128 0x2117
+ 1022 00f7 19       		.uleb128 0x19
+ 1023 00f8 01       		.uleb128 0x1
+ 1024 00f9 13       		.uleb128 0x13
+ 1025 00fa 00       		.byte	0
+ 1026 00fb 00       		.byte	0
+ 1027 00fc 10       		.uleb128 0x10
+ 1028 00fd 2E       		.uleb128 0x2e
+ 1029 00fe 00       		.byte	0
+ 1030 00ff 3F       		.uleb128 0x3f
+ 1031 0100 19       		.uleb128 0x19
+ 1032 0101 03       		.uleb128 0x3
+ 1033 0102 0E       		.uleb128 0xe
+ 1034 0103 3A       		.uleb128 0x3a
+ 1035 0104 0B       		.uleb128 0xb
+ 1036 0105 3B       		.uleb128 0x3b
+ 1037 0106 05       		.uleb128 0x5
+ 1038 0107 27       		.uleb128 0x27
+ 1039 0108 19       		.uleb128 0x19
+ 1040 0109 11       		.uleb128 0x11
+ 1041 010a 01       		.uleb128 0x1
+ 1042 010b 12       		.uleb128 0x12
+ 1043 010c 06       		.uleb128 0x6
+ 1044 010d 40       		.uleb128 0x40
+ 1045 010e 18       		.uleb128 0x18
+ 1046 010f 9742     		.uleb128 0x2117
+ 1047 0111 19       		.uleb128 0x19
+ 1048 0112 00       		.byte	0
+ 1049 0113 00       		.byte	0
+ 1050 0114 11       		.uleb128 0x11
+ 1051 0115 2E       		.uleb128 0x2e
+ 1052 0116 00       		.byte	0
+ 1053 0117 3F       		.uleb128 0x3f
+ 1054 0118 19       		.uleb128 0x19
+ 1055 0119 03       		.uleb128 0x3
+ 1056 011a 0E       		.uleb128 0xe
+ 1057 011b 3A       		.uleb128 0x3a
+ 1058 011c 0B       		.uleb128 0xb
+ 1059 011d 3B       		.uleb128 0x3b
+ 1060 011e 05       		.uleb128 0x5
+ 1061 011f 27       		.uleb128 0x27
+ 1062 0120 19       		.uleb128 0x19
+ 1063 0121 49       		.uleb128 0x49
+ 1064 0122 13       		.uleb128 0x13
+ 1065 0123 11       		.uleb128 0x11
+ 1066 0124 01       		.uleb128 0x1
+ 1067 0125 12       		.uleb128 0x12
+ 1068 0126 06       		.uleb128 0x6
+ 1069 0127 40       		.uleb128 0x40
+ 1070 0128 18       		.uleb128 0x18
+ 1071 0129 9742     		.uleb128 0x2117
+ 1072 012b 19       		.uleb128 0x19
+ 1073 012c 00       		.byte	0
+ 1074 012d 00       		.byte	0
+ 1075 012e 12       		.uleb128 0x12
+ 1076 012f 01       		.uleb128 0x1
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 27
+
+
+ 1077 0130 01       		.byte	0x1
+ 1078 0131 49       		.uleb128 0x49
+ 1079 0132 13       		.uleb128 0x13
+ 1080 0133 01       		.uleb128 0x1
+ 1081 0134 13       		.uleb128 0x13
+ 1082 0135 00       		.byte	0
+ 1083 0136 00       		.byte	0
+ 1084 0137 13       		.uleb128 0x13
+ 1085 0138 21       		.uleb128 0x21
+ 1086 0139 00       		.byte	0
+ 1087 013a 49       		.uleb128 0x49
+ 1088 013b 13       		.uleb128 0x13
+ 1089 013c 2F       		.uleb128 0x2f
+ 1090 013d 0B       		.uleb128 0xb
+ 1091 013e 00       		.byte	0
+ 1092 013f 00       		.byte	0
+ 1093 0140 14       		.uleb128 0x14
+ 1094 0141 34       		.uleb128 0x34
+ 1095 0142 00       		.byte	0
+ 1096 0143 03       		.uleb128 0x3
+ 1097 0144 0E       		.uleb128 0xe
+ 1098 0145 3A       		.uleb128 0x3a
+ 1099 0146 0B       		.uleb128 0xb
+ 1100 0147 3B       		.uleb128 0x3b
+ 1101 0148 0B       		.uleb128 0xb
+ 1102 0149 49       		.uleb128 0x49
+ 1103 014a 13       		.uleb128 0x13
+ 1104 014b 3F       		.uleb128 0x3f
+ 1105 014c 19       		.uleb128 0x19
+ 1106 014d 3C       		.uleb128 0x3c
+ 1107 014e 19       		.uleb128 0x19
+ 1108 014f 00       		.byte	0
+ 1109 0150 00       		.byte	0
+ 1110 0151 00       		.byte	0
+ 1111              		.section	.debug_aranges,"",%progbits
+ 1112 0000 7C000000 		.4byte	0x7c
+ 1113 0004 0200     		.2byte	0x2
+ 1114 0006 00000000 		.4byte	.Ldebug_info0
+ 1115 000a 04       		.byte	0x4
+ 1116 000b 00       		.byte	0
+ 1117 000c 0000     		.2byte	0
+ 1118 000e 0000     		.2byte	0
+ 1119 0010 00000000 		.4byte	.LFB34
+ 1120 0014 24000000 		.4byte	.LFE34-.LFB34
+ 1121 0018 00000000 		.4byte	.LFB35
+ 1122 001c 24000000 		.4byte	.LFE35-.LFB35
+ 1123 0020 00000000 		.4byte	.LFB36
+ 1124 0024 18000000 		.4byte	.LFE36-.LFB36
+ 1125 0028 00000000 		.4byte	.LFB37
+ 1126 002c 0C000000 		.4byte	.LFE37-.LFB37
+ 1127 0030 00000000 		.4byte	.LFB38
+ 1128 0034 18000000 		.4byte	.LFE38-.LFB38
+ 1129 0038 00000000 		.4byte	.LFB39
+ 1130 003c 14000000 		.4byte	.LFE39-.LFB39
+ 1131 0040 00000000 		.4byte	.LFB40
+ 1132 0044 50000000 		.4byte	.LFE40-.LFB40
+ 1133 0048 00000000 		.4byte	.LFB41
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 28
+
+
+ 1134 004c 2C000000 		.4byte	.LFE41-.LFB41
+ 1135 0050 00000000 		.4byte	.LFB42
+ 1136 0054 14000000 		.4byte	.LFE42-.LFB42
+ 1137 0058 00000000 		.4byte	.LFB43
+ 1138 005c 20000000 		.4byte	.LFE43-.LFB43
+ 1139 0060 00000000 		.4byte	.LFB44
+ 1140 0064 14000000 		.4byte	.LFE44-.LFB44
+ 1141 0068 00000000 		.4byte	.LFB45
+ 1142 006c 14000000 		.4byte	.LFE45-.LFB45
+ 1143 0070 00000000 		.4byte	.LFB46
+ 1144 0074 14000000 		.4byte	.LFE46-.LFB46
+ 1145 0078 00000000 		.4byte	0
+ 1146 007c 00000000 		.4byte	0
+ 1147              		.section	.debug_ranges,"",%progbits
+ 1148              	.Ldebug_ranges0:
+ 1149 0000 00000000 		.4byte	.LFB34
+ 1150 0004 24000000 		.4byte	.LFE34
+ 1151 0008 00000000 		.4byte	.LFB35
+ 1152 000c 24000000 		.4byte	.LFE35
+ 1153 0010 00000000 		.4byte	.LFB36
+ 1154 0014 18000000 		.4byte	.LFE36
+ 1155 0018 00000000 		.4byte	.LFB37
+ 1156 001c 0C000000 		.4byte	.LFE37
+ 1157 0020 00000000 		.4byte	.LFB38
+ 1158 0024 18000000 		.4byte	.LFE38
+ 1159 0028 00000000 		.4byte	.LFB39
+ 1160 002c 14000000 		.4byte	.LFE39
+ 1161 0030 00000000 		.4byte	.LFB40
+ 1162 0034 50000000 		.4byte	.LFE40
+ 1163 0038 00000000 		.4byte	.LFB41
+ 1164 003c 2C000000 		.4byte	.LFE41
+ 1165 0040 00000000 		.4byte	.LFB42
+ 1166 0044 14000000 		.4byte	.LFE42
+ 1167 0048 00000000 		.4byte	.LFB43
+ 1168 004c 20000000 		.4byte	.LFE43
+ 1169 0050 00000000 		.4byte	.LFB44
+ 1170 0054 14000000 		.4byte	.LFE44
+ 1171 0058 00000000 		.4byte	.LFB45
+ 1172 005c 14000000 		.4byte	.LFE45
+ 1173 0060 00000000 		.4byte	.LFB46
+ 1174 0064 14000000 		.4byte	.LFE46
+ 1175 0068 00000000 		.4byte	0
+ 1176 006c 00000000 		.4byte	0
+ 1177              		.section	.debug_line,"",%progbits
+ 1178              	.Ldebug_line0:
+ 1179 0000 6C010000 		.section	.debug_str,"MS",%progbits,1
+ 1179      02005F00 
+ 1179      00000201 
+ 1179      FB0E0D00 
+ 1179      01010101 
+ 1180              	.LASF34:
+ 1181 0000 2E5C4765 		.ascii	".\\Generated_Source\\PSoC4\\UpdateISR.c\000"
+ 1181      6E657261 
+ 1181      7465645F 
+ 1181      536F7572 
+ 1181      63655C50 
+ 1182              	.LASF14:
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 29
+
+
+ 1183 0025 72656733 		.ascii	"reg32\000"
+ 1183      3200
+ 1184              	.LASF33:
+ 1185 002b 474E5520 		.ascii	"GNU C 4.9.3 20150303 (release) [ARM/embedded-4_9-br"
+ 1185      4320342E 
+ 1185      392E3320 
+ 1185      32303135 
+ 1185      30333033 
+ 1186 005e 616E6368 		.ascii	"anch revision 221220] -mcpu=cortex-m0 -mthumb -g -O"
+ 1186      20726576 
+ 1186      6973696F 
+ 1186      6E203232 
+ 1186      31323230 
+ 1187 0091 30202D66 		.ascii	"0 -ffunction-sections -ffat-lto-objects\000"
+ 1187      66756E63 
+ 1187      74696F6E 
+ 1187      2D736563 
+ 1187      74696F6E 
+ 1188              	.LASF37:
+ 1189 00b9 43795261 		.ascii	"CyRamVectors\000"
+ 1189      6D566563 
+ 1189      746F7273 
+ 1189      00
+ 1190              	.LASF3:
+ 1191 00c6 73686F72 		.ascii	"short unsigned int\000"
+ 1191      7420756E 
+ 1191      7369676E 
+ 1191      65642069 
+ 1191      6E7400
+ 1192              	.LASF27:
+ 1193 00d9 55706461 		.ascii	"UpdateISR_Enable\000"
+ 1193      74654953 
+ 1193      525F456E 
+ 1193      61626C65 
+ 1193      00
+ 1194              	.LASF11:
+ 1195 00ea 666C6F61 		.ascii	"float\000"
+ 1195      7400
+ 1196              	.LASF1:
+ 1197 00f0 756E7369 		.ascii	"unsigned char\000"
+ 1197      676E6564 
+ 1197      20636861 
+ 1197      7200
+ 1198              	.LASF25:
+ 1199 00fe 696E7465 		.ascii	"interruptState\000"
+ 1199      72727570 
+ 1199      74537461 
+ 1199      746500
+ 1200              	.LASF5:
+ 1201 010d 6C6F6E67 		.ascii	"long unsigned int\000"
+ 1201      20756E73 
+ 1201      69676E65 
+ 1201      6420696E 
+ 1201      7400
+ 1202              	.LASF9:
+ 1203 011f 75696E74 		.ascii	"uint8\000"
+ 1203      3800
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 30
+
+
+ 1204              	.LASF17:
+ 1205 0125 55706461 		.ascii	"UpdateISR_Start\000"
+ 1205      74654953 
+ 1205      525F5374 
+ 1205      61727400 
+ 1206              	.LASF24:
+ 1207 0135 7072696F 		.ascii	"priority\000"
+ 1207      72697479 
+ 1207      00
+ 1208              	.LASF12:
+ 1209 013e 646F7562 		.ascii	"double\000"
+ 1209      6C6500
+ 1210              	.LASF2:
+ 1211 0145 73686F72 		.ascii	"short int\000"
+ 1211      7420696E 
+ 1211      7400
+ 1212              	.LASF32:
+ 1213 014f 55706461 		.ascii	"UpdateISR_ClearPending\000"
+ 1213      74654953 
+ 1213      525F436C 
+ 1213      65617250 
+ 1213      656E6469 
+ 1214              	.LASF31:
+ 1215 0166 55706461 		.ascii	"UpdateISR_SetPending\000"
+ 1215      74654953 
+ 1215      525F5365 
+ 1215      7450656E 
+ 1215      64696E67 
+ 1216              	.LASF10:
+ 1217 017b 75696E74 		.ascii	"uint32\000"
+ 1217      333200
+ 1218              	.LASF8:
+ 1219 0182 756E7369 		.ascii	"unsigned int\000"
+ 1219      676E6564 
+ 1219      20696E74 
+ 1219      00
+ 1220              	.LASF21:
+ 1221 018f 55706461 		.ascii	"UpdateISR_SetVector\000"
+ 1221      74654953 
+ 1221      525F5365 
+ 1221      74566563 
+ 1221      746F7200 
+ 1222              	.LASF22:
+ 1223 01a3 61646472 		.ascii	"address\000"
+ 1223      65737300 
+ 1224              	.LASF7:
+ 1225 01ab 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 1225      206C6F6E 
+ 1225      6720756E 
+ 1225      7369676E 
+ 1225      65642069 
+ 1226              	.LASF36:
+ 1227 01c2 55706461 		.ascii	"UpdateISR_GetPriority\000"
+ 1227      74654953 
+ 1227      525F4765 
+ 1227      74507269 
+ 1227      6F726974 
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 31
+
+
+ 1228              	.LASF15:
+ 1229 01d8 63796973 		.ascii	"cyisraddress\000"
+ 1229      72616464 
+ 1229      72657373 
+ 1229      00
+ 1230              	.LASF29:
+ 1231 01e5 55706461 		.ascii	"UpdateISR_GetState\000"
+ 1231      74654953 
+ 1231      525F4765 
+ 1231      74537461 
+ 1231      746500
+ 1232              	.LASF16:
+ 1233 01f8 73697A65 		.ascii	"sizetype\000"
+ 1233      74797065 
+ 1233      00
+ 1234              	.LASF6:
+ 1235 0201 6C6F6E67 		.ascii	"long long int\000"
+ 1235      206C6F6E 
+ 1235      6720696E 
+ 1235      7400
+ 1236              	.LASF13:
+ 1237 020f 63686172 		.ascii	"char\000"
+ 1237      00
+ 1238              	.LASF20:
+ 1239 0214 55706461 		.ascii	"UpdateISR_StartEx\000"
+ 1239      74654953 
+ 1239      525F5374 
+ 1239      61727445 
+ 1239      7800
+ 1240              	.LASF18:
+ 1241 0226 55706461 		.ascii	"UpdateISR_Stop\000"
+ 1241      74654953 
+ 1241      525F5374 
+ 1241      6F7000
+ 1242              	.LASF26:
+ 1243 0235 7072696F 		.ascii	"priorityOffset\000"
+ 1243      72697479 
+ 1243      4F666673 
+ 1243      657400
+ 1244              	.LASF4:
+ 1245 0244 6C6F6E67 		.ascii	"long int\000"
+ 1245      20696E74 
+ 1245      00
+ 1246              	.LASF23:
+ 1247 024d 55706461 		.ascii	"UpdateISR_SetPriority\000"
+ 1247      74654953 
+ 1247      525F5365 
+ 1247      74507269 
+ 1247      6F726974 
+ 1248              	.LASF0:
+ 1249 0263 7369676E 		.ascii	"signed char\000"
+ 1249      65642063 
+ 1249      68617200 
+ 1250              	.LASF28:
+ 1251 026f 55706461 		.ascii	"UpdateISR_GetVector\000"
+ 1251      74654953 
+ 1251      525F4765 
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\cctvfA37.s 			page 32
+
+
+ 1251      74566563 
+ 1251      746F7200 
+ 1252              	.LASF30:
+ 1253 0283 55706461 		.ascii	"UpdateISR_Disable\000"
+ 1253      74654953 
+ 1253      525F4469 
+ 1253      7361626C 
+ 1253      6500
+ 1254              	.LASF19:
+ 1255 0295 55706461 		.ascii	"UpdateISR_Interrupt\000"
+ 1255      74654953 
+ 1255      525F496E 
+ 1255      74657272 
+ 1255      75707400 
+ 1256              	.LASF35:
+ 1257 02a9 433A5C55 		.ascii	"C:\\Users\\faithc\\Box Sync\\Feniex Firmware Files\\"
+ 1257      73657273 
+ 1257      5C666169 
+ 1257      7468635C 
+ 1257      426F7820 
+ 1258 02d8 414C425C 		.ascii	"ALB\\81-00022-01 ALB LED Driver\\81-00022-01.cydsn\000"
+ 1258      38312D30 
+ 1258      30303232 
+ 1258      2D303120 
+ 1258      414C4220 
+ 1259              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 4.9.3 20150303 (release) [ARM/embedded-4_9-br

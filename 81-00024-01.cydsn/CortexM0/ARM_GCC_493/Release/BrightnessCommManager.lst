@@ -1,0 +1,4724 @@
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 1
+
+
+   1              		.cpu cortex-m0
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 34, 0
+  11              		.eabi_attribute 18, 4
+  12              		.code	16
+  13              		.file	"BrightnessCommManager.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.data
+  18              		.align	2
+  19              		.type	PacketList, %object
+  20              		.size	PacketList, 30
+  21              	PacketList:
+  22 0000 7E       		.byte	126
+  23 0001 42       		.byte	66
+  24 0002 08       		.byte	8
+  25 0003 0D       		.byte	13
+  26 0004 0A       		.byte	10
+  27 0005 7E       		.byte	126
+  28 0006 43       		.byte	67
+  29 0007 09       		.byte	9
+  30 0008 0D       		.byte	13
+  31 0009 0A       		.byte	10
+  32 000a 7E       		.byte	126
+  33 000b 46       		.byte	70
+  34 000c 08       		.byte	8
+  35 000d 0D       		.byte	13
+  36 000e 0A       		.byte	10
+  37 000f 7E       		.byte	126
+  38 0010 53       		.byte	83
+  39 0011 03       		.byte	3
+  40 0012 0D       		.byte	13
+  41 0013 0A       		.byte	10
+  42 0014 7E       		.byte	126
+  43 0015 4C       		.byte	76
+  44 0016 01       		.byte	1
+  45 0017 0D       		.byte	13
+  46 0018 0A       		.byte	10
+  47 0019 7E       		.byte	126
+  48 001a 41       		.byte	65
+  49 001b 01       		.byte	1
+  50 001c 0D       		.byte	13
+  51 001d 0A       		.byte	10
+  52              		.bss
+  53              	bDriverCountReceived:
+  54 0000 00       		.space	1
+  55              		.global	bCommunicationTimeOut
+  56              		.type	bCommunicationTimeOut, %object
+  57              		.size	bCommunicationTimeOut, 1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 2
+
+
+  58              	bCommunicationTimeOut:
+  59 0001 00       		.space	1
+  60              	stateOfLightBar:
+  61 0002 00       		.space	1
+  62              		.global	timeOutCounter
+  63 0003 00       		.align	1
+  64              		.type	timeOutCounter, %object
+  65              		.size	timeOutCounter, 2
+  66              	timeOutCounter:
+  67 0004 0000     		.space	2
+  68              		.global	bIsCommunicationTrigger
+  69              		.type	bIsCommunicationTrigger, %object
+  70              		.size	bIsCommunicationTrigger, 1
+  71              	bIsCommunicationTrigger:
+  72 0006 00       		.space	1
+  73 0007 00       		.align	1
+  74              	regulatedBrightness:
+  75 0008 0000     		.space	2
+  76              		.align	1
+  77              	bFirstTimeRampDown:
+  78 000a 0000     		.space	2
+  79              		.align	1
+  80              	previousBrightnessLocal:
+  81 000c 0000     		.space	2
+  82              	ifPowerUp:
+  83 000e 00       		.space	1
+  84              		.section	.text.timeOutStateMachine,"ax",%progbits
+  85              		.align	2
+  86              		.global	timeOutStateMachine
+  87              		.code	16
+  88              		.thumb_func
+  89              		.type	timeOutStateMachine, %function
+  90              	timeOutStateMachine:
+  91              	.LFB34:
+  92              		.file 1 ".\\BrightnessCommManager.c"
+   1:.\BrightnessCommManager.c **** /* ========================================
+   2:.\BrightnessCommManager.c ****  *
+   3:.\BrightnessCommManager.c ****  * Copyright YOUR COMPANY, THE YEAR
+   4:.\BrightnessCommManager.c ****  * All Rights Reserved
+   5:.\BrightnessCommManager.c ****  * UNPUBLISHED, LICENSED SOFTWARE.
+   6:.\BrightnessCommManager.c ****  *
+   7:.\BrightnessCommManager.c ****  * CONFIDENTIAL AND PROPRIETARY INFORMATION
+   8:.\BrightnessCommManager.c ****  * WHICH IS THE PROPERTY OF your company.
+   9:.\BrightnessCommManager.c ****  *
+  10:.\BrightnessCommManager.c ****  * ========================================
+  11:.\BrightnessCommManager.c **** */
+  12:.\BrightnessCommManager.c **** /**********CHANGE LOG**********/
+  13:.\BrightnessCommManager.c **** 
+  14:.\BrightnessCommManager.c **** /**********PREPROCESSOR DIRECTIVES**********/
+  15:.\BrightnessCommManager.c **** #include "CommonVariables.h"
+  16:.\BrightnessCommManager.c **** #include "BrightnessCommManager.h"
+  17:.\BrightnessCommManager.c **** #include "TemperatureCommManager.h"
+  18:.\BrightnessCommManager.c **** #include "DriverControl.h"
+  19:.\BrightnessCommManager.c **** 
+  20:.\BrightnessCommManager.c **** #define MAX_PAYLOAD_BYTE_COUNT  MAX_DRIVER_COUNT + 1
+  21:.\BrightnessCommManager.c **** #define HEADER_BYTE_COUNT       2
+  22:.\BrightnessCommManager.c **** #define EOP_BYTE_COUNT          2
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 3
+
+
+  23:.\BrightnessCommManager.c **** #define MAX_PACKET_SIZE         HEADER_BYTE_COUNT + MAX_PAYLOAD_BYTE_COUNT + EOP_BYTE_COUNT
+  24:.\BrightnessCommManager.c **** 
+  25:.\BrightnessCommManager.c **** #define PACKET_TYPE_COUNT       6
+  26:.\BrightnessCommManager.c **** #define HEADER_START_INDEX      0
+  27:.\BrightnessCommManager.c **** #define PAYLOAD_START_INDEX     HEADER_BYTE_COUNT
+  28:.\BrightnessCommManager.c **** 
+  29:.\BrightnessCommManager.c **** #define TIMEOUT_LIMIT_IN_MILLISECONDS   10000
+  30:.\BrightnessCommManager.c **** #define HEAD_BOARD_TIMEOUT   150
+  31:.\BrightnessCommManager.c ****     
+  32:.\BrightnessCommManager.c **** /**********DEFINED CONSTANTS**********/
+  33:.\BrightnessCommManager.c **** enum PacketState
+  34:.\BrightnessCommManager.c **** {
+  35:.\BrightnessCommManager.c ****     HEADER_STATE,
+  36:.\BrightnessCommManager.c ****     PAYLOAD_STATE,
+  37:.\BrightnessCommManager.c ****     EOP_STATE
+  38:.\BrightnessCommManager.c **** };
+  39:.\BrightnessCommManager.c **** 
+  40:.\BrightnessCommManager.c **** /**********DATA STRUCTURES**********/
+  41:.\BrightnessCommManager.c **** typedef struct
+  42:.\BrightnessCommManager.c **** {
+  43:.\BrightnessCommManager.c ****     const uint8 HEADER_BYTE;
+  44:.\BrightnessCommManager.c ****     const uint8 PACKET_TYPE;
+  45:.\BrightnessCommManager.c ****     const uint8 PAYLOAD_SIZE;
+  46:.\BrightnessCommManager.c ****     const uint8 EOP_CARRIAGE_RETURN;
+  47:.\BrightnessCommManager.c ****     const uint8 EOP_LINE_FEED;
+  48:.\BrightnessCommManager.c **** }Packet;
+  49:.\BrightnessCommManager.c **** 
+  50:.\BrightnessCommManager.c **** static Packet PacketList[PACKET_TYPE_COUNT] = 
+  51:.\BrightnessCommManager.c **** {
+  52:.\BrightnessCommManager.c ****     {'~', 'B', 8, '\r', '\n'},          //Definition: Brightness, Value Range: 0x00-0xFF, Module 0(
+  53:.\BrightnessCommManager.c ****     {'~', 'C', 9, '\r', '\n'},          //Definition: Driver Count, Payload:
+  54:.\BrightnessCommManager.c ****                                         //Byte 0: Number of Drivers, Value Range: 1-8
+  55:.\BrightnessCommManager.c ****                                         //Byte1-Byte8: Driver ID, Value Range: 1-8
+  56:.\BrightnessCommManager.c ****     {'~', 'F', 8, '\r', '\n'},
+  57:.\BrightnessCommManager.c ****     {'~', 'S', 3, '\r', '\n'},           //Save brightness and motor position to EEPROM
+  58:.\BrightnessCommManager.c ****     {'~', 'L', 1, '\r', '\n'},
+  59:.\BrightnessCommManager.c ****     {'~', 'A', 1, '\r', '\n'} 
+  60:.\BrightnessCommManager.c **** };    
+  61:.\BrightnessCommManager.c **** 
+  62:.\BrightnessCommManager.c **** /**********GLOBAL VARIABLES**********/
+  63:.\BrightnessCommManager.c **** static uint8 bDriverCountReceived = FALSE;
+  64:.\BrightnessCommManager.c **** 
+  65:.\BrightnessCommManager.c **** volatile uint8 bCommunicationTimeOut = FALSE;
+  66:.\BrightnessCommManager.c **** static uint8 stateOfLightBar = 0;
+  67:.\BrightnessCommManager.c **** volatile uint16 timeOutCounter = 0;
+  68:.\BrightnessCommManager.c **** volatile uint8 bIsCommunicationTrigger = FALSE;
+  69:.\BrightnessCommManager.c **** /**********LOCAL FUNCTION PROTOTYPES**********/
+  70:.\BrightnessCommManager.c **** static uint8 processLowPowerRequest(uint8* packet, uint8 length);
+  71:.\BrightnessCommManager.c **** static void detectPacket(uint8 dataByte);
+  72:.\BrightnessCommManager.c **** static uint8 processDriverCountPacket(uint8* packet, uint8 length);
+  73:.\BrightnessCommManager.c **** static uint8 processBrightnessPacket(uint8* packet, uint8 length, uint8 bFlashPattern);
+  74:.\BrightnessCommManager.c **** static uint8 processReinitlizationPacket(uint8* packet, uint8 length);
+  75:.\BrightnessCommManager.c **** static void saveStateBar(uint8 * volatileMemoryArray, const uint8 * nonVolatileMemoryArray, uint8* 
+  76:.\BrightnessCommManager.c **** static void putBarToSleep(void);
+  77:.\BrightnessCommManager.c **** static void returnFromSleep(void);
+  78:.\BrightnessCommManager.c **** static void processOutputSelectUart(void);
+  79:.\BrightnessCommManager.c **** /**********DEFINED GLOBAL FUNCTIONS**********/
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 4
+
+
+  80:.\BrightnessCommManager.c **** static uint16 regulatedBrightness = 0;
+  81:.\BrightnessCommManager.c **** //static uint16 rampDownIterator = 0;
+  82:.\BrightnessCommManager.c **** static uint16 bFirstTimeRampDown = 0;
+  83:.\BrightnessCommManager.c **** static int16 previousBrightnessLocal = 0;
+  84:.\BrightnessCommManager.c **** static uint8 ifPowerUp = FALSE;
+  85:.\BrightnessCommManager.c **** 
+  86:.\BrightnessCommManager.c **** 
+  87:.\BrightnessCommManager.c **** ////////////////////////////////////Time-Out and Low Power Functions///////////////////////////////
+  88:.\BrightnessCommManager.c **** 
+  89:.\BrightnessCommManager.c **** void timeOutStateMachine(const uint8 * nonVolatileMemoryArray)
+  90:.\BrightnessCommManager.c **** {           
+  93              		.loc 1 90 0
+  94              		.cfi_startproc
+  95 0000 80B5     		push	{r7, lr}
+  96              		.cfi_def_cfa_offset 8
+  97              		.cfi_offset 7, -8
+  98              		.cfi_offset 14, -4
+  99 0002 82B0     		sub	sp, sp, #8
+ 100              		.cfi_def_cfa_offset 16
+ 101 0004 00AF     		add	r7, sp, #0
+ 102              		.cfi_def_cfa_register 7
+ 103 0006 7860     		str	r0, [r7, #4]
+  91:.\BrightnessCommManager.c ****     switch(stateOfLightBar)
+ 104              		.loc 1 91 0
+ 105 0008 364B     		ldr	r3, .L17
+ 106 000a 1B78     		ldrb	r3, [r3]
+ 107 000c 012B     		cmp	r3, #1
+ 108 000e 29D0     		beq	.L3
+ 109 0010 02DC     		bgt	.L4
+ 110 0012 002B     		cmp	r3, #0
+ 111 0014 05D0     		beq	.L5
+  92:.\BrightnessCommManager.c ****     {
+  93:.\BrightnessCommManager.c ****         case IS_TIME_OUT_TRUE:
+  94:.\BrightnessCommManager.c ****             if(bCommunicationTimeOut == TRUE)
+  95:.\BrightnessCommManager.c ****             {
+  96:.\BrightnessCommManager.c ****                 //LED_Output_Write(TRUE); 
+  97:.\BrightnessCommManager.c ****                 CyDelay(10);
+  98:.\BrightnessCommManager.c ****                if(getDriverID() == HEAD_MODULE_ID)
+  99:.\BrightnessCommManager.c ****                {
+ 100:.\BrightnessCommManager.c ****                     if(getDriverID() == HEAD_MODULE_ID)
+ 101:.\BrightnessCommManager.c ****                     {
+ 102:.\BrightnessCommManager.c ****                         stateOfLightBar = HIGH_TIMOUT;
+ 103:.\BrightnessCommManager.c ****                         //WakeupISR_Start();
+ 104:.\BrightnessCommManager.c ****                     }
+ 105:.\BrightnessCommManager.c ****                }
+ 106:.\BrightnessCommManager.c ****                else
+ 107:.\BrightnessCommManager.c ****                {
+ 108:.\BrightnessCommManager.c ****                     previousBrightnessLocal = getPreviousBrightness();
+ 109:.\BrightnessCommManager.c ****                     stateOfLightBar = LOW_TIMEOUT;
+ 110:.\BrightnessCommManager.c ****                     //WakeupISR_Start();
+ 111:.\BrightnessCommManager.c ****                }
+ 112:.\BrightnessCommManager.c ****             }
+ 113:.\BrightnessCommManager.c ****             break;
+ 114:.\BrightnessCommManager.c ****         case HIGH_TIMOUT:
+ 115:.\BrightnessCommManager.c ****             if(bIsCommunicationTrigger == TRUE && bCommunicationTimeOut == FALSE) //&& UART_Rx_Read
+ 116:.\BrightnessCommManager.c ****             {
+ 117:.\BrightnessCommManager.c ****                 bIsCommunicationTrigger = FALSE;
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 5
+
+
+ 118:.\BrightnessCommManager.c ****                 stateOfLightBar = IS_TIME_OUT_TRUE;
+ 119:.\BrightnessCommManager.c ****                 //WakeupISR_Stop();
+ 120:.\BrightnessCommManager.c ****             }
+ 121:.\BrightnessCommManager.c ****             if(isReadyToSendNextBrightnessPacket() == TRUE)
+ 122:.\BrightnessCommManager.c ****             {
+ 123:.\BrightnessCommManager.c ****                 timeoutDefaultBrightness(getNonVolatileBarStateMemory());
+ 124:.\BrightnessCommManager.c ****                 clearIsReadyToSendNextBrightnessPacket();
+ 125:.\BrightnessCommManager.c ****             }
+ 126:.\BrightnessCommManager.c ****             break;
+ 127:.\BrightnessCommManager.c ****         case LOW_TIMEOUT:
+ 128:.\BrightnessCommManager.c ****             if(isReadyToSendNextBrightnessPacket() == TRUE)
+ 129:.\BrightnessCommManager.c ****             {
+ 130:.\BrightnessCommManager.c ****                 putBarToSleep();
+ 131:.\BrightnessCommManager.c ****                 CySysPmDeepSleep(); 
+ 132:.\BrightnessCommManager.c **** 
+ 133:.\BrightnessCommManager.c ****                 if(bIsCommunicationTrigger == TRUE)
+ 134:.\BrightnessCommManager.c ****                 {
+ 135:.\BrightnessCommManager.c ****                     bIsCommunicationTrigger = FALSE;
+ 136:.\BrightnessCommManager.c ****                     stateOfLightBar = IS_TIME_OUT_TRUE;
+ 137:.\BrightnessCommManager.c ****                     //WakeupISR_Stop();
+ 138:.\BrightnessCommManager.c ****                     bFirstTimeRampDown = FALSE;
+ 139:.\BrightnessCommManager.c ****                     CySoftwareReset(); 
+ 140:.\BrightnessCommManager.c ****                 }
+ 141:.\BrightnessCommManager.c ****                     clearIsReadyToSendNextBrightnessPacket();
+ 142:.\BrightnessCommManager.c ****             }
+ 143:.\BrightnessCommManager.c ****             break;
+ 144:.\BrightnessCommManager.c ****         case 3:
+ 145:.\BrightnessCommManager.c ****             break;
+ 146:.\BrightnessCommManager.c ****         default:
+ 147:.\BrightnessCommManager.c ****             break;
+ 112              		.loc 1 147 0
+ 113 0016 62E0     		b	.L1
+ 114              	.L4:
+  91:.\BrightnessCommManager.c ****     switch(stateOfLightBar)
+ 115              		.loc 1 91 0
+ 116 0018 022B     		cmp	r3, #2
+ 117 001a 42D0     		beq	.L6
+ 118 001c 032B     		cmp	r3, #3
+ 119 001e 5DD0     		beq	.L16
+ 120              		.loc 1 147 0
+ 121 0020 5DE0     		b	.L1
+ 122              	.L5:
+  94:.\BrightnessCommManager.c ****             {
+ 123              		.loc 1 94 0
+ 124 0022 314B     		ldr	r3, .L17+4
+ 125 0024 1B78     		ldrb	r3, [r3]
+ 126 0026 DBB2     		uxtb	r3, r3
+ 127 0028 012B     		cmp	r3, #1
+ 128 002a 1AD1     		bne	.L8
+  97:.\BrightnessCommManager.c ****                if(getDriverID() == HEAD_MODULE_ID)
+ 129              		.loc 1 97 0
+ 130 002c 0A20     		mov	r0, #10
+ 131 002e FFF7FEFF 		bl	CyDelay
+  98:.\BrightnessCommManager.c ****                {
+ 132              		.loc 1 98 0
+ 133 0032 FFF7FEFF 		bl	getDriverID
+ 134 0036 031E     		sub	r3, r0, #0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 6
+
+
+ 135 0038 012B     		cmp	r3, #1
+ 136 003a 08D1     		bne	.L9
+ 100:.\BrightnessCommManager.c ****                     {
+ 137              		.loc 1 100 0
+ 138 003c FFF7FEFF 		bl	getDriverID
+ 139 0040 031E     		sub	r3, r0, #0
+ 140 0042 012B     		cmp	r3, #1
+ 141 0044 0DD1     		bne	.L8
+ 102:.\BrightnessCommManager.c ****                         //WakeupISR_Start();
+ 142              		.loc 1 102 0
+ 143 0046 274B     		ldr	r3, .L17
+ 144 0048 0122     		mov	r2, #1
+ 145 004a 1A70     		strb	r2, [r3]
+ 113:.\BrightnessCommManager.c ****         case HIGH_TIMOUT:
+ 146              		.loc 1 113 0
+ 147 004c 47E0     		b	.L1
+ 148              	.L9:
+ 108:.\BrightnessCommManager.c ****                     stateOfLightBar = LOW_TIMEOUT;
+ 149              		.loc 1 108 0
+ 150 004e FFF7FEFF 		bl	getPreviousBrightness
+ 151 0052 031C     		mov	r3, r0
+ 152 0054 9AB2     		uxth	r2, r3
+ 153 0056 254B     		ldr	r3, .L17+8
+ 154 0058 1A80     		strh	r2, [r3]
+ 109:.\BrightnessCommManager.c ****                     //WakeupISR_Start();
+ 155              		.loc 1 109 0
+ 156 005a 224B     		ldr	r3, .L17
+ 157 005c 0222     		mov	r2, #2
+ 158 005e 1A70     		strb	r2, [r3]
+ 113:.\BrightnessCommManager.c ****         case HIGH_TIMOUT:
+ 159              		.loc 1 113 0
+ 160 0060 3DE0     		b	.L1
+ 161              	.L8:
+ 113:.\BrightnessCommManager.c ****         case HIGH_TIMOUT:
+ 162              		.loc 1 113 0 is_stmt 0 discriminator 1
+ 163 0062 3CE0     		b	.L1
+ 164              	.L3:
+ 115:.\BrightnessCommManager.c ****             {
+ 165              		.loc 1 115 0 is_stmt 1
+ 166 0064 224B     		ldr	r3, .L17+12
+ 167 0066 1B78     		ldrb	r3, [r3]
+ 168 0068 DBB2     		uxtb	r3, r3
+ 169 006a 012B     		cmp	r3, #1
+ 170 006c 0AD1     		bne	.L12
+ 115:.\BrightnessCommManager.c ****             {
+ 171              		.loc 1 115 0 is_stmt 0 discriminator 1
+ 172 006e 1E4B     		ldr	r3, .L17+4
+ 173 0070 1B78     		ldrb	r3, [r3]
+ 174 0072 DBB2     		uxtb	r3, r3
+ 175 0074 002B     		cmp	r3, #0
+ 176 0076 05D1     		bne	.L12
+ 117:.\BrightnessCommManager.c ****                 stateOfLightBar = IS_TIME_OUT_TRUE;
+ 177              		.loc 1 117 0 is_stmt 1
+ 178 0078 1D4B     		ldr	r3, .L17+12
+ 179 007a 0022     		mov	r2, #0
+ 180 007c 1A70     		strb	r2, [r3]
+ 118:.\BrightnessCommManager.c ****                 //WakeupISR_Stop();
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 7
+
+
+ 181              		.loc 1 118 0
+ 182 007e 194B     		ldr	r3, .L17
+ 183 0080 0022     		mov	r2, #0
+ 184 0082 1A70     		strb	r2, [r3]
+ 185              	.L12:
+ 121:.\BrightnessCommManager.c ****             {
+ 186              		.loc 1 121 0
+ 187 0084 FFF7FEFF 		bl	isReadyToSendNextBrightnessPacket
+ 188 0088 031E     		sub	r3, r0, #0
+ 189 008a 012B     		cmp	r3, #1
+ 190 008c 08D1     		bne	.L13
+ 123:.\BrightnessCommManager.c ****                 clearIsReadyToSendNextBrightnessPacket();
+ 191              		.loc 1 123 0
+ 192 008e FFF7FEFF 		bl	getNonVolatileBarStateMemory
+ 193 0092 031C     		mov	r3, r0
+ 194 0094 181C     		mov	r0, r3
+ 195 0096 FFF7FEFF 		bl	timeoutDefaultBrightness
+ 124:.\BrightnessCommManager.c ****             }
+ 196              		.loc 1 124 0
+ 197 009a FFF7FEFF 		bl	clearIsReadyToSendNextBrightnessPacket
+ 126:.\BrightnessCommManager.c ****         case LOW_TIMEOUT:
+ 198              		.loc 1 126 0
+ 199 009e 1EE0     		b	.L1
+ 200              	.L13:
+ 201 00a0 1DE0     		b	.L1
+ 202              	.L6:
+ 128:.\BrightnessCommManager.c ****             {
+ 203              		.loc 1 128 0
+ 204 00a2 FFF7FEFF 		bl	isReadyToSendNextBrightnessPacket
+ 205 00a6 031E     		sub	r3, r0, #0
+ 206 00a8 012B     		cmp	r3, #1
+ 207 00aa 16D1     		bne	.L14
+ 130:.\BrightnessCommManager.c ****                 CySysPmDeepSleep(); 
+ 208              		.loc 1 130 0
+ 209 00ac FFF7FEFF 		bl	putBarToSleep
+ 131:.\BrightnessCommManager.c **** 
+ 210              		.loc 1 131 0
+ 211 00b0 FFF7FEFF 		bl	CySysPmDeepSleep
+ 133:.\BrightnessCommManager.c ****                 {
+ 212              		.loc 1 133 0
+ 213 00b4 0E4B     		ldr	r3, .L17+12
+ 214 00b6 1B78     		ldrb	r3, [r3]
+ 215 00b8 DBB2     		uxtb	r3, r3
+ 216 00ba 012B     		cmp	r3, #1
+ 217 00bc 0AD1     		bne	.L15
+ 135:.\BrightnessCommManager.c ****                     stateOfLightBar = IS_TIME_OUT_TRUE;
+ 218              		.loc 1 135 0
+ 219 00be 0C4B     		ldr	r3, .L17+12
+ 220 00c0 0022     		mov	r2, #0
+ 221 00c2 1A70     		strb	r2, [r3]
+ 136:.\BrightnessCommManager.c ****                     //WakeupISR_Stop();
+ 222              		.loc 1 136 0
+ 223 00c4 074B     		ldr	r3, .L17
+ 224 00c6 0022     		mov	r2, #0
+ 225 00c8 1A70     		strb	r2, [r3]
+ 138:.\BrightnessCommManager.c ****                     CySoftwareReset(); 
+ 226              		.loc 1 138 0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 8
+
+
+ 227 00ca 0A4B     		ldr	r3, .L17+16
+ 228 00cc 0022     		mov	r2, #0
+ 229 00ce 1A80     		strh	r2, [r3]
+ 139:.\BrightnessCommManager.c ****                 }
+ 230              		.loc 1 139 0
+ 231 00d0 FFF7FEFF 		bl	CySoftwareReset
+ 232              	.L15:
+ 141:.\BrightnessCommManager.c ****             }
+ 233              		.loc 1 141 0
+ 234 00d4 FFF7FEFF 		bl	clearIsReadyToSendNextBrightnessPacket
+ 143:.\BrightnessCommManager.c ****         case 3:
+ 235              		.loc 1 143 0
+ 236 00d8 01E0     		b	.L1
+ 237              	.L14:
+ 238 00da 00E0     		b	.L1
+ 239              	.L16:
+ 145:.\BrightnessCommManager.c ****         default:
+ 240              		.loc 1 145 0
+ 241 00dc C046     		mov	r8, r8
+ 242              	.L1:
+ 148:.\BrightnessCommManager.c ****     }   
+ 149:.\BrightnessCommManager.c **** }
+ 243              		.loc 1 149 0
+ 244 00de BD46     		mov	sp, r7
+ 245 00e0 02B0     		add	sp, sp, #8
+ 246              		@ sp needed
+ 247 00e2 80BD     		pop	{r7, pc}
+ 248              	.L18:
+ 249              		.align	2
+ 250              	.L17:
+ 251 00e4 02000000 		.word	stateOfLightBar
+ 252 00e8 00000000 		.word	bCommunicationTimeOut
+ 253 00ec 0C000000 		.word	previousBrightnessLocal
+ 254 00f0 00000000 		.word	bIsCommunicationTrigger
+ 255 00f4 0A000000 		.word	bFirstTimeRampDown
+ 256              		.cfi_endproc
+ 257              	.LFE34:
+ 258              		.size	timeOutStateMachine, .-timeOutStateMachine
+ 259              		.section	.text.isThereHighLowTransitionFromUART,"ax",%progbits
+ 260              		.align	2
+ 261              		.global	isThereHighLowTransitionFromUART
+ 262              		.code	16
+ 263              		.thumb_func
+ 264              		.type	isThereHighLowTransitionFromUART, %function
+ 265              	isThereHighLowTransitionFromUART:
+ 266              	.LFB35:
+ 150:.\BrightnessCommManager.c **** 
+ 151:.\BrightnessCommManager.c **** /*******************************************************************************
+ 152:.\BrightnessCommManager.c **** * Function Name: wakeupModule
+ 153:.\BrightnessCommManager.c **** ********************************************************************************
+ 154:.\BrightnessCommManager.c **** *
+ 155:.\BrightnessCommManager.c **** * Summary:
+ 156:.\BrightnessCommManager.c **** *  Called in WakeupISR, sets the flag to indicate that an edge found on UART_Rx.
+ 157:.\BrightnessCommManager.c **** *
+ 158:.\BrightnessCommManager.c **** * Parameters:
+ 159:.\BrightnessCommManager.c **** *  None
+ 160:.\BrightnessCommManager.c **** *
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 9
+
+
+ 161:.\BrightnessCommManager.c **** * Return:
+ 162:.\BrightnessCommManager.c **** *  None
+ 163:.\BrightnessCommManager.c **** *
+ 164:.\BrightnessCommManager.c **** *******************************************************************************/
+ 165:.\BrightnessCommManager.c **** void isThereHighLowTransitionFromUART(void)
+ 166:.\BrightnessCommManager.c **** {
+ 267              		.loc 1 166 0
+ 268              		.cfi_startproc
+ 269 0000 80B5     		push	{r7, lr}
+ 270              		.cfi_def_cfa_offset 8
+ 271              		.cfi_offset 7, -8
+ 272              		.cfi_offset 14, -4
+ 273 0002 00AF     		add	r7, sp, #0
+ 274              		.cfi_def_cfa_register 7
+ 167:.\BrightnessCommManager.c ****     //WakeupISR_ClearPending();
+ 168:.\BrightnessCommManager.c ****     //UART_Rx_ClearInterrupt();
+ 169:.\BrightnessCommManager.c ****     
+ 170:.\BrightnessCommManager.c ****     bIsCommunicationTrigger = TRUE;
+ 275              		.loc 1 170 0
+ 276 0004 024B     		ldr	r3, .L20
+ 277 0006 0122     		mov	r2, #1
+ 278 0008 1A70     		strb	r2, [r3]
+ 171:.\BrightnessCommManager.c **** }
+ 279              		.loc 1 171 0
+ 280 000a BD46     		mov	sp, r7
+ 281              		@ sp needed
+ 282 000c 80BD     		pop	{r7, pc}
+ 283              	.L21:
+ 284 000e C046     		.align	2
+ 285              	.L20:
+ 286 0010 00000000 		.word	bIsCommunicationTrigger
+ 287              		.cfi_endproc
+ 288              	.LFE35:
+ 289              		.size	isThereHighLowTransitionFromUART, .-isThereHighLowTransitionFromUART
+ 290              		.section	.text.processTimeoutTimerRoutine,"ax",%progbits
+ 291              		.align	2
+ 292              		.global	processTimeoutTimerRoutine
+ 293              		.code	16
+ 294              		.thumb_func
+ 295              		.type	processTimeoutTimerRoutine, %function
+ 296              	processTimeoutTimerRoutine:
+ 297              	.LFB36:
+ 172:.\BrightnessCommManager.c **** 
+ 173:.\BrightnessCommManager.c **** /*******************************************************************************
+ 174:.\BrightnessCommManager.c **** * Function Name: processTimeoutTimerRoutine
+ 175:.\BrightnessCommManager.c **** ********************************************************************************
+ 176:.\BrightnessCommManager.c **** *
+ 177:.\BrightnessCommManager.c **** * Summary:
+ 178:.\BrightnessCommManager.c **** *  Called in CommTimeoutISR(), counts up while waiting for the next brightness
+ 179:.\BrightnessCommManager.c **** *  packet. If the timer limit is reached, then the LED is shut off and timeout
+ 180:.\BrightnessCommManager.c **** *  flag is set to put the module to sleep.
+ 181:.\BrightnessCommManager.c **** *
+ 182:.\BrightnessCommManager.c **** * Parameters:
+ 183:.\BrightnessCommManager.c **** *  None.
+ 184:.\BrightnessCommManager.c **** *
+ 185:.\BrightnessCommManager.c **** * Return:
+ 186:.\BrightnessCommManager.c **** *  None.
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 10
+
+
+ 187:.\BrightnessCommManager.c **** *
+ 188:.\BrightnessCommManager.c **** *******************************************************************************/
+ 189:.\BrightnessCommManager.c **** void processTimeoutTimerRoutine(void)
+ 190:.\BrightnessCommManager.c **** {
+ 298              		.loc 1 190 0
+ 299              		.cfi_startproc
+ 300 0000 80B5     		push	{r7, lr}
+ 301              		.cfi_def_cfa_offset 8
+ 302              		.cfi_offset 7, -8
+ 303              		.cfi_offset 14, -4
+ 304 0002 00AF     		add	r7, sp, #0
+ 305              		.cfi_def_cfa_register 7
+ 191:.\BrightnessCommManager.c ****     CommTimeoutISR_ClearPending();
+ 306              		.loc 1 191 0
+ 307 0004 FFF7FEFF 		bl	CommTimeoutISR_ClearPending
+ 192:.\BrightnessCommManager.c ****     TimeoutTimer_ClearInterrupt(TimeoutTimer_INTR_MASK_TC);
+ 308              		.loc 1 192 0
+ 309 0008 0120     		mov	r0, #1
+ 310 000a FFF7FEFF 		bl	TimeoutTimer_ClearInterrupt
+ 193:.\BrightnessCommManager.c **** 
+ 194:.\BrightnessCommManager.c ****     if(getDriverID() == HEAD_MODULE_ID)
+ 311              		.loc 1 194 0
+ 312 000e FFF7FEFF 		bl	getDriverID
+ 313 0012 031E     		sub	r3, r0, #0
+ 314 0014 012B     		cmp	r3, #1
+ 315 0016 15D1     		bne	.L23
+ 195:.\BrightnessCommManager.c ****     {
+ 196:.\BrightnessCommManager.c ****             if(timeOutCounter<HEAD_BOARD_TIMEOUT)
+ 316              		.loc 1 196 0
+ 317 0018 164B     		ldr	r3, .L28
+ 318 001a 1B88     		ldrh	r3, [r3]
+ 319 001c 9BB2     		uxth	r3, r3
+ 320 001e 952B     		cmp	r3, #149
+ 321 0020 07D8     		bhi	.L24
+ 197:.\BrightnessCommManager.c ****             {
+ 198:.\BrightnessCommManager.c ****                 timeOutCounter++;
+ 322              		.loc 1 198 0
+ 323 0022 144B     		ldr	r3, .L28
+ 324 0024 1B88     		ldrh	r3, [r3]
+ 325 0026 9BB2     		uxth	r3, r3
+ 326 0028 0133     		add	r3, r3, #1
+ 327 002a 9AB2     		uxth	r2, r3
+ 328 002c 114B     		ldr	r3, .L28
+ 329 002e 1A80     		strh	r2, [r3]
+ 330 0030 1EE0     		b	.L22
+ 331              	.L24:
+ 199:.\BrightnessCommManager.c ****             }
+ 200:.\BrightnessCommManager.c ****             else
+ 201:.\BrightnessCommManager.c ****             {
+ 202:.\BrightnessCommManager.c ****                 TimeoutTimer_Stop();
+ 332              		.loc 1 202 0
+ 333 0032 FFF7FEFF 		bl	TimeoutTimer_Stop
+ 203:.\BrightnessCommManager.c ****                 timeOutCounter = 0;
+ 334              		.loc 1 203 0
+ 335 0036 0F4B     		ldr	r3, .L28
+ 336 0038 0022     		mov	r2, #0
+ 337 003a 1A80     		strh	r2, [r3]
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 11
+
+
+ 204:.\BrightnessCommManager.c ****                 bCommunicationTimeOut = TRUE;
+ 338              		.loc 1 204 0
+ 339 003c 0E4B     		ldr	r3, .L28+4
+ 340 003e 0122     		mov	r2, #1
+ 341 0040 1A70     		strb	r2, [r3]
+ 342 0042 15E0     		b	.L22
+ 343              	.L23:
+ 205:.\BrightnessCommManager.c ****             }
+ 206:.\BrightnessCommManager.c ****     }
+ 207:.\BrightnessCommManager.c ****     else
+ 208:.\BrightnessCommManager.c ****     {
+ 209:.\BrightnessCommManager.c ****          if(timeOutCounter<TIMEOUT_LIMIT_IN_MILLISECONDS)
+ 344              		.loc 1 209 0
+ 345 0044 0B4B     		ldr	r3, .L28
+ 346 0046 1B88     		ldrh	r3, [r3]
+ 347 0048 9BB2     		uxth	r3, r3
+ 348 004a 0C4A     		ldr	r2, .L28+8
+ 349 004c 9342     		cmp	r3, r2
+ 350 004e 07D8     		bhi	.L27
+ 210:.\BrightnessCommManager.c ****         {
+ 211:.\BrightnessCommManager.c ****             timeOutCounter++;
+ 351              		.loc 1 211 0
+ 352 0050 084B     		ldr	r3, .L28
+ 353 0052 1B88     		ldrh	r3, [r3]
+ 354 0054 9BB2     		uxth	r3, r3
+ 355 0056 0133     		add	r3, r3, #1
+ 356 0058 9AB2     		uxth	r2, r3
+ 357 005a 064B     		ldr	r3, .L28
+ 358 005c 1A80     		strh	r2, [r3]
+ 359 005e 07E0     		b	.L22
+ 360              	.L27:
+ 212:.\BrightnessCommManager.c ****         }
+ 213:.\BrightnessCommManager.c ****         else
+ 214:.\BrightnessCommManager.c ****         {
+ 215:.\BrightnessCommManager.c ****             TimeoutTimer_Stop();
+ 361              		.loc 1 215 0
+ 362 0060 FFF7FEFF 		bl	TimeoutTimer_Stop
+ 216:.\BrightnessCommManager.c ****             timeOutCounter = 0;
+ 363              		.loc 1 216 0
+ 364 0064 034B     		ldr	r3, .L28
+ 365 0066 0022     		mov	r2, #0
+ 366 0068 1A80     		strh	r2, [r3]
+ 217:.\BrightnessCommManager.c ****             bCommunicationTimeOut = TRUE;
+ 367              		.loc 1 217 0
+ 368 006a 034B     		ldr	r3, .L28+4
+ 369 006c 0122     		mov	r2, #1
+ 370 006e 1A70     		strb	r2, [r3]
+ 371              	.L22:
+ 218:.\BrightnessCommManager.c ****         }
+ 219:.\BrightnessCommManager.c ****     }
+ 220:.\BrightnessCommManager.c **** 
+ 221:.\BrightnessCommManager.c **** }
+ 372              		.loc 1 221 0
+ 373 0070 BD46     		mov	sp, r7
+ 374              		@ sp needed
+ 375 0072 80BD     		pop	{r7, pc}
+ 376              	.L29:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 12
+
+
+ 377              		.align	2
+ 378              	.L28:
+ 379 0074 00000000 		.word	timeOutCounter
+ 380 0078 00000000 		.word	bCommunicationTimeOut
+ 381 007c 0F270000 		.word	9999
+ 382              		.cfi_endproc
+ 383              	.LFE36:
+ 384              		.size	processTimeoutTimerRoutine, .-processTimeoutTimerRoutine
+ 385              		.section	.text.processBrightnessByteReceivedHandler,"ax",%progbits
+ 386              		.align	2
+ 387              		.global	processBrightnessByteReceivedHandler
+ 388              		.code	16
+ 389              		.thumb_func
+ 390              		.type	processBrightnessByteReceivedHandler, %function
+ 391              	processBrightnessByteReceivedHandler:
+ 392              	.LFB37:
+ 222:.\BrightnessCommManager.c **** 
+ 223:.\BrightnessCommManager.c **** /*******************************************************************************
+ 224:.\BrightnessCommManager.c **** * Function Name: processBrightnessByteReceivedHandler
+ 225:.\BrightnessCommManager.c **** ********************************************************************************
+ 226:.\BrightnessCommManager.c **** *
+ 227:.\BrightnessCommManager.c **** * Summary:
+ 228:.\BrightnessCommManager.c **** *  Called in UART_Out_ISR(), triggers when a byte is received from the controller.
+ 229:.\BrightnessCommManager.c **** *
+ 230:.\BrightnessCommManager.c **** * Parameters:
+ 231:.\BrightnessCommManager.c **** *  None.
+ 232:.\BrightnessCommManager.c **** *
+ 233:.\BrightnessCommManager.c **** * Return:
+ 234:.\BrightnessCommManager.c **** *  None.
+ 235:.\BrightnessCommManager.c **** *
+ 236:.\BrightnessCommManager.c **** *******************************************************************************/
+ 237:.\BrightnessCommManager.c **** void processBrightnessByteReceivedHandler(void)
+ 238:.\BrightnessCommManager.c **** {
+ 393              		.loc 1 238 0
+ 394              		.cfi_startproc
+ 395 0000 80B5     		push	{r7, lr}
+ 396              		.cfi_def_cfa_offset 8
+ 397              		.cfi_offset 7, -8
+ 398              		.cfi_offset 14, -4
+ 399 0002 82B0     		sub	sp, sp, #8
+ 400              		.cfi_def_cfa_offset 16
+ 401 0004 00AF     		add	r7, sp, #0
+ 402              		.cfi_def_cfa_register 7
+ 239:.\BrightnessCommManager.c ****     
+ 240:.\BrightnessCommManager.c ****     uint8 dataByte = 0;
+ 403              		.loc 1 240 0
+ 404 0006 FB1D     		add	r3, r7, #7
+ 405 0008 0022     		mov	r2, #0
+ 406 000a 1A70     		strb	r2, [r3]
+ 241:.\BrightnessCommManager.c ****     uint32 interruptSource = 0;
+ 407              		.loc 1 241 0
+ 408 000c 0023     		mov	r3, #0
+ 409 000e 3B60     		str	r3, [r7]
+ 410              	.L31:
+ 242:.\BrightnessCommManager.c ****     //do
+ 243:.\BrightnessCommManager.c ****     //{
+ 244:.\BrightnessCommManager.c ****     //    dataByte = UART_LED_GetChar();
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 13
+
+
+ 245:.\BrightnessCommManager.c ****     //    detectPacket(dataByte);
+ 246:.\BrightnessCommManager.c ****         
+ 247:.\BrightnessCommManager.c ****     //}while(UART_LED_ReadRxStatus() & UART_LED_RX_STS_FIFO_NOTEMPTY);
+ 248:.\BrightnessCommManager.c ****     do
+ 249:.\BrightnessCommManager.c ****     {
+ 250:.\BrightnessCommManager.c ****         dataByte = (uint8)(UART_LED_UartGetByte() & 0xFF);
+ 411              		.loc 1 250 0 discriminator 1
+ 412 0010 FFF7FEFF 		bl	UART_LED_UartGetByte
+ 413 0014 021C     		mov	r2, r0
+ 414 0016 FB1D     		add	r3, r7, #7
+ 415 0018 1A70     		strb	r2, [r3]
+ 251:.\BrightnessCommManager.c ****         detectPacket(dataByte);
+ 416              		.loc 1 251 0 discriminator 1
+ 417 001a FB1D     		add	r3, r7, #7
+ 418 001c 1B78     		ldrb	r3, [r3]
+ 419 001e 181C     		mov	r0, r3
+ 420 0020 FFF7FEFF 		bl	detectPacket
+ 252:.\BrightnessCommManager.c ****     }while(UART_LED_SpiUartGetRxBufferSize() > 0);
+ 421              		.loc 1 252 0 discriminator 1
+ 422 0024 FFF7FEFF 		bl	UART_LED_SpiUartGetRxBufferSize
+ 423 0028 031E     		sub	r3, r0, #0
+ 424 002a F1D1     		bne	.L31
+ 253:.\BrightnessCommManager.c ****     
+ 254:.\BrightnessCommManager.c ****     interruptSource = UART_LED_GetRxInterruptSourceMasked();
+ 425              		.loc 1 254 0
+ 426 002c 044B     		ldr	r3, .L32
+ 427 002e 1B68     		ldr	r3, [r3]
+ 428 0030 3B60     		str	r3, [r7]
+ 255:.\BrightnessCommManager.c ****     UART_LED_ClearRxInterruptSource(interruptSource);
+ 429              		.loc 1 255 0
+ 430 0032 044B     		ldr	r3, .L32+4
+ 431 0034 3A68     		ldr	r2, [r7]
+ 432 0036 1A60     		str	r2, [r3]
+ 256:.\BrightnessCommManager.c **** }
+ 433              		.loc 1 256 0
+ 434 0038 BD46     		mov	sp, r7
+ 435 003a 02B0     		add	sp, sp, #8
+ 436              		@ sp needed
+ 437 003c 80BD     		pop	{r7, pc}
+ 438              	.L33:
+ 439 003e C046     		.align	2
+ 440              	.L32:
+ 441 0040 CC0F0740 		.word	1074204620
+ 442 0044 C00F0740 		.word	1074204608
+ 443              		.cfi_endproc
+ 444              	.LFE37:
+ 445              		.size	processBrightnessByteReceivedHandler, .-processBrightnessByteReceivedHandler
+ 446              		.section	.text.timeoutDefaultBrightness,"ax",%progbits
+ 447              		.align	2
+ 448              		.global	timeoutDefaultBrightness
+ 449              		.code	16
+ 450              		.thumb_func
+ 451              		.type	timeoutDefaultBrightness, %function
+ 452              	timeoutDefaultBrightness:
+ 453              	.LFB38:
+ 257:.\BrightnessCommManager.c **** 
+ 258:.\BrightnessCommManager.c **** void timeoutDefaultBrightness(const uint8 * nonVolatileMemoryArray)
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 14
+
+
+ 259:.\BrightnessCommManager.c **** {
+ 454              		.loc 1 259 0
+ 455              		.cfi_startproc
+ 456 0000 90B5     		push	{r4, r7, lr}
+ 457              		.cfi_def_cfa_offset 12
+ 458              		.cfi_offset 4, -12
+ 459              		.cfi_offset 7, -8
+ 460              		.cfi_offset 14, -4
+ 461 0002 85B0     		sub	sp, sp, #20
+ 462              		.cfi_def_cfa_offset 32
+ 463 0004 00AF     		add	r7, sp, #0
+ 464              		.cfi_def_cfa_register 7
+ 465 0006 7860     		str	r0, [r7, #4]
+ 260:.\BrightnessCommManager.c ****     uint8 currentRegulatedBrightness = 0;
+ 466              		.loc 1 260 0
+ 467 0008 0F23     		mov	r3, #15
+ 468 000a FB18     		add	r3, r7, r3
+ 469 000c 0022     		mov	r2, #0
+ 470 000e 1A70     		strb	r2, [r3]
+ 261:.\BrightnessCommManager.c ****     uint8 driver_ID = 0; 
+ 471              		.loc 1 261 0
+ 472 0010 0E23     		mov	r3, #14
+ 473 0012 FB18     		add	r3, r7, r3
+ 474 0014 0022     		mov	r2, #0
+ 475 0016 1A70     		strb	r2, [r3]
+ 262:.\BrightnessCommManager.c ****     static uint16 loopIterator = 0;
+ 263:.\BrightnessCommManager.c ****     
+ 264:.\BrightnessCommManager.c ****     driver_ID = getDriverID();
+ 476              		.loc 1 264 0
+ 477 0018 0E23     		mov	r3, #14
+ 478 001a FC18     		add	r4, r7, r3
+ 479 001c FFF7FEFF 		bl	getDriverID
+ 480 0020 031C     		mov	r3, r0
+ 481 0022 2370     		strb	r3, [r4]
+ 265:.\BrightnessCommManager.c ****     if(driver_ID == HEAD_MODULE_ID)
+ 482              		.loc 1 265 0
+ 483 0024 0E23     		mov	r3, #14
+ 484 0026 FB18     		add	r3, r7, r3
+ 485 0028 1B78     		ldrb	r3, [r3]
+ 486 002a 012B     		cmp	r3, #1
+ 487 002c 13D1     		bne	.L34
+ 266:.\BrightnessCommManager.c ****     {
+ 267:.\BrightnessCommManager.c ****         if(ifPowerUp == FALSE)
+ 488              		.loc 1 267 0
+ 489 002e 0B4B     		ldr	r3, .L37
+ 490 0030 1B78     		ldrb	r3, [r3]
+ 491 0032 002B     		cmp	r3, #0
+ 492 0034 05D1     		bne	.L36
+ 268:.\BrightnessCommManager.c ****         {
+ 269:.\BrightnessCommManager.c ****             ifPowerUp = TRUE;
+ 493              		.loc 1 269 0
+ 494 0036 094B     		ldr	r3, .L37
+ 495 0038 0122     		mov	r2, #1
+ 496 003a 1A70     		strb	r2, [r3]
+ 270:.\BrightnessCommManager.c ****             CyDelay(250);
+ 497              		.loc 1 270 0
+ 498 003c FA20     		mov	r0, #250
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 15
+
+
+ 499 003e FFF7FEFF 		bl	CyDelay
+ 500              	.L36:
+ 271:.\BrightnessCommManager.c ****             //for(loopIterator = 0; loopIterator<nonVolatileMemoryArray[0]; loopIterator+=32)
+ 272:.\BrightnessCommManager.c ****             //{
+ 273:.\BrightnessCommManager.c ****             //    currentRegulatedBrightness = updateBrightnessLevel(loopIterator, TRUE);
+ 274:.\BrightnessCommManager.c ****             //    UART_LED_PutChar('~');
+ 275:.\BrightnessCommManager.c ****             //    UART_LED_PutChar('B');
+ 276:.\BrightnessCommManager.c ****             //    UART_LED_PutChar(currentRegulatedBrightness);
+ 277:.\BrightnessCommManager.c ****             //    UART_LED_PutChar(currentRegulatedBrightness);
+ 278:.\BrightnessCommManager.c ****             //    UART_LED_PutChar(currentRegulatedBrightness);
+ 279:.\BrightnessCommManager.c ****             //    UART_LED_PutChar(currentRegulatedBrightness);
+ 280:.\BrightnessCommManager.c ****             //    UART_LED_PutChar(currentRegulatedBrightness);
+ 281:.\BrightnessCommManager.c ****             //    UART_LED_PutChar(currentRegulatedBrightness);
+ 282:.\BrightnessCommManager.c ****             //    UART_LED_PutChar(currentRegulatedBrightness);
+ 283:.\BrightnessCommManager.c ****             //    UART_LED_PutChar(currentRegulatedBrightness);
+ 284:.\BrightnessCommManager.c ****             //    UART_LED_PutChar(0x0D);
+ 285:.\BrightnessCommManager.c ****             //    UART_LED_PutChar(0x0A);
+ 286:.\BrightnessCommManager.c ****             //    CyDelayUs(3000);
+ 287:.\BrightnessCommManager.c ****             //}
+ 288:.\BrightnessCommManager.c ****         }
+ 289:.\BrightnessCommManager.c ****         currentRegulatedBrightness = updateBrightnessLevel(nonVolatileMemoryArray[0], TRUE);
+ 501              		.loc 1 289 0
+ 502 0042 7B68     		ldr	r3, [r7, #4]
+ 503 0044 1B78     		ldrb	r3, [r3]
+ 504 0046 0F22     		mov	r2, #15
+ 505 0048 BC18     		add	r4, r7, r2
+ 506 004a 181C     		mov	r0, r3
+ 507 004c 0121     		mov	r1, #1
+ 508 004e FFF7FEFF 		bl	updateBrightnessLevel
+ 509 0052 031C     		mov	r3, r0
+ 510 0054 2370     		strb	r3, [r4]
+ 511              	.L34:
+ 290:.\BrightnessCommManager.c ****         //currentRegulatedBrightness = updateBrightnessLevel(0, TRUE);
+ 291:.\BrightnessCommManager.c ****        // UART_LED_PutChar('~');
+ 292:.\BrightnessCommManager.c ****        // UART_LED_PutChar('B');
+ 293:.\BrightnessCommManager.c ****        // UART_LED_PutChar(currentRegulatedBrightness);
+ 294:.\BrightnessCommManager.c ****        // UART_LED_PutChar(currentRegulatedBrightness);
+ 295:.\BrightnessCommManager.c ****        // UART_LED_PutChar(currentRegulatedBrightness);
+ 296:.\BrightnessCommManager.c ****        // UART_LED_PutChar(currentRegulatedBrightness);
+ 297:.\BrightnessCommManager.c ****        // UART_LED_PutChar(currentRegulatedBrightness);
+ 298:.\BrightnessCommManager.c ****        // UART_LED_PutChar(currentRegulatedBrightness);
+ 299:.\BrightnessCommManager.c ****        // UART_LED_PutChar(currentRegulatedBrightness);
+ 300:.\BrightnessCommManager.c ****        // UART_LED_PutChar(currentRegulatedBrightness);
+ 301:.\BrightnessCommManager.c ****        // UART_LED_PutChar(0x0D);
+ 302:.\BrightnessCommManager.c ****        // UART_LED_PutChar(0x0A);        
+ 303:.\BrightnessCommManager.c ****     }
+ 304:.\BrightnessCommManager.c **** }
+ 512              		.loc 1 304 0
+ 513 0056 BD46     		mov	sp, r7
+ 514 0058 05B0     		add	sp, sp, #20
+ 515              		@ sp needed
+ 516 005a 90BD     		pop	{r4, r7, pc}
+ 517              	.L38:
+ 518              		.align	2
+ 519              	.L37:
+ 520 005c 0E000000 		.word	ifPowerUp
+ 521              		.cfi_endproc
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 16
+
+
+ 522              	.LFE38:
+ 523              		.size	timeoutDefaultBrightness, .-timeoutDefaultBrightness
+ 524              		.section	.text.isDriverCountReceived,"ax",%progbits
+ 525              		.align	2
+ 526              		.global	isDriverCountReceived
+ 527              		.code	16
+ 528              		.thumb_func
+ 529              		.type	isDriverCountReceived, %function
+ 530              	isDriverCountReceived:
+ 531              	.LFB39:
+ 305:.\BrightnessCommManager.c **** 
+ 306:.\BrightnessCommManager.c **** ////////////////////////////////////Driver Count Initialization Functions//////////////////////////
+ 307:.\BrightnessCommManager.c **** uint8 isDriverCountReceived(void)
+ 308:.\BrightnessCommManager.c **** {
+ 532              		.loc 1 308 0
+ 533              		.cfi_startproc
+ 534 0000 80B5     		push	{r7, lr}
+ 535              		.cfi_def_cfa_offset 8
+ 536              		.cfi_offset 7, -8
+ 537              		.cfi_offset 14, -4
+ 538 0002 00AF     		add	r7, sp, #0
+ 539              		.cfi_def_cfa_register 7
+ 309:.\BrightnessCommManager.c ****     return bDriverCountReceived;
+ 540              		.loc 1 309 0
+ 541 0004 024B     		ldr	r3, .L41
+ 542 0006 1B78     		ldrb	r3, [r3]
+ 310:.\BrightnessCommManager.c **** }
+ 543              		.loc 1 310 0
+ 544 0008 181C     		mov	r0, r3
+ 545 000a BD46     		mov	sp, r7
+ 546              		@ sp needed
+ 547 000c 80BD     		pop	{r7, pc}
+ 548              	.L42:
+ 549 000e C046     		.align	2
+ 550              	.L41:
+ 551 0010 00000000 		.word	bDriverCountReceived
+ 552              		.cfi_endproc
+ 553              	.LFE39:
+ 554              		.size	isDriverCountReceived, .-isDriverCountReceived
+ 555              		.section	.text.setDriverCountReceived,"ax",%progbits
+ 556              		.align	2
+ 557              		.global	setDriverCountReceived
+ 558              		.code	16
+ 559              		.thumb_func
+ 560              		.type	setDriverCountReceived, %function
+ 561              	setDriverCountReceived:
+ 562              	.LFB40:
+ 311:.\BrightnessCommManager.c **** 
+ 312:.\BrightnessCommManager.c **** void setDriverCountReceived(void)
+ 313:.\BrightnessCommManager.c **** {
+ 563              		.loc 1 313 0
+ 564              		.cfi_startproc
+ 565 0000 80B5     		push	{r7, lr}
+ 566              		.cfi_def_cfa_offset 8
+ 567              		.cfi_offset 7, -8
+ 568              		.cfi_offset 14, -4
+ 569 0002 00AF     		add	r7, sp, #0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 17
+
+
+ 570              		.cfi_def_cfa_register 7
+ 314:.\BrightnessCommManager.c ****     bDriverCountReceived = TRUE;
+ 571              		.loc 1 314 0
+ 572 0004 024B     		ldr	r3, .L44
+ 573 0006 0122     		mov	r2, #1
+ 574 0008 1A70     		strb	r2, [r3]
+ 315:.\BrightnessCommManager.c **** }
+ 575              		.loc 1 315 0
+ 576 000a BD46     		mov	sp, r7
+ 577              		@ sp needed
+ 578 000c 80BD     		pop	{r7, pc}
+ 579              	.L45:
+ 580 000e C046     		.align	2
+ 581              	.L44:
+ 582 0010 00000000 		.word	bDriverCountReceived
+ 583              		.cfi_endproc
+ 584              	.LFE40:
+ 585              		.size	setDriverCountReceived, .-setDriverCountReceived
+ 586              		.section	.text.assignDriverIDs,"ax",%progbits
+ 587              		.align	2
+ 588              		.global	assignDriverIDs
+ 589              		.code	16
+ 590              		.thumb_func
+ 591              		.type	assignDriverIDs, %function
+ 592              	assignDriverIDs:
+ 593              	.LFB41:
+ 316:.\BrightnessCommManager.c **** 
+ 317:.\BrightnessCommManager.c **** /*******************************************************************************
+ 318:.\BrightnessCommManager.c **** * Function Name: assignDriverIDs
+ 319:.\BrightnessCommManager.c **** ********************************************************************************
+ 320:.\BrightnessCommManager.c **** *
+ 321:.\BrightnessCommManager.c **** * Summary:
+ 322:.\BrightnessCommManager.c **** *  Sends out the driver count packet. Only the head module executes this.
+ 323:.\BrightnessCommManager.c **** *
+ 324:.\BrightnessCommManager.c **** * Parameters:
+ 325:.\BrightnessCommManager.c **** *  None.
+ 326:.\BrightnessCommManager.c **** *
+ 327:.\BrightnessCommManager.c **** * Return:
+ 328:.\BrightnessCommManager.c **** *  None.
+ 329:.\BrightnessCommManager.c **** *
+ 330:.\BrightnessCommManager.c **** *******************************************************************************/
+ 331:.\BrightnessCommManager.c **** void assignDriverIDs(void)
+ 332:.\BrightnessCommManager.c **** {
+ 594              		.loc 1 332 0
+ 595              		.cfi_startproc
+ 596 0000 80B5     		push	{r7, lr}
+ 597              		.cfi_def_cfa_offset 8
+ 598              		.cfi_offset 7, -8
+ 599              		.cfi_offset 14, -4
+ 600 0002 84B0     		sub	sp, sp, #16
+ 601              		.cfi_def_cfa_offset 24
+ 602 0004 00AF     		add	r7, sp, #0
+ 603              		.cfi_def_cfa_register 7
+ 333:.\BrightnessCommManager.c ****     uint8 driverCountPacket[MAX_PACKET_SIZE];
+ 334:.\BrightnessCommManager.c ****     
+ 335:.\BrightnessCommManager.c ****     if(getDriverID() != HEAD_MODULE_ID)
+ 604              		.loc 1 335 0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 18
+
+
+ 605 0006 FFF7FEFF 		bl	getDriverID
+ 606 000a 031E     		sub	r3, r0, #0
+ 607 000c 012B     		cmp	r3, #1
+ 608 000e 21D1     		bne	.L46
+ 336:.\BrightnessCommManager.c ****         return;
+ 337:.\BrightnessCommManager.c ****     
+ 338:.\BrightnessCommManager.c ****     memset(driverCountPacket, 0, MAX_PACKET_SIZE);
+ 609              		.loc 1 338 0
+ 610 0010 3B1C     		mov	r3, r7
+ 611 0012 181C     		mov	r0, r3
+ 612 0014 0021     		mov	r1, #0
+ 613 0016 0D22     		mov	r2, #13
+ 614 0018 FFF7FEFF 		bl	memset
+ 339:.\BrightnessCommManager.c ****     driverCountPacket[HEADER_START_INDEX] = PacketList[1].HEADER_BYTE;
+ 615              		.loc 1 339 0
+ 616 001c 0F4B     		ldr	r3, .L49
+ 617 001e 5A79     		ldrb	r2, [r3, #5]
+ 618 0020 3B1C     		mov	r3, r7
+ 619 0022 1A70     		strb	r2, [r3]
+ 340:.\BrightnessCommManager.c ****     driverCountPacket[HEADER_START_INDEX + 1] = PacketList[1].PACKET_TYPE;
+ 620              		.loc 1 340 0
+ 621 0024 0D4B     		ldr	r3, .L49
+ 622 0026 9A79     		ldrb	r2, [r3, #6]
+ 623 0028 3B1C     		mov	r3, r7
+ 624 002a 5A70     		strb	r2, [r3, #1]
+ 341:.\BrightnessCommManager.c ****     driverCountPacket[PAYLOAD_START_INDEX + PacketList[1].PAYLOAD_SIZE]
+ 625              		.loc 1 341 0
+ 626 002c 0B4B     		ldr	r3, .L49
+ 627 002e DB79     		ldrb	r3, [r3, #7]
+ 628 0030 0233     		add	r3, r3, #2
+ 342:.\BrightnessCommManager.c ****         = PacketList[1].EOP_CARRIAGE_RETURN;
+ 629              		.loc 1 342 0
+ 630 0032 0A4A     		ldr	r2, .L49
+ 631 0034 117A     		ldrb	r1, [r2, #8]
+ 632 0036 3A1C     		mov	r2, r7
+ 633 0038 D154     		strb	r1, [r2, r3]
+ 343:.\BrightnessCommManager.c ****     driverCountPacket[PAYLOAD_START_INDEX + PacketList[1].PAYLOAD_SIZE + 1]
+ 634              		.loc 1 343 0
+ 635 003a 084B     		ldr	r3, .L49
+ 636 003c DB79     		ldrb	r3, [r3, #7]
+ 637 003e 0333     		add	r3, r3, #3
+ 344:.\BrightnessCommManager.c ****         = PacketList[1].EOP_LINE_FEED;
+ 638              		.loc 1 344 0
+ 639 0040 064A     		ldr	r2, .L49
+ 640 0042 517A     		ldrb	r1, [r2, #9]
+ 641 0044 3A1C     		mov	r2, r7
+ 642 0046 D154     		strb	r1, [r2, r3]
+ 345:.\BrightnessCommManager.c ****     driverCountPacket[PAYLOAD_START_INDEX] = 1;
+ 643              		.loc 1 345 0
+ 644 0048 3B1C     		mov	r3, r7
+ 645 004a 0122     		mov	r2, #1
+ 646 004c 9A70     		strb	r2, [r3, #2]
+ 346:.\BrightnessCommManager.c ****     driverCountPacket[PAYLOAD_START_INDEX + 1] = HEAD_MODULE_ID;
+ 647              		.loc 1 346 0
+ 648 004e 3B1C     		mov	r3, r7
+ 649 0050 0122     		mov	r2, #1
+ 650 0052 DA70     		strb	r2, [r3, #3]
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 19
+
+
+ 651              	.L46:
+ 347:.\BrightnessCommManager.c ****     
+ 348:.\BrightnessCommManager.c ****     //UART_LED_PutArray(driverCountPacket, MAX_PACKET_SIZE);
+ 349:.\BrightnessCommManager.c **** }
+ 652              		.loc 1 349 0
+ 653 0054 BD46     		mov	sp, r7
+ 654 0056 04B0     		add	sp, sp, #16
+ 655              		@ sp needed
+ 656 0058 80BD     		pop	{r7, pc}
+ 657              	.L50:
+ 658 005a C046     		.align	2
+ 659              	.L49:
+ 660 005c 00000000 		.word	PacketList
+ 661              		.cfi_endproc
+ 662              	.LFE41:
+ 663              		.size	assignDriverIDs, .-assignDriverIDs
+ 664              		.section	.text.detectPacket,"ax",%progbits
+ 665              		.align	2
+ 666              		.code	16
+ 667              		.thumb_func
+ 668              		.type	detectPacket, %function
+ 669              	detectPacket:
+ 670              	.LFB42:
+ 350:.\BrightnessCommManager.c **** 
+ 351:.\BrightnessCommManager.c **** /**********DEFINED LOCAL FUNCTIONS**********/
+ 352:.\BrightnessCommManager.c **** 
+ 353:.\BrightnessCommManager.c **** ////////////////////////////////////Recieve from controller or previous module functions///////////
+ 354:.\BrightnessCommManager.c **** 
+ 355:.\BrightnessCommManager.c **** /*******************************************************************************
+ 356:.\BrightnessCommManager.c **** * Function Name: detectPacket
+ 357:.\BrightnessCommManager.c **** ********************************************************************************
+ 358:.\BrightnessCommManager.c **** *
+ 359:.\BrightnessCommManager.c **** * Summary:
+ 360:.\BrightnessCommManager.c **** *  Determines if the incoming byte belongs to a valid packet. If the packet is
+ 361:.\BrightnessCommManager.c **** *  valid, then the payload is processed.
+ 362:.\BrightnessCommManager.c **** *
+ 363:.\BrightnessCommManager.c **** * Parameters:
+ 364:.\BrightnessCommManager.c **** *  dataByte: The next byte to check in the packet
+ 365:.\BrightnessCommManager.c **** *
+ 366:.\BrightnessCommManager.c **** * Return:
+ 367:.\BrightnessCommManager.c **** *  None.
+ 368:.\BrightnessCommManager.c **** *
+ 369:.\BrightnessCommManager.c **** *******************************************************************************/
+ 370:.\BrightnessCommManager.c **** static void detectPacket(uint8 dataByte)
+ 371:.\BrightnessCommManager.c **** {
+ 671              		.loc 1 371 0
+ 672              		.cfi_startproc
+ 673 0000 90B5     		push	{r4, r7, lr}
+ 674              		.cfi_def_cfa_offset 12
+ 675              		.cfi_offset 4, -12
+ 676              		.cfi_offset 7, -8
+ 677              		.cfi_offset 14, -4
+ 678 0002 85B0     		sub	sp, sp, #20
+ 679              		.cfi_def_cfa_offset 32
+ 680 0004 00AF     		add	r7, sp, #0
+ 681              		.cfi_def_cfa_register 7
+ 682 0006 021C     		mov	r2, r0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 20
+
+
+ 683 0008 FB1D     		add	r3, r7, #7
+ 684 000a 1A70     		strb	r2, [r3]
+ 372:.\BrightnessCommManager.c ****     static uint8 packet[MAX_PACKET_SIZE];   
+ 373:.\BrightnessCommManager.c ****     static enum PacketState currentState = HEADER_STATE;
+ 374:.\BrightnessCommManager.c ****     static uint8 currentPacketIndex = HEADER_START_INDEX;
+ 375:.\BrightnessCommManager.c ****     static uint8 dataTypeIndex = 0;
+ 376:.\BrightnessCommManager.c ****     uint8 loopIndex = 0;
+ 685              		.loc 1 376 0
+ 686 000c 0F23     		mov	r3, #15
+ 687 000e FB18     		add	r3, r7, r3
+ 688 0010 0022     		mov	r2, #0
+ 689 0012 1A70     		strb	r2, [r3]
+ 377:.\BrightnessCommManager.c ****     
+ 378:.\BrightnessCommManager.c ****     switch(currentState)
+ 690              		.loc 1 378 0
+ 691 0014 A74B     		ldr	r3, .L74
+ 692 0016 1B78     		ldrb	r3, [r3]
+ 693 0018 012B     		cmp	r3, #1
+ 694 001a 00D1     		bne	.LCB539
+ 695 001c 6FE0     		b	.L53	@long jump
+ 696              	.LCB539:
+ 697 001e 022B     		cmp	r3, #2
+ 698 0020 00D1     		bne	.LCB541
+ 699 0022 8DE0     		b	.L54	@long jump
+ 700              	.LCB541:
+ 701 0024 002B     		cmp	r3, #0
+ 702 0026 00D0     		beq	.LCB543
+ 703 0028 40E1     		b	.L51	@long jump
+ 704              	.LCB543:
+ 379:.\BrightnessCommManager.c ****     {
+ 380:.\BrightnessCommManager.c ****         case HEADER_STATE:
+ 381:.\BrightnessCommManager.c ****             if((currentPacketIndex == HEADER_START_INDEX) &&
+ 705              		.loc 1 381 0
+ 706 002a A34B     		ldr	r3, .L74+4
+ 707 002c 1B78     		ldrb	r3, [r3]
+ 708 002e 002B     		cmp	r3, #0
+ 709 0030 19D1     		bne	.L56
+ 382:.\BrightnessCommManager.c ****                 (dataByte == PacketList[dataTypeIndex].HEADER_BYTE))
+ 710              		.loc 1 382 0 discriminator 1
+ 711 0032 A24B     		ldr	r3, .L74+8
+ 712 0034 1B78     		ldrb	r3, [r3]
+ 713 0036 191C     		mov	r1, r3
+ 714 0038 A14A     		ldr	r2, .L74+12
+ 715 003a 0B1C     		mov	r3, r1
+ 716 003c 9B00     		lsl	r3, r3, #2
+ 717 003e 5B18     		add	r3, r3, r1
+ 718 0040 9B5C     		ldrb	r3, [r3, r2]
+ 381:.\BrightnessCommManager.c ****                 (dataByte == PacketList[dataTypeIndex].HEADER_BYTE))
+ 719              		.loc 1 381 0 discriminator 1
+ 720 0042 FA1D     		add	r2, r7, #7
+ 721 0044 1278     		ldrb	r2, [r2]
+ 722 0046 9A42     		cmp	r2, r3
+ 723 0048 0DD1     		bne	.L56
+ 383:.\BrightnessCommManager.c ****             {
+ 384:.\BrightnessCommManager.c ****                 packet[currentPacketIndex] = dataByte;
+ 724              		.loc 1 384 0
+ 725 004a 9B4B     		ldr	r3, .L74+4
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 21
+
+
+ 726 004c 1B78     		ldrb	r3, [r3]
+ 727 004e 191C     		mov	r1, r3
+ 728 0050 9C4B     		ldr	r3, .L74+16
+ 729 0052 FA1D     		add	r2, r7, #7
+ 730 0054 1278     		ldrb	r2, [r2]
+ 731 0056 5A54     		strb	r2, [r3, r1]
+ 385:.\BrightnessCommManager.c ****                 currentPacketIndex++;
+ 732              		.loc 1 385 0
+ 733 0058 974B     		ldr	r3, .L74+4
+ 734 005a 1B78     		ldrb	r3, [r3]
+ 735 005c 0133     		add	r3, r3, #1
+ 736 005e DAB2     		uxtb	r2, r3
+ 737 0060 954B     		ldr	r3, .L74+4
+ 738 0062 1A70     		strb	r2, [r3]
+ 739 0064 4AE0     		b	.L57
+ 740              	.L56:
+ 386:.\BrightnessCommManager.c ****             }
+ 387:.\BrightnessCommManager.c ****             else if(currentPacketIndex == (HEADER_START_INDEX + 1))
+ 741              		.loc 1 387 0
+ 742 0066 944B     		ldr	r3, .L74+4
+ 743 0068 1B78     		ldrb	r3, [r3]
+ 744 006a 012B     		cmp	r3, #1
+ 745 006c 3FD1     		bne	.L58
+ 388:.\BrightnessCommManager.c ****             {
+ 389:.\BrightnessCommManager.c ****                 for(loopIndex = 0; loopIndex < PACKET_TYPE_COUNT; loopIndex++)
+ 746              		.loc 1 389 0
+ 747 006e 0F23     		mov	r3, #15
+ 748 0070 FB18     		add	r3, r7, r3
+ 749 0072 0022     		mov	r2, #0
+ 750 0074 1A70     		strb	r2, [r3]
+ 751 0076 29E0     		b	.L59
+ 752              	.L62:
+ 390:.\BrightnessCommManager.c ****                 {
+ 391:.\BrightnessCommManager.c ****                     if(dataByte == PacketList[loopIndex].PACKET_TYPE)
+ 753              		.loc 1 391 0
+ 754 0078 0F23     		mov	r3, #15
+ 755 007a FB18     		add	r3, r7, r3
+ 756 007c 1A78     		ldrb	r2, [r3]
+ 757 007e 9049     		ldr	r1, .L74+12
+ 758 0080 131C     		mov	r3, r2
+ 759 0082 9B00     		lsl	r3, r3, #2
+ 760 0084 9B18     		add	r3, r3, r2
+ 761 0086 CB18     		add	r3, r1, r3
+ 762 0088 5B78     		ldrb	r3, [r3, #1]
+ 763 008a FA1D     		add	r2, r7, #7
+ 764 008c 1278     		ldrb	r2, [r2]
+ 765 008e 9A42     		cmp	r2, r3
+ 766 0090 15D1     		bne	.L60
+ 392:.\BrightnessCommManager.c ****                     {
+ 393:.\BrightnessCommManager.c ****                         dataTypeIndex = loopIndex;                        
+ 767              		.loc 1 393 0
+ 768 0092 8A4B     		ldr	r3, .L74+8
+ 769 0094 0F22     		mov	r2, #15
+ 770 0096 BA18     		add	r2, r7, r2
+ 771 0098 1278     		ldrb	r2, [r2]
+ 772 009a 1A70     		strb	r2, [r3]
+ 394:.\BrightnessCommManager.c ****                         packet[currentPacketIndex] = dataByte;
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 22
+
+
+ 773              		.loc 1 394 0
+ 774 009c 864B     		ldr	r3, .L74+4
+ 775 009e 1B78     		ldrb	r3, [r3]
+ 776 00a0 191C     		mov	r1, r3
+ 777 00a2 884B     		ldr	r3, .L74+16
+ 778 00a4 FA1D     		add	r2, r7, #7
+ 779 00a6 1278     		ldrb	r2, [r2]
+ 780 00a8 5A54     		strb	r2, [r3, r1]
+ 395:.\BrightnessCommManager.c ****                         currentPacketIndex++;
+ 781              		.loc 1 395 0
+ 782 00aa 834B     		ldr	r3, .L74+4
+ 783 00ac 1B78     		ldrb	r3, [r3]
+ 784 00ae 0133     		add	r3, r3, #1
+ 785 00b0 DAB2     		uxtb	r2, r3
+ 786 00b2 814B     		ldr	r3, .L74+4
+ 787 00b4 1A70     		strb	r2, [r3]
+ 396:.\BrightnessCommManager.c ****                         currentState = PAYLOAD_STATE;
+ 788              		.loc 1 396 0
+ 789 00b6 7F4B     		ldr	r3, .L74
+ 790 00b8 0122     		mov	r2, #1
+ 791 00ba 1A70     		strb	r2, [r3]
+ 397:.\BrightnessCommManager.c ****                         break;
+ 792              		.loc 1 397 0
+ 793 00bc 0BE0     		b	.L61
+ 794              	.L60:
+ 389:.\BrightnessCommManager.c ****                 {
+ 795              		.loc 1 389 0 discriminator 2
+ 796 00be 0F23     		mov	r3, #15
+ 797 00c0 FB18     		add	r3, r7, r3
+ 798 00c2 1A78     		ldrb	r2, [r3]
+ 799 00c4 0F23     		mov	r3, #15
+ 800 00c6 FB18     		add	r3, r7, r3
+ 801 00c8 0132     		add	r2, r2, #1
+ 802 00ca 1A70     		strb	r2, [r3]
+ 803              	.L59:
+ 389:.\BrightnessCommManager.c ****                 {
+ 804              		.loc 1 389 0 is_stmt 0 discriminator 1
+ 805 00cc 0F23     		mov	r3, #15
+ 806 00ce FB18     		add	r3, r7, r3
+ 807 00d0 1B78     		ldrb	r3, [r3]
+ 808 00d2 052B     		cmp	r3, #5
+ 809 00d4 D0D9     		bls	.L62
+ 810              	.L61:
+ 398:.\BrightnessCommManager.c ****                     }
+ 399:.\BrightnessCommManager.c ****                 }
+ 400:.\BrightnessCommManager.c ****                 
+ 401:.\BrightnessCommManager.c ****                 if(loopIndex >= PACKET_TYPE_COUNT)
+ 811              		.loc 1 401 0 is_stmt 1
+ 812 00d6 0F23     		mov	r3, #15
+ 813 00d8 FB18     		add	r3, r7, r3
+ 814 00da 1B78     		ldrb	r3, [r3]
+ 815 00dc 052B     		cmp	r3, #5
+ 816 00de 0DD9     		bls	.L57
+ 402:.\BrightnessCommManager.c ****                 {
+ 403:.\BrightnessCommManager.c ****                     currentPacketIndex = HEADER_START_INDEX;
+ 817              		.loc 1 403 0
+ 818 00e0 754B     		ldr	r3, .L74+4
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 23
+
+
+ 819 00e2 0022     		mov	r2, #0
+ 820 00e4 1A70     		strb	r2, [r3]
+ 404:.\BrightnessCommManager.c ****                     dataTypeIndex = 0;
+ 821              		.loc 1 404 0
+ 822 00e6 754B     		ldr	r3, .L74+8
+ 823 00e8 0022     		mov	r2, #0
+ 824 00ea 1A70     		strb	r2, [r3]
+ 405:.\BrightnessCommManager.c ****                 }
+ 406:.\BrightnessCommManager.c ****             }
+ 407:.\BrightnessCommManager.c ****             else
+ 408:.\BrightnessCommManager.c ****             {
+ 409:.\BrightnessCommManager.c ****                 currentPacketIndex = HEADER_START_INDEX;
+ 410:.\BrightnessCommManager.c ****                 dataTypeIndex = 0;
+ 411:.\BrightnessCommManager.c ****             }
+ 412:.\BrightnessCommManager.c ****             break;
+ 825              		.loc 1 412 0
+ 826 00ec DEE0     		b	.L51
+ 827              	.L58:
+ 409:.\BrightnessCommManager.c ****                 dataTypeIndex = 0;
+ 828              		.loc 1 409 0
+ 829 00ee 724B     		ldr	r3, .L74+4
+ 830 00f0 0022     		mov	r2, #0
+ 831 00f2 1A70     		strb	r2, [r3]
+ 410:.\BrightnessCommManager.c ****             }
+ 832              		.loc 1 410 0
+ 833 00f4 714B     		ldr	r3, .L74+8
+ 834 00f6 0022     		mov	r2, #0
+ 835 00f8 1A70     		strb	r2, [r3]
+ 836              		.loc 1 412 0
+ 837 00fa D7E0     		b	.L51
+ 838              	.L57:
+ 839              		.loc 1 412 0 is_stmt 0 discriminator 1
+ 840 00fc D6E0     		b	.L51
+ 841              	.L53:
+ 413:.\BrightnessCommManager.c ****         case PAYLOAD_STATE:
+ 414:.\BrightnessCommManager.c ****             packet[currentPacketIndex] = dataByte;
+ 842              		.loc 1 414 0 is_stmt 1
+ 843 00fe 6E4B     		ldr	r3, .L74+4
+ 844 0100 1B78     		ldrb	r3, [r3]
+ 845 0102 191C     		mov	r1, r3
+ 846 0104 6F4B     		ldr	r3, .L74+16
+ 847 0106 FA1D     		add	r2, r7, #7
+ 848 0108 1278     		ldrb	r2, [r2]
+ 849 010a 5A54     		strb	r2, [r3, r1]
+ 415:.\BrightnessCommManager.c ****             currentPacketIndex++;
+ 850              		.loc 1 415 0
+ 851 010c 6A4B     		ldr	r3, .L74+4
+ 852 010e 1B78     		ldrb	r3, [r3]
+ 853 0110 0133     		add	r3, r3, #1
+ 854 0112 DAB2     		uxtb	r2, r3
+ 855 0114 684B     		ldr	r3, .L74+4
+ 856 0116 1A70     		strb	r2, [r3]
+ 416:.\BrightnessCommManager.c ****             
+ 417:.\BrightnessCommManager.c ****             if(currentPacketIndex >= (PAYLOAD_START_INDEX + PacketList[dataTypeIndex].PAYLOAD_SIZE)
+ 857              		.loc 1 417 0
+ 858 0118 674B     		ldr	r3, .L74+4
+ 859 011a 1B78     		ldrb	r3, [r3]
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 24
+
+
+ 860 011c 181C     		mov	r0, r3
+ 861 011e 674B     		ldr	r3, .L74+8
+ 862 0120 1B78     		ldrb	r3, [r3]
+ 863 0122 191C     		mov	r1, r3
+ 864 0124 664A     		ldr	r2, .L74+12
+ 865 0126 0B1C     		mov	r3, r1
+ 866 0128 9B00     		lsl	r3, r3, #2
+ 867 012a 5B18     		add	r3, r3, r1
+ 868 012c D318     		add	r3, r2, r3
+ 869 012e 9B78     		ldrb	r3, [r3, #2]
+ 870 0130 0233     		add	r3, r3, #2
+ 871 0132 9842     		cmp	r0, r3
+ 872 0134 03DB     		blt	.L64
+ 418:.\BrightnessCommManager.c ****                 currentState = EOP_STATE;
+ 873              		.loc 1 418 0
+ 874 0136 5F4B     		ldr	r3, .L74
+ 875 0138 0222     		mov	r2, #2
+ 876 013a 1A70     		strb	r2, [r3]
+ 419:.\BrightnessCommManager.c ****             break;
+ 877              		.loc 1 419 0
+ 878 013c B6E0     		b	.L51
+ 879              	.L64:
+ 880 013e B5E0     		b	.L51
+ 881              	.L54:
+ 420:.\BrightnessCommManager.c ****         case EOP_STATE:
+ 421:.\BrightnessCommManager.c ****             if((currentPacketIndex == (PAYLOAD_START_INDEX + PacketList[dataTypeIndex].PAYLOAD_SIZE
+ 882              		.loc 1 421 0
+ 883 0140 5D4B     		ldr	r3, .L74+4
+ 884 0142 1B78     		ldrb	r3, [r3]
+ 885 0144 181C     		mov	r0, r3
+ 886 0146 5D4B     		ldr	r3, .L74+8
+ 887 0148 1B78     		ldrb	r3, [r3]
+ 888 014a 191C     		mov	r1, r3
+ 889 014c 5C4A     		ldr	r2, .L74+12
+ 890 014e 0B1C     		mov	r3, r1
+ 891 0150 9B00     		lsl	r3, r3, #2
+ 892 0152 5B18     		add	r3, r3, r1
+ 893 0154 D318     		add	r3, r2, r3
+ 894 0156 9B78     		ldrb	r3, [r3, #2]
+ 895 0158 0233     		add	r3, r3, #2
+ 896 015a 9842     		cmp	r0, r3
+ 897 015c 1AD1     		bne	.L65
+ 422:.\BrightnessCommManager.c ****                 (dataByte == PacketList[dataTypeIndex].EOP_CARRIAGE_RETURN))
+ 898              		.loc 1 422 0 discriminator 1
+ 899 015e 574B     		ldr	r3, .L74+8
+ 900 0160 1B78     		ldrb	r3, [r3]
+ 901 0162 191C     		mov	r1, r3
+ 902 0164 564A     		ldr	r2, .L74+12
+ 903 0166 0B1C     		mov	r3, r1
+ 904 0168 9B00     		lsl	r3, r3, #2
+ 905 016a 5B18     		add	r3, r3, r1
+ 906 016c D318     		add	r3, r2, r3
+ 907 016e DB78     		ldrb	r3, [r3, #3]
+ 421:.\BrightnessCommManager.c ****                 (dataByte == PacketList[dataTypeIndex].EOP_CARRIAGE_RETURN))
+ 908              		.loc 1 421 0 discriminator 1
+ 909 0170 FA1D     		add	r2, r7, #7
+ 910 0172 1278     		ldrb	r2, [r2]
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 25
+
+
+ 911 0174 9A42     		cmp	r2, r3
+ 912 0176 0DD1     		bne	.L65
+ 423:.\BrightnessCommManager.c ****             {
+ 424:.\BrightnessCommManager.c ****                 packet[currentPacketIndex] = dataByte;
+ 913              		.loc 1 424 0
+ 914 0178 4F4B     		ldr	r3, .L74+4
+ 915 017a 1B78     		ldrb	r3, [r3]
+ 916 017c 191C     		mov	r1, r3
+ 917 017e 514B     		ldr	r3, .L74+16
+ 918 0180 FA1D     		add	r2, r7, #7
+ 919 0182 1278     		ldrb	r2, [r2]
+ 920 0184 5A54     		strb	r2, [r3, r1]
+ 425:.\BrightnessCommManager.c ****                 currentPacketIndex++;
+ 921              		.loc 1 425 0
+ 922 0186 4C4B     		ldr	r3, .L74+4
+ 923 0188 1B78     		ldrb	r3, [r3]
+ 924 018a 0133     		add	r3, r3, #1
+ 925 018c DAB2     		uxtb	r2, r3
+ 926 018e 4A4B     		ldr	r3, .L74+4
+ 927 0190 1A70     		strb	r2, [r3]
+ 928 0192 8AE0     		b	.L66
+ 929              	.L65:
+ 426:.\BrightnessCommManager.c ****             }
+ 427:.\BrightnessCommManager.c ****             else if((currentPacketIndex == (PAYLOAD_START_INDEX + PacketList[dataTypeIndex].PAYLOAD
+ 930              		.loc 1 427 0
+ 931 0194 484B     		ldr	r3, .L74+4
+ 932 0196 1B78     		ldrb	r3, [r3]
+ 933 0198 181C     		mov	r0, r3
+ 934 019a 484B     		ldr	r3, .L74+8
+ 935 019c 1B78     		ldrb	r3, [r3]
+ 936 019e 191C     		mov	r1, r3
+ 937 01a0 474A     		ldr	r2, .L74+12
+ 938 01a2 0B1C     		mov	r3, r1
+ 939 01a4 9B00     		lsl	r3, r3, #2
+ 940 01a6 5B18     		add	r3, r3, r1
+ 941 01a8 D318     		add	r3, r2, r3
+ 942 01aa 9B78     		ldrb	r3, [r3, #2]
+ 943 01ac 0333     		add	r3, r3, #3
+ 944 01ae 9842     		cmp	r0, r3
+ 945 01b0 00D0     		beq	.LCB769
+ 946 01b2 71E0     		b	.L67	@long jump
+ 947              	.LCB769:
+ 428:.\BrightnessCommManager.c ****                     && (dataByte == PacketList[dataTypeIndex].EOP_LINE_FEED))
+ 948              		.loc 1 428 0
+ 949 01b4 414B     		ldr	r3, .L74+8
+ 950 01b6 1B78     		ldrb	r3, [r3]
+ 951 01b8 191C     		mov	r1, r3
+ 952 01ba 414A     		ldr	r2, .L74+12
+ 953 01bc 0B1C     		mov	r3, r1
+ 954 01be 9B00     		lsl	r3, r3, #2
+ 955 01c0 5B18     		add	r3, r3, r1
+ 956 01c2 D318     		add	r3, r2, r3
+ 957 01c4 1B79     		ldrb	r3, [r3, #4]
+ 958 01c6 FA1D     		add	r2, r7, #7
+ 959 01c8 1278     		ldrb	r2, [r2]
+ 960 01ca 9A42     		cmp	r2, r3
+ 961 01cc 64D1     		bne	.L67
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 26
+
+
+ 429:.\BrightnessCommManager.c ****             {
+ 430:.\BrightnessCommManager.c ****                 packet[currentPacketIndex] = dataByte;
+ 962              		.loc 1 430 0
+ 963 01ce 3A4B     		ldr	r3, .L74+4
+ 964 01d0 1B78     		ldrb	r3, [r3]
+ 965 01d2 191C     		mov	r1, r3
+ 966 01d4 3B4B     		ldr	r3, .L74+16
+ 967 01d6 FA1D     		add	r2, r7, #7
+ 968 01d8 1278     		ldrb	r2, [r2]
+ 969 01da 5A54     		strb	r2, [r3, r1]
+ 431:.\BrightnessCommManager.c ****                 
+ 432:.\BrightnessCommManager.c ****                 TimeoutTimer_Stop();
+ 970              		.loc 1 432 0
+ 971 01dc FFF7FEFF 		bl	TimeoutTimer_Stop
+ 433:.\BrightnessCommManager.c ****                 timeOutCounter = 0;
+ 972              		.loc 1 433 0
+ 973 01e0 394B     		ldr	r3, .L74+20
+ 974 01e2 0022     		mov	r2, #0
+ 975 01e4 1A80     		strh	r2, [r3]
+ 434:.\BrightnessCommManager.c ****                 bCommunicationTimeOut = FALSE;
+ 976              		.loc 1 434 0
+ 977 01e6 394B     		ldr	r3, .L74+24
+ 978 01e8 0022     		mov	r2, #0
+ 979 01ea 1A70     		strb	r2, [r3]
+ 435:.\BrightnessCommManager.c ****                 TimeoutTimer_Start();
+ 980              		.loc 1 435 0
+ 981 01ec FFF7FEFF 		bl	TimeoutTimer_Start
+ 436:.\BrightnessCommManager.c ****                 
+ 437:.\BrightnessCommManager.c **** 				if(dataTypeIndex == 0)
+ 982              		.loc 1 437 0
+ 983 01f0 324B     		ldr	r3, .L74+8
+ 984 01f2 1B78     		ldrb	r3, [r3]
+ 985 01f4 002B     		cmp	r3, #0
+ 986 01f6 08D1     		bne	.L68
+ 438:.\BrightnessCommManager.c ****                 {
+ 439:.\BrightnessCommManager.c ****                     processOutputSelectUart();
+ 987              		.loc 1 439 0
+ 988 01f8 FFF7FEFF 		bl	processOutputSelectUart
+ 440:.\BrightnessCommManager.c ****                     processBrightnessPacket(packet, MAX_PACKET_SIZE - 1, FALSE);
+ 989              		.loc 1 440 0
+ 990 01fc 314B     		ldr	r3, .L74+16
+ 991 01fe 181C     		mov	r0, r3
+ 992 0200 0C21     		mov	r1, #12
+ 993 0202 0022     		mov	r2, #0
+ 994 0204 FFF7FEFF 		bl	processBrightnessPacket
+ 995 0208 3CE0     		b	.L69
+ 996              	.L68:
+ 441:.\BrightnessCommManager.c ****                 }
+ 442:.\BrightnessCommManager.c **** 				else if(dataTypeIndex == 1)
+ 997              		.loc 1 442 0
+ 998 020a 2C4B     		ldr	r3, .L74+8
+ 999 020c 1B78     		ldrb	r3, [r3]
+ 1000 020e 012B     		cmp	r3, #1
+ 1001 0210 07D1     		bne	.L70
+ 443:.\BrightnessCommManager.c ****                 {
+ 444:.\BrightnessCommManager.c ****                     processOutputSelectUart();
+ 1002              		.loc 1 444 0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 27
+
+
+ 1003 0212 FFF7FEFF 		bl	processOutputSelectUart
+ 445:.\BrightnessCommManager.c ****                     processDriverCountPacket(packet, MAX_PACKET_SIZE);
+ 1004              		.loc 1 445 0
+ 1005 0216 2B4B     		ldr	r3, .L74+16
+ 1006 0218 181C     		mov	r0, r3
+ 1007 021a 0D21     		mov	r1, #13
+ 1008 021c FFF7FEFF 		bl	processDriverCountPacket
+ 1009 0220 30E0     		b	.L69
+ 1010              	.L70:
+ 446:.\BrightnessCommManager.c ****                 }
+ 447:.\BrightnessCommManager.c ****                 else if(dataTypeIndex == 3)
+ 1011              		.loc 1 447 0
+ 1012 0222 264B     		ldr	r3, .L74+8
+ 1013 0224 1B78     		ldrb	r3, [r3]
+ 1014 0226 032B     		cmp	r3, #3
+ 1015 0228 0ED1     		bne	.L71
+ 448:.\BrightnessCommManager.c ****                 {
+ 449:.\BrightnessCommManager.c ****                     processOutputSelectUart();
+ 1016              		.loc 1 449 0
+ 1017 022a FFF7FEFF 		bl	processOutputSelectUart
+ 450:.\BrightnessCommManager.c ****                     saveStateBar(getVolatileBarStateMemory(), getNonVolatileBarStateMemory(), packe
+ 1018              		.loc 1 450 0
+ 1019 022e FFF7FEFF 		bl	getVolatileBarStateMemory
+ 1020 0232 041C     		mov	r4, r0
+ 1021 0234 FFF7FEFF 		bl	getNonVolatileBarStateMemory
+ 1022 0238 021C     		mov	r2, r0
+ 1023 023a 224B     		ldr	r3, .L74+16
+ 1024 023c 201C     		mov	r0, r4
+ 1025 023e 111C     		mov	r1, r2
+ 1026 0240 1A1C     		mov	r2, r3
+ 1027 0242 FFF7FEFF 		bl	saveStateBar
+ 1028 0246 1DE0     		b	.L69
+ 1029              	.L71:
+ 451:.\BrightnessCommManager.c ****                     //
+ 452:.\BrightnessCommManager.c ****                 }
+ 453:.\BrightnessCommManager.c ****                 else if(dataTypeIndex == 4)
+ 1030              		.loc 1 453 0
+ 1031 0248 1C4B     		ldr	r3, .L74+8
+ 1032 024a 1B78     		ldrb	r3, [r3]
+ 1033 024c 042B     		cmp	r3, #4
+ 1034 024e 05D1     		bne	.L72
+ 454:.\BrightnessCommManager.c ****                 {                   
+ 455:.\BrightnessCommManager.c ****                     processLowPowerRequest(packet, MAX_PACKET_SIZE-8);
+ 1035              		.loc 1 455 0
+ 1036 0250 1C4B     		ldr	r3, .L74+16
+ 1037 0252 181C     		mov	r0, r3
+ 1038 0254 0521     		mov	r1, #5
+ 1039 0256 FFF7FEFF 		bl	processLowPowerRequest
+ 1040 025a 13E0     		b	.L69
+ 1041              	.L72:
+ 456:.\BrightnessCommManager.c ****                 }
+ 457:.\BrightnessCommManager.c ****                 else if(dataTypeIndex == 5)
+ 1042              		.loc 1 457 0
+ 1043 025c 174B     		ldr	r3, .L74+8
+ 1044 025e 1B78     		ldrb	r3, [r3]
+ 1045 0260 052B     		cmp	r3, #5
+ 1046 0262 07D1     		bne	.L73
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 28
+
+
+ 458:.\BrightnessCommManager.c ****                 {
+ 459:.\BrightnessCommManager.c ****                     processOutputSelectUart();
+ 1047              		.loc 1 459 0
+ 1048 0264 FFF7FEFF 		bl	processOutputSelectUart
+ 460:.\BrightnessCommManager.c ****                     processReinitlizationPacket(packet, MAX_PACKET_SIZE-6);
+ 1049              		.loc 1 460 0
+ 1050 0268 164B     		ldr	r3, .L74+16
+ 1051 026a 181C     		mov	r0, r3
+ 1052 026c 0721     		mov	r1, #7
+ 1053 026e FFF7FEFF 		bl	processReinitlizationPacket
+ 1054 0272 07E0     		b	.L69
+ 1055              	.L73:
+ 461:.\BrightnessCommManager.c ****                 }
+ 462:.\BrightnessCommManager.c ****                 else
+ 463:.\BrightnessCommManager.c ****                 {
+ 464:.\BrightnessCommManager.c ****                     processOutputSelectUart();
+ 1056              		.loc 1 464 0
+ 1057 0274 FFF7FEFF 		bl	processOutputSelectUart
+ 465:.\BrightnessCommManager.c ****                     processBrightnessPacket(packet, MAX_PACKET_SIZE - 1, TRUE);
+ 1058              		.loc 1 465 0
+ 1059 0278 124B     		ldr	r3, .L74+16
+ 1060 027a 181C     		mov	r0, r3
+ 1061 027c 0C21     		mov	r1, #12
+ 1062 027e 0122     		mov	r2, #1
+ 1063 0280 FFF7FEFF 		bl	processBrightnessPacket
+ 1064              	.L69:
+ 466:.\BrightnessCommManager.c ****                 }
+ 467:.\BrightnessCommManager.c ****                 
+ 468:.\BrightnessCommManager.c ****                 currentPacketIndex = HEADER_START_INDEX;
+ 1065              		.loc 1 468 0
+ 1066 0284 0C4B     		ldr	r3, .L74+4
+ 1067 0286 0022     		mov	r2, #0
+ 1068 0288 1A70     		strb	r2, [r3]
+ 469:.\BrightnessCommManager.c ****                 currentState = HEADER_STATE;
+ 1069              		.loc 1 469 0
+ 1070 028a 0A4B     		ldr	r3, .L74
+ 1071 028c 0022     		mov	r2, #0
+ 1072 028e 1A70     		strb	r2, [r3]
+ 470:.\BrightnessCommManager.c ****                 dataTypeIndex = 0;
+ 1073              		.loc 1 470 0
+ 1074 0290 0A4B     		ldr	r3, .L74+8
+ 1075 0292 0022     		mov	r2, #0
+ 1076 0294 1A70     		strb	r2, [r3]
+ 1077 0296 08E0     		b	.L66
+ 1078              	.L67:
+ 471:.\BrightnessCommManager.c ****             }
+ 472:.\BrightnessCommManager.c ****             else
+ 473:.\BrightnessCommManager.c ****             {
+ 474:.\BrightnessCommManager.c ****                 currentPacketIndex = HEADER_START_INDEX;
+ 1079              		.loc 1 474 0
+ 1080 0298 074B     		ldr	r3, .L74+4
+ 1081 029a 0022     		mov	r2, #0
+ 1082 029c 1A70     		strb	r2, [r3]
+ 475:.\BrightnessCommManager.c ****                 currentState = HEADER_STATE;
+ 1083              		.loc 1 475 0
+ 1084 029e 054B     		ldr	r3, .L74
+ 1085 02a0 0022     		mov	r2, #0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 29
+
+
+ 1086 02a2 1A70     		strb	r2, [r3]
+ 476:.\BrightnessCommManager.c ****                 dataTypeIndex = 0;
+ 1087              		.loc 1 476 0
+ 1088 02a4 054B     		ldr	r3, .L74+8
+ 1089 02a6 0022     		mov	r2, #0
+ 1090 02a8 1A70     		strb	r2, [r3]
+ 1091              	.L66:
+ 477:.\BrightnessCommManager.c ****             }
+ 478:.\BrightnessCommManager.c ****             break;
+ 1092              		.loc 1 478 0
+ 1093 02aa C046     		mov	r8, r8
+ 1094              	.L51:
+ 479:.\BrightnessCommManager.c ****     }
+ 480:.\BrightnessCommManager.c **** }
+ 1095              		.loc 1 480 0
+ 1096 02ac BD46     		mov	sp, r7
+ 1097 02ae 05B0     		add	sp, sp, #20
+ 1098              		@ sp needed
+ 1099 02b0 90BD     		pop	{r4, r7, pc}
+ 1100              	.L75:
+ 1101 02b2 C046     		.align	2
+ 1102              	.L74:
+ 1103 02b4 12000000 		.word	currentState.6225
+ 1104 02b8 13000000 		.word	currentPacketIndex.6226
+ 1105 02bc 14000000 		.word	dataTypeIndex.6227
+ 1106 02c0 00000000 		.word	PacketList
+ 1107 02c4 18000000 		.word	packet.6224
+ 1108 02c8 00000000 		.word	timeOutCounter
+ 1109 02cc 00000000 		.word	bCommunicationTimeOut
+ 1110              		.cfi_endproc
+ 1111              	.LFE42:
+ 1112              		.size	detectPacket, .-detectPacket
+ 1113              		.section	.text.processLowPowerRequest,"ax",%progbits
+ 1114              		.align	2
+ 1115              		.code	16
+ 1116              		.thumb_func
+ 1117              		.type	processLowPowerRequest, %function
+ 1118              	processLowPowerRequest:
+ 1119              	.LFB43:
+ 481:.\BrightnessCommManager.c **** 
+ 482:.\BrightnessCommManager.c **** /*******************************************************************************
+ 483:.\BrightnessCommManager.c **** * Function Name: processDriverCountPacket
+ 484:.\BrightnessCommManager.c **** ********************************************************************************
+ 485:.\BrightnessCommManager.c **** *
+ 486:.\BrightnessCommManager.c **** * Summary:
+ 487:.\BrightnessCommManager.c **** *  Uses packet to send an ack to the previous module, set the ID for this driver, 
+ 488:.\BrightnessCommManager.c **** *  send the packet to the next module, and start the timer to wait for an ack from
+ 489:.\BrightnessCommManager.c **** *  the next module.
+ 490:.\BrightnessCommManager.c **** *
+ 491:.\BrightnessCommManager.c **** * Parameters:
+ 492:.\BrightnessCommManager.c **** *  packet: The reference to the driver count packet to process.
+ 493:.\BrightnessCommManager.c **** *  length: The byte count for this packet.
+ 494:.\BrightnessCommManager.c **** *
+ 495:.\BrightnessCommManager.c **** * Return:
+ 496:.\BrightnessCommManager.c **** *  SUCCESS for valid inputs, FAILURE otherwise
+ 497:.\BrightnessCommManager.c **** *
+ 498:.\BrightnessCommManager.c **** *******************************************************************************/
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 30
+
+
+ 499:.\BrightnessCommManager.c **** static uint8 processLowPowerRequest(uint8* packet, uint8 length)
+ 500:.\BrightnessCommManager.c **** {
+ 1120              		.loc 1 500 0
+ 1121              		.cfi_startproc
+ 1122 0000 80B5     		push	{r7, lr}
+ 1123              		.cfi_def_cfa_offset 8
+ 1124              		.cfi_offset 7, -8
+ 1125              		.cfi_offset 14, -4
+ 1126 0002 82B0     		sub	sp, sp, #8
+ 1127              		.cfi_def_cfa_offset 16
+ 1128 0004 00AF     		add	r7, sp, #0
+ 1129              		.cfi_def_cfa_register 7
+ 1130 0006 7860     		str	r0, [r7, #4]
+ 1131 0008 0A1C     		mov	r2, r1
+ 1132 000a FB1C     		add	r3, r7, #3
+ 1133 000c 1A70     		strb	r2, [r3]
+ 501:.\BrightnessCommManager.c ****     static uint8 driver_ID = 0;
+ 502:.\BrightnessCommManager.c ****     //uint8 currentDriverCount = 0;
+ 503:.\BrightnessCommManager.c ****     
+ 504:.\BrightnessCommManager.c ****     if(packet == NULL || length != MAX_PACKET_SIZE-8)
+ 1134              		.loc 1 504 0
+ 1135 000e 7B68     		ldr	r3, [r7, #4]
+ 1136 0010 002B     		cmp	r3, #0
+ 1137 0012 03D0     		beq	.L77
+ 1138              		.loc 1 504 0 is_stmt 0 discriminator 1
+ 1139 0014 FB1C     		add	r3, r7, #3
+ 1140 0016 1B78     		ldrb	r3, [r3]
+ 1141 0018 052B     		cmp	r3, #5
+ 1142 001a 01D0     		beq	.L78
+ 1143              	.L77:
+ 505:.\BrightnessCommManager.c ****         return FAILURE;
+ 1144              		.loc 1 505 0 is_stmt 1
+ 1145 001c 0123     		mov	r3, #1
+ 1146 001e 06E0     		b	.L79
+ 1147              	.L78:
+ 506:.\BrightnessCommManager.c ****     
+ 507:.\BrightnessCommManager.c ****     driver_ID = getDriverID();
+ 1148              		.loc 1 507 0
+ 1149 0020 FFF7FEFF 		bl	getDriverID
+ 1150 0024 031C     		mov	r3, r0
+ 1151 0026 1A1C     		mov	r2, r3
+ 1152 0028 034B     		ldr	r3, .L80
+ 1153 002a 1A70     		strb	r2, [r3]
+ 508:.\BrightnessCommManager.c **** 
+ 509:.\BrightnessCommManager.c ****     if(driver_ID == HEAD_MODULE_ID)
+ 510:.\BrightnessCommManager.c ****     {
+ 511:.\BrightnessCommManager.c ****         //UART_LED_PutChar('~');
+ 512:.\BrightnessCommManager.c ****         //UART_LED_PutChar('L');
+ 513:.\BrightnessCommManager.c ****         //UART_LED_PutChar(01);
+ 514:.\BrightnessCommManager.c ****         //UART_LED_PutChar(0x0D);
+ 515:.\BrightnessCommManager.c ****         //UART_LED_PutChar(0x0A);
+ 516:.\BrightnessCommManager.c ****         //UART_LED_Control_Write(2);
+ 517:.\BrightnessCommManager.c ****     }    
+ 518:.\BrightnessCommManager.c ****     
+ 519:.\BrightnessCommManager.c ****     return TRUE;
+ 1154              		.loc 1 519 0
+ 1155 002c 0123     		mov	r3, #1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 31
+
+
+ 1156              	.L79:
+ 520:.\BrightnessCommManager.c **** }
+ 1157              		.loc 1 520 0
+ 1158 002e 181C     		mov	r0, r3
+ 1159 0030 BD46     		mov	sp, r7
+ 1160 0032 02B0     		add	sp, sp, #8
+ 1161              		@ sp needed
+ 1162 0034 80BD     		pop	{r7, pc}
+ 1163              	.L81:
+ 1164 0036 C046     		.align	2
+ 1165              	.L80:
+ 1166 0038 25000000 		.word	driver_ID.6240
+ 1167              		.cfi_endproc
+ 1168              	.LFE43:
+ 1169              		.size	processLowPowerRequest, .-processLowPowerRequest
+ 1170              		.section	.text.processDriverCountPacket,"ax",%progbits
+ 1171              		.align	2
+ 1172              		.code	16
+ 1173              		.thumb_func
+ 1174              		.type	processDriverCountPacket, %function
+ 1175              	processDriverCountPacket:
+ 1176              	.LFB44:
+ 521:.\BrightnessCommManager.c **** 
+ 522:.\BrightnessCommManager.c **** /*******************************************************************************
+ 523:.\BrightnessCommManager.c **** * Function Name: processDriverCountPacket
+ 524:.\BrightnessCommManager.c **** ********************************************************************************
+ 525:.\BrightnessCommManager.c **** *
+ 526:.\BrightnessCommManager.c **** * Summary:
+ 527:.\BrightnessCommManager.c **** *  Uses packet to send an ack to the previous module, set the ID for this driver, 
+ 528:.\BrightnessCommManager.c **** *  send the packet to the next module, and start the timer to wait for an ack from
+ 529:.\BrightnessCommManager.c **** *  the next module.
+ 530:.\BrightnessCommManager.c **** *
+ 531:.\BrightnessCommManager.c **** * Parameters:
+ 532:.\BrightnessCommManager.c **** *  packet: The reference to the driver count packet to process.
+ 533:.\BrightnessCommManager.c **** *  length: The byte count for this packet.
+ 534:.\BrightnessCommManager.c **** *
+ 535:.\BrightnessCommManager.c **** * Return:
+ 536:.\BrightnessCommManager.c **** *  SUCCESS for valid inputs, FAILURE otherwise
+ 537:.\BrightnessCommManager.c **** *
+ 538:.\BrightnessCommManager.c **** *******************************************************************************/
+ 539:.\BrightnessCommManager.c **** static uint8 processDriverCountPacket(uint8* packet, uint8 length)
+ 540:.\BrightnessCommManager.c **** {
+ 1177              		.loc 1 540 0
+ 1178              		.cfi_startproc
+ 1179 0000 80B5     		push	{r7, lr}
+ 1180              		.cfi_def_cfa_offset 8
+ 1181              		.cfi_offset 7, -8
+ 1182              		.cfi_offset 14, -4
+ 1183 0002 86B0     		sub	sp, sp, #24
+ 1184              		.cfi_def_cfa_offset 32
+ 1185 0004 00AF     		add	r7, sp, #0
+ 1186              		.cfi_def_cfa_register 7
+ 1187 0006 7860     		str	r0, [r7, #4]
+ 1188 0008 0A1C     		mov	r2, r1
+ 1189 000a FB1C     		add	r3, r7, #3
+ 1190 000c 1A70     		strb	r2, [r3]
+ 541:.\BrightnessCommManager.c ****     static uint8 bReceivedCountPacket = FALSE;
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 32
+
+
+ 542:.\BrightnessCommManager.c ****     uint8 currentDriverCount = 0;
+ 1191              		.loc 1 542 0
+ 1192 000e 1623     		mov	r3, #22
+ 1193 0010 FB18     		add	r3, r7, r3
+ 1194 0012 0022     		mov	r2, #0
+ 1195 0014 1A70     		strb	r2, [r3]
+ 543:.\BrightnessCommManager.c ****     uint8 ackPacket[MAX_PACKET_SIZE];
+ 544:.\BrightnessCommManager.c ****     uint8 countIndex = 0;
+ 1196              		.loc 1 544 0
+ 1197 0016 1723     		mov	r3, #23
+ 1198 0018 FB18     		add	r3, r7, r3
+ 1199 001a 0022     		mov	r2, #0
+ 1200 001c 1A70     		strb	r2, [r3]
+ 545:.\BrightnessCommManager.c ****     
+ 546:.\BrightnessCommManager.c ****     if(packet == NULL || length != MAX_PACKET_SIZE)
+ 1201              		.loc 1 546 0
+ 1202 001e 7B68     		ldr	r3, [r7, #4]
+ 1203 0020 002B     		cmp	r3, #0
+ 1204 0022 03D0     		beq	.L83
+ 1205              		.loc 1 546 0 is_stmt 0 discriminator 1
+ 1206 0024 FB1C     		add	r3, r7, #3
+ 1207 0026 1B78     		ldrb	r3, [r3]
+ 1208 0028 0D2B     		cmp	r3, #13
+ 1209 002a 01D0     		beq	.L84
+ 1210              	.L83:
+ 547:.\BrightnessCommManager.c ****         return FAILURE;
+ 1211              		.loc 1 547 0 is_stmt 1
+ 1212 002c 0123     		mov	r3, #1
+ 1213 002e 60E0     		b	.L89
+ 1214              	.L84:
+ 548:.\BrightnessCommManager.c ****     
+ 549:.\BrightnessCommManager.c ****     if(bReceivedCountPacket)
+ 1215              		.loc 1 549 0
+ 1216 0030 324B     		ldr	r3, .L90
+ 1217 0032 1B78     		ldrb	r3, [r3]
+ 1218 0034 002B     		cmp	r3, #0
+ 1219 0036 01D0     		beq	.L86
+ 550:.\BrightnessCommManager.c ****         return SUCCESS;
+ 1220              		.loc 1 550 0
+ 1221 0038 0023     		mov	r3, #0
+ 1222 003a 5AE0     		b	.L89
+ 1223              	.L86:
+ 551:.\BrightnessCommManager.c ****     
+ 552:.\BrightnessCommManager.c ****     bReceivedCountPacket = TRUE;
+ 1224              		.loc 1 552 0
+ 1225 003c 2F4B     		ldr	r3, .L90
+ 1226 003e 0122     		mov	r2, #1
+ 1227 0040 1A70     		strb	r2, [r3]
+ 553:.\BrightnessCommManager.c ****     memcpy(ackPacket, packet, length);
+ 1228              		.loc 1 553 0
+ 1229 0042 FB1C     		add	r3, r7, #3
+ 1230 0044 1B78     		ldrb	r3, [r3]
+ 1231 0046 0822     		mov	r2, #8
+ 1232 0048 B918     		add	r1, r7, r2
+ 1233 004a 7A68     		ldr	r2, [r7, #4]
+ 1234 004c 081C     		mov	r0, r1
+ 1235 004e 111C     		mov	r1, r2
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 33
+
+
+ 1236 0050 1A1C     		mov	r2, r3
+ 1237 0052 FFF7FEFF 		bl	memcpy
+ 554:.\BrightnessCommManager.c ****     ackPacket[HEADER_START_INDEX + 1] = 'A';
+ 1238              		.loc 1 554 0
+ 1239 0056 0823     		mov	r3, #8
+ 1240 0058 FB18     		add	r3, r7, r3
+ 1241 005a 4122     		mov	r2, #65
+ 1242 005c 5A70     		strb	r2, [r3, #1]
+ 555:.\BrightnessCommManager.c ****     
+ 556:.\BrightnessCommManager.c ****     for(countIndex = 0; countIndex < 5; countIndex++)
+ 1243              		.loc 1 556 0
+ 1244 005e 1723     		mov	r3, #23
+ 1245 0060 FB18     		add	r3, r7, r3
+ 1246 0062 0022     		mov	r2, #0
+ 1247 0064 1A70     		strb	r2, [r3]
+ 1248 0066 0EE0     		b	.L87
+ 1249              	.L88:
+ 1250              	.LBB2:
+ 557:.\BrightnessCommManager.c ****     {
+ 558:.\BrightnessCommManager.c ****         UART_Temperature_SpiUartPutArray(ackPacket, length);
+ 1251              		.loc 1 558 0 discriminator 3
+ 1252 0068 FB1C     		add	r3, r7, #3
+ 1253 006a 1B78     		ldrb	r3, [r3]
+ 1254 006c 0822     		mov	r2, #8
+ 1255 006e BA18     		add	r2, r7, r2
+ 1256 0070 101C     		mov	r0, r2
+ 1257 0072 191C     		mov	r1, r3
+ 1258 0074 FFF7FEFF 		bl	UART_Temperature_SpiUartPutArray
+ 1259              	.LBE2:
+ 556:.\BrightnessCommManager.c ****     {
+ 1260              		.loc 1 556 0 discriminator 3
+ 1261 0078 1723     		mov	r3, #23
+ 1262 007a FB18     		add	r3, r7, r3
+ 1263 007c 1A78     		ldrb	r2, [r3]
+ 1264 007e 1723     		mov	r3, #23
+ 1265 0080 FB18     		add	r3, r7, r3
+ 1266 0082 0132     		add	r2, r2, #1
+ 1267 0084 1A70     		strb	r2, [r3]
+ 1268              	.L87:
+ 556:.\BrightnessCommManager.c ****     {
+ 1269              		.loc 1 556 0 is_stmt 0 discriminator 1
+ 1270 0086 1723     		mov	r3, #23
+ 1271 0088 FB18     		add	r3, r7, r3
+ 1272 008a 1B78     		ldrb	r3, [r3]
+ 1273 008c 042B     		cmp	r3, #4
+ 1274 008e EBD9     		bls	.L88
+ 559:.\BrightnessCommManager.c ****     }
+ 560:.\BrightnessCommManager.c ****         
+ 561:.\BrightnessCommManager.c ****     
+ 562:.\BrightnessCommManager.c ****     currentDriverCount = packet[PAYLOAD_START_INDEX] + 1;
+ 1275              		.loc 1 562 0 is_stmt 1
+ 1276 0090 7B68     		ldr	r3, [r7, #4]
+ 1277 0092 0233     		add	r3, r3, #2
+ 1278 0094 1A78     		ldrb	r2, [r3]
+ 1279 0096 1623     		mov	r3, #22
+ 1280 0098 FB18     		add	r3, r7, r3
+ 1281 009a 0132     		add	r2, r2, #1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 34
+
+
+ 1282 009c 1A70     		strb	r2, [r3]
+ 563:.\BrightnessCommManager.c ****     setIdentityByComm(currentDriverCount);
+ 1283              		.loc 1 563 0
+ 1284 009e 1623     		mov	r3, #22
+ 1285 00a0 FB18     		add	r3, r7, r3
+ 1286 00a2 1B78     		ldrb	r3, [r3]
+ 1287 00a4 181C     		mov	r0, r3
+ 1288 00a6 FFF7FEFF 		bl	setIdentityByComm
+ 564:.\BrightnessCommManager.c ****     bDriverCountReceived = TRUE;
+ 1289              		.loc 1 564 0
+ 1290 00aa 154B     		ldr	r3, .L90+4
+ 1291 00ac 0122     		mov	r2, #1
+ 1292 00ae 1A70     		strb	r2, [r3]
+ 565:.\BrightnessCommManager.c ****     packet[currentDriverCount + PAYLOAD_START_INDEX] = currentDriverCount;
+ 1293              		.loc 1 565 0
+ 1294 00b0 1623     		mov	r3, #22
+ 1295 00b2 FB18     		add	r3, r7, r3
+ 1296 00b4 1B78     		ldrb	r3, [r3]
+ 1297 00b6 0233     		add	r3, r3, #2
+ 1298 00b8 7A68     		ldr	r2, [r7, #4]
+ 1299 00ba D318     		add	r3, r2, r3
+ 1300 00bc 1622     		mov	r2, #22
+ 1301 00be BA18     		add	r2, r7, r2
+ 1302 00c0 1278     		ldrb	r2, [r2]
+ 1303 00c2 1A70     		strb	r2, [r3]
+ 566:.\BrightnessCommManager.c ****     packet[PAYLOAD_START_INDEX] = currentDriverCount;
+ 1304              		.loc 1 566 0
+ 1305 00c4 7B68     		ldr	r3, [r7, #4]
+ 1306 00c6 0233     		add	r3, r3, #2
+ 1307 00c8 1622     		mov	r2, #22
+ 1308 00ca BA18     		add	r2, r7, r2
+ 1309 00cc 1278     		ldrb	r2, [r2]
+ 1310 00ce 1A70     		strb	r2, [r3]
+ 567:.\BrightnessCommManager.c ****     setLastDriverPacket(packet, length);
+ 1311              		.loc 1 567 0
+ 1312 00d0 7A68     		ldr	r2, [r7, #4]
+ 1313 00d2 FB1C     		add	r3, r7, #3
+ 1314 00d4 1B78     		ldrb	r3, [r3]
+ 1315 00d6 101C     		mov	r0, r2
+ 1316 00d8 191C     		mov	r1, r3
+ 1317 00da FFF7FEFF 		bl	setLastDriverPacket
+ 568:.\BrightnessCommManager.c ****     UART_LED_PutArray(packet, length);
+ 1318              		.loc 1 568 0
+ 1319 00de FB1C     		add	r3, r7, #3
+ 1320 00e0 1B78     		ldrb	r3, [r3]
+ 1321 00e2 7A68     		ldr	r2, [r7, #4]
+ 1322 00e4 101C     		mov	r0, r2
+ 1323 00e6 191C     		mov	r1, r3
+ 1324 00e8 FFF7FEFF 		bl	UART_LED_PutArray
+ 569:.\BrightnessCommManager.c ****     AckTimer_Start();
+ 1325              		.loc 1 569 0
+ 1326 00ec FFF7FEFF 		bl	AckTimer_Start
+ 570:.\BrightnessCommManager.c ****     
+ 571:.\BrightnessCommManager.c ****     return SUCCESS;
+ 1327              		.loc 1 571 0
+ 1328 00f0 0023     		mov	r3, #0
+ 1329              	.L89:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 35
+
+
+ 572:.\BrightnessCommManager.c **** }
+ 1330              		.loc 1 572 0 discriminator 1
+ 1331 00f2 181C     		mov	r0, r3
+ 1332 00f4 BD46     		mov	sp, r7
+ 1333 00f6 06B0     		add	sp, sp, #24
+ 1334              		@ sp needed
+ 1335 00f8 80BD     		pop	{r7, pc}
+ 1336              	.L91:
+ 1337 00fa C046     		.align	2
+ 1338              	.L90:
+ 1339 00fc 26000000 		.word	bReceivedCountPacket.6245
+ 1340 0100 00000000 		.word	bDriverCountReceived
+ 1341              		.cfi_endproc
+ 1342              	.LFE44:
+ 1343              		.size	processDriverCountPacket, .-processDriverCountPacket
+ 1344              		.section	.text.processReinitlizationPacket,"ax",%progbits
+ 1345              		.align	2
+ 1346              		.code	16
+ 1347              		.thumb_func
+ 1348              		.type	processReinitlizationPacket, %function
+ 1349              	processReinitlizationPacket:
+ 1350              	.LFB45:
+ 573:.\BrightnessCommManager.c **** 
+ 574:.\BrightnessCommManager.c **** /*******************************************************************************
+ 575:.\BrightnessCommManager.c **** * Function Name: processDriverCountPacket
+ 576:.\BrightnessCommManager.c **** ********************************************************************************
+ 577:.\BrightnessCommManager.c **** *
+ 578:.\BrightnessCommManager.c **** * Summary:
+ 579:.\BrightnessCommManager.c **** *  Uses packet to send an ack to the previous module, set the ID for this driver, 
+ 580:.\BrightnessCommManager.c **** *  send the packet to the next module, and start the timer to wait for an ack from
+ 581:.\BrightnessCommManager.c **** *  the next module.
+ 582:.\BrightnessCommManager.c **** *
+ 583:.\BrightnessCommManager.c **** * Parameters:
+ 584:.\BrightnessCommManager.c **** *  packet: The reference to the driver count packet to process.
+ 585:.\BrightnessCommManager.c **** *  length: The byte count for this packet.
+ 586:.\BrightnessCommManager.c **** *
+ 587:.\BrightnessCommManager.c **** * Return:
+ 588:.\BrightnessCommManager.c **** *  SUCCESS for valid inputs, FAILURE otherwise
+ 589:.\BrightnessCommManager.c **** *
+ 590:.\BrightnessCommManager.c **** *******************************************************************************/
+ 591:.\BrightnessCommManager.c **** static uint8 processReinitlizationPacket(uint8* packet, uint8 length)
+ 592:.\BrightnessCommManager.c **** {
+ 1351              		.loc 1 592 0
+ 1352              		.cfi_startproc
+ 1353 0000 80B5     		push	{r7, lr}
+ 1354              		.cfi_def_cfa_offset 8
+ 1355              		.cfi_offset 7, -8
+ 1356              		.cfi_offset 14, -4
+ 1357 0002 82B0     		sub	sp, sp, #8
+ 1358              		.cfi_def_cfa_offset 16
+ 1359 0004 00AF     		add	r7, sp, #0
+ 1360              		.cfi_def_cfa_register 7
+ 1361 0006 7860     		str	r0, [r7, #4]
+ 1362 0008 0A1C     		mov	r2, r1
+ 1363 000a FB1C     		add	r3, r7, #3
+ 1364 000c 1A70     		strb	r2, [r3]
+ 593:.\BrightnessCommManager.c ****     
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 36
+
+
+ 594:.\BrightnessCommManager.c ****     //if(length != MAX_PACKET_SIZE-6)
+ 595:.\BrightnessCommManager.c ****     //    return FAILURE;
+ 596:.\BrightnessCommManager.c ****     
+ 597:.\BrightnessCommManager.c ****     clearInitializeAlreadyEEPROM();
+ 1365              		.loc 1 597 0
+ 1366 000e FFF7FEFF 		bl	clearInitializeAlreadyEEPROM
+ 598:.\BrightnessCommManager.c ****     UART_LED_PutArray(packet, length);
+ 1367              		.loc 1 598 0
+ 1368 0012 FB1C     		add	r3, r7, #3
+ 1369 0014 1B78     		ldrb	r3, [r3]
+ 1370 0016 7A68     		ldr	r2, [r7, #4]
+ 1371 0018 101C     		mov	r0, r2
+ 1372 001a 191C     		mov	r1, r3
+ 1373 001c FFF7FEFF 		bl	UART_LED_PutArray
+ 599:.\BrightnessCommManager.c ****     return SUCCESS;
+ 1374              		.loc 1 599 0
+ 1375 0020 0023     		mov	r3, #0
+ 600:.\BrightnessCommManager.c **** }
+ 1376              		.loc 1 600 0
+ 1377 0022 181C     		mov	r0, r3
+ 1378 0024 BD46     		mov	sp, r7
+ 1379 0026 02B0     		add	sp, sp, #8
+ 1380              		@ sp needed
+ 1381 0028 80BD     		pop	{r7, pc}
+ 1382              		.cfi_endproc
+ 1383              	.LFE45:
+ 1384              		.size	processReinitlizationPacket, .-processReinitlizationPacket
+ 1385 002a C046     		.section	.text.processBrightnessPacket,"ax",%progbits
+ 1386              		.align	2
+ 1387              		.code	16
+ 1388              		.thumb_func
+ 1389              		.type	processBrightnessPacket, %function
+ 1390              	processBrightnessPacket:
+ 1391              	.LFB46:
+ 601:.\BrightnessCommManager.c **** 
+ 602:.\BrightnessCommManager.c **** /*******************************************************************************
+ 603:.\BrightnessCommManager.c **** * Function Name: processBrightnessPacket
+ 604:.\BrightnessCommManager.c **** ********************************************************************************
+ 605:.\BrightnessCommManager.c **** *
+ 606:.\BrightnessCommManager.c **** * Summary:
+ 607:.\BrightnessCommManager.c **** *  Uses the packet to determine the next brightness level for all modules, send the
+ 608:.\BrightnessCommManager.c **** *  packet to the next module, and start the temperature sampling timer if this module
+ 609:.\BrightnessCommManager.c **** *  is the last module in the chain.
+ 610:.\BrightnessCommManager.c **** *
+ 611:.\BrightnessCommManager.c **** * Parameters:
+ 612:.\BrightnessCommManager.c **** *  packet: The reference to the brightness packet to process.
+ 613:.\BrightnessCommManager.c **** *  length: The byte count for this packet.
+ 614:.\BrightnessCommManager.c **** *
+ 615:.\BrightnessCommManager.c **** * Return:
+ 616:.\BrightnessCommManager.c **** *  SUCCESS for valid inputs, FAILURE otherwise
+ 617:.\BrightnessCommManager.c **** *
+ 618:.\BrightnessCommManager.c **** *******************************************************************************/
+ 619:.\BrightnessCommManager.c **** static uint8 processBrightnessPacket(uint8* packet, uint8 length, uint8 bFlashPattern)
+ 620:.\BrightnessCommManager.c **** {
+ 1392              		.loc 1 620 0
+ 1393              		.cfi_startproc
+ 1394 0000 90B5     		push	{r4, r7, lr}
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 37
+
+
+ 1395              		.cfi_def_cfa_offset 12
+ 1396              		.cfi_offset 4, -12
+ 1397              		.cfi_offset 7, -8
+ 1398              		.cfi_offset 14, -4
+ 1399 0002 85B0     		sub	sp, sp, #20
+ 1400              		.cfi_def_cfa_offset 32
+ 1401 0004 00AF     		add	r7, sp, #0
+ 1402              		.cfi_def_cfa_register 7
+ 1403 0006 7860     		str	r0, [r7, #4]
+ 1404 0008 081C     		mov	r0, r1
+ 1405 000a 111C     		mov	r1, r2
+ 1406 000c FB1C     		add	r3, r7, #3
+ 1407 000e 021C     		add	r2, r0, #0
+ 1408 0010 1A70     		strb	r2, [r3]
+ 1409 0012 BB1C     		add	r3, r7, #2
+ 1410 0014 0A1C     		add	r2, r1, #0
+ 1411 0016 1A70     		strb	r2, [r3]
+ 621:.\BrightnessCommManager.c ****     static uint8 bFirstBrightnessPacket = TRUE;
+ 622:.\BrightnessCommManager.c ****     uint8 currentBrightness = 0;
+ 1412              		.loc 1 622 0
+ 1413 0018 0F23     		mov	r3, #15
+ 1414 001a FB18     		add	r3, r7, r3
+ 1415 001c 0022     		mov	r2, #0
+ 1416 001e 1A70     		strb	r2, [r3]
+ 623:.\BrightnessCommManager.c ****     uint8 driver_ID = 0;
+ 1417              		.loc 1 623 0
+ 1418 0020 0E23     		mov	r3, #14
+ 1419 0022 FB18     		add	r3, r7, r3
+ 1420 0024 0022     		mov	r2, #0
+ 1421 0026 1A70     		strb	r2, [r3]
+ 624:.\BrightnessCommManager.c ****     
+ 625:.\BrightnessCommManager.c ****     if(packet == NULL || length != (MAX_PACKET_SIZE - 1))
+ 1422              		.loc 1 625 0
+ 1423 0028 7B68     		ldr	r3, [r7, #4]
+ 1424 002a 002B     		cmp	r3, #0
+ 1425 002c 03D0     		beq	.L95
+ 1426              		.loc 1 625 0 is_stmt 0 discriminator 1
+ 1427 002e FB1C     		add	r3, r7, #3
+ 1428 0030 1B78     		ldrb	r3, [r3]
+ 1429 0032 0C2B     		cmp	r3, #12
+ 1430 0034 01D0     		beq	.L96
+ 1431              	.L95:
+ 626:.\BrightnessCommManager.c ****         return FAILURE;
+ 1432              		.loc 1 626 0 is_stmt 1
+ 1433 0036 0123     		mov	r3, #1
+ 1434 0038 69E0     		b	.L97
+ 1435              	.L96:
+ 627:.\BrightnessCommManager.c ****     
+ 628:.\BrightnessCommManager.c ****     if(bFlashPattern != TRUE && bFlashPattern != FALSE)
+ 1436              		.loc 1 628 0
+ 1437 003a BB1C     		add	r3, r7, #2
+ 1438 003c 1B78     		ldrb	r3, [r3]
+ 1439 003e 012B     		cmp	r3, #1
+ 1440 0040 05D0     		beq	.L98
+ 1441              		.loc 1 628 0 is_stmt 0 discriminator 1
+ 1442 0042 BB1C     		add	r3, r7, #2
+ 1443 0044 1B78     		ldrb	r3, [r3]
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 38
+
+
+ 1444 0046 002B     		cmp	r3, #0
+ 1445 0048 01D0     		beq	.L98
+ 629:.\BrightnessCommManager.c ****         return FAILURE;
+ 1446              		.loc 1 629 0 is_stmt 1
+ 1447 004a 0123     		mov	r3, #1
+ 1448 004c 5FE0     		b	.L97
+ 1449              	.L98:
+ 630:.\BrightnessCommManager.c ****     
+ 631:.\BrightnessCommManager.c ****     driver_ID = getDriverID();
+ 1450              		.loc 1 631 0
+ 1451 004e 0E23     		mov	r3, #14
+ 1452 0050 FC18     		add	r4, r7, r3
+ 1453 0052 FFF7FEFF 		bl	getDriverID
+ 1454 0056 031C     		mov	r3, r0
+ 1455 0058 2370     		strb	r3, [r4]
+ 632:.\BrightnessCommManager.c ****     if((driver_ID < HEAD_MODULE_ID) || (driver_ID > MAX_DRIVER_COUNT))
+ 1456              		.loc 1 632 0
+ 1457 005a 0E23     		mov	r3, #14
+ 1458 005c FB18     		add	r3, r7, r3
+ 1459 005e 1B78     		ldrb	r3, [r3]
+ 1460 0060 002B     		cmp	r3, #0
+ 1461 0062 04D0     		beq	.L99
+ 1462              		.loc 1 632 0 is_stmt 0 discriminator 1
+ 1463 0064 0E23     		mov	r3, #14
+ 1464 0066 FB18     		add	r3, r7, r3
+ 1465 0068 1B78     		ldrb	r3, [r3]
+ 1466 006a 082B     		cmp	r3, #8
+ 1467 006c 01D9     		bls	.L100
+ 1468              	.L99:
+ 633:.\BrightnessCommManager.c ****         return FAILURE;
+ 1469              		.loc 1 633 0 is_stmt 1
+ 1470 006e 0123     		mov	r3, #1
+ 1471 0070 4DE0     		b	.L97
+ 1472              	.L100:
+ 634:.\BrightnessCommManager.c ****     
+ 635:.\BrightnessCommManager.c ****     //TimeoutTimer_Stop();
+ 636:.\BrightnessCommManager.c ****     
+ 637:.\BrightnessCommManager.c ****     if(bFirstBrightnessPacket)
+ 1473              		.loc 1 637 0
+ 1474 0072 294B     		ldr	r3, .L106
+ 1475 0074 1B78     		ldrb	r3, [r3]
+ 1476 0076 002B     		cmp	r3, #0
+ 1477 0078 02D0     		beq	.L101
+ 638:.\BrightnessCommManager.c ****     {
+ 639:.\BrightnessCommManager.c ****         bFirstBrightnessPacket = FALSE;           
+ 1478              		.loc 1 639 0
+ 1479 007a 274B     		ldr	r3, .L106
+ 1480 007c 0022     		mov	r2, #0
+ 1481 007e 1A70     		strb	r2, [r3]
+ 1482              	.L101:
+ 640:.\BrightnessCommManager.c ****         //SamplingTimer_Start();
+ 641:.\BrightnessCommManager.c ****     }
+ 642:.\BrightnessCommManager.c ****     
+ 643:.\BrightnessCommManager.c ****     if(isReadyToSendNextBrightnessPacket() == TRUE)
+ 1483              		.loc 1 643 0
+ 1484 0080 FFF7FEFF 		bl	isReadyToSendNextBrightnessPacket
+ 1485 0084 031E     		sub	r3, r0, #0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 39
+
+
+ 1486 0086 012B     		cmp	r3, #1
+ 1487 0088 40D1     		bne	.L102
+ 644:.\BrightnessCommManager.c ****     {
+ 645:.\BrightnessCommManager.c ****         if(driver_ID == 1)
+ 1488              		.loc 1 645 0
+ 1489 008a 0E23     		mov	r3, #14
+ 1490 008c FB18     		add	r3, r7, r3
+ 1491 008e 1B78     		ldrb	r3, [r3]
+ 1492 0090 012B     		cmp	r3, #1
+ 1493 0092 30D1     		bne	.L103
+ 1494              	.LBB3:
+ 646:.\BrightnessCommManager.c ****         {
+ 647:.\BrightnessCommManager.c ****             if(bFlashPattern)
+ 1495              		.loc 1 647 0
+ 1496 0094 BB1C     		add	r3, r7, #2
+ 1497 0096 1B78     		ldrb	r3, [r3]
+ 1498 0098 002B     		cmp	r3, #0
+ 1499 009a 0BD0     		beq	.L104
+ 648:.\BrightnessCommManager.c ****                 updateBrightnessLevel(packet[driver_ID + PAYLOAD_START_INDEX - 1], FALSE);
+ 1500              		.loc 1 648 0
+ 1501 009c 0E23     		mov	r3, #14
+ 1502 009e FB18     		add	r3, r7, r3
+ 1503 00a0 1B78     		ldrb	r3, [r3]
+ 1504 00a2 0133     		add	r3, r3, #1
+ 1505 00a4 7A68     		ldr	r2, [r7, #4]
+ 1506 00a6 D318     		add	r3, r2, r3
+ 1507 00a8 1B78     		ldrb	r3, [r3]
+ 1508 00aa 181C     		mov	r0, r3
+ 1509 00ac 0021     		mov	r1, #0
+ 1510 00ae FFF7FEFF 		bl	updateBrightnessLevel
+ 1511 00b2 18E0     		b	.L105
+ 1512              	.L104:
+ 649:.\BrightnessCommManager.c ****             else
+ 650:.\BrightnessCommManager.c ****             {
+ 651:.\BrightnessCommManager.c ****                 currentBrightness =
+ 652:.\BrightnessCommManager.c ****                     updateBrightnessLevel(packet[driver_ID + PAYLOAD_START_INDEX - 1], TRUE);
+ 1513              		.loc 1 652 0
+ 1514 00b4 0E23     		mov	r3, #14
+ 1515 00b6 FB18     		add	r3, r7, r3
+ 1516 00b8 1B78     		ldrb	r3, [r3]
+ 1517 00ba 0133     		add	r3, r3, #1
+ 1518 00bc 7A68     		ldr	r2, [r7, #4]
+ 1519 00be D318     		add	r3, r2, r3
+ 1520 00c0 1B78     		ldrb	r3, [r3]
+ 651:.\BrightnessCommManager.c ****                     updateBrightnessLevel(packet[driver_ID + PAYLOAD_START_INDEX - 1], TRUE);
+ 1521              		.loc 1 651 0
+ 1522 00c2 0F22     		mov	r2, #15
+ 1523 00c4 BC18     		add	r4, r7, r2
+ 1524 00c6 181C     		mov	r0, r3
+ 1525 00c8 0121     		mov	r1, #1
+ 1526 00ca FFF7FEFF 		bl	updateBrightnessLevel
+ 1527 00ce 031C     		mov	r3, r0
+ 1528 00d0 2370     		strb	r3, [r4]
+ 653:.\BrightnessCommManager.c ****                 memset(&packet[PAYLOAD_START_INDEX], currentBrightness, MAX_DRIVER_COUNT);
+ 1529              		.loc 1 653 0
+ 1530 00d2 7B68     		ldr	r3, [r7, #4]
+ 1531 00d4 9A1C     		add	r2, r3, #2
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 40
+
+
+ 1532 00d6 0F23     		mov	r3, #15
+ 1533 00d8 FB18     		add	r3, r7, r3
+ 1534 00da 1B78     		ldrb	r3, [r3]
+ 1535 00dc 101C     		mov	r0, r2
+ 1536 00de 191C     		mov	r1, r3
+ 1537 00e0 0822     		mov	r2, #8
+ 1538 00e2 FFF7FEFF 		bl	memset
+ 1539              	.L105:
+ 654:.\BrightnessCommManager.c ****             }
+ 655:.\BrightnessCommManager.c ****             UART_LED_PutArray(packet, length);
+ 1540              		.loc 1 655 0
+ 1541 00e6 FB1C     		add	r3, r7, #3
+ 1542 00e8 1B78     		ldrb	r3, [r3]
+ 1543 00ea 7A68     		ldr	r2, [r7, #4]
+ 1544 00ec 101C     		mov	r0, r2
+ 1545 00ee 191C     		mov	r1, r3
+ 1546 00f0 FFF7FEFF 		bl	UART_LED_PutArray
+ 1547              	.LBE3:
+ 1548 00f4 0AE0     		b	.L102
+ 1549              	.L103:
+ 656:.\BrightnessCommManager.c ****         }
+ 657:.\BrightnessCommManager.c ****         else
+ 658:.\BrightnessCommManager.c ****         {
+ 659:.\BrightnessCommManager.c ****             updateBrightnessLevel(packet[driver_ID + PAYLOAD_START_INDEX - 1], FALSE);
+ 1550              		.loc 1 659 0
+ 1551 00f6 0E23     		mov	r3, #14
+ 1552 00f8 FB18     		add	r3, r7, r3
+ 1553 00fa 1B78     		ldrb	r3, [r3]
+ 1554 00fc 0133     		add	r3, r3, #1
+ 1555 00fe 7A68     		ldr	r2, [r7, #4]
+ 1556 0100 D318     		add	r3, r2, r3
+ 1557 0102 1B78     		ldrb	r3, [r3]
+ 1558 0104 181C     		mov	r0, r3
+ 1559 0106 0021     		mov	r1, #0
+ 1560 0108 FFF7FEFF 		bl	updateBrightnessLevel
+ 1561              	.L102:
+ 660:.\BrightnessCommManager.c ****         }
+ 661:.\BrightnessCommManager.c ****     }
+ 662:.\BrightnessCommManager.c ****     //TimeoutTimer_Start();
+ 663:.\BrightnessCommManager.c ****     
+ 664:.\BrightnessCommManager.c ****     return SUCCESS;
+ 1562              		.loc 1 664 0
+ 1563 010c 0023     		mov	r3, #0
+ 1564              	.L97:
+ 665:.\BrightnessCommManager.c **** }
+ 1565              		.loc 1 665 0
+ 1566 010e 181C     		mov	r0, r3
+ 1567 0110 BD46     		mov	sp, r7
+ 1568 0112 05B0     		add	sp, sp, #20
+ 1569              		@ sp needed
+ 1570 0114 90BD     		pop	{r4, r7, pc}
+ 1571              	.L107:
+ 1572 0116 C046     		.align	2
+ 1573              	.L106:
+ 1574 0118 1E000000 		.word	bFirstBrightnessPacket.6266
+ 1575              		.cfi_endproc
+ 1576              	.LFE46:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 41
+
+
+ 1577              		.size	processBrightnessPacket, .-processBrightnessPacket
+ 1578              		.section	.text.saveStateBar,"ax",%progbits
+ 1579              		.align	2
+ 1580              		.code	16
+ 1581              		.thumb_func
+ 1582              		.type	saveStateBar, %function
+ 1583              	saveStateBar:
+ 1584              	.LFB47:
+ 666:.\BrightnessCommManager.c **** 
+ 667:.\BrightnessCommManager.c **** static void saveStateBar(uint8 * volatileMemoryArray, const uint8 * nonVolatileMemoryArray, uint8* 
+ 668:.\BrightnessCommManager.c **** {
+ 1585              		.loc 1 668 0
+ 1586              		.cfi_startproc
+ 1587 0000 80B5     		push	{r7, lr}
+ 1588              		.cfi_def_cfa_offset 8
+ 1589              		.cfi_offset 7, -8
+ 1590              		.cfi_offset 14, -4
+ 1591 0002 84B0     		sub	sp, sp, #16
+ 1592              		.cfi_def_cfa_offset 24
+ 1593 0004 00AF     		add	r7, sp, #0
+ 1594              		.cfi_def_cfa_register 7
+ 1595 0006 F860     		str	r0, [r7, #12]
+ 1596 0008 B960     		str	r1, [r7, #8]
+ 1597 000a 7A60     		str	r2, [r7, #4]
+ 669:.\BrightnessCommManager.c ****     static uint8 driver_ID = 0;
+ 670:.\BrightnessCommManager.c ****     
+ 671:.\BrightnessCommManager.c ****     driver_ID = getDriverID();
+ 1598              		.loc 1 671 0
+ 1599 000c FFF7FEFF 		bl	getDriverID
+ 1600 0010 031C     		mov	r3, r0
+ 1601 0012 1A1C     		mov	r2, r3
+ 1602 0014 0E4B     		ldr	r3, .L110
+ 1603 0016 1A70     		strb	r2, [r3]
+ 672:.\BrightnessCommManager.c ****     if(driver_ID == HEAD_BOARD)
+ 1604              		.loc 1 672 0
+ 1605 0018 0D4B     		ldr	r3, .L110
+ 1606 001a 1B78     		ldrb	r3, [r3]
+ 1607 001c 002B     		cmp	r3, #0
+ 1608 001e 04D1     		bne	.L109
+ 1609              	.LBB4:
+ 673:.\BrightnessCommManager.c ****     {        
+ 674:.\BrightnessCommManager.c ****         UART_LED_PutArray(packet, 7);
+ 1610              		.loc 1 674 0
+ 1611 0020 7B68     		ldr	r3, [r7, #4]
+ 1612 0022 181C     		mov	r0, r3
+ 1613 0024 0721     		mov	r1, #7
+ 1614 0026 FFF7FEFF 		bl	UART_LED_PutArray
+ 1615              	.L109:
+ 1616              	.LBE4:
+ 675:.\BrightnessCommManager.c ****     }
+ 676:.\BrightnessCommManager.c ****     volatileMemoryArray[0] = packet[driver_ID + PAYLOAD_START_INDEX - 1];
+ 1617              		.loc 1 676 0
+ 1618 002a 094B     		ldr	r3, .L110
+ 1619 002c 1B78     		ldrb	r3, [r3]
+ 1620 002e 0133     		add	r3, r3, #1
+ 1621 0030 7A68     		ldr	r2, [r7, #4]
+ 1622 0032 D318     		add	r3, r2, r3
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 42
+
+
+ 1623 0034 1A78     		ldrb	r2, [r3]
+ 1624 0036 FB68     		ldr	r3, [r7, #12]
+ 1625 0038 1A70     		strb	r2, [r3]
+ 677:.\BrightnessCommManager.c ****     EmEEPROM_Write(volatileMemoryArray,nonVolatileMemoryArray,1);
+ 1626              		.loc 1 677 0
+ 1627 003a FA68     		ldr	r2, [r7, #12]
+ 1628 003c BB68     		ldr	r3, [r7, #8]
+ 1629 003e 101C     		mov	r0, r2
+ 1630 0040 191C     		mov	r1, r3
+ 1631 0042 0122     		mov	r2, #1
+ 1632 0044 FFF7FEFF 		bl	EmEEPROM_Write
+ 678:.\BrightnessCommManager.c **** }
+ 1633              		.loc 1 678 0
+ 1634 0048 BD46     		mov	sp, r7
+ 1635 004a 04B0     		add	sp, sp, #16
+ 1636              		@ sp needed
+ 1637 004c 80BD     		pop	{r7, pc}
+ 1638              	.L111:
+ 1639 004e C046     		.align	2
+ 1640              	.L110:
+ 1641 0050 27000000 		.word	driver_ID.6275
+ 1642              		.cfi_endproc
+ 1643              	.LFE47:
+ 1644              		.size	saveStateBar, .-saveStateBar
+ 1645              		.section	.text.putBarToSleep,"ax",%progbits
+ 1646              		.align	2
+ 1647              		.code	16
+ 1648              		.thumb_func
+ 1649              		.type	putBarToSleep, %function
+ 1650              	putBarToSleep:
+ 1651              	.LFB48:
+ 679:.\BrightnessCommManager.c **** 
+ 680:.\BrightnessCommManager.c **** static void putBarToSleep(void)
+ 681:.\BrightnessCommManager.c **** {
+ 1652              		.loc 1 681 0
+ 1653              		.cfi_startproc
+ 1654 0000 80B5     		push	{r7, lr}
+ 1655              		.cfi_def_cfa_offset 8
+ 1656              		.cfi_offset 7, -8
+ 1657              		.cfi_offset 14, -4
+ 1658 0002 00AF     		add	r7, sp, #0
+ 1659              		.cfi_def_cfa_register 7
+ 682:.\BrightnessCommManager.c ****     PWM_Stop();
+ 1660              		.loc 1 682 0
+ 1661 0004 FFF7FEFF 		bl	PWM_Stop
+ 683:.\BrightnessCommManager.c ****     PWM_WriteCompare(0);
+ 1662              		.loc 1 683 0
+ 1663 0008 0020     		mov	r0, #0
+ 1664 000a FFF7FEFF 		bl	PWM_WriteCompare
+ 684:.\BrightnessCommManager.c **** 
+ 685:.\BrightnessCommManager.c ****     CommTimeoutISR_Stop();
+ 1665              		.loc 1 685 0
+ 1666 000e FFF7FEFF 		bl	CommTimeoutISR_Stop
+ 686:.\BrightnessCommManager.c ****     AckTimeoutISR_Stop();
+ 1667              		.loc 1 686 0
+ 1668 0012 FFF7FEFF 		bl	AckTimeoutISR_Stop
+ 687:.\BrightnessCommManager.c ****     
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 43
+
+
+ 688:.\BrightnessCommManager.c ****     SamplingTimerISR_Stop();
+ 1669              		.loc 1 688 0
+ 1670 0016 FFF7FEFF 		bl	SamplingTimerISR_Stop
+ 689:.\BrightnessCommManager.c ****     ADC_SAR_Seq_Stop();
+ 1671              		.loc 1 689 0
+ 1672 001a FFF7FEFF 		bl	ADC_SAR_Seq_Stop
+ 690:.\BrightnessCommManager.c ****     ADC_SAR_Seq_StopConvert();
+ 1673              		.loc 1 690 0
+ 1674 001e FFF7FEFF 		bl	ADC_SAR_Seq_StopConvert
+ 691:.\BrightnessCommManager.c ****     
+ 692:.\BrightnessCommManager.c ****     UART_Temp_ISR_Stop();
+ 1675              		.loc 1 692 0
+ 1676 0022 FFF7FEFF 		bl	UART_Temp_ISR_Stop
+ 693:.\BrightnessCommManager.c ****     UART_Temperature_Stop();
+ 1677              		.loc 1 693 0
+ 1678 0026 FFF7FEFF 		bl	UART_Temperature_Stop
+ 694:.\BrightnessCommManager.c ****     
+ 695:.\BrightnessCommManager.c ****     //UART_LED_ISR_Stop();
+ 696:.\BrightnessCommManager.c ****     
+ 697:.\BrightnessCommManager.c ****     //UART_LED_Stop();
+ 698:.\BrightnessCommManager.c ****     //WakeupISR_Start();
+ 699:.\BrightnessCommManager.c ****     
+ 700:.\BrightnessCommManager.c ****     LED_ISR_Stop(); 
+ 1679              		.loc 1 700 0
+ 1680 002a FFF7FEFF 		bl	LED_ISR_Stop
+ 701:.\BrightnessCommManager.c ****     
+ 702:.\BrightnessCommManager.c ****     SamplingTimer_Stop();
+ 1681              		.loc 1 702 0
+ 1682 002e FFF7FEFF 		bl	SamplingTimer_Stop
+ 703:.\BrightnessCommManager.c ****     TimeoutTimer_Stop();
+ 1683              		.loc 1 703 0
+ 1684 0032 FFF7FEFF 		bl	TimeoutTimer_Stop
+ 704:.\BrightnessCommManager.c **** }
+ 1685              		.loc 1 704 0
+ 1686 0036 BD46     		mov	sp, r7
+ 1687              		@ sp needed
+ 1688 0038 80BD     		pop	{r7, pc}
+ 1689              		.cfi_endproc
+ 1690              	.LFE48:
+ 1691              		.size	putBarToSleep, .-putBarToSleep
+ 1692 003a C046     		.section	.text.returnFromSleep,"ax",%progbits
+ 1693              		.align	2
+ 1694              		.code	16
+ 1695              		.thumb_func
+ 1696              		.type	returnFromSleep, %function
+ 1697              	returnFromSleep:
+ 1698              	.LFB49:
+ 705:.\BrightnessCommManager.c **** 
+ 706:.\BrightnessCommManager.c **** static void returnFromSleep(void)
+ 707:.\BrightnessCommManager.c **** {
+ 1699              		.loc 1 707 0
+ 1700              		.cfi_startproc
+ 1701 0000 80B5     		push	{r7, lr}
+ 1702              		.cfi_def_cfa_offset 8
+ 1703              		.cfi_offset 7, -8
+ 1704              		.cfi_offset 14, -4
+ 1705 0002 00AF     		add	r7, sp, #0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 44
+
+
+ 1706              		.cfi_def_cfa_register 7
+ 708:.\BrightnessCommManager.c ****     static const uint8 * nonVolatileMemoryArray;
+ 709:.\BrightnessCommManager.c ****     
+ 710:.\BrightnessCommManager.c ****     UART_LED_Control_Write(TRUE);
+ 1707              		.loc 1 710 0
+ 1708 0004 0120     		mov	r0, #1
+ 1709 0006 FFF7FEFF 		bl	UART_LED_Control_Write
+ 711:.\BrightnessCommManager.c ****     PWM_Enable_Write(FALSE);
+ 1710              		.loc 1 711 0
+ 1711 000a 0020     		mov	r0, #0
+ 1712 000c FFF7FEFF 		bl	PWM_Enable_Write
+ 712:.\BrightnessCommManager.c ****     
+ 713:.\BrightnessCommManager.c ****     PWM_Start();
+ 1713              		.loc 1 713 0
+ 1714 0010 FFF7FEFF 		bl	PWM_Start
+ 714:.\BrightnessCommManager.c ****     PWM_WriteCompare(0);
+ 1715              		.loc 1 714 0
+ 1716 0014 0020     		mov	r0, #0
+ 1717 0016 FFF7FEFF 		bl	PWM_WriteCompare
+ 715:.\BrightnessCommManager.c **** 
+ 716:.\BrightnessCommManager.c ****     CommTimeoutISR_Start();
+ 1718              		.loc 1 716 0
+ 1719 001a FFF7FEFF 		bl	CommTimeoutISR_Start
+ 717:.\BrightnessCommManager.c ****     AckTimeoutISR_Start();
+ 1720              		.loc 1 717 0
+ 1721 001e FFF7FEFF 		bl	AckTimeoutISR_Start
+ 718:.\BrightnessCommManager.c ****     
+ 719:.\BrightnessCommManager.c ****     SamplingTimerISR_Start();
+ 1722              		.loc 1 719 0
+ 1723 0022 FFF7FEFF 		bl	SamplingTimerISR_Start
+ 720:.\BrightnessCommManager.c ****     ADC_SAR_Seq_Start();
+ 1724              		.loc 1 720 0
+ 1725 0026 FFF7FEFF 		bl	ADC_SAR_Seq_Start
+ 721:.\BrightnessCommManager.c ****     ADC_SAR_Seq_StartConvert();
+ 1726              		.loc 1 721 0
+ 1727 002a FFF7FEFF 		bl	ADC_SAR_Seq_StartConvert
+ 722:.\BrightnessCommManager.c ****     
+ 723:.\BrightnessCommManager.c ****     UART_Temp_ISR_Start();
+ 1728              		.loc 1 723 0
+ 1729 002e FFF7FEFF 		bl	UART_Temp_ISR_Start
+ 724:.\BrightnessCommManager.c ****     UART_Temperature_Start();
+ 1730              		.loc 1 724 0
+ 1731 0032 FFF7FEFF 		bl	UART_Temperature_Start
+ 725:.\BrightnessCommManager.c ****     
+ 726:.\BrightnessCommManager.c ****     //UART_LED_ISR_Start();
+ 727:.\BrightnessCommManager.c ****     
+ 728:.\BrightnessCommManager.c ****     //UART_LED_Start();
+ 729:.\BrightnessCommManager.c ****     //WakeupISR_Start();
+ 730:.\BrightnessCommManager.c ****     
+ 731:.\BrightnessCommManager.c ****     LED_ISR_Start(); 
+ 1732              		.loc 1 731 0
+ 1733 0036 FFF7FEFF 		bl	LED_ISR_Start
+ 732:.\BrightnessCommManager.c ****     
+ 733:.\BrightnessCommManager.c ****     SamplingTimer_Start();
+ 1734              		.loc 1 733 0
+ 1735 003a FFF7FEFF 		bl	SamplingTimer_Start
+ 734:.\BrightnessCommManager.c ****     TimeoutTimer_Start();
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 45
+
+
+ 1736              		.loc 1 734 0
+ 1737 003e FFF7FEFF 		bl	TimeoutTimer_Start
+ 735:.\BrightnessCommManager.c ****     
+ 736:.\BrightnessCommManager.c ****     EmEEPROM_Start();
+ 1738              		.loc 1 736 0
+ 1739 0042 FFF7FEFF 		bl	EmEEPROM_Start
+ 737:.\BrightnessCommManager.c ****     CyDelay(250);
+ 1740              		.loc 1 737 0
+ 1741 0046 FA20     		mov	r0, #250
+ 1742 0048 FFF7FEFF 		bl	CyDelay
+ 738:.\BrightnessCommManager.c ****     //LED_Output_Write(FALSE);
+ 739:.\BrightnessCommManager.c ****     UART_LED_Control_Write(FALSE);
+ 1743              		.loc 1 739 0
+ 1744 004c 0020     		mov	r0, #0
+ 1745 004e FFF7FEFF 		bl	UART_LED_Control_Write
+ 740:.\BrightnessCommManager.c ****     
+ 741:.\BrightnessCommManager.c ****     nonVolatileMemoryArray = getNonVolatileBarStateMemory();
+ 1746              		.loc 1 741 0
+ 1747 0052 FFF7FEFF 		bl	getNonVolatileBarStateMemory
+ 1748 0056 021C     		mov	r2, r0
+ 1749 0058 0B4B     		ldr	r3, .L116
+ 1750 005a 1A60     		str	r2, [r3]
+ 742:.\BrightnessCommManager.c ****     setIdentityByComm(nonVolatileMemoryArray[2]);
+ 1751              		.loc 1 742 0
+ 1752 005c 0A4B     		ldr	r3, .L116
+ 1753 005e 1B68     		ldr	r3, [r3]
+ 1754 0060 0233     		add	r3, r3, #2
+ 1755 0062 1B78     		ldrb	r3, [r3]
+ 1756 0064 181C     		mov	r0, r3
+ 1757 0066 FFF7FEFF 		bl	setIdentityByComm
+ 743:.\BrightnessCommManager.c ****     if(getDriverID()==HEAD_MODULE_ID)
+ 1758              		.loc 1 743 0
+ 1759 006a FFF7FEFF 		bl	getDriverID
+ 1760 006e 031E     		sub	r3, r0, #0
+ 1761 0070 012B     		cmp	r3, #1
+ 1762 0072 03D1     		bne	.L114
+ 744:.\BrightnessCommManager.c ****     {
+ 745:.\BrightnessCommManager.c ****         UART_LED_Control_Write(TRUE);
+ 1763              		.loc 1 745 0
+ 1764 0074 0120     		mov	r0, #1
+ 1765 0076 FFF7FEFF 		bl	UART_LED_Control_Write
+ 1766 007a 02E0     		b	.L113
+ 1767              	.L114:
+ 746:.\BrightnessCommManager.c ****     }
+ 747:.\BrightnessCommManager.c ****     else
+ 748:.\BrightnessCommManager.c ****     {
+ 749:.\BrightnessCommManager.c ****         UART_LED_Control_Write(FALSE);
+ 1768              		.loc 1 749 0
+ 1769 007c 0020     		mov	r0, #0
+ 1770 007e FFF7FEFF 		bl	UART_LED_Control_Write
+ 1771              	.L113:
+ 750:.\BrightnessCommManager.c ****     }
+ 751:.\BrightnessCommManager.c **** }
+ 1772              		.loc 1 751 0
+ 1773 0082 BD46     		mov	sp, r7
+ 1774              		@ sp needed
+ 1775 0084 80BD     		pop	{r7, pc}
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 46
+
+
+ 1776              	.L117:
+ 1777 0086 C046     		.align	2
+ 1778              	.L116:
+ 1779 0088 28000000 		.word	nonVolatileMemoryArray.6285
+ 1780              		.cfi_endproc
+ 1781              	.LFE49:
+ 1782              		.size	returnFromSleep, .-returnFromSleep
+ 1783              		.section	.text.processOutputSelectUart,"ax",%progbits
+ 1784              		.align	2
+ 1785              		.code	16
+ 1786              		.thumb_func
+ 1787              		.type	processOutputSelectUart, %function
+ 1788              	processOutputSelectUart:
+ 1789              	.LFB50:
+ 752:.\BrightnessCommManager.c **** 
+ 753:.\BrightnessCommManager.c **** static void processOutputSelectUart(void)
+ 754:.\BrightnessCommManager.c **** {
+ 1790              		.loc 1 754 0
+ 1791              		.cfi_startproc
+ 1792 0000 80B5     		push	{r7, lr}
+ 1793              		.cfi_def_cfa_offset 8
+ 1794              		.cfi_offset 7, -8
+ 1795              		.cfi_offset 14, -4
+ 1796 0002 00AF     		add	r7, sp, #0
+ 1797              		.cfi_def_cfa_register 7
+ 755:.\BrightnessCommManager.c ****     if(getDriverID() == HEAD_MODULE_ID)
+ 1798              		.loc 1 755 0
+ 1799 0004 FFF7FEFF 		bl	getDriverID
+ 1800 0008 031E     		sub	r3, r0, #0
+ 1801 000a 012B     		cmp	r3, #1
+ 1802 000c 03D1     		bne	.L119
+ 1803              	.LBB5:
+ 756:.\BrightnessCommManager.c ****     {
+ 757:.\BrightnessCommManager.c ****         UART_LED_Control_Write(1);
+ 1804              		.loc 1 757 0
+ 1805 000e 0120     		mov	r0, #1
+ 1806 0010 FFF7FEFF 		bl	UART_LED_Control_Write
+ 1807              	.LBE5:
+ 1808 0014 02E0     		b	.L118
+ 1809              	.L119:
+ 1810              	.LBB6:
+ 758:.\BrightnessCommManager.c ****     }
+ 759:.\BrightnessCommManager.c ****     else
+ 760:.\BrightnessCommManager.c ****     {
+ 761:.\BrightnessCommManager.c ****         UART_LED_Control_Write(0);
+ 1811              		.loc 1 761 0
+ 1812 0016 0020     		mov	r0, #0
+ 1813 0018 FFF7FEFF 		bl	UART_LED_Control_Write
+ 1814              	.L118:
+ 1815              	.LBE6:
+ 762:.\BrightnessCommManager.c ****     }
+ 763:.\BrightnessCommManager.c **** }
+ 1816              		.loc 1 763 0
+ 1817 001c BD46     		mov	sp, r7
+ 1818              		@ sp needed
+ 1819 001e 80BD     		pop	{r7, pc}
+ 1820              		.cfi_endproc
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 47
+
+
+ 1821              	.LFE50:
+ 1822              		.size	processOutputSelectUart, .-processOutputSelectUart
+ 1823              		.bss
+ 1824 000f 00       		.align	1
+ 1825              	loopIterator.6210:
+ 1826 0010 0000     		.space	2
+ 1827              	currentState.6225:
+ 1828 0012 00       		.space	1
+ 1829              	currentPacketIndex.6226:
+ 1830 0013 00       		.space	1
+ 1831              	dataTypeIndex.6227:
+ 1832 0014 00       		.space	1
+ 1833 0015 000000   		.align	2
+ 1834              	packet.6224:
+ 1835 0018 00000000 		.space	13
+ 1835      00000000 
+ 1835      00000000 
+ 1835      00
+ 1836              	driver_ID.6240:
+ 1837 0025 00       		.space	1
+ 1838              	bReceivedCountPacket.6245:
+ 1839 0026 00       		.space	1
+ 1840              		.data
+ 1841              		.type	bFirstBrightnessPacket.6266, %object
+ 1842              		.size	bFirstBrightnessPacket.6266, 1
+ 1843              	bFirstBrightnessPacket.6266:
+ 1844 001e 01       		.byte	1
+ 1845 001f 00       		.bss
+ 1846              	driver_ID.6275:
+ 1847 0027 00       		.space	1
+ 1848              		.align	2
+ 1849              	nonVolatileMemoryArray.6285:
+ 1850 0028 00000000 		.space	4
+ 1851              		.text
+ 1852              	.Letext0:
+ 1853              		.file 2 "Generated_Source\\PSoC4/cytypes.h"
+ 1854              		.section	.debug_info,"",%progbits
+ 1855              	.Ldebug_info0:
+ 1856 0000 9D060000 		.4byte	0x69d
+ 1857 0004 0400     		.2byte	0x4
+ 1858 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 1859 000a 04       		.byte	0x4
+ 1860 000b 01       		.uleb128 0x1
+ 1861 000c D8030000 		.4byte	.LASF79
+ 1862 0010 01       		.byte	0x1
+ 1863 0011 17060000 		.4byte	.LASF80
+ 1864 0015 D7040000 		.4byte	.LASF81
+ 1865 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 1866 001d 00000000 		.4byte	0
+ 1867 0021 00000000 		.4byte	.Ldebug_line0
+ 1868 0025 02       		.uleb128 0x2
+ 1869 0026 01       		.byte	0x1
+ 1870 0027 06       		.byte	0x6
+ 1871 0028 11010000 		.4byte	.LASF0
+ 1872 002c 02       		.uleb128 0x2
+ 1873 002d 01       		.byte	0x1
+ 1874 002e 08       		.byte	0x8
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 48
+
+
+ 1875 002f EB010000 		.4byte	.LASF1
+ 1876 0033 02       		.uleb128 0x2
+ 1877 0034 02       		.byte	0x2
+ 1878 0035 05       		.byte	0x5
+ 1879 0036 5F000000 		.4byte	.LASF2
+ 1880 003a 02       		.uleb128 0x2
+ 1881 003b 02       		.byte	0x2
+ 1882 003c 07       		.byte	0x7
+ 1883 003d 5C030000 		.4byte	.LASF3
+ 1884 0041 02       		.uleb128 0x2
+ 1885 0042 04       		.byte	0x4
+ 1886 0043 05       		.byte	0x5
+ 1887 0044 83010000 		.4byte	.LASF4
+ 1888 0048 02       		.uleb128 0x2
+ 1889 0049 04       		.byte	0x4
+ 1890 004a 07       		.byte	0x7
+ 1891 004b 8A040000 		.4byte	.LASF5
+ 1892 004f 02       		.uleb128 0x2
+ 1893 0050 08       		.byte	0x8
+ 1894 0051 05       		.byte	0x5
+ 1895 0052 80000000 		.4byte	.LASF6
+ 1896 0056 02       		.uleb128 0x2
+ 1897 0057 08       		.byte	0x8
+ 1898 0058 07       		.byte	0x7
+ 1899 0059 76020000 		.4byte	.LASF7
+ 1900 005d 03       		.uleb128 0x3
+ 1901 005e 04       		.byte	0x4
+ 1902 005f 05       		.byte	0x5
+ 1903 0060 696E7400 		.ascii	"int\000"
+ 1904 0064 02       		.uleb128 0x2
+ 1905 0065 04       		.byte	0x4
+ 1906 0066 07       		.byte	0x7
+ 1907 0067 CC020000 		.4byte	.LASF8
+ 1908 006b 04       		.uleb128 0x4
+ 1909 006c F7000000 		.4byte	.LASF9
+ 1910 0070 02       		.byte	0x2
+ 1911 0071 3801     		.2byte	0x138
+ 1912 0073 2C000000 		.4byte	0x2c
+ 1913 0077 04       		.uleb128 0x4
+ 1914 0078 BE000000 		.4byte	.LASF10
+ 1915 007c 02       		.byte	0x2
+ 1916 007d 3901     		.2byte	0x139
+ 1917 007f 3A000000 		.4byte	0x3a
+ 1918 0083 04       		.uleb128 0x4
+ 1919 0084 83040000 		.4byte	.LASF11
+ 1920 0088 02       		.byte	0x2
+ 1921 0089 3A01     		.2byte	0x13a
+ 1922 008b 48000000 		.4byte	0x48
+ 1923 008f 04       		.uleb128 0x4
+ 1924 0090 F1000000 		.4byte	.LASF12
+ 1925 0094 02       		.byte	0x2
+ 1926 0095 3C01     		.2byte	0x13c
+ 1927 0097 33000000 		.4byte	0x33
+ 1928 009b 02       		.uleb128 0x2
+ 1929 009c 04       		.byte	0x4
+ 1930 009d 04       		.byte	0x4
+ 1931 009e 1D010000 		.4byte	.LASF13
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 49
+
+
+ 1932 00a2 02       		.uleb128 0x2
+ 1933 00a3 08       		.byte	0x8
+ 1934 00a4 04       		.byte	0x4
+ 1935 00a5 AA040000 		.4byte	.LASF14
+ 1936 00a9 02       		.uleb128 0x2
+ 1937 00aa 01       		.byte	0x1
+ 1938 00ab 08       		.byte	0x8
+ 1939 00ac C3030000 		.4byte	.LASF15
+ 1940 00b0 05       		.uleb128 0x5
+ 1941 00b1 6B000000 		.4byte	0x6b
+ 1942 00b5 05       		.uleb128 0x5
+ 1943 00b6 77000000 		.4byte	0x77
+ 1944 00ba 04       		.uleb128 0x4
+ 1945 00bb 44030000 		.4byte	.LASF16
+ 1946 00bf 02       		.byte	0x2
+ 1947 00c0 E401     		.2byte	0x1e4
+ 1948 00c2 C6000000 		.4byte	0xc6
+ 1949 00c6 05       		.uleb128 0x5
+ 1950 00c7 83000000 		.4byte	0x83
+ 1951 00cb 02       		.uleb128 0x2
+ 1952 00cc 04       		.byte	0x4
+ 1953 00cd 07       		.byte	0x7
+ 1954 00ce 69000000 		.4byte	.LASF17
+ 1955 00d2 06       		.uleb128 0x6
+ 1956 00d3 04       		.byte	0x4
+ 1957 00d4 6B000000 		.4byte	0x6b
+ 1958 00d8 07       		.uleb128 0x7
+ 1959 00d9 23010000 		.4byte	.LASF82
+ 1960 00dd 01       		.byte	0x1
+ 1961 00de 01       		.byte	0x1
+ 1962 00df 21       		.byte	0x21
+ 1963 00e0 F7000000 		.4byte	0xf7
+ 1964 00e4 08       		.uleb128 0x8
+ 1965 00e5 19030000 		.4byte	.LASF18
+ 1966 00e9 00       		.sleb128 0
+ 1967 00ea 08       		.uleb128 0x8
+ 1968 00eb 72000000 		.4byte	.LASF19
+ 1969 00ef 01       		.sleb128 1
+ 1970 00f0 08       		.uleb128 0x8
+ 1971 00f1 7A050000 		.4byte	.LASF20
+ 1972 00f5 02       		.sleb128 2
+ 1973 00f6 00       		.byte	0
+ 1974 00f7 09       		.uleb128 0x9
+ 1975 00f8 05       		.byte	0x5
+ 1976 00f9 01       		.byte	0x1
+ 1977 00fa 29       		.byte	0x29
+ 1978 00fb 3C010000 		.4byte	0x13c
+ 1979 00ff 0A       		.uleb128 0xa
+ 1980 0100 CB040000 		.4byte	.LASF21
+ 1981 0104 01       		.byte	0x1
+ 1982 0105 2B       		.byte	0x2b
+ 1983 0106 3C010000 		.4byte	0x13c
+ 1984 010a 00       		.byte	0
+ 1985 010b 0A       		.uleb128 0xa
+ 1986 010c 1E020000 		.4byte	.LASF22
+ 1987 0110 01       		.byte	0x1
+ 1988 0111 2C       		.byte	0x2c
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 50
+
+
+ 1989 0112 3C010000 		.4byte	0x13c
+ 1990 0116 01       		.byte	0x1
+ 1991 0117 0A       		.uleb128 0xa
+ 1992 0118 56050000 		.4byte	.LASF23
+ 1993 011c 01       		.byte	0x1
+ 1994 011d 2D       		.byte	0x2d
+ 1995 011e 3C010000 		.4byte	0x13c
+ 1996 0122 02       		.byte	0x2
+ 1997 0123 0A       		.uleb128 0xa
+ 1998 0124 6F010000 		.4byte	.LASF24
+ 1999 0128 01       		.byte	0x1
+ 2000 0129 2E       		.byte	0x2e
+ 2001 012a 3C010000 		.4byte	0x13c
+ 2002 012e 03       		.byte	0x3
+ 2003 012f 0A       		.uleb128 0xa
+ 2004 0130 84050000 		.4byte	.LASF25
+ 2005 0134 01       		.byte	0x1
+ 2006 0135 2F       		.byte	0x2f
+ 2007 0136 3C010000 		.4byte	0x13c
+ 2008 013a 04       		.byte	0x4
+ 2009 013b 00       		.byte	0
+ 2010 013c 0B       		.uleb128 0xb
+ 2011 013d 6B000000 		.4byte	0x6b
+ 2012 0141 0C       		.uleb128 0xc
+ 2013 0142 17020000 		.4byte	.LASF26
+ 2014 0146 01       		.byte	0x1
+ 2015 0147 30       		.byte	0x30
+ 2016 0148 F7000000 		.4byte	0xf7
+ 2017 014c 0D       		.uleb128 0xd
+ 2018 014d 2A020000 		.4byte	.LASF29
+ 2019 0151 01       		.byte	0x1
+ 2020 0152 59       		.byte	0x59
+ 2021 0153 00000000 		.4byte	.LFB34
+ 2022 0157 F8000000 		.4byte	.LFE34-.LFB34
+ 2023 015b 01       		.uleb128 0x1
+ 2024 015c 9C       		.byte	0x9c
+ 2025 015d 70010000 		.4byte	0x170
+ 2026 0161 0E       		.uleb128 0xe
+ 2027 0162 3E020000 		.4byte	.LASF34
+ 2028 0166 01       		.byte	0x1
+ 2029 0167 59       		.byte	0x59
+ 2030 0168 70010000 		.4byte	0x170
+ 2031 016c 02       		.uleb128 0x2
+ 2032 016d 91       		.byte	0x91
+ 2033 016e 74       		.sleb128 -12
+ 2034 016f 00       		.byte	0
+ 2035 0170 06       		.uleb128 0x6
+ 2036 0171 04       		.byte	0x4
+ 2037 0172 3C010000 		.4byte	0x13c
+ 2038 0176 0F       		.uleb128 0xf
+ 2039 0177 55020000 		.4byte	.LASF27
+ 2040 017b 01       		.byte	0x1
+ 2041 017c A5       		.byte	0xa5
+ 2042 017d 00000000 		.4byte	.LFB35
+ 2043 0181 14000000 		.4byte	.LFE35-.LFB35
+ 2044 0185 01       		.uleb128 0x1
+ 2045 0186 9C       		.byte	0x9c
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 51
+
+
+ 2046 0187 10       		.uleb128 0x10
+ 2047 0188 BA010000 		.4byte	.LASF28
+ 2048 018c 01       		.byte	0x1
+ 2049 018d BD       		.byte	0xbd
+ 2050 018e 00000000 		.4byte	.LFB36
+ 2051 0192 80000000 		.4byte	.LFE36-.LFB36
+ 2052 0196 01       		.uleb128 0x1
+ 2053 0197 9C       		.byte	0x9c
+ 2054 0198 0D       		.uleb128 0xd
+ 2055 0199 95010000 		.4byte	.LASF30
+ 2056 019d 01       		.byte	0x1
+ 2057 019e ED       		.byte	0xed
+ 2058 019f 00000000 		.4byte	.LFB37
+ 2059 01a3 48000000 		.4byte	.LFE37-.LFB37
+ 2060 01a7 01       		.uleb128 0x1
+ 2061 01a8 9C       		.byte	0x9c
+ 2062 01a9 CA010000 		.4byte	0x1ca
+ 2063 01ad 11       		.uleb128 0x11
+ 2064 01ae 8C010000 		.4byte	.LASF31
+ 2065 01b2 01       		.byte	0x1
+ 2066 01b3 F0       		.byte	0xf0
+ 2067 01b4 6B000000 		.4byte	0x6b
+ 2068 01b8 02       		.uleb128 0x2
+ 2069 01b9 91       		.byte	0x91
+ 2070 01ba 77       		.sleb128 -9
+ 2071 01bb 11       		.uleb128 0x11
+ 2072 01bc C8030000 		.4byte	.LASF32
+ 2073 01c0 01       		.byte	0x1
+ 2074 01c1 F1       		.byte	0xf1
+ 2075 01c2 83000000 		.4byte	0x83
+ 2076 01c6 02       		.uleb128 0x2
+ 2077 01c7 91       		.byte	0x91
+ 2078 01c8 70       		.sleb128 -16
+ 2079 01c9 00       		.byte	0
+ 2080 01ca 12       		.uleb128 0x12
+ 2081 01cb A5020000 		.4byte	.LASF33
+ 2082 01cf 01       		.byte	0x1
+ 2083 01d0 0201     		.2byte	0x102
+ 2084 01d2 00000000 		.4byte	.LFB38
+ 2085 01d6 60000000 		.4byte	.LFE38-.LFB38
+ 2086 01da 01       		.uleb128 0x1
+ 2087 01db 9C       		.byte	0x9c
+ 2088 01dc 20020000 		.4byte	0x220
+ 2089 01e0 13       		.uleb128 0x13
+ 2090 01e1 3E020000 		.4byte	.LASF34
+ 2091 01e5 01       		.byte	0x1
+ 2092 01e6 0201     		.2byte	0x102
+ 2093 01e8 70010000 		.4byte	0x170
+ 2094 01ec 02       		.uleb128 0x2
+ 2095 01ed 91       		.byte	0x91
+ 2096 01ee 64       		.sleb128 -28
+ 2097 01ef 14       		.uleb128 0x14
+ 2098 01f0 FC050000 		.4byte	.LASF35
+ 2099 01f4 01       		.byte	0x1
+ 2100 01f5 0401     		.2byte	0x104
+ 2101 01f7 6B000000 		.4byte	0x6b
+ 2102 01fb 02       		.uleb128 0x2
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 52
+
+
+ 2103 01fc 91       		.byte	0x91
+ 2104 01fd 6F       		.sleb128 -17
+ 2105 01fe 14       		.uleb128 0x14
+ 2106 01ff B1040000 		.4byte	.LASF36
+ 2107 0203 01       		.byte	0x1
+ 2108 0204 0501     		.2byte	0x105
+ 2109 0206 6B000000 		.4byte	0x6b
+ 2110 020a 02       		.uleb128 0x2
+ 2111 020b 91       		.byte	0x91
+ 2112 020c 6E       		.sleb128 -18
+ 2113 020d 14       		.uleb128 0x14
+ 2114 020e 0A020000 		.4byte	.LASF37
+ 2115 0212 01       		.byte	0x1
+ 2116 0213 0601     		.2byte	0x106
+ 2117 0215 77000000 		.4byte	0x77
+ 2118 0219 05       		.uleb128 0x5
+ 2119 021a 03       		.byte	0x3
+ 2120 021b 10000000 		.4byte	loopIterator.6210
+ 2121 021f 00       		.byte	0
+ 2122 0220 15       		.uleb128 0x15
+ 2123 0221 3E000000 		.4byte	.LASF83
+ 2124 0225 01       		.byte	0x1
+ 2125 0226 3301     		.2byte	0x133
+ 2126 0228 6B000000 		.4byte	0x6b
+ 2127 022c 00000000 		.4byte	.LFB39
+ 2128 0230 14000000 		.4byte	.LFE39-.LFB39
+ 2129 0234 01       		.uleb128 0x1
+ 2130 0235 9C       		.byte	0x9c
+ 2131 0236 16       		.uleb128 0x16
+ 2132 0237 63050000 		.4byte	.LASF38
+ 2133 023b 01       		.byte	0x1
+ 2134 023c 3801     		.2byte	0x138
+ 2135 023e 00000000 		.4byte	.LFB40
+ 2136 0242 14000000 		.4byte	.LFE40-.LFB40
+ 2137 0246 01       		.uleb128 0x1
+ 2138 0247 9C       		.byte	0x9c
+ 2139 0248 12       		.uleb128 0x12
+ 2140 0249 73040000 		.4byte	.LASF39
+ 2141 024d 01       		.byte	0x1
+ 2142 024e 4B01     		.2byte	0x14b
+ 2143 0250 00000000 		.4byte	.LFB41
+ 2144 0254 60000000 		.4byte	.LFE41-.LFB41
+ 2145 0258 01       		.uleb128 0x1
+ 2146 0259 9C       		.byte	0x9c
+ 2147 025a 6E020000 		.4byte	0x26e
+ 2148 025e 14       		.uleb128 0x14
+ 2149 025f C0050000 		.4byte	.LASF40
+ 2150 0263 01       		.byte	0x1
+ 2151 0264 4D01     		.2byte	0x14d
+ 2152 0266 6E020000 		.4byte	0x26e
+ 2153 026a 02       		.uleb128 0x2
+ 2154 026b 91       		.byte	0x91
+ 2155 026c 68       		.sleb128 -24
+ 2156 026d 00       		.byte	0
+ 2157 026e 17       		.uleb128 0x17
+ 2158 026f 6B000000 		.4byte	0x6b
+ 2159 0273 7E020000 		.4byte	0x27e
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 53
+
+
+ 2160 0277 18       		.uleb128 0x18
+ 2161 0278 CB000000 		.4byte	0xcb
+ 2162 027c 0C       		.byte	0xc
+ 2163 027d 00       		.byte	0
+ 2164 027e 19       		.uleb128 0x19
+ 2165 027f 04010000 		.4byte	.LASF60
+ 2166 0283 01       		.byte	0x1
+ 2167 0284 7201     		.2byte	0x172
+ 2168 0286 00000000 		.4byte	.LFB42
+ 2169 028a D0020000 		.4byte	.LFE42-.LFB42
+ 2170 028e 01       		.uleb128 0x1
+ 2171 028f 9C       		.byte	0x9c
+ 2172 0290 FB020000 		.4byte	0x2fb
+ 2173 0294 13       		.uleb128 0x13
+ 2174 0295 8C010000 		.4byte	.LASF31
+ 2175 0299 01       		.byte	0x1
+ 2176 029a 7201     		.2byte	0x172
+ 2177 029c 6B000000 		.4byte	0x6b
+ 2178 02a0 02       		.uleb128 0x2
+ 2179 02a1 91       		.byte	0x91
+ 2180 02a2 67       		.sleb128 -25
+ 2181 02a3 14       		.uleb128 0x14
+ 2182 02a4 FD000000 		.4byte	.LASF41
+ 2183 02a8 01       		.byte	0x1
+ 2184 02a9 7401     		.2byte	0x174
+ 2185 02ab 6E020000 		.4byte	0x26e
+ 2186 02af 05       		.uleb128 0x5
+ 2187 02b0 03       		.byte	0x3
+ 2188 02b1 18000000 		.4byte	packet.6224
+ 2189 02b5 14       		.uleb128 0x14
+ 2190 02b6 66040000 		.4byte	.LASF42
+ 2191 02ba 01       		.byte	0x1
+ 2192 02bb 7501     		.2byte	0x175
+ 2193 02bd D8000000 		.4byte	0xd8
+ 2194 02c1 05       		.uleb128 0x5
+ 2195 02c2 03       		.byte	0x3
+ 2196 02c3 12000000 		.4byte	currentState.6225
+ 2197 02c7 14       		.uleb128 0x14
+ 2198 02c8 D2050000 		.4byte	.LASF43
+ 2199 02cc 01       		.byte	0x1
+ 2200 02cd 7601     		.2byte	0x176
+ 2201 02cf 6B000000 		.4byte	0x6b
+ 2202 02d3 05       		.uleb128 0x5
+ 2203 02d4 03       		.byte	0x3
+ 2204 02d5 13000000 		.4byte	currentPacketIndex.6226
+ 2205 02d9 14       		.uleb128 0x14
+ 2206 02da BE020000 		.4byte	.LASF44
+ 2207 02de 01       		.byte	0x1
+ 2208 02df 7701     		.2byte	0x177
+ 2209 02e1 6B000000 		.4byte	0x6b
+ 2210 02e5 05       		.uleb128 0x5
+ 2211 02e6 03       		.byte	0x3
+ 2212 02e7 14000000 		.4byte	dataTypeIndex.6227
+ 2213 02eb 14       		.uleb128 0x14
+ 2214 02ec 26030000 		.4byte	.LASF45
+ 2215 02f0 01       		.byte	0x1
+ 2216 02f1 7801     		.2byte	0x178
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 54
+
+
+ 2217 02f3 6B000000 		.4byte	0x6b
+ 2218 02f7 02       		.uleb128 0x2
+ 2219 02f8 91       		.byte	0x91
+ 2220 02f9 6F       		.sleb128 -17
+ 2221 02fa 00       		.byte	0
+ 2222 02fb 1A       		.uleb128 0x1a
+ 2223 02fc 92050000 		.4byte	.LASF47
+ 2224 0300 01       		.byte	0x1
+ 2225 0301 F301     		.2byte	0x1f3
+ 2226 0303 6B000000 		.4byte	0x6b
+ 2227 0307 00000000 		.4byte	.LFB43
+ 2228 030b 3C000000 		.4byte	.LFE43-.LFB43
+ 2229 030f 01       		.uleb128 0x1
+ 2230 0310 9C       		.byte	0x9c
+ 2231 0311 46030000 		.4byte	0x346
+ 2232 0315 13       		.uleb128 0x13
+ 2233 0316 FD000000 		.4byte	.LASF41
+ 2234 031a 01       		.byte	0x1
+ 2235 031b F301     		.2byte	0x1f3
+ 2236 031d D2000000 		.4byte	0xd2
+ 2237 0321 02       		.uleb128 0x2
+ 2238 0322 91       		.byte	0x91
+ 2239 0323 74       		.sleb128 -12
+ 2240 0324 13       		.uleb128 0x13
+ 2241 0325 03020000 		.4byte	.LASF46
+ 2242 0329 01       		.byte	0x1
+ 2243 032a F301     		.2byte	0x1f3
+ 2244 032c 6B000000 		.4byte	0x6b
+ 2245 0330 02       		.uleb128 0x2
+ 2246 0331 91       		.byte	0x91
+ 2247 0332 73       		.sleb128 -13
+ 2248 0333 14       		.uleb128 0x14
+ 2249 0334 B1040000 		.4byte	.LASF36
+ 2250 0338 01       		.byte	0x1
+ 2251 0339 F501     		.2byte	0x1f5
+ 2252 033b 6B000000 		.4byte	0x6b
+ 2253 033f 05       		.uleb128 0x5
+ 2254 0340 03       		.byte	0x3
+ 2255 0341 25000000 		.4byte	driver_ID.6240
+ 2256 0345 00       		.byte	0
+ 2257 0346 1A       		.uleb128 0x1a
+ 2258 0347 12000000 		.4byte	.LASF48
+ 2259 034b 01       		.byte	0x1
+ 2260 034c 1B02     		.2byte	0x21b
+ 2261 034e 6B000000 		.4byte	0x6b
+ 2262 0352 00000000 		.4byte	.LFB44
+ 2263 0356 04010000 		.4byte	.LFE44-.LFB44
+ 2264 035a 01       		.uleb128 0x1
+ 2265 035b 9C       		.byte	0x9c
+ 2266 035c E8030000 		.4byte	0x3e8
+ 2267 0360 13       		.uleb128 0x13
+ 2268 0361 FD000000 		.4byte	.LASF41
+ 2269 0365 01       		.byte	0x1
+ 2270 0366 1B02     		.2byte	0x21b
+ 2271 0368 D2000000 		.4byte	0xd2
+ 2272 036c 02       		.uleb128 0x2
+ 2273 036d 91       		.byte	0x91
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 55
+
+
+ 2274 036e 64       		.sleb128 -28
+ 2275 036f 13       		.uleb128 0x13
+ 2276 0370 03020000 		.4byte	.LASF46
+ 2277 0374 01       		.byte	0x1
+ 2278 0375 1B02     		.2byte	0x21b
+ 2279 0377 6B000000 		.4byte	0x6b
+ 2280 037b 02       		.uleb128 0x2
+ 2281 037c 91       		.byte	0x91
+ 2282 037d 63       		.sleb128 -29
+ 2283 037e 14       		.uleb128 0x14
+ 2284 037f F0020000 		.4byte	.LASF49
+ 2285 0383 01       		.byte	0x1
+ 2286 0384 1D02     		.2byte	0x21d
+ 2287 0386 6B000000 		.4byte	0x6b
+ 2288 038a 05       		.uleb128 0x5
+ 2289 038b 03       		.byte	0x3
+ 2290 038c 26000000 		.4byte	bReceivedCountPacket.6245
+ 2291 0390 14       		.uleb128 0x14
+ 2292 0391 2B000000 		.4byte	.LASF50
+ 2293 0395 01       		.byte	0x1
+ 2294 0396 1E02     		.2byte	0x21e
+ 2295 0398 6B000000 		.4byte	0x6b
+ 2296 039c 02       		.uleb128 0x2
+ 2297 039d 91       		.byte	0x91
+ 2298 039e 76       		.sleb128 -10
+ 2299 039f 14       		.uleb128 0x14
+ 2300 03a0 34050000 		.4byte	.LASF51
+ 2301 03a4 01       		.byte	0x1
+ 2302 03a5 1F02     		.2byte	0x21f
+ 2303 03a7 6E020000 		.4byte	0x26e
+ 2304 03ab 02       		.uleb128 0x2
+ 2305 03ac 91       		.byte	0x91
+ 2306 03ad 68       		.sleb128 -24
+ 2307 03ae 14       		.uleb128 0x14
+ 2308 03af 54000000 		.4byte	.LASF52
+ 2309 03b3 01       		.byte	0x1
+ 2310 03b4 2002     		.2byte	0x220
+ 2311 03b6 6B000000 		.4byte	0x6b
+ 2312 03ba 02       		.uleb128 0x2
+ 2313 03bb 91       		.byte	0x91
+ 2314 03bc 77       		.sleb128 -9
+ 2315 03bd 1B       		.uleb128 0x1b
+ 2316 03be 4A030000 		.4byte	.LASF55
+ 2317 03c2 01       		.byte	0x1
+ 2318 03c3 3802     		.2byte	0x238
+ 2319 03c5 5D000000 		.4byte	0x5d
+ 2320 03c9 CF030000 		.4byte	0x3cf
+ 2321 03cd 1C       		.uleb128 0x1c
+ 2322 03ce 00       		.byte	0
+ 2323 03cf 1D       		.uleb128 0x1d
+ 2324 03d0 68000000 		.4byte	.LBB2
+ 2325 03d4 10000000 		.4byte	.LBE2-.LBB2
+ 2326 03d8 1E       		.uleb128 0x1e
+ 2327 03d9 A2030000 		.4byte	.LASF54
+ 2328 03dd 01       		.byte	0x1
+ 2329 03de 2E02     		.2byte	0x22e
+ 2330 03e0 5D000000 		.4byte	0x5d
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 56
+
+
+ 2331 03e4 1C       		.uleb128 0x1c
+ 2332 03e5 00       		.byte	0
+ 2333 03e6 00       		.byte	0
+ 2334 03e7 00       		.byte	0
+ 2335 03e8 1A       		.uleb128 0x1a
+ 2336 03e9 C5000000 		.4byte	.LASF53
+ 2337 03ed 01       		.byte	0x1
+ 2338 03ee 4F02     		.2byte	0x24f
+ 2339 03f0 6B000000 		.4byte	0x6b
+ 2340 03f4 00000000 		.4byte	.LFB45
+ 2341 03f8 2A000000 		.4byte	.LFE45-.LFB45
+ 2342 03fc 01       		.uleb128 0x1
+ 2343 03fd 9C       		.byte	0x9c
+ 2344 03fe 2F040000 		.4byte	0x42f
+ 2345 0402 13       		.uleb128 0x13
+ 2346 0403 FD000000 		.4byte	.LASF41
+ 2347 0407 01       		.byte	0x1
+ 2348 0408 4F02     		.2byte	0x24f
+ 2349 040a D2000000 		.4byte	0xd2
+ 2350 040e 02       		.uleb128 0x2
+ 2351 040f 91       		.byte	0x91
+ 2352 0410 74       		.sleb128 -12
+ 2353 0411 13       		.uleb128 0x13
+ 2354 0412 03020000 		.4byte	.LASF46
+ 2355 0416 01       		.byte	0x1
+ 2356 0417 4F02     		.2byte	0x24f
+ 2357 0419 6B000000 		.4byte	0x6b
+ 2358 041d 02       		.uleb128 0x2
+ 2359 041e 91       		.byte	0x91
+ 2360 041f 73       		.sleb128 -13
+ 2361 0420 1E       		.uleb128 0x1e
+ 2362 0421 4A030000 		.4byte	.LASF55
+ 2363 0425 01       		.byte	0x1
+ 2364 0426 3802     		.2byte	0x238
+ 2365 0428 5D000000 		.4byte	0x5d
+ 2366 042c 1C       		.uleb128 0x1c
+ 2367 042d 00       		.byte	0
+ 2368 042e 00       		.byte	0
+ 2369 042f 1A       		.uleb128 0x1a
+ 2370 0430 44010000 		.4byte	.LASF56
+ 2371 0434 01       		.byte	0x1
+ 2372 0435 6B02     		.2byte	0x26b
+ 2373 0437 6B000000 		.4byte	0x6b
+ 2374 043b 00000000 		.4byte	.LFB46
+ 2375 043f 1C010000 		.4byte	.LFE46-.LFB46
+ 2376 0443 01       		.uleb128 0x1
+ 2377 0444 9C       		.byte	0x9c
+ 2378 0445 BF040000 		.4byte	0x4bf
+ 2379 0449 13       		.uleb128 0x13
+ 2380 044a FD000000 		.4byte	.LASF41
+ 2381 044e 01       		.byte	0x1
+ 2382 044f 6B02     		.2byte	0x26b
+ 2383 0451 D2000000 		.4byte	0xd2
+ 2384 0455 02       		.uleb128 0x2
+ 2385 0456 91       		.byte	0x91
+ 2386 0457 64       		.sleb128 -28
+ 2387 0458 13       		.uleb128 0x13
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 57
+
+
+ 2388 0459 03020000 		.4byte	.LASF46
+ 2389 045d 01       		.byte	0x1
+ 2390 045e 6B02     		.2byte	0x26b
+ 2391 0460 6B000000 		.4byte	0x6b
+ 2392 0464 02       		.uleb128 0x2
+ 2393 0465 91       		.byte	0x91
+ 2394 0466 63       		.sleb128 -29
+ 2395 0467 13       		.uleb128 0x13
+ 2396 0468 9C040000 		.4byte	.LASF57
+ 2397 046c 01       		.byte	0x1
+ 2398 046d 6B02     		.2byte	0x26b
+ 2399 046f 6B000000 		.4byte	0x6b
+ 2400 0473 02       		.uleb128 0x2
+ 2401 0474 91       		.byte	0x91
+ 2402 0475 62       		.sleb128 -30
+ 2403 0476 14       		.uleb128 0x14
+ 2404 0477 D9020000 		.4byte	.LASF58
+ 2405 047b 01       		.byte	0x1
+ 2406 047c 6D02     		.2byte	0x26d
+ 2407 047e 6B000000 		.4byte	0x6b
+ 2408 0482 05       		.uleb128 0x5
+ 2409 0483 03       		.byte	0x3
+ 2410 0484 1E000000 		.4byte	bFirstBrightnessPacket.6266
+ 2411 0488 14       		.uleb128 0x14
+ 2412 0489 00000000 		.4byte	.LASF59
+ 2413 048d 01       		.byte	0x1
+ 2414 048e 6E02     		.2byte	0x26e
+ 2415 0490 6B000000 		.4byte	0x6b
+ 2416 0494 02       		.uleb128 0x2
+ 2417 0495 91       		.byte	0x91
+ 2418 0496 6F       		.sleb128 -17
+ 2419 0497 14       		.uleb128 0x14
+ 2420 0498 B1040000 		.4byte	.LASF36
+ 2421 049c 01       		.byte	0x1
+ 2422 049d 6F02     		.2byte	0x26f
+ 2423 049f 6B000000 		.4byte	0x6b
+ 2424 04a3 02       		.uleb128 0x2
+ 2425 04a4 91       		.byte	0x91
+ 2426 04a5 6E       		.sleb128 -18
+ 2427 04a6 1D       		.uleb128 0x1d
+ 2428 04a7 94000000 		.4byte	.LBB3
+ 2429 04ab 60000000 		.4byte	.LBE3-.LBB3
+ 2430 04af 1E       		.uleb128 0x1e
+ 2431 04b0 4A030000 		.4byte	.LASF55
+ 2432 04b4 01       		.byte	0x1
+ 2433 04b5 3802     		.2byte	0x238
+ 2434 04b7 5D000000 		.4byte	0x5d
+ 2435 04bb 1C       		.uleb128 0x1c
+ 2436 04bc 00       		.byte	0
+ 2437 04bd 00       		.byte	0
+ 2438 04be 00       		.byte	0
+ 2439 04bf 19       		.uleb128 0x19
+ 2440 04c0 B1000000 		.4byte	.LASF61
+ 2441 04c4 01       		.byte	0x1
+ 2442 04c5 9B02     		.2byte	0x29b
+ 2443 04c7 00000000 		.4byte	.LFB47
+ 2444 04cb 54000000 		.4byte	.LFE47-.LFB47
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 58
+
+
+ 2445 04cf 01       		.uleb128 0x1
+ 2446 04d0 9C       		.byte	0x9c
+ 2447 04d1 2D050000 		.4byte	0x52d
+ 2448 04d5 13       		.uleb128 0x13
+ 2449 04d6 05030000 		.4byte	.LASF62
+ 2450 04da 01       		.byte	0x1
+ 2451 04db 9B02     		.2byte	0x29b
+ 2452 04dd D2000000 		.4byte	0xd2
+ 2453 04e1 02       		.uleb128 0x2
+ 2454 04e2 91       		.byte	0x91
+ 2455 04e3 74       		.sleb128 -12
+ 2456 04e4 13       		.uleb128 0x13
+ 2457 04e5 3E020000 		.4byte	.LASF34
+ 2458 04e9 01       		.byte	0x1
+ 2459 04ea 9B02     		.2byte	0x29b
+ 2460 04ec 70010000 		.4byte	0x170
+ 2461 04f0 02       		.uleb128 0x2
+ 2462 04f1 91       		.byte	0x91
+ 2463 04f2 70       		.sleb128 -16
+ 2464 04f3 13       		.uleb128 0x13
+ 2465 04f4 FD000000 		.4byte	.LASF41
+ 2466 04f8 01       		.byte	0x1
+ 2467 04f9 9B02     		.2byte	0x29b
+ 2468 04fb D2000000 		.4byte	0xd2
+ 2469 04ff 02       		.uleb128 0x2
+ 2470 0500 91       		.byte	0x91
+ 2471 0501 6C       		.sleb128 -20
+ 2472 0502 14       		.uleb128 0x14
+ 2473 0503 B1040000 		.4byte	.LASF36
+ 2474 0507 01       		.byte	0x1
+ 2475 0508 9D02     		.2byte	0x29d
+ 2476 050a 6B000000 		.4byte	0x6b
+ 2477 050e 05       		.uleb128 0x5
+ 2478 050f 03       		.byte	0x3
+ 2479 0510 27000000 		.4byte	driver_ID.6275
+ 2480 0514 1D       		.uleb128 0x1d
+ 2481 0515 20000000 		.4byte	.LBB4
+ 2482 0519 0A000000 		.4byte	.LBE4-.LBB4
+ 2483 051d 1E       		.uleb128 0x1e
+ 2484 051e 4A030000 		.4byte	.LASF55
+ 2485 0522 01       		.byte	0x1
+ 2486 0523 3802     		.2byte	0x238
+ 2487 0525 5D000000 		.4byte	0x5d
+ 2488 0529 1C       		.uleb128 0x1c
+ 2489 052a 00       		.byte	0
+ 2490 052b 00       		.byte	0
+ 2491 052c 00       		.byte	0
+ 2492 052d 19       		.uleb128 0x19
+ 2493 052e 94030000 		.4byte	.LASF63
+ 2494 0532 01       		.byte	0x1
+ 2495 0533 A802     		.2byte	0x2a8
+ 2496 0535 00000000 		.4byte	.LFB48
+ 2497 0539 3A000000 		.4byte	.LFE48-.LFB48
+ 2498 053d 01       		.uleb128 0x1
+ 2499 053e 9C       		.byte	0x9c
+ 2500 053f 52050000 		.4byte	0x552
+ 2501 0543 1E       		.uleb128 0x1e
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 59
+
+
+ 2502 0544 D5010000 		.4byte	.LASF64
+ 2503 0548 01       		.byte	0x1
+ 2504 0549 B502     		.2byte	0x2b5
+ 2505 054b 5D000000 		.4byte	0x5d
+ 2506 054f 1C       		.uleb128 0x1c
+ 2507 0550 00       		.byte	0
+ 2508 0551 00       		.byte	0
+ 2509 0552 19       		.uleb128 0x19
+ 2510 0553 E1000000 		.4byte	.LASF65
+ 2511 0557 01       		.byte	0x1
+ 2512 0558 C202     		.2byte	0x2c2
+ 2513 055a 00000000 		.4byte	.LFB49
+ 2514 055e 8C000000 		.4byte	.LFE49-.LFB49
+ 2515 0562 01       		.uleb128 0x1
+ 2516 0563 9C       		.byte	0x9c
+ 2517 0564 9B050000 		.4byte	0x59b
+ 2518 0568 14       		.uleb128 0x14
+ 2519 0569 3E020000 		.4byte	.LASF34
+ 2520 056d 01       		.byte	0x1
+ 2521 056e C402     		.2byte	0x2c4
+ 2522 0570 70010000 		.4byte	0x170
+ 2523 0574 05       		.uleb128 0x5
+ 2524 0575 03       		.byte	0x3
+ 2525 0576 28000000 		.4byte	nonVolatileMemoryArray.6285
+ 2526 057a 1B       		.uleb128 0x1b
+ 2527 057b A9050000 		.4byte	.LASF66
+ 2528 057f 01       		.byte	0x1
+ 2529 0580 C602     		.2byte	0x2c6
+ 2530 0582 5D000000 		.4byte	0x5d
+ 2531 0586 8C050000 		.4byte	0x58c
+ 2532 058a 1C       		.uleb128 0x1c
+ 2533 058b 00       		.byte	0
+ 2534 058c 1E       		.uleb128 0x1e
+ 2535 058d E5050000 		.4byte	.LASF67
+ 2536 0591 01       		.byte	0x1
+ 2537 0592 D402     		.2byte	0x2d4
+ 2538 0594 5D000000 		.4byte	0x5d
+ 2539 0598 1C       		.uleb128 0x1c
+ 2540 0599 00       		.byte	0
+ 2541 059a 00       		.byte	0
+ 2542 059b 19       		.uleb128 0x19
+ 2543 059c 99000000 		.4byte	.LASF68
+ 2544 05a0 01       		.byte	0x1
+ 2545 05a1 F102     		.2byte	0x2f1
+ 2546 05a3 00000000 		.4byte	.LFB50
+ 2547 05a7 20000000 		.4byte	.LFE50-.LFB50
+ 2548 05ab 01       		.uleb128 0x1
+ 2549 05ac 9C       		.byte	0x9c
+ 2550 05ad E6050000 		.4byte	0x5e6
+ 2551 05b1 1F       		.uleb128 0x1f
+ 2552 05b2 0E000000 		.4byte	.LBB5
+ 2553 05b6 06000000 		.4byte	.LBE5-.LBB5
+ 2554 05ba CD050000 		.4byte	0x5cd
+ 2555 05be 1E       		.uleb128 0x1e
+ 2556 05bf A9050000 		.4byte	.LASF66
+ 2557 05c3 01       		.byte	0x1
+ 2558 05c4 C602     		.2byte	0x2c6
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 60
+
+
+ 2559 05c6 5D000000 		.4byte	0x5d
+ 2560 05ca 1C       		.uleb128 0x1c
+ 2561 05cb 00       		.byte	0
+ 2562 05cc 00       		.byte	0
+ 2563 05cd 1D       		.uleb128 0x1d
+ 2564 05ce 16000000 		.4byte	.LBB6
+ 2565 05d2 06000000 		.4byte	.LBE6-.LBB6
+ 2566 05d6 1E       		.uleb128 0x1e
+ 2567 05d7 A9050000 		.4byte	.LASF66
+ 2568 05db 01       		.byte	0x1
+ 2569 05dc C602     		.2byte	0x2c6
+ 2570 05de 5D000000 		.4byte	0x5d
+ 2571 05e2 1C       		.uleb128 0x1c
+ 2572 05e3 00       		.byte	0
+ 2573 05e4 00       		.byte	0
+ 2574 05e5 00       		.byte	0
+ 2575 05e6 17       		.uleb128 0x17
+ 2576 05e7 41010000 		.4byte	0x141
+ 2577 05eb F6050000 		.4byte	0x5f6
+ 2578 05ef 18       		.uleb128 0x18
+ 2579 05f0 CB000000 		.4byte	0xcb
+ 2580 05f4 05       		.byte	0x5
+ 2581 05f5 00       		.byte	0
+ 2582 05f6 11       		.uleb128 0x11
+ 2583 05f7 8E000000 		.4byte	.LASF69
+ 2584 05fb 01       		.byte	0x1
+ 2585 05fc 32       		.byte	0x32
+ 2586 05fd E6050000 		.4byte	0x5e6
+ 2587 0601 05       		.uleb128 0x5
+ 2588 0602 03       		.byte	0x3
+ 2589 0603 00000000 		.4byte	PacketList
+ 2590 0607 11       		.uleb128 0x11
+ 2591 0608 2F010000 		.4byte	.LASF70
+ 2592 060c 01       		.byte	0x1
+ 2593 060d 3F       		.byte	0x3f
+ 2594 060e 6B000000 		.4byte	0x6b
+ 2595 0612 05       		.uleb128 0x5
+ 2596 0613 03       		.byte	0x3
+ 2597 0614 00000000 		.4byte	bDriverCountReceived
+ 2598 0618 11       		.uleb128 0x11
+ 2599 0619 BB040000 		.4byte	.LASF71
+ 2600 061d 01       		.byte	0x1
+ 2601 061e 42       		.byte	0x42
+ 2602 061f 6B000000 		.4byte	0x6b
+ 2603 0623 05       		.uleb128 0x5
+ 2604 0624 03       		.byte	0x3
+ 2605 0625 02000000 		.4byte	stateOfLightBar
+ 2606 0629 11       		.uleb128 0x11
+ 2607 062a 30030000 		.4byte	.LASF72
+ 2608 062e 01       		.byte	0x1
+ 2609 062f 50       		.byte	0x50
+ 2610 0630 77000000 		.4byte	0x77
+ 2611 0634 05       		.uleb128 0x5
+ 2612 0635 03       		.byte	0x3
+ 2613 0636 08000000 		.4byte	regulatedBrightness
+ 2614 063a 11       		.uleb128 0x11
+ 2615 063b 5C010000 		.4byte	.LASF73
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 61
+
+
+ 2616 063f 01       		.byte	0x1
+ 2617 0640 52       		.byte	0x52
+ 2618 0641 77000000 		.4byte	0x77
+ 2619 0645 05       		.uleb128 0x5
+ 2620 0646 03       		.byte	0x3
+ 2621 0647 0A000000 		.4byte	bFirstTimeRampDown
+ 2622 064b 11       		.uleb128 0x11
+ 2623 064c 3E050000 		.4byte	.LASF74
+ 2624 0650 01       		.byte	0x1
+ 2625 0651 53       		.byte	0x53
+ 2626 0652 8F000000 		.4byte	0x8f
+ 2627 0656 05       		.uleb128 0x5
+ 2628 0657 03       		.byte	0x3
+ 2629 0658 0C000000 		.4byte	previousBrightnessLocal
+ 2630 065c 11       		.uleb128 0x11
+ 2631 065d F9010000 		.4byte	.LASF75
+ 2632 0661 01       		.byte	0x1
+ 2633 0662 54       		.byte	0x54
+ 2634 0663 6B000000 		.4byte	0x6b
+ 2635 0667 05       		.uleb128 0x5
+ 2636 0668 03       		.byte	0x3
+ 2637 0669 0E000000 		.4byte	ifPowerUp
+ 2638 066d 20       		.uleb128 0x20
+ 2639 066e 7E030000 		.4byte	.LASF76
+ 2640 0672 01       		.byte	0x1
+ 2641 0673 41       		.byte	0x41
+ 2642 0674 B0000000 		.4byte	0xb0
+ 2643 0678 05       		.uleb128 0x5
+ 2644 0679 03       		.byte	0x3
+ 2645 067a 00000000 		.4byte	bCommunicationTimeOut
+ 2646 067e 20       		.uleb128 0x20
+ 2647 067f 6F030000 		.4byte	.LASF77
+ 2648 0683 01       		.byte	0x1
+ 2649 0684 43       		.byte	0x43
+ 2650 0685 B5000000 		.4byte	0xb5
+ 2651 0689 05       		.uleb128 0x5
+ 2652 068a 03       		.byte	0x3
+ 2653 068b 00000000 		.4byte	timeOutCounter
+ 2654 068f 20       		.uleb128 0x20
+ 2655 0690 8D020000 		.4byte	.LASF78
+ 2656 0694 01       		.byte	0x1
+ 2657 0695 44       		.byte	0x44
+ 2658 0696 B0000000 		.4byte	0xb0
+ 2659 069a 05       		.uleb128 0x5
+ 2660 069b 03       		.byte	0x3
+ 2661 069c 00000000 		.4byte	bIsCommunicationTrigger
+ 2662 06a0 00       		.byte	0
+ 2663              		.section	.debug_abbrev,"",%progbits
+ 2664              	.Ldebug_abbrev0:
+ 2665 0000 01       		.uleb128 0x1
+ 2666 0001 11       		.uleb128 0x11
+ 2667 0002 01       		.byte	0x1
+ 2668 0003 25       		.uleb128 0x25
+ 2669 0004 0E       		.uleb128 0xe
+ 2670 0005 13       		.uleb128 0x13
+ 2671 0006 0B       		.uleb128 0xb
+ 2672 0007 03       		.uleb128 0x3
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 62
+
+
+ 2673 0008 0E       		.uleb128 0xe
+ 2674 0009 1B       		.uleb128 0x1b
+ 2675 000a 0E       		.uleb128 0xe
+ 2676 000b 55       		.uleb128 0x55
+ 2677 000c 17       		.uleb128 0x17
+ 2678 000d 11       		.uleb128 0x11
+ 2679 000e 01       		.uleb128 0x1
+ 2680 000f 10       		.uleb128 0x10
+ 2681 0010 17       		.uleb128 0x17
+ 2682 0011 00       		.byte	0
+ 2683 0012 00       		.byte	0
+ 2684 0013 02       		.uleb128 0x2
+ 2685 0014 24       		.uleb128 0x24
+ 2686 0015 00       		.byte	0
+ 2687 0016 0B       		.uleb128 0xb
+ 2688 0017 0B       		.uleb128 0xb
+ 2689 0018 3E       		.uleb128 0x3e
+ 2690 0019 0B       		.uleb128 0xb
+ 2691 001a 03       		.uleb128 0x3
+ 2692 001b 0E       		.uleb128 0xe
+ 2693 001c 00       		.byte	0
+ 2694 001d 00       		.byte	0
+ 2695 001e 03       		.uleb128 0x3
+ 2696 001f 24       		.uleb128 0x24
+ 2697 0020 00       		.byte	0
+ 2698 0021 0B       		.uleb128 0xb
+ 2699 0022 0B       		.uleb128 0xb
+ 2700 0023 3E       		.uleb128 0x3e
+ 2701 0024 0B       		.uleb128 0xb
+ 2702 0025 03       		.uleb128 0x3
+ 2703 0026 08       		.uleb128 0x8
+ 2704 0027 00       		.byte	0
+ 2705 0028 00       		.byte	0
+ 2706 0029 04       		.uleb128 0x4
+ 2707 002a 16       		.uleb128 0x16
+ 2708 002b 00       		.byte	0
+ 2709 002c 03       		.uleb128 0x3
+ 2710 002d 0E       		.uleb128 0xe
+ 2711 002e 3A       		.uleb128 0x3a
+ 2712 002f 0B       		.uleb128 0xb
+ 2713 0030 3B       		.uleb128 0x3b
+ 2714 0031 05       		.uleb128 0x5
+ 2715 0032 49       		.uleb128 0x49
+ 2716 0033 13       		.uleb128 0x13
+ 2717 0034 00       		.byte	0
+ 2718 0035 00       		.byte	0
+ 2719 0036 05       		.uleb128 0x5
+ 2720 0037 35       		.uleb128 0x35
+ 2721 0038 00       		.byte	0
+ 2722 0039 49       		.uleb128 0x49
+ 2723 003a 13       		.uleb128 0x13
+ 2724 003b 00       		.byte	0
+ 2725 003c 00       		.byte	0
+ 2726 003d 06       		.uleb128 0x6
+ 2727 003e 0F       		.uleb128 0xf
+ 2728 003f 00       		.byte	0
+ 2729 0040 0B       		.uleb128 0xb
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 63
+
+
+ 2730 0041 0B       		.uleb128 0xb
+ 2731 0042 49       		.uleb128 0x49
+ 2732 0043 13       		.uleb128 0x13
+ 2733 0044 00       		.byte	0
+ 2734 0045 00       		.byte	0
+ 2735 0046 07       		.uleb128 0x7
+ 2736 0047 04       		.uleb128 0x4
+ 2737 0048 01       		.byte	0x1
+ 2738 0049 03       		.uleb128 0x3
+ 2739 004a 0E       		.uleb128 0xe
+ 2740 004b 0B       		.uleb128 0xb
+ 2741 004c 0B       		.uleb128 0xb
+ 2742 004d 3A       		.uleb128 0x3a
+ 2743 004e 0B       		.uleb128 0xb
+ 2744 004f 3B       		.uleb128 0x3b
+ 2745 0050 0B       		.uleb128 0xb
+ 2746 0051 01       		.uleb128 0x1
+ 2747 0052 13       		.uleb128 0x13
+ 2748 0053 00       		.byte	0
+ 2749 0054 00       		.byte	0
+ 2750 0055 08       		.uleb128 0x8
+ 2751 0056 28       		.uleb128 0x28
+ 2752 0057 00       		.byte	0
+ 2753 0058 03       		.uleb128 0x3
+ 2754 0059 0E       		.uleb128 0xe
+ 2755 005a 1C       		.uleb128 0x1c
+ 2756 005b 0D       		.uleb128 0xd
+ 2757 005c 00       		.byte	0
+ 2758 005d 00       		.byte	0
+ 2759 005e 09       		.uleb128 0x9
+ 2760 005f 13       		.uleb128 0x13
+ 2761 0060 01       		.byte	0x1
+ 2762 0061 0B       		.uleb128 0xb
+ 2763 0062 0B       		.uleb128 0xb
+ 2764 0063 3A       		.uleb128 0x3a
+ 2765 0064 0B       		.uleb128 0xb
+ 2766 0065 3B       		.uleb128 0x3b
+ 2767 0066 0B       		.uleb128 0xb
+ 2768 0067 01       		.uleb128 0x1
+ 2769 0068 13       		.uleb128 0x13
+ 2770 0069 00       		.byte	0
+ 2771 006a 00       		.byte	0
+ 2772 006b 0A       		.uleb128 0xa
+ 2773 006c 0D       		.uleb128 0xd
+ 2774 006d 00       		.byte	0
+ 2775 006e 03       		.uleb128 0x3
+ 2776 006f 0E       		.uleb128 0xe
+ 2777 0070 3A       		.uleb128 0x3a
+ 2778 0071 0B       		.uleb128 0xb
+ 2779 0072 3B       		.uleb128 0x3b
+ 2780 0073 0B       		.uleb128 0xb
+ 2781 0074 49       		.uleb128 0x49
+ 2782 0075 13       		.uleb128 0x13
+ 2783 0076 38       		.uleb128 0x38
+ 2784 0077 0B       		.uleb128 0xb
+ 2785 0078 00       		.byte	0
+ 2786 0079 00       		.byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 64
+
+
+ 2787 007a 0B       		.uleb128 0xb
+ 2788 007b 26       		.uleb128 0x26
+ 2789 007c 00       		.byte	0
+ 2790 007d 49       		.uleb128 0x49
+ 2791 007e 13       		.uleb128 0x13
+ 2792 007f 00       		.byte	0
+ 2793 0080 00       		.byte	0
+ 2794 0081 0C       		.uleb128 0xc
+ 2795 0082 16       		.uleb128 0x16
+ 2796 0083 00       		.byte	0
+ 2797 0084 03       		.uleb128 0x3
+ 2798 0085 0E       		.uleb128 0xe
+ 2799 0086 3A       		.uleb128 0x3a
+ 2800 0087 0B       		.uleb128 0xb
+ 2801 0088 3B       		.uleb128 0x3b
+ 2802 0089 0B       		.uleb128 0xb
+ 2803 008a 49       		.uleb128 0x49
+ 2804 008b 13       		.uleb128 0x13
+ 2805 008c 00       		.byte	0
+ 2806 008d 00       		.byte	0
+ 2807 008e 0D       		.uleb128 0xd
+ 2808 008f 2E       		.uleb128 0x2e
+ 2809 0090 01       		.byte	0x1
+ 2810 0091 3F       		.uleb128 0x3f
+ 2811 0092 19       		.uleb128 0x19
+ 2812 0093 03       		.uleb128 0x3
+ 2813 0094 0E       		.uleb128 0xe
+ 2814 0095 3A       		.uleb128 0x3a
+ 2815 0096 0B       		.uleb128 0xb
+ 2816 0097 3B       		.uleb128 0x3b
+ 2817 0098 0B       		.uleb128 0xb
+ 2818 0099 27       		.uleb128 0x27
+ 2819 009a 19       		.uleb128 0x19
+ 2820 009b 11       		.uleb128 0x11
+ 2821 009c 01       		.uleb128 0x1
+ 2822 009d 12       		.uleb128 0x12
+ 2823 009e 06       		.uleb128 0x6
+ 2824 009f 40       		.uleb128 0x40
+ 2825 00a0 18       		.uleb128 0x18
+ 2826 00a1 9642     		.uleb128 0x2116
+ 2827 00a3 19       		.uleb128 0x19
+ 2828 00a4 01       		.uleb128 0x1
+ 2829 00a5 13       		.uleb128 0x13
+ 2830 00a6 00       		.byte	0
+ 2831 00a7 00       		.byte	0
+ 2832 00a8 0E       		.uleb128 0xe
+ 2833 00a9 05       		.uleb128 0x5
+ 2834 00aa 00       		.byte	0
+ 2835 00ab 03       		.uleb128 0x3
+ 2836 00ac 0E       		.uleb128 0xe
+ 2837 00ad 3A       		.uleb128 0x3a
+ 2838 00ae 0B       		.uleb128 0xb
+ 2839 00af 3B       		.uleb128 0x3b
+ 2840 00b0 0B       		.uleb128 0xb
+ 2841 00b1 49       		.uleb128 0x49
+ 2842 00b2 13       		.uleb128 0x13
+ 2843 00b3 02       		.uleb128 0x2
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 65
+
+
+ 2844 00b4 18       		.uleb128 0x18
+ 2845 00b5 00       		.byte	0
+ 2846 00b6 00       		.byte	0
+ 2847 00b7 0F       		.uleb128 0xf
+ 2848 00b8 2E       		.uleb128 0x2e
+ 2849 00b9 00       		.byte	0
+ 2850 00ba 3F       		.uleb128 0x3f
+ 2851 00bb 19       		.uleb128 0x19
+ 2852 00bc 03       		.uleb128 0x3
+ 2853 00bd 0E       		.uleb128 0xe
+ 2854 00be 3A       		.uleb128 0x3a
+ 2855 00bf 0B       		.uleb128 0xb
+ 2856 00c0 3B       		.uleb128 0x3b
+ 2857 00c1 0B       		.uleb128 0xb
+ 2858 00c2 27       		.uleb128 0x27
+ 2859 00c3 19       		.uleb128 0x19
+ 2860 00c4 11       		.uleb128 0x11
+ 2861 00c5 01       		.uleb128 0x1
+ 2862 00c6 12       		.uleb128 0x12
+ 2863 00c7 06       		.uleb128 0x6
+ 2864 00c8 40       		.uleb128 0x40
+ 2865 00c9 18       		.uleb128 0x18
+ 2866 00ca 9742     		.uleb128 0x2117
+ 2867 00cc 19       		.uleb128 0x19
+ 2868 00cd 00       		.byte	0
+ 2869 00ce 00       		.byte	0
+ 2870 00cf 10       		.uleb128 0x10
+ 2871 00d0 2E       		.uleb128 0x2e
+ 2872 00d1 00       		.byte	0
+ 2873 00d2 3F       		.uleb128 0x3f
+ 2874 00d3 19       		.uleb128 0x19
+ 2875 00d4 03       		.uleb128 0x3
+ 2876 00d5 0E       		.uleb128 0xe
+ 2877 00d6 3A       		.uleb128 0x3a
+ 2878 00d7 0B       		.uleb128 0xb
+ 2879 00d8 3B       		.uleb128 0x3b
+ 2880 00d9 0B       		.uleb128 0xb
+ 2881 00da 27       		.uleb128 0x27
+ 2882 00db 19       		.uleb128 0x19
+ 2883 00dc 11       		.uleb128 0x11
+ 2884 00dd 01       		.uleb128 0x1
+ 2885 00de 12       		.uleb128 0x12
+ 2886 00df 06       		.uleb128 0x6
+ 2887 00e0 40       		.uleb128 0x40
+ 2888 00e1 18       		.uleb128 0x18
+ 2889 00e2 9642     		.uleb128 0x2116
+ 2890 00e4 19       		.uleb128 0x19
+ 2891 00e5 00       		.byte	0
+ 2892 00e6 00       		.byte	0
+ 2893 00e7 11       		.uleb128 0x11
+ 2894 00e8 34       		.uleb128 0x34
+ 2895 00e9 00       		.byte	0
+ 2896 00ea 03       		.uleb128 0x3
+ 2897 00eb 0E       		.uleb128 0xe
+ 2898 00ec 3A       		.uleb128 0x3a
+ 2899 00ed 0B       		.uleb128 0xb
+ 2900 00ee 3B       		.uleb128 0x3b
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 66
+
+
+ 2901 00ef 0B       		.uleb128 0xb
+ 2902 00f0 49       		.uleb128 0x49
+ 2903 00f1 13       		.uleb128 0x13
+ 2904 00f2 02       		.uleb128 0x2
+ 2905 00f3 18       		.uleb128 0x18
+ 2906 00f4 00       		.byte	0
+ 2907 00f5 00       		.byte	0
+ 2908 00f6 12       		.uleb128 0x12
+ 2909 00f7 2E       		.uleb128 0x2e
+ 2910 00f8 01       		.byte	0x1
+ 2911 00f9 3F       		.uleb128 0x3f
+ 2912 00fa 19       		.uleb128 0x19
+ 2913 00fb 03       		.uleb128 0x3
+ 2914 00fc 0E       		.uleb128 0xe
+ 2915 00fd 3A       		.uleb128 0x3a
+ 2916 00fe 0B       		.uleb128 0xb
+ 2917 00ff 3B       		.uleb128 0x3b
+ 2918 0100 05       		.uleb128 0x5
+ 2919 0101 27       		.uleb128 0x27
+ 2920 0102 19       		.uleb128 0x19
+ 2921 0103 11       		.uleb128 0x11
+ 2922 0104 01       		.uleb128 0x1
+ 2923 0105 12       		.uleb128 0x12
+ 2924 0106 06       		.uleb128 0x6
+ 2925 0107 40       		.uleb128 0x40
+ 2926 0108 18       		.uleb128 0x18
+ 2927 0109 9642     		.uleb128 0x2116
+ 2928 010b 19       		.uleb128 0x19
+ 2929 010c 01       		.uleb128 0x1
+ 2930 010d 13       		.uleb128 0x13
+ 2931 010e 00       		.byte	0
+ 2932 010f 00       		.byte	0
+ 2933 0110 13       		.uleb128 0x13
+ 2934 0111 05       		.uleb128 0x5
+ 2935 0112 00       		.byte	0
+ 2936 0113 03       		.uleb128 0x3
+ 2937 0114 0E       		.uleb128 0xe
+ 2938 0115 3A       		.uleb128 0x3a
+ 2939 0116 0B       		.uleb128 0xb
+ 2940 0117 3B       		.uleb128 0x3b
+ 2941 0118 05       		.uleb128 0x5
+ 2942 0119 49       		.uleb128 0x49
+ 2943 011a 13       		.uleb128 0x13
+ 2944 011b 02       		.uleb128 0x2
+ 2945 011c 18       		.uleb128 0x18
+ 2946 011d 00       		.byte	0
+ 2947 011e 00       		.byte	0
+ 2948 011f 14       		.uleb128 0x14
+ 2949 0120 34       		.uleb128 0x34
+ 2950 0121 00       		.byte	0
+ 2951 0122 03       		.uleb128 0x3
+ 2952 0123 0E       		.uleb128 0xe
+ 2953 0124 3A       		.uleb128 0x3a
+ 2954 0125 0B       		.uleb128 0xb
+ 2955 0126 3B       		.uleb128 0x3b
+ 2956 0127 05       		.uleb128 0x5
+ 2957 0128 49       		.uleb128 0x49
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 67
+
+
+ 2958 0129 13       		.uleb128 0x13
+ 2959 012a 02       		.uleb128 0x2
+ 2960 012b 18       		.uleb128 0x18
+ 2961 012c 00       		.byte	0
+ 2962 012d 00       		.byte	0
+ 2963 012e 15       		.uleb128 0x15
+ 2964 012f 2E       		.uleb128 0x2e
+ 2965 0130 00       		.byte	0
+ 2966 0131 3F       		.uleb128 0x3f
+ 2967 0132 19       		.uleb128 0x19
+ 2968 0133 03       		.uleb128 0x3
+ 2969 0134 0E       		.uleb128 0xe
+ 2970 0135 3A       		.uleb128 0x3a
+ 2971 0136 0B       		.uleb128 0xb
+ 2972 0137 3B       		.uleb128 0x3b
+ 2973 0138 05       		.uleb128 0x5
+ 2974 0139 27       		.uleb128 0x27
+ 2975 013a 19       		.uleb128 0x19
+ 2976 013b 49       		.uleb128 0x49
+ 2977 013c 13       		.uleb128 0x13
+ 2978 013d 11       		.uleb128 0x11
+ 2979 013e 01       		.uleb128 0x1
+ 2980 013f 12       		.uleb128 0x12
+ 2981 0140 06       		.uleb128 0x6
+ 2982 0141 40       		.uleb128 0x40
+ 2983 0142 18       		.uleb128 0x18
+ 2984 0143 9742     		.uleb128 0x2117
+ 2985 0145 19       		.uleb128 0x19
+ 2986 0146 00       		.byte	0
+ 2987 0147 00       		.byte	0
+ 2988 0148 16       		.uleb128 0x16
+ 2989 0149 2E       		.uleb128 0x2e
+ 2990 014a 00       		.byte	0
+ 2991 014b 3F       		.uleb128 0x3f
+ 2992 014c 19       		.uleb128 0x19
+ 2993 014d 03       		.uleb128 0x3
+ 2994 014e 0E       		.uleb128 0xe
+ 2995 014f 3A       		.uleb128 0x3a
+ 2996 0150 0B       		.uleb128 0xb
+ 2997 0151 3B       		.uleb128 0x3b
+ 2998 0152 05       		.uleb128 0x5
+ 2999 0153 27       		.uleb128 0x27
+ 3000 0154 19       		.uleb128 0x19
+ 3001 0155 11       		.uleb128 0x11
+ 3002 0156 01       		.uleb128 0x1
+ 3003 0157 12       		.uleb128 0x12
+ 3004 0158 06       		.uleb128 0x6
+ 3005 0159 40       		.uleb128 0x40
+ 3006 015a 18       		.uleb128 0x18
+ 3007 015b 9742     		.uleb128 0x2117
+ 3008 015d 19       		.uleb128 0x19
+ 3009 015e 00       		.byte	0
+ 3010 015f 00       		.byte	0
+ 3011 0160 17       		.uleb128 0x17
+ 3012 0161 01       		.uleb128 0x1
+ 3013 0162 01       		.byte	0x1
+ 3014 0163 49       		.uleb128 0x49
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 68
+
+
+ 3015 0164 13       		.uleb128 0x13
+ 3016 0165 01       		.uleb128 0x1
+ 3017 0166 13       		.uleb128 0x13
+ 3018 0167 00       		.byte	0
+ 3019 0168 00       		.byte	0
+ 3020 0169 18       		.uleb128 0x18
+ 3021 016a 21       		.uleb128 0x21
+ 3022 016b 00       		.byte	0
+ 3023 016c 49       		.uleb128 0x49
+ 3024 016d 13       		.uleb128 0x13
+ 3025 016e 2F       		.uleb128 0x2f
+ 3026 016f 0B       		.uleb128 0xb
+ 3027 0170 00       		.byte	0
+ 3028 0171 00       		.byte	0
+ 3029 0172 19       		.uleb128 0x19
+ 3030 0173 2E       		.uleb128 0x2e
+ 3031 0174 01       		.byte	0x1
+ 3032 0175 03       		.uleb128 0x3
+ 3033 0176 0E       		.uleb128 0xe
+ 3034 0177 3A       		.uleb128 0x3a
+ 3035 0178 0B       		.uleb128 0xb
+ 3036 0179 3B       		.uleb128 0x3b
+ 3037 017a 05       		.uleb128 0x5
+ 3038 017b 27       		.uleb128 0x27
+ 3039 017c 19       		.uleb128 0x19
+ 3040 017d 11       		.uleb128 0x11
+ 3041 017e 01       		.uleb128 0x1
+ 3042 017f 12       		.uleb128 0x12
+ 3043 0180 06       		.uleb128 0x6
+ 3044 0181 40       		.uleb128 0x40
+ 3045 0182 18       		.uleb128 0x18
+ 3046 0183 9642     		.uleb128 0x2116
+ 3047 0185 19       		.uleb128 0x19
+ 3048 0186 01       		.uleb128 0x1
+ 3049 0187 13       		.uleb128 0x13
+ 3050 0188 00       		.byte	0
+ 3051 0189 00       		.byte	0
+ 3052 018a 1A       		.uleb128 0x1a
+ 3053 018b 2E       		.uleb128 0x2e
+ 3054 018c 01       		.byte	0x1
+ 3055 018d 03       		.uleb128 0x3
+ 3056 018e 0E       		.uleb128 0xe
+ 3057 018f 3A       		.uleb128 0x3a
+ 3058 0190 0B       		.uleb128 0xb
+ 3059 0191 3B       		.uleb128 0x3b
+ 3060 0192 05       		.uleb128 0x5
+ 3061 0193 27       		.uleb128 0x27
+ 3062 0194 19       		.uleb128 0x19
+ 3063 0195 49       		.uleb128 0x49
+ 3064 0196 13       		.uleb128 0x13
+ 3065 0197 11       		.uleb128 0x11
+ 3066 0198 01       		.uleb128 0x1
+ 3067 0199 12       		.uleb128 0x12
+ 3068 019a 06       		.uleb128 0x6
+ 3069 019b 40       		.uleb128 0x40
+ 3070 019c 18       		.uleb128 0x18
+ 3071 019d 9642     		.uleb128 0x2116
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 69
+
+
+ 3072 019f 19       		.uleb128 0x19
+ 3073 01a0 01       		.uleb128 0x1
+ 3074 01a1 13       		.uleb128 0x13
+ 3075 01a2 00       		.byte	0
+ 3076 01a3 00       		.byte	0
+ 3077 01a4 1B       		.uleb128 0x1b
+ 3078 01a5 2E       		.uleb128 0x2e
+ 3079 01a6 01       		.byte	0x1
+ 3080 01a7 3F       		.uleb128 0x3f
+ 3081 01a8 19       		.uleb128 0x19
+ 3082 01a9 03       		.uleb128 0x3
+ 3083 01aa 0E       		.uleb128 0xe
+ 3084 01ab 3A       		.uleb128 0x3a
+ 3085 01ac 0B       		.uleb128 0xb
+ 3086 01ad 3B       		.uleb128 0x3b
+ 3087 01ae 05       		.uleb128 0x5
+ 3088 01af 49       		.uleb128 0x49
+ 3089 01b0 13       		.uleb128 0x13
+ 3090 01b1 3C       		.uleb128 0x3c
+ 3091 01b2 19       		.uleb128 0x19
+ 3092 01b3 01       		.uleb128 0x1
+ 3093 01b4 13       		.uleb128 0x13
+ 3094 01b5 00       		.byte	0
+ 3095 01b6 00       		.byte	0
+ 3096 01b7 1C       		.uleb128 0x1c
+ 3097 01b8 18       		.uleb128 0x18
+ 3098 01b9 00       		.byte	0
+ 3099 01ba 00       		.byte	0
+ 3100 01bb 00       		.byte	0
+ 3101 01bc 1D       		.uleb128 0x1d
+ 3102 01bd 0B       		.uleb128 0xb
+ 3103 01be 01       		.byte	0x1
+ 3104 01bf 11       		.uleb128 0x11
+ 3105 01c0 01       		.uleb128 0x1
+ 3106 01c1 12       		.uleb128 0x12
+ 3107 01c2 06       		.uleb128 0x6
+ 3108 01c3 00       		.byte	0
+ 3109 01c4 00       		.byte	0
+ 3110 01c5 1E       		.uleb128 0x1e
+ 3111 01c6 2E       		.uleb128 0x2e
+ 3112 01c7 01       		.byte	0x1
+ 3113 01c8 3F       		.uleb128 0x3f
+ 3114 01c9 19       		.uleb128 0x19
+ 3115 01ca 03       		.uleb128 0x3
+ 3116 01cb 0E       		.uleb128 0xe
+ 3117 01cc 3A       		.uleb128 0x3a
+ 3118 01cd 0B       		.uleb128 0xb
+ 3119 01ce 3B       		.uleb128 0x3b
+ 3120 01cf 05       		.uleb128 0x5
+ 3121 01d0 49       		.uleb128 0x49
+ 3122 01d1 13       		.uleb128 0x13
+ 3123 01d2 3C       		.uleb128 0x3c
+ 3124 01d3 19       		.uleb128 0x19
+ 3125 01d4 00       		.byte	0
+ 3126 01d5 00       		.byte	0
+ 3127 01d6 1F       		.uleb128 0x1f
+ 3128 01d7 0B       		.uleb128 0xb
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 70
+
+
+ 3129 01d8 01       		.byte	0x1
+ 3130 01d9 11       		.uleb128 0x11
+ 3131 01da 01       		.uleb128 0x1
+ 3132 01db 12       		.uleb128 0x12
+ 3133 01dc 06       		.uleb128 0x6
+ 3134 01dd 01       		.uleb128 0x1
+ 3135 01de 13       		.uleb128 0x13
+ 3136 01df 00       		.byte	0
+ 3137 01e0 00       		.byte	0
+ 3138 01e1 20       		.uleb128 0x20
+ 3139 01e2 34       		.uleb128 0x34
+ 3140 01e3 00       		.byte	0
+ 3141 01e4 03       		.uleb128 0x3
+ 3142 01e5 0E       		.uleb128 0xe
+ 3143 01e6 3A       		.uleb128 0x3a
+ 3144 01e7 0B       		.uleb128 0xb
+ 3145 01e8 3B       		.uleb128 0x3b
+ 3146 01e9 0B       		.uleb128 0xb
+ 3147 01ea 49       		.uleb128 0x49
+ 3148 01eb 13       		.uleb128 0x13
+ 3149 01ec 3F       		.uleb128 0x3f
+ 3150 01ed 19       		.uleb128 0x19
+ 3151 01ee 02       		.uleb128 0x2
+ 3152 01ef 18       		.uleb128 0x18
+ 3153 01f0 00       		.byte	0
+ 3154 01f1 00       		.byte	0
+ 3155 01f2 00       		.byte	0
+ 3156              		.section	.debug_aranges,"",%progbits
+ 3157 0000 9C000000 		.4byte	0x9c
+ 3158 0004 0200     		.2byte	0x2
+ 3159 0006 00000000 		.4byte	.Ldebug_info0
+ 3160 000a 04       		.byte	0x4
+ 3161 000b 00       		.byte	0
+ 3162 000c 0000     		.2byte	0
+ 3163 000e 0000     		.2byte	0
+ 3164 0010 00000000 		.4byte	.LFB34
+ 3165 0014 F8000000 		.4byte	.LFE34-.LFB34
+ 3166 0018 00000000 		.4byte	.LFB35
+ 3167 001c 14000000 		.4byte	.LFE35-.LFB35
+ 3168 0020 00000000 		.4byte	.LFB36
+ 3169 0024 80000000 		.4byte	.LFE36-.LFB36
+ 3170 0028 00000000 		.4byte	.LFB37
+ 3171 002c 48000000 		.4byte	.LFE37-.LFB37
+ 3172 0030 00000000 		.4byte	.LFB38
+ 3173 0034 60000000 		.4byte	.LFE38-.LFB38
+ 3174 0038 00000000 		.4byte	.LFB39
+ 3175 003c 14000000 		.4byte	.LFE39-.LFB39
+ 3176 0040 00000000 		.4byte	.LFB40
+ 3177 0044 14000000 		.4byte	.LFE40-.LFB40
+ 3178 0048 00000000 		.4byte	.LFB41
+ 3179 004c 60000000 		.4byte	.LFE41-.LFB41
+ 3180 0050 00000000 		.4byte	.LFB42
+ 3181 0054 D0020000 		.4byte	.LFE42-.LFB42
+ 3182 0058 00000000 		.4byte	.LFB43
+ 3183 005c 3C000000 		.4byte	.LFE43-.LFB43
+ 3184 0060 00000000 		.4byte	.LFB44
+ 3185 0064 04010000 		.4byte	.LFE44-.LFB44
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 71
+
+
+ 3186 0068 00000000 		.4byte	.LFB45
+ 3187 006c 2A000000 		.4byte	.LFE45-.LFB45
+ 3188 0070 00000000 		.4byte	.LFB46
+ 3189 0074 1C010000 		.4byte	.LFE46-.LFB46
+ 3190 0078 00000000 		.4byte	.LFB47
+ 3191 007c 54000000 		.4byte	.LFE47-.LFB47
+ 3192 0080 00000000 		.4byte	.LFB48
+ 3193 0084 3A000000 		.4byte	.LFE48-.LFB48
+ 3194 0088 00000000 		.4byte	.LFB49
+ 3195 008c 8C000000 		.4byte	.LFE49-.LFB49
+ 3196 0090 00000000 		.4byte	.LFB50
+ 3197 0094 20000000 		.4byte	.LFE50-.LFB50
+ 3198 0098 00000000 		.4byte	0
+ 3199 009c 00000000 		.4byte	0
+ 3200              		.section	.debug_ranges,"",%progbits
+ 3201              	.Ldebug_ranges0:
+ 3202 0000 00000000 		.4byte	.LFB34
+ 3203 0004 F8000000 		.4byte	.LFE34
+ 3204 0008 00000000 		.4byte	.LFB35
+ 3205 000c 14000000 		.4byte	.LFE35
+ 3206 0010 00000000 		.4byte	.LFB36
+ 3207 0014 80000000 		.4byte	.LFE36
+ 3208 0018 00000000 		.4byte	.LFB37
+ 3209 001c 48000000 		.4byte	.LFE37
+ 3210 0020 00000000 		.4byte	.LFB38
+ 3211 0024 60000000 		.4byte	.LFE38
+ 3212 0028 00000000 		.4byte	.LFB39
+ 3213 002c 14000000 		.4byte	.LFE39
+ 3214 0030 00000000 		.4byte	.LFB40
+ 3215 0034 14000000 		.4byte	.LFE40
+ 3216 0038 00000000 		.4byte	.LFB41
+ 3217 003c 60000000 		.4byte	.LFE41
+ 3218 0040 00000000 		.4byte	.LFB42
+ 3219 0044 D0020000 		.4byte	.LFE42
+ 3220 0048 00000000 		.4byte	.LFB43
+ 3221 004c 3C000000 		.4byte	.LFE43
+ 3222 0050 00000000 		.4byte	.LFB44
+ 3223 0054 04010000 		.4byte	.LFE44
+ 3224 0058 00000000 		.4byte	.LFB45
+ 3225 005c 2A000000 		.4byte	.LFE45
+ 3226 0060 00000000 		.4byte	.LFB46
+ 3227 0064 1C010000 		.4byte	.LFE46
+ 3228 0068 00000000 		.4byte	.LFB47
+ 3229 006c 54000000 		.4byte	.LFE47
+ 3230 0070 00000000 		.4byte	.LFB48
+ 3231 0074 3A000000 		.4byte	.LFE48
+ 3232 0078 00000000 		.4byte	.LFB49
+ 3233 007c 8C000000 		.4byte	.LFE49
+ 3234 0080 00000000 		.4byte	.LFB50
+ 3235 0084 20000000 		.4byte	.LFE50
+ 3236 0088 00000000 		.4byte	0
+ 3237 008c 00000000 		.4byte	0
+ 3238              		.section	.debug_line,"",%progbits
+ 3239              	.Ldebug_line0:
+ 3240 0000 E5020000 		.section	.debug_str,"MS",%progbits,1
+ 3240      02005400 
+ 3240      00000201 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 72
+
+
+ 3240      FB0E0D00 
+ 3240      01010101 
+ 3241              	.LASF59:
+ 3242 0000 63757272 		.ascii	"currentBrightness\000"
+ 3242      656E7442 
+ 3242      72696768 
+ 3242      746E6573 
+ 3242      7300
+ 3243              	.LASF48:
+ 3244 0012 70726F63 		.ascii	"processDriverCountPacket\000"
+ 3244      65737344 
+ 3244      72697665 
+ 3244      72436F75 
+ 3244      6E745061 
+ 3245              	.LASF50:
+ 3246 002b 63757272 		.ascii	"currentDriverCount\000"
+ 3246      656E7444 
+ 3246      72697665 
+ 3246      72436F75 
+ 3246      6E7400
+ 3247              	.LASF83:
+ 3248 003e 69734472 		.ascii	"isDriverCountReceived\000"
+ 3248      69766572 
+ 3248      436F756E 
+ 3248      74526563 
+ 3248      65697665 
+ 3249              	.LASF52:
+ 3250 0054 636F756E 		.ascii	"countIndex\000"
+ 3250      74496E64 
+ 3250      657800
+ 3251              	.LASF2:
+ 3252 005f 73686F72 		.ascii	"short int\000"
+ 3252      7420696E 
+ 3252      7400
+ 3253              	.LASF17:
+ 3254 0069 73697A65 		.ascii	"sizetype\000"
+ 3254      74797065 
+ 3254      00
+ 3255              	.LASF19:
+ 3256 0072 5041594C 		.ascii	"PAYLOAD_STATE\000"
+ 3256      4F41445F 
+ 3256      53544154 
+ 3256      4500
+ 3257              	.LASF6:
+ 3258 0080 6C6F6E67 		.ascii	"long long int\000"
+ 3258      206C6F6E 
+ 3258      6720696E 
+ 3258      7400
+ 3259              	.LASF69:
+ 3260 008e 5061636B 		.ascii	"PacketList\000"
+ 3260      65744C69 
+ 3260      737400
+ 3261              	.LASF68:
+ 3262 0099 70726F63 		.ascii	"processOutputSelectUart\000"
+ 3262      6573734F 
+ 3262      75747075 
+ 3262      7453656C 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 73
+
+
+ 3262      65637455 
+ 3263              	.LASF61:
+ 3264 00b1 73617665 		.ascii	"saveStateBar\000"
+ 3264      53746174 
+ 3264      65426172 
+ 3264      00
+ 3265              	.LASF10:
+ 3266 00be 75696E74 		.ascii	"uint16\000"
+ 3266      313600
+ 3267              	.LASF53:
+ 3268 00c5 70726F63 		.ascii	"processReinitlizationPacket\000"
+ 3268      65737352 
+ 3268      65696E69 
+ 3268      746C697A 
+ 3268      6174696F 
+ 3269              	.LASF65:
+ 3270 00e1 72657475 		.ascii	"returnFromSleep\000"
+ 3270      726E4672 
+ 3270      6F6D536C 
+ 3270      65657000 
+ 3271              	.LASF12:
+ 3272 00f1 696E7431 		.ascii	"int16\000"
+ 3272      3600
+ 3273              	.LASF9:
+ 3274 00f7 75696E74 		.ascii	"uint8\000"
+ 3274      3800
+ 3275              	.LASF41:
+ 3276 00fd 7061636B 		.ascii	"packet\000"
+ 3276      657400
+ 3277              	.LASF60:
+ 3278 0104 64657465 		.ascii	"detectPacket\000"
+ 3278      63745061 
+ 3278      636B6574 
+ 3278      00
+ 3279              	.LASF0:
+ 3280 0111 7369676E 		.ascii	"signed char\000"
+ 3280      65642063 
+ 3280      68617200 
+ 3281              	.LASF13:
+ 3282 011d 666C6F61 		.ascii	"float\000"
+ 3282      7400
+ 3283              	.LASF82:
+ 3284 0123 5061636B 		.ascii	"PacketState\000"
+ 3284      65745374 
+ 3284      61746500 
+ 3285              	.LASF70:
+ 3286 012f 62447269 		.ascii	"bDriverCountReceived\000"
+ 3286      76657243 
+ 3286      6F756E74 
+ 3286      52656365 
+ 3286      69766564 
+ 3287              	.LASF56:
+ 3288 0144 70726F63 		.ascii	"processBrightnessPacket\000"
+ 3288      65737342 
+ 3288      72696768 
+ 3288      746E6573 
+ 3288      73506163 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 74
+
+
+ 3289              	.LASF73:
+ 3290 015c 62466972 		.ascii	"bFirstTimeRampDown\000"
+ 3290      73745469 
+ 3290      6D655261 
+ 3290      6D70446F 
+ 3290      776E00
+ 3291              	.LASF24:
+ 3292 016f 454F505F 		.ascii	"EOP_CARRIAGE_RETURN\000"
+ 3292      43415252 
+ 3292      49414745 
+ 3292      5F524554 
+ 3292      55524E00 
+ 3293              	.LASF4:
+ 3294 0183 6C6F6E67 		.ascii	"long int\000"
+ 3294      20696E74 
+ 3294      00
+ 3295              	.LASF31:
+ 3296 018c 64617461 		.ascii	"dataByte\000"
+ 3296      42797465 
+ 3296      00
+ 3297              	.LASF30:
+ 3298 0195 70726F63 		.ascii	"processBrightnessByteReceivedHandler\000"
+ 3298      65737342 
+ 3298      72696768 
+ 3298      746E6573 
+ 3298      73427974 
+ 3299              	.LASF28:
+ 3300 01ba 70726F63 		.ascii	"processTimeoutTimerRoutine\000"
+ 3300      65737354 
+ 3300      696D656F 
+ 3300      75745469 
+ 3300      6D657252 
+ 3301              	.LASF64:
+ 3302 01d5 55415254 		.ascii	"UART_Temperature_Stop\000"
+ 3302      5F54656D 
+ 3302      70657261 
+ 3302      74757265 
+ 3302      5F53746F 
+ 3303              	.LASF1:
+ 3304 01eb 756E7369 		.ascii	"unsigned char\000"
+ 3304      676E6564 
+ 3304      20636861 
+ 3304      7200
+ 3305              	.LASF75:
+ 3306 01f9 6966506F 		.ascii	"ifPowerUp\000"
+ 3306      77657255 
+ 3306      7000
+ 3307              	.LASF46:
+ 3308 0203 6C656E67 		.ascii	"length\000"
+ 3308      746800
+ 3309              	.LASF37:
+ 3310 020a 6C6F6F70 		.ascii	"loopIterator\000"
+ 3310      49746572 
+ 3310      61746F72 
+ 3310      00
+ 3311              	.LASF26:
+ 3312 0217 5061636B 		.ascii	"Packet\000"
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 75
+
+
+ 3312      657400
+ 3313              	.LASF22:
+ 3314 021e 5041434B 		.ascii	"PACKET_TYPE\000"
+ 3314      45545F54 
+ 3314      59504500 
+ 3315              	.LASF29:
+ 3316 022a 74696D65 		.ascii	"timeOutStateMachine\000"
+ 3316      4F757453 
+ 3316      74617465 
+ 3316      4D616368 
+ 3316      696E6500 
+ 3317              	.LASF34:
+ 3318 023e 6E6F6E56 		.ascii	"nonVolatileMemoryArray\000"
+ 3318      6F6C6174 
+ 3318      696C654D 
+ 3318      656D6F72 
+ 3318      79417272 
+ 3319              	.LASF27:
+ 3320 0255 69735468 		.ascii	"isThereHighLowTransitionFromUART\000"
+ 3320      65726548 
+ 3320      6967684C 
+ 3320      6F775472 
+ 3320      616E7369 
+ 3321              	.LASF7:
+ 3322 0276 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 3322      206C6F6E 
+ 3322      6720756E 
+ 3322      7369676E 
+ 3322      65642069 
+ 3323              	.LASF78:
+ 3324 028d 62497343 		.ascii	"bIsCommunicationTrigger\000"
+ 3324      6F6D6D75 
+ 3324      6E696361 
+ 3324      74696F6E 
+ 3324      54726967 
+ 3325              	.LASF33:
+ 3326 02a5 74696D65 		.ascii	"timeoutDefaultBrightness\000"
+ 3326      6F757444 
+ 3326      65666175 
+ 3326      6C744272 
+ 3326      69676874 
+ 3327              	.LASF44:
+ 3328 02be 64617461 		.ascii	"dataTypeIndex\000"
+ 3328      54797065 
+ 3328      496E6465 
+ 3328      7800
+ 3329              	.LASF8:
+ 3330 02cc 756E7369 		.ascii	"unsigned int\000"
+ 3330      676E6564 
+ 3330      20696E74 
+ 3330      00
+ 3331              	.LASF58:
+ 3332 02d9 62466972 		.ascii	"bFirstBrightnessPacket\000"
+ 3332      73744272 
+ 3332      69676874 
+ 3332      6E657373 
+ 3332      5061636B 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 76
+
+
+ 3333              	.LASF49:
+ 3334 02f0 62526563 		.ascii	"bReceivedCountPacket\000"
+ 3334      65697665 
+ 3334      64436F75 
+ 3334      6E745061 
+ 3334      636B6574 
+ 3335              	.LASF62:
+ 3336 0305 766F6C61 		.ascii	"volatileMemoryArray\000"
+ 3336      74696C65 
+ 3336      4D656D6F 
+ 3336      72794172 
+ 3336      72617900 
+ 3337              	.LASF18:
+ 3338 0319 48454144 		.ascii	"HEADER_STATE\000"
+ 3338      45525F53 
+ 3338      54415445 
+ 3338      00
+ 3339              	.LASF45:
+ 3340 0326 6C6F6F70 		.ascii	"loopIndex\000"
+ 3340      496E6465 
+ 3340      7800
+ 3341              	.LASF72:
+ 3342 0330 72656775 		.ascii	"regulatedBrightness\000"
+ 3342      6C617465 
+ 3342      64427269 
+ 3342      6768746E 
+ 3342      65737300 
+ 3343              	.LASF16:
+ 3344 0344 72656733 		.ascii	"reg32\000"
+ 3344      3200
+ 3345              	.LASF55:
+ 3346 034a 55415254 		.ascii	"UART_LED_PutArray\000"
+ 3346      5F4C4544 
+ 3346      5F507574 
+ 3346      41727261 
+ 3346      7900
+ 3347              	.LASF3:
+ 3348 035c 73686F72 		.ascii	"short unsigned int\000"
+ 3348      7420756E 
+ 3348      7369676E 
+ 3348      65642069 
+ 3348      6E7400
+ 3349              	.LASF77:
+ 3350 036f 74696D65 		.ascii	"timeOutCounter\000"
+ 3350      4F757443 
+ 3350      6F756E74 
+ 3350      657200
+ 3351              	.LASF76:
+ 3352 037e 62436F6D 		.ascii	"bCommunicationTimeOut\000"
+ 3352      6D756E69 
+ 3352      63617469 
+ 3352      6F6E5469 
+ 3352      6D654F75 
+ 3353              	.LASF63:
+ 3354 0394 70757442 		.ascii	"putBarToSleep\000"
+ 3354      6172546F 
+ 3354      536C6565 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 77
+
+
+ 3354      7000
+ 3355              	.LASF54:
+ 3356 03a2 55415254 		.ascii	"UART_Temperature_SpiUartPutArray\000"
+ 3356      5F54656D 
+ 3356      70657261 
+ 3356      74757265 
+ 3356      5F537069 
+ 3357              	.LASF15:
+ 3358 03c3 63686172 		.ascii	"char\000"
+ 3358      00
+ 3359              	.LASF32:
+ 3360 03c8 696E7465 		.ascii	"interruptSource\000"
+ 3360      72727570 
+ 3360      74536F75 
+ 3360      72636500 
+ 3361              	.LASF79:
+ 3362 03d8 474E5520 		.ascii	"GNU C 4.9.3 20150303 (release) [ARM/embedded-4_9-br"
+ 3362      4320342E 
+ 3362      392E3320 
+ 3362      32303135 
+ 3362      30333033 
+ 3363 040b 616E6368 		.ascii	"anch revision 221220] -mcpu=cortex-m0 -mthumb -g -O"
+ 3363      20726576 
+ 3363      6973696F 
+ 3363      6E203232 
+ 3363      31323230 
+ 3364 043e 30202D66 		.ascii	"0 -ffunction-sections -ffat-lto-objects\000"
+ 3364      66756E63 
+ 3364      74696F6E 
+ 3364      2D736563 
+ 3364      74696F6E 
+ 3365              	.LASF42:
+ 3366 0466 63757272 		.ascii	"currentState\000"
+ 3366      656E7453 
+ 3366      74617465 
+ 3366      00
+ 3367              	.LASF39:
+ 3368 0473 61737369 		.ascii	"assignDriverIDs\000"
+ 3368      676E4472 
+ 3368      69766572 
+ 3368      49447300 
+ 3369              	.LASF11:
+ 3370 0483 75696E74 		.ascii	"uint32\000"
+ 3370      333200
+ 3371              	.LASF5:
+ 3372 048a 6C6F6E67 		.ascii	"long unsigned int\000"
+ 3372      20756E73 
+ 3372      69676E65 
+ 3372      6420696E 
+ 3372      7400
+ 3373              	.LASF57:
+ 3374 049c 62466C61 		.ascii	"bFlashPattern\000"
+ 3374      73685061 
+ 3374      74746572 
+ 3374      6E00
+ 3375              	.LASF14:
+ 3376 04aa 646F7562 		.ascii	"double\000"
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 78
+
+
+ 3376      6C6500
+ 3377              	.LASF36:
+ 3378 04b1 64726976 		.ascii	"driver_ID\000"
+ 3378      65725F49 
+ 3378      4400
+ 3379              	.LASF71:
+ 3380 04bb 73746174 		.ascii	"stateOfLightBar\000"
+ 3380      654F664C 
+ 3380      69676874 
+ 3380      42617200 
+ 3381              	.LASF21:
+ 3382 04cb 48454144 		.ascii	"HEADER_BYTE\000"
+ 3382      45525F42 
+ 3382      59544500 
+ 3383              	.LASF81:
+ 3384 04d7 433A5C55 		.ascii	"C:\\Users\\kylep\\Box Sync\\Feniex Firmware Files\\"
+ 3384      73657273 
+ 3384      5C6B796C 
+ 3384      65705C42 
+ 3384      6F782053 
+ 3385 0505 414C4220 		.ascii	"ALB Cube\\81-00024-01 AI Cube\\81-00024-01.cydsn\000"
+ 3385      43756265 
+ 3385      5C38312D 
+ 3385      30303032 
+ 3385      342D3031 
+ 3386              	.LASF51:
+ 3387 0534 61636B50 		.ascii	"ackPacket\000"
+ 3387      61636B65 
+ 3387      7400
+ 3388              	.LASF74:
+ 3389 053e 70726576 		.ascii	"previousBrightnessLocal\000"
+ 3389      696F7573 
+ 3389      42726967 
+ 3389      68746E65 
+ 3389      73734C6F 
+ 3390              	.LASF23:
+ 3391 0556 5041594C 		.ascii	"PAYLOAD_SIZE\000"
+ 3391      4F41445F 
+ 3391      53495A45 
+ 3391      00
+ 3392              	.LASF38:
+ 3393 0563 73657444 		.ascii	"setDriverCountReceived\000"
+ 3393      72697665 
+ 3393      72436F75 
+ 3393      6E745265 
+ 3393      63656976 
+ 3394              	.LASF20:
+ 3395 057a 454F505F 		.ascii	"EOP_STATE\000"
+ 3395      53544154 
+ 3395      4500
+ 3396              	.LASF25:
+ 3397 0584 454F505F 		.ascii	"EOP_LINE_FEED\000"
+ 3397      4C494E45 
+ 3397      5F464545 
+ 3397      4400
+ 3398              	.LASF47:
+ 3399 0592 70726F63 		.ascii	"processLowPowerRequest\000"
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWRYzUv.s 			page 79
+
+
+ 3399      6573734C 
+ 3399      6F77506F 
+ 3399      77657252 
+ 3399      65717565 
+ 3400              	.LASF66:
+ 3401 05a9 55415254 		.ascii	"UART_LED_Control_Write\000"
+ 3401      5F4C4544 
+ 3401      5F436F6E 
+ 3401      74726F6C 
+ 3401      5F577269 
+ 3402              	.LASF40:
+ 3403 05c0 64726976 		.ascii	"driverCountPacket\000"
+ 3403      6572436F 
+ 3403      756E7450 
+ 3403      61636B65 
+ 3403      7400
+ 3404              	.LASF43:
+ 3405 05d2 63757272 		.ascii	"currentPacketIndex\000"
+ 3405      656E7450 
+ 3405      61636B65 
+ 3405      74496E64 
+ 3405      657800
+ 3406              	.LASF67:
+ 3407 05e5 55415254 		.ascii	"UART_Temperature_Start\000"
+ 3407      5F54656D 
+ 3407      70657261 
+ 3407      74757265 
+ 3407      5F537461 
+ 3408              	.LASF35:
+ 3409 05fc 63757272 		.ascii	"currentRegulatedBrightness\000"
+ 3409      656E7452 
+ 3409      6567756C 
+ 3409      61746564 
+ 3409      42726967 
+ 3410              	.LASF80:
+ 3411 0617 2E5C4272 		.ascii	".\\BrightnessCommManager.c\000"
+ 3411      69676874 
+ 3411      6E657373 
+ 3411      436F6D6D 
+ 3411      4D616E61 
+ 3412              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 4.9.3 20150303 (release) [ARM/embedded-4_9-br

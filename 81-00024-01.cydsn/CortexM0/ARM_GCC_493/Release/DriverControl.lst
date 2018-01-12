@@ -1,0 +1,3868 @@
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 1
+
+
+   1              		.cpu cortex-m0
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 34, 0
+  11              		.eabi_attribute 18, 4
+  12              		.code	16
+  13              		.file	"DriverControl.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.data
+  18              		.align	2
+  19              		.type	ThermalLimitArray, %object
+  20              		.size	ThermalLimitArray, 16
+  21              	ThermalLimitArray:
+  22 0000 C201     		.short	450
+  23 0002 6400     		.short	100
+  24 0004 9001     		.short	400
+  25 0006 6400     		.short	100
+  26 0008 6400     		.short	100
+  27 000a 5000     		.short	80
+  28 000c 2C01     		.short	300
+  29 000e 6400     		.short	100
+  30              		.align	2
+  31              		.type	PositionData, %object
+  32              		.size	PositionData, 3
+  33              	PositionData:
+  34 0010 00       		.byte	0
+  35 0011 00       		.byte	0
+  36 0012 01       		.byte	1
+  37 0013 00       		.align	2
+  38              		.type	RegulationData, %object
+  39              		.size	RegulationData, 5
+  40              	RegulationData:
+  41 0014 00       		.byte	0
+  42 0015 00       		.byte	0
+  43 0016 00       		.byte	0
+  44 0017 00       		.byte	0
+  45 0018 FF       		.byte	-1
+  46 0019 000000   		.align	2
+  47              		.type	VoltageSenseData, %object
+  48              		.size	VoltageSenseData, 2
+  49              	VoltageSenseData:
+  50 001c 01       		.byte	1
+  51 001d FF       		.byte	-1
+  52 001e 0000     		.section	.text.getPreviousBrightness,"ax",%progbits
+  53              		.align	2
+  54              		.global	getPreviousBrightness
+  55              		.code	16
+  56              		.thumb_func
+  57              		.type	getPreviousBrightness, %function
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 2
+
+
+  58              	getPreviousBrightness:
+  59              	.LFB34:
+  60              		.file 1 ".\\DriverControl.c"
+   1:.\DriverControl.c **** /* ========================================
+   2:.\DriverControl.c ****  *
+   3:.\DriverControl.c ****  * Copyright YOUR COMPANY, THE YEAR
+   4:.\DriverControl.c ****  * All Rights Reserved
+   5:.\DriverControl.c ****  * UNPUBLISHED, LICENSED SOFTWARE.
+   6:.\DriverControl.c ****  *
+   7:.\DriverControl.c ****  * CONFIDENTIAL AND PROPRIETARY INFORMATION
+   8:.\DriverControl.c ****  * WHICH IS THE PROPERTY OF your company.
+   9:.\DriverControl.c ****  *
+  10:.\DriverControl.c ****  * ========================================
+  11:.\DriverControl.c **** */
+  12:.\DriverControl.c **** /**********CHANGE LOG**********/
+  13:.\DriverControl.c **** 
+  14:.\DriverControl.c **** 
+  15:.\DriverControl.c **** /**********PREPROCESSOR DIRECTIVES**********/
+  16:.\DriverControl.c **** #include "CommonVariables.h"
+  17:.\DriverControl.c **** #include "DriverControl.h"
+  18:.\DriverControl.c **** #include "BrightnessCommManager.h"
+  19:.\DriverControl.c **** 
+  20:.\DriverControl.c **** #define MAX_ADC_CONVERSION_WAIT_LIMIT   5
+  21:.\DriverControl.c **** #define SAMPLE_COUNT_PER_CYCLE          1
+  22:.\DriverControl.c **** #define BRIGHTNESS_CHANGE_PER_SAMPLE    1
+  23:.\DriverControl.c **** 
+  24:.\DriverControl.c **** #define RAMP_DOWN_RATE                  1
+  25:.\DriverControl.c **** #define STEADY_INCREASE_RATE            1
+  26:.\DriverControl.c **** #define STEADY_DECREASE_RATE            1
+  27:.\DriverControl.c **** 
+  28:.\DriverControl.c **** #define MAX_SCALING_FACTOR              0xFF
+  29:.\DriverControl.c **** #define SAFE_TEMPERATURE_TOLERANCE      0
+  30:.\DriverControl.c **** 
+  31:.\DriverControl.c **** #define VOLTAGE_SENSE_LOWER_BOUND       670
+  32:.\DriverControl.c **** #define VOLTAGE_SENSE_UPPER_BOUND       870
+  33:.\DriverControl.c ****     
+  34:.\DriverControl.c **** /**********DEFINED CONSTANTS**********/
+  35:.\DriverControl.c **** enum RegulationState
+  36:.\DriverControl.c **** {
+  37:.\DriverControl.c ****     STARTUP,
+  38:.\DriverControl.c ****     STEADY_INCREASE,
+  39:.\DriverControl.c ****     STEADY_DECREASE,
+  40:.\DriverControl.c ****     NO_CHANGE
+  41:.\DriverControl.c **** };
+  42:.\DriverControl.c **** 
+  43:.\DriverControl.c **** enum TemperatureStatus
+  44:.\DriverControl.c **** {
+  45:.\DriverControl.c ****     WITHIN_TOLERANCE,
+  46:.\DriverControl.c ****     EXCEEDED_UPPER_BOUND,
+  47:.\DriverControl.c ****     EXCEEDED_LOWER_BOUND,
+  48:.\DriverControl.c ****     ERROR
+  49:.\DriverControl.c **** };
+  50:.\DriverControl.c **** 
+  51:.\DriverControl.c **** typedef struct
+  52:.\DriverControl.c **** {
+  53:.\DriverControl.c ****     const int16 MAX_TEMPERATURE;
+  54:.\DriverControl.c ****     const int16 SAFE_TEMPERATURE;
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 3
+
+
+  55:.\DriverControl.c **** }ThermalLimit;
+  56:.\DriverControl.c **** 
+  57:.\DriverControl.c **** static ThermalLimit ThermalLimitArray[ADC_SAMPLE_COUNT] = 
+  58:.\DriverControl.c **** {
+  59:.\DriverControl.c ****     {450, 100}, //LED
+  60:.\DriverControl.c ****     {400, 100}, //SwitchNode    
+  61:.\DriverControl.c ****     {100,  80}, //Micro
+  62:.\DriverControl.c ****     {300, 100}  //Ambient
+  63:.\DriverControl.c **** };
+  64:.\DriverControl.c **** 
+  65:.\DriverControl.c **** /**********DATA STRUCTURES**********/
+  66:.\DriverControl.c **** typedef struct
+  67:.\DriverControl.c **** {
+  68:.\DriverControl.c ****     uint8 ID_Number;
+  69:.\DriverControl.c ****     uint8 driverCount;
+  70:.\DriverControl.c ****     uint8 bLastDriverInChain;
+  71:.\DriverControl.c **** }DriverProperties;
+  72:.\DriverControl.c **** 
+  73:.\DriverControl.c **** static DriverProperties PositionData = {0, 0, TRUE};
+  74:.\DriverControl.c **** 
+  75:.\DriverControl.c **** typedef struct
+  76:.\DriverControl.c **** {
+  77:.\DriverControl.c ****     uint8 requestedBrightness;
+  78:.\DriverControl.c ****     uint8 regulatedBrightness;
+  79:.\DriverControl.c ****     uint8 previousBrightness;
+  80:.\DriverControl.c ****     enum RegulationState currentState;
+  81:.\DriverControl.c ****     uint8 scalingFactor;
+  82:.\DriverControl.c **** }RegulationProperties;
+  83:.\DriverControl.c **** 
+  84:.\DriverControl.c **** static RegulationProperties RegulationData = {0, 0, 0, STARTUP, 0xFF};
+  85:.\DriverControl.c **** 
+  86:.\DriverControl.c **** typedef struct
+  87:.\DriverControl.c **** {
+  88:.\DriverControl.c ****     uint8 bEnable;
+  89:.\DriverControl.c ****     uint8 scalingFactor;
+  90:.\DriverControl.c **** }VoltageSenseProperties;
+  91:.\DriverControl.c **** 
+  92:.\DriverControl.c **** static VoltageSenseProperties VoltageSenseData = {TRUE, 0xFF};
+  93:.\DriverControl.c **** 
+  94:.\DriverControl.c **** /**********GLOBAL VARIABLES**********/
+  95:.\DriverControl.c **** 
+  96:.\DriverControl.c **** 
+  97:.\DriverControl.c **** /**********LOCAL FUNCTION PROTOTYPES**********/
+  98:.\DriverControl.c **** static enum TemperatureStatus getTemperatureStatus(int16* TemperatureData,
+  99:.\DriverControl.c ****     uint8 length, int16 tolerance);
+ 100:.\DriverControl.c **** 
+ 101:.\DriverControl.c **** /**********DEFINED GLOBAL FUNCTIONS**********/
+ 102:.\DriverControl.c **** uint8 getPreviousBrightness(void)
+ 103:.\DriverControl.c **** {
+  61              		.loc 1 103 0
+  62              		.cfi_startproc
+  63 0000 80B5     		push	{r7, lr}
+  64              		.cfi_def_cfa_offset 8
+  65              		.cfi_offset 7, -8
+  66              		.cfi_offset 14, -4
+  67 0002 00AF     		add	r7, sp, #0
+  68              		.cfi_def_cfa_register 7
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 4
+
+
+ 104:.\DriverControl.c ****     return RegulationData.previousBrightness;
+  69              		.loc 1 104 0
+  70 0004 024B     		ldr	r3, .L3
+  71 0006 9B78     		ldrb	r3, [r3, #2]
+ 105:.\DriverControl.c **** }
+  72              		.loc 1 105 0
+  73 0008 181C     		mov	r0, r3
+  74 000a BD46     		mov	sp, r7
+  75              		@ sp needed
+  76 000c 80BD     		pop	{r7, pc}
+  77              	.L4:
+  78 000e C046     		.align	2
+  79              	.L3:
+  80 0010 14000000 		.word	RegulationData
+  81              		.cfi_endproc
+  82              	.LFE34:
+  83              		.size	getPreviousBrightness, .-getPreviousBrightness
+  84              		.section	.text.getDriverID,"ax",%progbits
+  85              		.align	2
+  86              		.global	getDriverID
+  87              		.code	16
+  88              		.thumb_func
+  89              		.type	getDriverID, %function
+  90              	getDriverID:
+  91              	.LFB35:
+ 106:.\DriverControl.c **** 
+ 107:.\DriverControl.c **** /*******************************************************************************
+ 108:.\DriverControl.c **** * Function Name: getDriverID
+ 109:.\DriverControl.c **** ********************************************************************************
+ 110:.\DriverControl.c **** *
+ 111:.\DriverControl.c **** * Summary:
+ 112:.\DriverControl.c **** *  Returns the ID number of this driver.
+ 113:.\DriverControl.c **** *
+ 114:.\DriverControl.c **** * Parameters:
+ 115:.\DriverControl.c **** *  None.
+ 116:.\DriverControl.c **** *
+ 117:.\DriverControl.c **** * Return:
+ 118:.\DriverControl.c **** *  Value 1 for head module, 2 - 8 for trailer module
+ 119:.\DriverControl.c **** *
+ 120:.\DriverControl.c **** *******************************************************************************/
+ 121:.\DriverControl.c **** uint8 getDriverID(void)
+ 122:.\DriverControl.c **** {
+  92              		.loc 1 122 0
+  93              		.cfi_startproc
+  94 0000 80B5     		push	{r7, lr}
+  95              		.cfi_def_cfa_offset 8
+  96              		.cfi_offset 7, -8
+  97              		.cfi_offset 14, -4
+  98 0002 00AF     		add	r7, sp, #0
+  99              		.cfi_def_cfa_register 7
+ 123:.\DriverControl.c ****     return PositionData.ID_Number;
+ 100              		.loc 1 123 0
+ 101 0004 024B     		ldr	r3, .L7
+ 102 0006 1B78     		ldrb	r3, [r3]
+ 124:.\DriverControl.c **** }
+ 103              		.loc 1 124 0
+ 104 0008 181C     		mov	r0, r3
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 5
+
+
+ 105 000a BD46     		mov	sp, r7
+ 106              		@ sp needed
+ 107 000c 80BD     		pop	{r7, pc}
+ 108              	.L8:
+ 109 000e C046     		.align	2
+ 110              	.L7:
+ 111 0010 10000000 		.word	PositionData
+ 112              		.cfi_endproc
+ 113              	.LFE35:
+ 114              		.size	getDriverID, .-getDriverID
+ 115              		.section	.text.setIdentityByComm,"ax",%progbits
+ 116              		.align	2
+ 117              		.global	setIdentityByComm
+ 118              		.code	16
+ 119              		.thumb_func
+ 120              		.type	setIdentityByComm, %function
+ 121              	setIdentityByComm:
+ 122              	.LFB36:
+ 125:.\DriverControl.c **** 
+ 126:.\DriverControl.c **** /*******************************************************************************
+ 127:.\DriverControl.c **** * Function Name: setIdentityByComm
+ 128:.\DriverControl.c **** ********************************************************************************
+ 129:.\DriverControl.c **** *
+ 130:.\DriverControl.c **** * Summary:
+ 131:.\DriverControl.c **** *  Sets the ID number for this driver based on UART communication. The number
+ 132:.\DriverControl.c **** *  assigned is the driver position away from the controller.
+ 133:.\DriverControl.c **** *
+ 134:.\DriverControl.c **** * Parameters:
+ 135:.\DriverControl.c **** *  positionNumber: The ID number based on position in the chain.
+ 136:.\DriverControl.c **** *
+ 137:.\DriverControl.c **** * Return:
+ 138:.\DriverControl.c **** *  SUCCESS for valid input, FAILURE otherwise
+ 139:.\DriverControl.c **** *
+ 140:.\DriverControl.c **** *******************************************************************************/
+ 141:.\DriverControl.c **** uint8 setIdentityByComm(uint8 positionNumber)
+ 142:.\DriverControl.c **** {
+ 123              		.loc 1 142 0
+ 124              		.cfi_startproc
+ 125 0000 80B5     		push	{r7, lr}
+ 126              		.cfi_def_cfa_offset 8
+ 127              		.cfi_offset 7, -8
+ 128              		.cfi_offset 14, -4
+ 129 0002 82B0     		sub	sp, sp, #8
+ 130              		.cfi_def_cfa_offset 16
+ 131 0004 00AF     		add	r7, sp, #0
+ 132              		.cfi_def_cfa_register 7
+ 133 0006 021C     		mov	r2, r0
+ 134 0008 FB1D     		add	r3, r7, #7
+ 135 000a 1A70     		strb	r2, [r3]
+ 143:.\DriverControl.c ****     if(positionNumber < HEAD_MODULE_ID || positionNumber > MAX_DRIVER_COUNT)
+ 136              		.loc 1 143 0
+ 137 000c FB1D     		add	r3, r7, #7
+ 138 000e 1B78     		ldrb	r3, [r3]
+ 139 0010 002B     		cmp	r3, #0
+ 140 0012 03D0     		beq	.L10
+ 141              		.loc 1 143 0 is_stmt 0 discriminator 1
+ 142 0014 FB1D     		add	r3, r7, #7
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 6
+
+
+ 143 0016 1B78     		ldrb	r3, [r3]
+ 144 0018 082B     		cmp	r3, #8
+ 145 001a 01D9     		bls	.L11
+ 146              	.L10:
+ 144:.\DriverControl.c ****         return FAILURE;
+ 147              		.loc 1 144 0 is_stmt 1
+ 148 001c 0123     		mov	r3, #1
+ 149 001e 04E0     		b	.L12
+ 150              	.L11:
+ 145:.\DriverControl.c ****     
+ 146:.\DriverControl.c ****     PositionData.ID_Number = positionNumber;
+ 151              		.loc 1 146 0
+ 152 0020 044B     		ldr	r3, .L13
+ 153 0022 FA1D     		add	r2, r7, #7
+ 154 0024 1278     		ldrb	r2, [r2]
+ 155 0026 1A70     		strb	r2, [r3]
+ 147:.\DriverControl.c ****     
+ 148:.\DriverControl.c ****     return SUCCESS;
+ 156              		.loc 1 148 0
+ 157 0028 0023     		mov	r3, #0
+ 158              	.L12:
+ 149:.\DriverControl.c **** }
+ 159              		.loc 1 149 0
+ 160 002a 181C     		mov	r0, r3
+ 161 002c BD46     		mov	sp, r7
+ 162 002e 02B0     		add	sp, sp, #8
+ 163              		@ sp needed
+ 164 0030 80BD     		pop	{r7, pc}
+ 165              	.L14:
+ 166 0032 C046     		.align	2
+ 167              	.L13:
+ 168 0034 10000000 		.word	PositionData
+ 169              		.cfi_endproc
+ 170              	.LFE36:
+ 171              		.size	setIdentityByComm, .-setIdentityByComm
+ 172              		.section	.text.setDriverCount,"ax",%progbits
+ 173              		.align	2
+ 174              		.global	setDriverCount
+ 175              		.code	16
+ 176              		.thumb_func
+ 177              		.type	setDriverCount, %function
+ 178              	setDriverCount:
+ 179              	.LFB37:
+ 150:.\DriverControl.c **** 
+ 151:.\DriverControl.c **** /*******************************************************************************
+ 152:.\DriverControl.c **** * Function Name: setDriverCount
+ 153:.\DriverControl.c **** ********************************************************************************
+ 154:.\DriverControl.c **** *
+ 155:.\DriverControl.c **** * Summary:
+ 156:.\DriverControl.c **** *  Sets the number of drivers in the chain.
+ 157:.\DriverControl.c **** *
+ 158:.\DriverControl.c **** * Parameters:
+ 159:.\DriverControl.c **** *  newDriverCount: The updated number of drivers in the chain.
+ 160:.\DriverControl.c **** *
+ 161:.\DriverControl.c **** * Return:
+ 162:.\DriverControl.c **** *  SUCCESS for valid input, FAILURE otherwise
+ 163:.\DriverControl.c **** *
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 7
+
+
+ 164:.\DriverControl.c **** *******************************************************************************/
+ 165:.\DriverControl.c **** uint8 setDriverCount(uint8 newDriverCount)
+ 166:.\DriverControl.c **** {
+ 180              		.loc 1 166 0
+ 181              		.cfi_startproc
+ 182 0000 80B5     		push	{r7, lr}
+ 183              		.cfi_def_cfa_offset 8
+ 184              		.cfi_offset 7, -8
+ 185              		.cfi_offset 14, -4
+ 186 0002 82B0     		sub	sp, sp, #8
+ 187              		.cfi_def_cfa_offset 16
+ 188 0004 00AF     		add	r7, sp, #0
+ 189              		.cfi_def_cfa_register 7
+ 190 0006 021C     		mov	r2, r0
+ 191 0008 FB1D     		add	r3, r7, #7
+ 192 000a 1A70     		strb	r2, [r3]
+ 167:.\DriverControl.c ****     if(newDriverCount < HEAD_MODULE_ID || newDriverCount > MAX_DRIVER_COUNT)
+ 193              		.loc 1 167 0
+ 194 000c FB1D     		add	r3, r7, #7
+ 195 000e 1B78     		ldrb	r3, [r3]
+ 196 0010 002B     		cmp	r3, #0
+ 197 0012 03D0     		beq	.L16
+ 198              		.loc 1 167 0 is_stmt 0 discriminator 1
+ 199 0014 FB1D     		add	r3, r7, #7
+ 200 0016 1B78     		ldrb	r3, [r3]
+ 201 0018 082B     		cmp	r3, #8
+ 202 001a 01D9     		bls	.L17
+ 203              	.L16:
+ 168:.\DriverControl.c ****         return FAILURE;
+ 204              		.loc 1 168 0 is_stmt 1
+ 205 001c 0123     		mov	r3, #1
+ 206 001e 04E0     		b	.L18
+ 207              	.L17:
+ 169:.\DriverControl.c ****     
+ 170:.\DriverControl.c ****     PositionData.driverCount = newDriverCount;
+ 208              		.loc 1 170 0
+ 209 0020 044B     		ldr	r3, .L19
+ 210 0022 FA1D     		add	r2, r7, #7
+ 211 0024 1278     		ldrb	r2, [r2]
+ 212 0026 5A70     		strb	r2, [r3, #1]
+ 171:.\DriverControl.c ****     
+ 172:.\DriverControl.c ****     return SUCCESS;
+ 213              		.loc 1 172 0
+ 214 0028 0023     		mov	r3, #0
+ 215              	.L18:
+ 173:.\DriverControl.c **** }
+ 216              		.loc 1 173 0
+ 217 002a 181C     		mov	r0, r3
+ 218 002c BD46     		mov	sp, r7
+ 219 002e 02B0     		add	sp, sp, #8
+ 220              		@ sp needed
+ 221 0030 80BD     		pop	{r7, pc}
+ 222              	.L20:
+ 223 0032 C046     		.align	2
+ 224              	.L19:
+ 225 0034 10000000 		.word	PositionData
+ 226              		.cfi_endproc
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 8
+
+
+ 227              	.LFE37:
+ 228              		.size	setDriverCount, .-setDriverCount
+ 229              		.section	.text.isLastDriverInChain,"ax",%progbits
+ 230              		.align	2
+ 231              		.global	isLastDriverInChain
+ 232              		.code	16
+ 233              		.thumb_func
+ 234              		.type	isLastDriverInChain, %function
+ 235              	isLastDriverInChain:
+ 236              	.LFB38:
+ 174:.\DriverControl.c **** 
+ 175:.\DriverControl.c **** /*******************************************************************************
+ 176:.\DriverControl.c **** * Function Name: isLastDriverInChain
+ 177:.\DriverControl.c **** ********************************************************************************
+ 178:.\DriverControl.c **** *
+ 179:.\DriverControl.c **** * Summary:
+ 180:.\DriverControl.c **** *  Determines if this driver is at the end of the chain.
+ 181:.\DriverControl.c **** *
+ 182:.\DriverControl.c **** * Parameters:
+ 183:.\DriverControl.c **** *  None.
+ 184:.\DriverControl.c **** *
+ 185:.\DriverControl.c **** * Return:
+ 186:.\DriverControl.c **** *  TRUE if last driver in the chain, FALSE if otherwise
+ 187:.\DriverControl.c **** *
+ 188:.\DriverControl.c **** *******************************************************************************/
+ 189:.\DriverControl.c **** uint8 isLastDriverInChain(void)
+ 190:.\DriverControl.c **** {
+ 237              		.loc 1 190 0
+ 238              		.cfi_startproc
+ 239 0000 80B5     		push	{r7, lr}
+ 240              		.cfi_def_cfa_offset 8
+ 241              		.cfi_offset 7, -8
+ 242              		.cfi_offset 14, -4
+ 243 0002 00AF     		add	r7, sp, #0
+ 244              		.cfi_def_cfa_register 7
+ 191:.\DriverControl.c ****     return PositionData.bLastDriverInChain;
+ 245              		.loc 1 191 0
+ 246 0004 024B     		ldr	r3, .L23
+ 247 0006 9B78     		ldrb	r3, [r3, #2]
+ 192:.\DriverControl.c **** }
+ 248              		.loc 1 192 0
+ 249 0008 181C     		mov	r0, r3
+ 250 000a BD46     		mov	sp, r7
+ 251              		@ sp needed
+ 252 000c 80BD     		pop	{r7, pc}
+ 253              	.L24:
+ 254 000e C046     		.align	2
+ 255              	.L23:
+ 256 0010 10000000 		.word	PositionData
+ 257              		.cfi_endproc
+ 258              	.LFE38:
+ 259              		.size	isLastDriverInChain, .-isLastDriverInChain
+ 260              		.section	.text.setAsNotLastDriverInChain,"ax",%progbits
+ 261              		.align	2
+ 262              		.global	setAsNotLastDriverInChain
+ 263              		.code	16
+ 264              		.thumb_func
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 9
+
+
+ 265              		.type	setAsNotLastDriverInChain, %function
+ 266              	setAsNotLastDriverInChain:
+ 267              	.LFB39:
+ 193:.\DriverControl.c **** 
+ 194:.\DriverControl.c **** /*******************************************************************************
+ 195:.\DriverControl.c **** * Function Name: setAsNotLastDriverInChain
+ 196:.\DriverControl.c **** ********************************************************************************
+ 197:.\DriverControl.c **** *
+ 198:.\DriverControl.c **** * Summary:
+ 199:.\DriverControl.c **** *  At the start of the program, this driver is assumed to the be the last driver
+ 200:.\DriverControl.c **** *  in the chain. If an ACK packet is received at startup, this function is called
+ 201:.\DriverControl.c **** *  to update the status for not being in the last driver.
+ 202:.\DriverControl.c **** *
+ 203:.\DriverControl.c **** * Parameters:
+ 204:.\DriverControl.c **** *  None.
+ 205:.\DriverControl.c **** *
+ 206:.\DriverControl.c **** * Return:
+ 207:.\DriverControl.c **** *  None.
+ 208:.\DriverControl.c **** *
+ 209:.\DriverControl.c **** *******************************************************************************/
+ 210:.\DriverControl.c **** void setAsNotLastDriverInChain(void)
+ 211:.\DriverControl.c **** {
+ 268              		.loc 1 211 0
+ 269              		.cfi_startproc
+ 270 0000 80B5     		push	{r7, lr}
+ 271              		.cfi_def_cfa_offset 8
+ 272              		.cfi_offset 7, -8
+ 273              		.cfi_offset 14, -4
+ 274 0002 00AF     		add	r7, sp, #0
+ 275              		.cfi_def_cfa_register 7
+ 212:.\DriverControl.c ****     PositionData.bLastDriverInChain = FALSE;
+ 276              		.loc 1 212 0
+ 277 0004 024B     		ldr	r3, .L26
+ 278 0006 0022     		mov	r2, #0
+ 279 0008 9A70     		strb	r2, [r3, #2]
+ 213:.\DriverControl.c **** }
+ 280              		.loc 1 213 0
+ 281 000a BD46     		mov	sp, r7
+ 282              		@ sp needed
+ 283 000c 80BD     		pop	{r7, pc}
+ 284              	.L27:
+ 285 000e C046     		.align	2
+ 286              	.L26:
+ 287 0010 10000000 		.word	PositionData
+ 288              		.cfi_endproc
+ 289              	.LFE39:
+ 290              		.size	setAsNotLastDriverInChain, .-setAsNotLastDriverInChain
+ 291              		.section	.text.checkForUnderVoltage,"ax",%progbits
+ 292              		.align	2
+ 293              		.global	checkForUnderVoltage
+ 294              		.code	16
+ 295              		.thumb_func
+ 296              		.type	checkForUnderVoltage, %function
+ 297              	checkForUnderVoltage:
+ 298              	.LFB40:
+ 214:.\DriverControl.c **** 
+ 215:.\DriverControl.c **** /*******************************************************************************
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 10
+
+
+ 216:.\DriverControl.c **** * Function Name: checkForUnderVoltage
+ 217:.\DriverControl.c **** ********************************************************************************
+ 218:.\DriverControl.c **** *
+ 219:.\DriverControl.c **** * Summary:
+ 220:.\DriverControl.c **** *  Takes in the voltage sense reading and updates the undervoltage status.
+ 221:.\DriverControl.c **** *
+ 222:.\DriverControl.c **** * Parameters:
+ 223:.\DriverControl.c **** *  ADC_Value: The voltage sense reading
+ 224:.\DriverControl.c **** *
+ 225:.\DriverControl.c **** * Return:
+ 226:.\DriverControl.c **** *  None.
+ 227:.\DriverControl.c **** *
+ 228:.\DriverControl.c **** *******************************************************************************/
+ 229:.\DriverControl.c **** void checkForUnderVoltage(uint16 ADC_Value)
+ 230:.\DriverControl.c **** {
+ 299              		.loc 1 230 0
+ 300              		.cfi_startproc
+ 301 0000 80B5     		push	{r7, lr}
+ 302              		.cfi_def_cfa_offset 8
+ 303              		.cfi_offset 7, -8
+ 304              		.cfi_offset 14, -4
+ 305 0002 82B0     		sub	sp, sp, #8
+ 306              		.cfi_def_cfa_offset 16
+ 307 0004 00AF     		add	r7, sp, #0
+ 308              		.cfi_def_cfa_register 7
+ 309 0006 021C     		mov	r2, r0
+ 310 0008 BB1D     		add	r3, r7, #6
+ 311 000a 1A80     		strh	r2, [r3]
+ 231:.\DriverControl.c ****     if((VoltageSenseData.bEnable == TRUE) && (ADC_Value < VOLTAGE_SENSE_LOWER_BOUND))
+ 312              		.loc 1 231 0
+ 313 000c 114B     		ldr	r3, .L31
+ 314 000e 1B78     		ldrb	r3, [r3]
+ 315 0010 012B     		cmp	r3, #1
+ 316 0012 0DD1     		bne	.L29
+ 317              		.loc 1 231 0 is_stmt 0 discriminator 1
+ 318 0014 BB1D     		add	r3, r7, #6
+ 319 0016 1B88     		ldrh	r3, [r3]
+ 320 0018 0F4A     		ldr	r2, .L31+4
+ 321 001a 9342     		cmp	r3, r2
+ 322 001c 08D8     		bhi	.L29
+ 232:.\DriverControl.c ****     {
+ 233:.\DriverControl.c ****         VoltageSenseData.bEnable = FALSE;
+ 323              		.loc 1 233 0 is_stmt 1
+ 324 001e 0D4B     		ldr	r3, .L31
+ 325 0020 0022     		mov	r2, #0
+ 326 0022 1A70     		strb	r2, [r3]
+ 234:.\DriverControl.c ****         LED_Timer_Stop();
+ 327              		.loc 1 234 0
+ 328 0024 FFF7FEFF 		bl	LED_Timer_Stop
+ 235:.\DriverControl.c ****         VoltageSenseData.scalingFactor = 0;
+ 329              		.loc 1 235 0
+ 330 0028 0A4B     		ldr	r3, .L31
+ 331 002a 0022     		mov	r2, #0
+ 332 002c 5A70     		strb	r2, [r3, #1]
+ 333 002e 0DE0     		b	.L28
+ 334              	.L29:
+ 236:.\DriverControl.c ****     }
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 11
+
+
+ 237:.\DriverControl.c ****     else if((VoltageSenseData.bEnable == FALSE) && (ADC_Value > (VOLTAGE_SENSE_UPPER_BOUND)))
+ 335              		.loc 1 237 0
+ 336 0030 084B     		ldr	r3, .L31
+ 337 0032 1B78     		ldrb	r3, [r3]
+ 338 0034 002B     		cmp	r3, #0
+ 339 0036 09D1     		bne	.L28
+ 340              		.loc 1 237 0 is_stmt 0 discriminator 1
+ 341 0038 BB1D     		add	r3, r7, #6
+ 342 003a 1B88     		ldrh	r3, [r3]
+ 343 003c 074A     		ldr	r2, .L31+8
+ 344 003e 9342     		cmp	r3, r2
+ 345 0040 04D9     		bls	.L28
+ 238:.\DriverControl.c ****     {
+ 239:.\DriverControl.c ****         VoltageSenseData.bEnable = TRUE;
+ 346              		.loc 1 239 0 is_stmt 1
+ 347 0042 044B     		ldr	r3, .L31
+ 348 0044 0122     		mov	r2, #1
+ 349 0046 1A70     		strb	r2, [r3]
+ 240:.\DriverControl.c ****         LED_Timer_Start();
+ 350              		.loc 1 240 0
+ 351 0048 FFF7FEFF 		bl	LED_Timer_Start
+ 352              	.L28:
+ 241:.\DriverControl.c ****     }
+ 242:.\DriverControl.c **** }
+ 353              		.loc 1 242 0
+ 354 004c BD46     		mov	sp, r7
+ 355 004e 02B0     		add	sp, sp, #8
+ 356              		@ sp needed
+ 357 0050 80BD     		pop	{r7, pc}
+ 358              	.L32:
+ 359 0052 C046     		.align	2
+ 360              	.L31:
+ 361 0054 1C000000 		.word	VoltageSenseData
+ 362 0058 9D020000 		.word	669
+ 363 005c 66030000 		.word	870
+ 364              		.cfi_endproc
+ 365              	.LFE40:
+ 366              		.size	checkForUnderVoltage, .-checkForUnderVoltage
+ 367              		.section	.text.processSoftStart,"ax",%progbits
+ 368              		.align	2
+ 369              		.global	processSoftStart
+ 370              		.code	16
+ 371              		.thumb_func
+ 372              		.type	processSoftStart, %function
+ 373              	processSoftStart:
+ 374              	.LFB41:
+ 243:.\DriverControl.c **** 
+ 244:.\DriverControl.c **** /*******************************************************************************
+ 245:.\DriverControl.c **** * Function Name: processSoftStart
+ 246:.\DriverControl.c **** ********************************************************************************
+ 247:.\DriverControl.c **** *
+ 248:.\DriverControl.c **** * Summary:
+ 249:.\DriverControl.c **** *  Called in LED_ISR, increases the brightness from full on to full off in 1 second.
+ 250:.\DriverControl.c **** *
+ 251:.\DriverControl.c **** * Parameters:
+ 252:.\DriverControl.c **** *  None.
+ 253:.\DriverControl.c **** *
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 12
+
+
+ 254:.\DriverControl.c **** * Return:
+ 255:.\DriverControl.c **** *  None.
+ 256:.\DriverControl.c **** *
+ 257:.\DriverControl.c **** *******************************************************************************/
+ 258:.\DriverControl.c **** void processSoftStart(void)
+ 259:.\DriverControl.c **** {
+ 375              		.loc 1 259 0
+ 376              		.cfi_startproc
+ 377 0000 80B5     		push	{r7, lr}
+ 378              		.cfi_def_cfa_offset 8
+ 379              		.cfi_offset 7, -8
+ 380              		.cfi_offset 14, -4
+ 381 0002 00AF     		add	r7, sp, #0
+ 382              		.cfi_def_cfa_register 7
+ 260:.\DriverControl.c ****     LED_Timer_ClearInterrupt(LED_Timer_INTR_MASK_TC);
+ 383              		.loc 1 260 0
+ 384 0004 0120     		mov	r0, #1
+ 385 0006 FFF7FEFF 		bl	LED_Timer_ClearInterrupt
+ 261:.\DriverControl.c ****     
+ 262:.\DriverControl.c ****     if(VoltageSenseData.scalingFactor < 0xFF)
+ 386              		.loc 1 262 0
+ 387 000a 074B     		ldr	r3, .L36
+ 388 000c 5B78     		ldrb	r3, [r3, #1]
+ 389 000e FF2B     		cmp	r3, #255
+ 390 0010 06D0     		beq	.L34
+ 263:.\DriverControl.c ****         VoltageSenseData.scalingFactor++;
+ 391              		.loc 1 263 0
+ 392 0012 054B     		ldr	r3, .L36
+ 393 0014 5B78     		ldrb	r3, [r3, #1]
+ 394 0016 0133     		add	r3, r3, #1
+ 395 0018 DAB2     		uxtb	r2, r3
+ 396 001a 034B     		ldr	r3, .L36
+ 397 001c 5A70     		strb	r2, [r3, #1]
+ 398 001e 01E0     		b	.L33
+ 399              	.L34:
+ 264:.\DriverControl.c ****     else
+ 265:.\DriverControl.c ****         LED_Timer_Stop();
+ 400              		.loc 1 265 0
+ 401 0020 FFF7FEFF 		bl	LED_Timer_Stop
+ 402              	.L33:
+ 266:.\DriverControl.c **** }
+ 403              		.loc 1 266 0
+ 404 0024 BD46     		mov	sp, r7
+ 405              		@ sp needed
+ 406 0026 80BD     		pop	{r7, pc}
+ 407              	.L37:
+ 408              		.align	2
+ 409              	.L36:
+ 410 0028 1C000000 		.word	VoltageSenseData
+ 411              		.cfi_endproc
+ 412              	.LFE41:
+ 413              		.size	processSoftStart, .-processSoftStart
+ 414              		.section	.text.updateBrightnessLevel,"ax",%progbits
+ 415              		.align	2
+ 416              		.global	updateBrightnessLevel
+ 417              		.code	16
+ 418              		.thumb_func
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 13
+
+
+ 419              		.type	updateBrightnessLevel, %function
+ 420              	updateBrightnessLevel:
+ 421              	.LFB42:
+ 267:.\DriverControl.c **** 
+ 268:.\DriverControl.c **** /*******************************************************************************
+ 269:.\DriverControl.c **** * Function Name: updateBrightnessLevel
+ 270:.\DriverControl.c **** ********************************************************************************
+ 271:.\DriverControl.c **** *
+ 272:.\DriverControl.c **** * Summary:
+ 273:.\DriverControl.c **** *  Updates the brightness of the LED. Resulting brightness may not match the
+ 274:.\DriverControl.c **** *  requested brightness depending on temperature regulation state.
+ 275:.\DriverControl.c **** *
+ 276:.\DriverControl.c **** * Parameters:
+ 277:.\DriverControl.c **** *  brightnessLevel: The desired brightness level for the LED.
+ 278:.\DriverControl.c **** *
+ 279:.\DriverControl.c **** * Return:
+ 280:.\DriverControl.c **** *  The resulting brightness level of the LED
+ 281:.\DriverControl.c **** *
+ 282:.\DriverControl.c **** *******************************************************************************/
+ 283:.\DriverControl.c **** uint8 updateBrightnessLevel(uint8 brightnessLevel, uint8 bRegulated)
+ 284:.\DriverControl.c **** {
+ 422              		.loc 1 284 0
+ 423              		.cfi_startproc
+ 424 0000 80B5     		push	{r7, lr}
+ 425              		.cfi_def_cfa_offset 8
+ 426              		.cfi_offset 7, -8
+ 427              		.cfi_offset 14, -4
+ 428 0002 82B0     		sub	sp, sp, #8
+ 429              		.cfi_def_cfa_offset 16
+ 430 0004 00AF     		add	r7, sp, #0
+ 431              		.cfi_def_cfa_register 7
+ 432 0006 021C     		mov	r2, r0
+ 433 0008 FB1D     		add	r3, r7, #7
+ 434 000a 1A70     		strb	r2, [r3]
+ 435 000c BB1D     		add	r3, r7, #6
+ 436 000e 0A1C     		add	r2, r1, #0
+ 437 0010 1A70     		strb	r2, [r3]
+ 285:.\DriverControl.c ****     if(bRegulated != TRUE && bRegulated != FALSE)
+ 438              		.loc 1 285 0
+ 439 0012 BB1D     		add	r3, r7, #6
+ 440 0014 1B78     		ldrb	r3, [r3]
+ 441 0016 012B     		cmp	r3, #1
+ 442 0018 05D0     		beq	.L39
+ 443              		.loc 1 285 0 is_stmt 0 discriminator 1
+ 444 001a BB1D     		add	r3, r7, #6
+ 445 001c 1B78     		ldrb	r3, [r3]
+ 446 001e 002B     		cmp	r3, #0
+ 447 0020 01D0     		beq	.L39
+ 286:.\DriverControl.c ****     return 0;
+ 448              		.loc 1 286 0 is_stmt 1
+ 449 0022 0023     		mov	r3, #0
+ 450 0024 4AE0     		b	.L40
+ 451              	.L39:
+ 287:.\DriverControl.c ****     
+ 288:.\DriverControl.c ****    // brightnessLevel = (uint8)((uint16)(VoltageSenseData.scalingFactor)*
+ 289:.\DriverControl.c ****    //                     (uint16)(brightnessLevel) / MAX_SCALING_FACTOR);
+ 290:.\DriverControl.c ****     
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 14
+
+
+ 291:.\DriverControl.c ****     if(brightnessLevel != RegulationData.requestedBrightness)
+ 452              		.loc 1 291 0
+ 453 0026 274B     		ldr	r3, .L48
+ 454 0028 1B78     		ldrb	r3, [r3]
+ 455 002a FA1D     		add	r2, r7, #7
+ 456 002c 1278     		ldrb	r2, [r2]
+ 457 002e 9A42     		cmp	r2, r3
+ 458 0030 03D0     		beq	.L41
+ 292:.\DriverControl.c ****         RegulationData.requestedBrightness = brightnessLevel;
+ 459              		.loc 1 292 0
+ 460 0032 244B     		ldr	r3, .L48
+ 461 0034 FA1D     		add	r2, r7, #7
+ 462 0036 1278     		ldrb	r2, [r2]
+ 463 0038 1A70     		strb	r2, [r3]
+ 464              	.L41:
+ 293:.\DriverControl.c ****     
+ 294:.\DriverControl.c ****     if((PositionData.ID_Number != HEAD_MODULE_ID) || (bRegulated == FALSE))
+ 465              		.loc 1 294 0
+ 466 003a 234B     		ldr	r3, .L48+4
+ 467 003c 1B78     		ldrb	r3, [r3]
+ 468 003e 012B     		cmp	r3, #1
+ 469 0040 03D1     		bne	.L42
+ 470              		.loc 1 294 0 is_stmt 0 discriminator 1
+ 471 0042 BB1D     		add	r3, r7, #6
+ 472 0044 1B78     		ldrb	r3, [r3]
+ 473 0046 002B     		cmp	r3, #0
+ 474 0048 1CD1     		bne	.L43
+ 475              	.L42:
+ 295:.\DriverControl.c ****     {   
+ 296:.\DriverControl.c ****         if(RegulationData.requestedBrightness != RegulationData.previousBrightness)
+ 476              		.loc 1 296 0 is_stmt 1
+ 477 004a 1E4B     		ldr	r3, .L48
+ 478 004c 1A78     		ldrb	r2, [r3]
+ 479 004e 1D4B     		ldr	r3, .L48
+ 480 0050 9B78     		ldrb	r3, [r3, #2]
+ 481 0052 9A42     		cmp	r2, r3
+ 482 0054 0FD0     		beq	.L44
+ 297:.\DriverControl.c ****         {
+ 298:.\DriverControl.c ****             if(RegulationData.requestedBrightness > 0)
+ 483              		.loc 1 298 0
+ 484 0056 1B4B     		ldr	r3, .L48
+ 485 0058 1B78     		ldrb	r3, [r3]
+ 486 005a 002B     		cmp	r3, #0
+ 487 005c 08D0     		beq	.L45
+ 299:.\DriverControl.c ****             {
+ 300:.\DriverControl.c ****                 PWM_Enable_Write(TRUE);
+ 488              		.loc 1 300 0
+ 489 005e 0120     		mov	r0, #1
+ 490 0060 FFF7FEFF 		bl	PWM_Enable_Write
+ 301:.\DriverControl.c ****                 PWM_WriteCompare(RegulationData.requestedBrightness);
+ 491              		.loc 1 301 0
+ 492 0064 174B     		ldr	r3, .L48
+ 493 0066 1B78     		ldrb	r3, [r3]
+ 494 0068 181C     		mov	r0, r3
+ 495 006a FFF7FEFF 		bl	PWM_WriteCompare
+ 496 006e 02E0     		b	.L44
+ 497              	.L45:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 15
+
+
+ 302:.\DriverControl.c ****             }
+ 303:.\DriverControl.c ****             else
+ 304:.\DriverControl.c ****             {
+ 305:.\DriverControl.c ****                 PWM_Enable_Write(FALSE);
+ 498              		.loc 1 305 0
+ 499 0070 0020     		mov	r0, #0
+ 500 0072 FFF7FEFF 		bl	PWM_Enable_Write
+ 501              	.L44:
+ 306:.\DriverControl.c ****             }
+ 307:.\DriverControl.c ****         };
+ 308:.\DriverControl.c ****         
+ 309:.\DriverControl.c ****         RegulationData.previousBrightness = RegulationData.requestedBrightness;
+ 502              		.loc 1 309 0
+ 503 0076 134B     		ldr	r3, .L48
+ 504 0078 1A78     		ldrb	r2, [r3]
+ 505 007a 124B     		ldr	r3, .L48
+ 506 007c 9A70     		strb	r2, [r3, #2]
+ 310:.\DriverControl.c ****         return RegulationData.requestedBrightness;
+ 507              		.loc 1 310 0
+ 508 007e 114B     		ldr	r3, .L48
+ 509 0080 1B78     		ldrb	r3, [r3]
+ 510 0082 1BE0     		b	.L40
+ 511              	.L43:
+ 311:.\DriverControl.c ****     }
+ 312:.\DriverControl.c ****     
+ 313:.\DriverControl.c ****     if(RegulationData.regulatedBrightness != RegulationData.previousBrightness)
+ 512              		.loc 1 313 0
+ 513 0084 0F4B     		ldr	r3, .L48
+ 514 0086 5A78     		ldrb	r2, [r3, #1]
+ 515 0088 0E4B     		ldr	r3, .L48
+ 516 008a 9B78     		ldrb	r3, [r3, #2]
+ 517 008c 9A42     		cmp	r2, r3
+ 518 008e 0FD0     		beq	.L46
+ 314:.\DriverControl.c ****     {
+ 315:.\DriverControl.c ****         if(RegulationData.regulatedBrightness > 0)
+ 519              		.loc 1 315 0
+ 520 0090 0C4B     		ldr	r3, .L48
+ 521 0092 5B78     		ldrb	r3, [r3, #1]
+ 522 0094 002B     		cmp	r3, #0
+ 523 0096 08D0     		beq	.L47
+ 316:.\DriverControl.c ****         {
+ 317:.\DriverControl.c ****             PWM_Enable_Write(TRUE);
+ 524              		.loc 1 317 0
+ 525 0098 0120     		mov	r0, #1
+ 526 009a FFF7FEFF 		bl	PWM_Enable_Write
+ 318:.\DriverControl.c ****             PWM_WriteCompare(RegulationData.regulatedBrightness);
+ 527              		.loc 1 318 0
+ 528 009e 094B     		ldr	r3, .L48
+ 529 00a0 5B78     		ldrb	r3, [r3, #1]
+ 530 00a2 181C     		mov	r0, r3
+ 531 00a4 FFF7FEFF 		bl	PWM_WriteCompare
+ 532 00a8 02E0     		b	.L46
+ 533              	.L47:
+ 319:.\DriverControl.c ****         }
+ 320:.\DriverControl.c ****         else
+ 321:.\DriverControl.c ****             PWM_Enable_Write(FALSE);
+ 534              		.loc 1 321 0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 16
+
+
+ 535 00aa 0020     		mov	r0, #0
+ 536 00ac FFF7FEFF 		bl	PWM_Enable_Write
+ 537              	.L46:
+ 322:.\DriverControl.c ****     }
+ 323:.\DriverControl.c ****     
+ 324:.\DriverControl.c ****     RegulationData.previousBrightness = RegulationData.regulatedBrightness;    
+ 538              		.loc 1 324 0
+ 539 00b0 044B     		ldr	r3, .L48
+ 540 00b2 5A78     		ldrb	r2, [r3, #1]
+ 541 00b4 034B     		ldr	r3, .L48
+ 542 00b6 9A70     		strb	r2, [r3, #2]
+ 325:.\DriverControl.c ****     return RegulationData.regulatedBrightness;
+ 543              		.loc 1 325 0
+ 544 00b8 024B     		ldr	r3, .L48
+ 545 00ba 5B78     		ldrb	r3, [r3, #1]
+ 546              	.L40:
+ 326:.\DriverControl.c **** }
+ 547              		.loc 1 326 0
+ 548 00bc 181C     		mov	r0, r3
+ 549 00be BD46     		mov	sp, r7
+ 550 00c0 02B0     		add	sp, sp, #8
+ 551              		@ sp needed
+ 552 00c2 80BD     		pop	{r7, pc}
+ 553              	.L49:
+ 554              		.align	2
+ 555              	.L48:
+ 556 00c4 14000000 		.word	RegulationData
+ 557 00c8 10000000 		.word	PositionData
+ 558              		.cfi_endproc
+ 559              	.LFE42:
+ 560              		.size	updateBrightnessLevel, .-updateBrightnessLevel
+ 561              		.section	.text.getMaxTemperature,"ax",%progbits
+ 562              		.align	2
+ 563              		.global	getMaxTemperature
+ 564              		.code	16
+ 565              		.thumb_func
+ 566              		.type	getMaxTemperature, %function
+ 567              	getMaxTemperature:
+ 568              	.LFB43:
+ 327:.\DriverControl.c **** 
+ 328:.\DriverControl.c **** /*******************************************************************************
+ 329:.\DriverControl.c **** * Function Name: getMaxTemperature
+ 330:.\DriverControl.c **** ********************************************************************************
+ 331:.\DriverControl.c **** *
+ 332:.\DriverControl.c **** * Summary:
+ 333:.\DriverControl.c **** *  Obtains the next temperature sample from ADC.
+ 334:.\DriverControl.c **** *
+ 335:.\DriverControl.c **** * Parameters:
+ 336:.\DriverControl.c **** *  None.
+ 337:.\DriverControl.c **** *
+ 338:.\DriverControl.c **** * Return:
+ 339:.\DriverControl.c **** *  The next temperature sample from ADC
+ 340:.\DriverControl.c **** *
+ 341:.\DriverControl.c **** *******************************************************************************/
+ 342:.\DriverControl.c **** int16 getMaxTemperature(enum TemperaturePoint channelNumber)
+ 343:.\DriverControl.c **** {
+ 569              		.loc 1 343 0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 17
+
+
+ 570              		.cfi_startproc
+ 571 0000 80B5     		push	{r7, lr}
+ 572              		.cfi_def_cfa_offset 8
+ 573              		.cfi_offset 7, -8
+ 574              		.cfi_offset 14, -4
+ 575 0002 82B0     		sub	sp, sp, #8
+ 576              		.cfi_def_cfa_offset 16
+ 577 0004 00AF     		add	r7, sp, #0
+ 578              		.cfi_def_cfa_register 7
+ 579 0006 021C     		mov	r2, r0
+ 580 0008 FB1D     		add	r3, r7, #7
+ 581 000a 1A70     		strb	r2, [r3]
+ 344:.\DriverControl.c ****     if(channelNumber < LED || channelNumber > MICRO)
+ 582              		.loc 1 344 0
+ 583 000c FB1D     		add	r3, r7, #7
+ 584 000e 1B78     		ldrb	r3, [r3]
+ 585 0010 022B     		cmp	r3, #2
+ 586 0012 01D9     		bls	.L51
+ 345:.\DriverControl.c ****         return 0;
+ 587              		.loc 1 345 0
+ 588 0014 0023     		mov	r3, #0
+ 589 0016 04E0     		b	.L52
+ 590              	.L51:
+ 346:.\DriverControl.c ****     
+ 347:.\DriverControl.c ****     return ThermalLimitArray[channelNumber].MAX_TEMPERATURE;
+ 591              		.loc 1 347 0
+ 592 0018 FB1D     		add	r3, r7, #7
+ 593 001a 1A78     		ldrb	r2, [r3]
+ 594 001c 034B     		ldr	r3, .L53
+ 595 001e 9200     		lsl	r2, r2, #2
+ 596 0020 D35A     		ldrh	r3, [r2, r3]
+ 597              	.L52:
+ 598 0022 1BB2     		sxth	r3, r3
+ 348:.\DriverControl.c **** }
+ 599              		.loc 1 348 0
+ 600 0024 181C     		mov	r0, r3
+ 601 0026 BD46     		mov	sp, r7
+ 602 0028 02B0     		add	sp, sp, #8
+ 603              		@ sp needed
+ 604 002a 80BD     		pop	{r7, pc}
+ 605              	.L54:
+ 606              		.align	2
+ 607              	.L53:
+ 608 002c 00000000 		.word	ThermalLimitArray
+ 609              		.cfi_endproc
+ 610              	.LFE43:
+ 611              		.size	getMaxTemperature, .-getMaxTemperature
+ 612              		.global	__aeabi_i2f
+ 613              		.global	__aeabi_fmul
+ 614              		.global	__aeabi_f2d
+ 615              		.global	__aeabi_ddiv
+ 616              		.global	__aeabi_d2f
+ 617              		.global	__aeabi_f2iz
+ 618              		.section	.text.getTemperatureSample,"ax",%progbits
+ 619              		.align	2
+ 620              		.global	getTemperatureSample
+ 621              		.code	16
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 18
+
+
+ 622              		.thumb_func
+ 623              		.type	getTemperatureSample, %function
+ 624              	getTemperatureSample:
+ 625              	.LFB44:
+ 349:.\DriverControl.c **** 
+ 350:.\DriverControl.c **** /*******************************************************************************
+ 351:.\DriverControl.c **** * Function Name: getTemperatureSample
+ 352:.\DriverControl.c **** ********************************************************************************
+ 353:.\DriverControl.c **** *
+ 354:.\DriverControl.c **** * Summary:
+ 355:.\DriverControl.c **** *  Obtains the next temperature sample(s) from ADC. This function can return a
+ 356:.\DriverControl.c **** *  single sample or multiple samples in one call.
+ 357:.\DriverControl.c **** *
+ 358:.\DriverControl.c **** * Parameters:
+ 359:.\DriverControl.c **** *  bSingleSample: TRUE for single sample, FALSE for multiple samples
+ 360:.\DriverControl.c **** *  channelNumber: Channel selection for single sample: LED, SWITCH_NODE, AMBIENT, or MICRO
+ 361:.\DriverControl.c **** *  sampleArray: Reference to the array that contains 4 temperature samples
+ 362:.\DriverControl.c **** *  length: Size of the array in # of temperature points
+ 363:.\DriverControl.c **** *
+ 364:.\DriverControl.c **** * Return:
+ 365:.\DriverControl.c **** *  Single temperature value or Reference to array of 4 temperature samples
+ 366:.\DriverControl.c **** *
+ 367:.\DriverControl.c **** *******************************************************************************/
+ 368:.\DriverControl.c **** int16 getTemperatureSample(uint8 bSingleSample, enum TemperaturePoint channelNumber, 
+ 369:.\DriverControl.c ****     int16* sampleArray, uint8 length)
+ 370:.\DriverControl.c **** {  
+ 626              		.loc 1 370 0
+ 627              		.cfi_startproc
+ 628 0000 90B5     		push	{r4, r7, lr}
+ 629              		.cfi_def_cfa_offset 12
+ 630              		.cfi_offset 4, -12
+ 631              		.cfi_offset 7, -8
+ 632              		.cfi_offset 14, -4
+ 633 0002 87B0     		sub	sp, sp, #28
+ 634              		.cfi_def_cfa_offset 40
+ 635 0004 00AF     		add	r7, sp, #0
+ 636              		.cfi_def_cfa_register 7
+ 637 0006 041C     		mov	r4, r0
+ 638 0008 081C     		mov	r0, r1
+ 639 000a 3A60     		str	r2, [r7]
+ 640 000c 191C     		mov	r1, r3
+ 641 000e FB1D     		add	r3, r7, #7
+ 642 0010 221C     		add	r2, r4, #0
+ 643 0012 1A70     		strb	r2, [r3]
+ 644 0014 BB1D     		add	r3, r7, #6
+ 645 0016 021C     		add	r2, r0, #0
+ 646 0018 1A70     		strb	r2, [r3]
+ 647 001a 7B1D     		add	r3, r7, #5
+ 648 001c 0A1C     		add	r2, r1, #0
+ 649 001e 1A70     		strb	r2, [r3]
+ 371:.\DriverControl.c ****     uint8 ADC_WaitCount = 0;
+ 650              		.loc 1 371 0
+ 651 0020 1723     		mov	r3, #23
+ 652 0022 FB18     		add	r3, r7, r3
+ 653 0024 0022     		mov	r2, #0
+ 654 0026 1A70     		strb	r2, [r3]
+ 372:.\DriverControl.c ****     int16 temperatureSample_16 = 0;
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 19
+
+
+ 655              		.loc 1 372 0
+ 656 0028 1423     		mov	r3, #20
+ 657 002a FB18     		add	r3, r7, r3
+ 658 002c 0022     		mov	r2, #0
+ 659 002e 1A80     		strh	r2, [r3]
+ 373:.\DriverControl.c ****     float temperatureSample_float = 0;
+ 660              		.loc 1 373 0
+ 661 0030 0023     		mov	r3, #0
+ 662 0032 FB60     		str	r3, [r7, #12]
+ 374:.\DriverControl.c ****     uint32 channelIndex = 0;    
+ 663              		.loc 1 374 0
+ 664 0034 0023     		mov	r3, #0
+ 665 0036 3B61     		str	r3, [r7, #16]
+ 375:.\DriverControl.c ****     
+ 376:.\DriverControl.c ****     if((bSingleSample != TRUE) && (bSingleSample != FALSE))
+ 666              		.loc 1 376 0
+ 667 0038 FB1D     		add	r3, r7, #7
+ 668 003a 1B78     		ldrb	r3, [r3]
+ 669 003c 012B     		cmp	r3, #1
+ 670 003e 05D0     		beq	.L56
+ 671              		.loc 1 376 0 is_stmt 0 discriminator 1
+ 672 0040 FB1D     		add	r3, r7, #7
+ 673 0042 1B78     		ldrb	r3, [r3]
+ 674 0044 002B     		cmp	r3, #0
+ 675 0046 01D0     		beq	.L56
+ 377:.\DriverControl.c ****         return 0;
+ 676              		.loc 1 377 0 is_stmt 1
+ 677 0048 0023     		mov	r3, #0
+ 678 004a CFE0     		b	.L57
+ 679              	.L56:
+ 378:.\DriverControl.c ****     
+ 379:.\DriverControl.c ****     if(bSingleSample)
+ 680              		.loc 1 379 0
+ 681 004c FB1D     		add	r3, r7, #7
+ 682 004e 1B78     		ldrb	r3, [r3]
+ 683 0050 002B     		cmp	r3, #0
+ 684 0052 05D0     		beq	.L58
+ 380:.\DriverControl.c ****     {   //Input check for single sample
+ 381:.\DriverControl.c ****         if(channelNumber < LED || channelNumber > VOLTAGE_SENSE)
+ 685              		.loc 1 381 0
+ 686 0054 BB1D     		add	r3, r7, #6
+ 687 0056 1B78     		ldrb	r3, [r3]
+ 688 0058 032B     		cmp	r3, #3
+ 689 005a 0AD9     		bls	.L59
+ 382:.\DriverControl.c ****             return 0;
+ 690              		.loc 1 382 0
+ 691 005c 0023     		mov	r3, #0
+ 692 005e C5E0     		b	.L57
+ 693              	.L58:
+ 383:.\DriverControl.c ****     }
+ 384:.\DriverControl.c ****     else
+ 385:.\DriverControl.c ****     {   //Input check for multiple samples
+ 386:.\DriverControl.c ****         if(sampleArray == NULL || length > ADC_SAMPLE_COUNT)
+ 694              		.loc 1 386 0
+ 695 0060 3B68     		ldr	r3, [r7]
+ 696 0062 002B     		cmp	r3, #0
+ 697 0064 03D0     		beq	.L60
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 20
+
+
+ 698              		.loc 1 386 0 is_stmt 0 discriminator 1
+ 699 0066 7B1D     		add	r3, r7, #5
+ 700 0068 1B78     		ldrb	r3, [r3]
+ 701 006a 042B     		cmp	r3, #4
+ 702 006c 01D9     		bls	.L59
+ 703              	.L60:
+ 387:.\DriverControl.c ****             return 0;
+ 704              		.loc 1 387 0 is_stmt 1
+ 705 006e 0023     		mov	r3, #0
+ 706 0070 BCE0     		b	.L57
+ 707              	.L59:
+ 388:.\DriverControl.c ****     }
+ 389:.\DriverControl.c ****     
+ 390:.\DriverControl.c ****     while(!ADC_SAR_Seq_IsEndConversion(ADC_SAR_Seq_RETURN_STATUS) 
+ 708              		.loc 1 390 0 discriminator 1
+ 709 0072 09E0     		b	.L61
+ 710              	.L63:
+ 391:.\DriverControl.c ****         && (ADC_WaitCount < MAX_ADC_CONVERSION_WAIT_LIMIT))
+ 392:.\DriverControl.c ****     {   //Wait for ADC conversion to complete
+ 393:.\DriverControl.c ****         ADC_WaitCount++;
+ 711              		.loc 1 393 0
+ 712 0074 1723     		mov	r3, #23
+ 713 0076 FB18     		add	r3, r7, r3
+ 714 0078 1A78     		ldrb	r2, [r3]
+ 715 007a 1723     		mov	r3, #23
+ 716 007c FB18     		add	r3, r7, r3
+ 717 007e 0132     		add	r2, r2, #1
+ 718 0080 1A70     		strb	r2, [r3]
+ 394:.\DriverControl.c ****         CyDelayUs(8);
+ 719              		.loc 1 394 0
+ 720 0082 0820     		mov	r0, #8
+ 721 0084 FFF7FEFF 		bl	CyDelayUs
+ 722              	.L61:
+ 390:.\DriverControl.c ****         && (ADC_WaitCount < MAX_ADC_CONVERSION_WAIT_LIMIT))
+ 723              		.loc 1 390 0
+ 724 0088 0120     		mov	r0, #1
+ 725 008a FFF7FEFF 		bl	ADC_SAR_Seq_IsEndConversion
+ 726 008e 031E     		sub	r3, r0, #0
+ 727 0090 04D1     		bne	.L62
+ 391:.\DriverControl.c ****         && (ADC_WaitCount < MAX_ADC_CONVERSION_WAIT_LIMIT))
+ 728              		.loc 1 391 0
+ 729 0092 1723     		mov	r3, #23
+ 730 0094 FB18     		add	r3, r7, r3
+ 731 0096 1B78     		ldrb	r3, [r3]
+ 732 0098 042B     		cmp	r3, #4
+ 733 009a EBD9     		bls	.L63
+ 734              	.L62:
+ 395:.\DriverControl.c ****     }
+ 396:.\DriverControl.c ****     
+ 397:.\DriverControl.c ****     if(ADC_WaitCount > MAX_ADC_CONVERSION_WAIT_LIMIT)
+ 735              		.loc 1 397 0
+ 736 009c 1723     		mov	r3, #23
+ 737 009e FB18     		add	r3, r7, r3
+ 738 00a0 1B78     		ldrb	r3, [r3]
+ 739 00a2 052B     		cmp	r3, #5
+ 740 00a4 01D9     		bls	.L64
+ 398:.\DriverControl.c ****         return 0;   //For case when conversion doesn't complete
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 21
+
+
+ 741              		.loc 1 398 0
+ 742 00a6 0023     		mov	r3, #0
+ 743 00a8 A0E0     		b	.L57
+ 744              	.L64:
+ 399:.\DriverControl.c ****     
+ 400:.\DriverControl.c ****     if(bSingleSample)
+ 745              		.loc 1 400 0
+ 746 00aa FB1D     		add	r3, r7, #7
+ 747 00ac 1B78     		ldrb	r3, [r3]
+ 748 00ae 002B     		cmp	r3, #0
+ 749 00b0 46D0     		beq	.L65
+ 401:.\DriverControl.c ****     {   //Get single sample
+ 402:.\DriverControl.c ****         if(channelNumber == MICRO)
+ 750              		.loc 1 402 0
+ 751 00b2 BB1D     		add	r3, r7, #6
+ 752 00b4 1B78     		ldrb	r3, [r3]
+ 753 00b6 022B     		cmp	r3, #2
+ 754 00b8 2CD1     		bne	.L66
+ 403:.\DriverControl.c ****         {
+ 404:.\DriverControl.c ****             temperatureSample_float = (float)(ADC_SAR_Seq_GetResult16(MICRO + 1));
+ 755              		.loc 1 404 0
+ 756 00ba 0320     		mov	r0, #3
+ 757 00bc FFF7FEFF 		bl	ADC_SAR_Seq_GetResult16
+ 758 00c0 031C     		mov	r3, r0
+ 759 00c2 181C     		mov	r0, r3
+ 760 00c4 FFF7FEFF 		bl	__aeabi_i2f
+ 761 00c8 031C     		add	r3, r0, #0
+ 762 00ca FB60     		str	r3, [r7, #12]
+ 405:.\DriverControl.c ****             temperatureSample_float = temperatureSample_float * 5 / 1.024;
+ 763              		.loc 1 405 0
+ 764 00cc F868     		ldr	r0, [r7, #12]
+ 765 00ce 4A49     		ldr	r1, .L72
+ 766 00d0 FFF7FEFF 		bl	__aeabi_fmul
+ 767 00d4 031C     		add	r3, r0, #0
+ 768 00d6 181C     		add	r0, r3, #0
+ 769 00d8 FFF7FEFF 		bl	__aeabi_f2d
+ 770 00dc 031C     		mov	r3, r0
+ 771 00de 0C1C     		mov	r4, r1
+ 772 00e0 181C     		mov	r0, r3
+ 773 00e2 211C     		mov	r1, r4
+ 774 00e4 454A     		ldr	r2, .L72+4
+ 775 00e6 464B     		ldr	r3, .L72+8
+ 776 00e8 FFF7FEFF 		bl	__aeabi_ddiv
+ 777 00ec 031C     		mov	r3, r0
+ 778 00ee 0C1C     		mov	r4, r1
+ 779 00f0 181C     		mov	r0, r3
+ 780 00f2 211C     		mov	r1, r4
+ 781 00f4 FFF7FEFF 		bl	__aeabi_d2f
+ 782 00f8 031C     		add	r3, r0, #0
+ 783 00fa FB60     		str	r3, [r7, #12]
+ 406:.\DriverControl.c ****             temperatureSample_16 = (int16)(DieTemp_CountsTo_Celsius((int32)(temperatureSample_float
+ 784              		.loc 1 406 0
+ 785 00fc F868     		ldr	r0, [r7, #12]
+ 786 00fe FFF7FEFF 		bl	__aeabi_f2iz
+ 787 0102 031C     		mov	r3, r0
+ 788 0104 181C     		mov	r0, r3
+ 789 0106 FFF7FEFF 		bl	DieTemp_CountsTo_Celsius
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 22
+
+
+ 790 010a 021C     		mov	r2, r0
+ 791 010c 1423     		mov	r3, #20
+ 792 010e FB18     		add	r3, r7, r3
+ 793 0110 1A80     		strh	r2, [r3]
+ 794 0112 68E0     		b	.L69
+ 795              	.L66:
+ 407:.\DriverControl.c ****         }
+ 408:.\DriverControl.c ****         else
+ 409:.\DriverControl.c ****         {
+ 410:.\DriverControl.c ****             if(channelNumber == VOLTAGE_SENSE)
+ 796              		.loc 1 410 0
+ 797 0114 BB1D     		add	r3, r7, #6
+ 798 0116 1B78     		ldrb	r3, [r3]
+ 799 0118 032B     		cmp	r3, #3
+ 800 011a 07D1     		bne	.L68
+ 411:.\DriverControl.c ****                 temperatureSample_16 = ADC_SAR_Seq_GetResult16((uint32)(VOLTAGE_SENSE - 1));
+ 801              		.loc 1 411 0
+ 802 011c 1423     		mov	r3, #20
+ 803 011e FC18     		add	r4, r7, r3
+ 804 0120 0220     		mov	r0, #2
+ 805 0122 FFF7FEFF 		bl	ADC_SAR_Seq_GetResult16
+ 806 0126 031C     		mov	r3, r0
+ 807 0128 2380     		strh	r3, [r4]
+ 808 012a 5CE0     		b	.L69
+ 809              	.L68:
+ 412:.\DriverControl.c ****             else
+ 413:.\DriverControl.c ****                 temperatureSample_16 = ADC_SAR_Seq_GetResult16((uint32)(channelNumber));
+ 810              		.loc 1 413 0
+ 811 012c BB1D     		add	r3, r7, #6
+ 812 012e 1B78     		ldrb	r3, [r3]
+ 813 0130 1422     		mov	r2, #20
+ 814 0132 BC18     		add	r4, r7, r2
+ 815 0134 181C     		mov	r0, r3
+ 816 0136 FFF7FEFF 		bl	ADC_SAR_Seq_GetResult16
+ 817 013a 031C     		mov	r3, r0
+ 818 013c 2380     		strh	r3, [r4]
+ 819 013e 52E0     		b	.L69
+ 820              	.L65:
+ 414:.\DriverControl.c ****         }
+ 415:.\DriverControl.c ****     }
+ 416:.\DriverControl.c ****     else
+ 417:.\DriverControl.c ****     {   //Get 4 temperature samples
+ 418:.\DriverControl.c ****         for(channelIndex = 0; channelIndex < (ADC_SAMPLE_COUNT - 2); channelIndex++)
+ 821              		.loc 1 418 0
+ 822 0140 0023     		mov	r3, #0
+ 823 0142 3B61     		str	r3, [r7, #16]
+ 824 0144 12E0     		b	.L70
+ 825              	.L71:
+ 419:.\DriverControl.c ****         {
+ 420:.\DriverControl.c ****             temperatureSample_16 = ADC_SAR_Seq_GetResult16(channelIndex);
+ 826              		.loc 1 420 0 discriminator 3
+ 827 0146 1423     		mov	r3, #20
+ 828 0148 FC18     		add	r4, r7, r3
+ 829 014a 3B69     		ldr	r3, [r7, #16]
+ 830 014c 181C     		mov	r0, r3
+ 831 014e FFF7FEFF 		bl	ADC_SAR_Seq_GetResult16
+ 832 0152 031C     		mov	r3, r0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 23
+
+
+ 833 0154 2380     		strh	r3, [r4]
+ 421:.\DriverControl.c ****             sampleArray[channelIndex] = temperatureSample_16;
+ 834              		.loc 1 421 0 discriminator 3
+ 835 0156 3B69     		ldr	r3, [r7, #16]
+ 836 0158 5B00     		lsl	r3, r3, #1
+ 837 015a 3A68     		ldr	r2, [r7]
+ 838 015c D318     		add	r3, r2, r3
+ 839 015e 1422     		mov	r2, #20
+ 840 0160 BA18     		add	r2, r7, r2
+ 841 0162 1288     		ldrh	r2, [r2]
+ 842 0164 1A80     		strh	r2, [r3]
+ 418:.\DriverControl.c ****         {
+ 843              		.loc 1 418 0 discriminator 3
+ 844 0166 3B69     		ldr	r3, [r7, #16]
+ 845 0168 0133     		add	r3, r3, #1
+ 846 016a 3B61     		str	r3, [r7, #16]
+ 847              	.L70:
+ 418:.\DriverControl.c ****         {
+ 848              		.loc 1 418 0 is_stmt 0 discriminator 1
+ 849 016c 3B69     		ldr	r3, [r7, #16]
+ 850 016e 012B     		cmp	r3, #1
+ 851 0170 E9D9     		bls	.L71
+ 422:.\DriverControl.c ****         }
+ 423:.\DriverControl.c ****             
+ 424:.\DriverControl.c ****         temperatureSample_float = (float)(ADC_SAR_Seq_GetResult16(MICRO + 1));
+ 852              		.loc 1 424 0 is_stmt 1
+ 853 0172 0320     		mov	r0, #3
+ 854 0174 FFF7FEFF 		bl	ADC_SAR_Seq_GetResult16
+ 855 0178 031C     		mov	r3, r0
+ 856 017a 181C     		mov	r0, r3
+ 857 017c FFF7FEFF 		bl	__aeabi_i2f
+ 858 0180 031C     		add	r3, r0, #0
+ 859 0182 FB60     		str	r3, [r7, #12]
+ 425:.\DriverControl.c ****         temperatureSample_float = temperatureSample_float * 5 / 1.024;
+ 860              		.loc 1 425 0
+ 861 0184 F868     		ldr	r0, [r7, #12]
+ 862 0186 1C49     		ldr	r1, .L72
+ 863 0188 FFF7FEFF 		bl	__aeabi_fmul
+ 864 018c 031C     		add	r3, r0, #0
+ 865 018e 181C     		add	r0, r3, #0
+ 866 0190 FFF7FEFF 		bl	__aeabi_f2d
+ 867 0194 031C     		mov	r3, r0
+ 868 0196 0C1C     		mov	r4, r1
+ 869 0198 181C     		mov	r0, r3
+ 870 019a 211C     		mov	r1, r4
+ 871 019c 174A     		ldr	r2, .L72+4
+ 872 019e 184B     		ldr	r3, .L72+8
+ 873 01a0 FFF7FEFF 		bl	__aeabi_ddiv
+ 874 01a4 031C     		mov	r3, r0
+ 875 01a6 0C1C     		mov	r4, r1
+ 876 01a8 181C     		mov	r0, r3
+ 877 01aa 211C     		mov	r1, r4
+ 878 01ac FFF7FEFF 		bl	__aeabi_d2f
+ 879 01b0 031C     		add	r3, r0, #0
+ 880 01b2 FB60     		str	r3, [r7, #12]
+ 426:.\DriverControl.c ****         sampleArray[ADC_SAMPLE_COUNT - 2]
+ 881              		.loc 1 426 0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 24
+
+
+ 882 01b4 3B68     		ldr	r3, [r7]
+ 883 01b6 1C1D     		add	r4, r3, #4
+ 427:.\DriverControl.c ****             = (int16)(DieTemp_CountsTo_Celsius((int32)(temperatureSample_float)));
+ 884              		.loc 1 427 0
+ 885 01b8 F868     		ldr	r0, [r7, #12]
+ 886 01ba FFF7FEFF 		bl	__aeabi_f2iz
+ 887 01be 031C     		mov	r3, r0
+ 888 01c0 181C     		mov	r0, r3
+ 889 01c2 FFF7FEFF 		bl	DieTemp_CountsTo_Celsius
+ 890 01c6 031C     		mov	r3, r0
+ 891 01c8 9BB2     		uxth	r3, r3
+ 892 01ca 2380     		strh	r3, [r4]
+ 428:.\DriverControl.c ****             
+ 429:.\DriverControl.c ****         temperatureSample_16 = ADC_SAR_Seq_GetResult16(VOLTAGE_SENSE - 1);
+ 893              		.loc 1 429 0
+ 894 01cc 1423     		mov	r3, #20
+ 895 01ce FC18     		add	r4, r7, r3
+ 896 01d0 0220     		mov	r0, #2
+ 897 01d2 FFF7FEFF 		bl	ADC_SAR_Seq_GetResult16
+ 898 01d6 031C     		mov	r3, r0
+ 899 01d8 2380     		strh	r3, [r4]
+ 430:.\DriverControl.c ****             sampleArray[ADC_SAMPLE_COUNT - 1] = temperatureSample_16;
+ 900              		.loc 1 430 0
+ 901 01da 3B68     		ldr	r3, [r7]
+ 902 01dc 0633     		add	r3, r3, #6
+ 903 01de 1422     		mov	r2, #20
+ 904 01e0 BA18     		add	r2, r7, r2
+ 905 01e2 1288     		ldrh	r2, [r2]
+ 906 01e4 1A80     		strh	r2, [r3]
+ 907              	.L69:
+ 431:.\DriverControl.c ****     }
+ 432:.\DriverControl.c ****     
+ 433:.\DriverControl.c ****     return temperatureSample_16;
+ 908              		.loc 1 433 0
+ 909 01e6 1423     		mov	r3, #20
+ 910 01e8 FB18     		add	r3, r7, r3
+ 911 01ea 1B88     		ldrh	r3, [r3]
+ 912              	.L57:
+ 913 01ec 1BB2     		sxth	r3, r3
+ 434:.\DriverControl.c **** }
+ 914              		.loc 1 434 0
+ 915 01ee 181C     		mov	r0, r3
+ 916 01f0 BD46     		mov	sp, r7
+ 917 01f2 07B0     		add	sp, sp, #28
+ 918              		@ sp needed
+ 919 01f4 90BD     		pop	{r4, r7, pc}
+ 920              	.L73:
+ 921 01f6 C046     		.align	2
+ 922              	.L72:
+ 923 01f8 0000A040 		.word	1084227584
+ 924 01fc FCA9F1D2 		.word	-755914244
+ 925 0200 4D62F03F 		.word	1072718413
+ 926              		.cfi_endproc
+ 927              	.LFE44:
+ 928              		.size	getTemperatureSample, .-getTemperatureSample
+ 929              		.section	.text.getNewMaxBrightness,"ax",%progbits
+ 930              		.align	2
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 25
+
+
+ 931              		.global	getNewMaxBrightness
+ 932              		.code	16
+ 933              		.thumb_func
+ 934              		.type	getNewMaxBrightness, %function
+ 935              	getNewMaxBrightness:
+ 936              	.LFB45:
+ 435:.\DriverControl.c **** 
+ 436:.\DriverControl.c **** /*******************************************************************************
+ 437:.\DriverControl.c **** * Function Name: getNewMaxBrightness
+ 438:.\DriverControl.c **** ********************************************************************************
+ 439:.\DriverControl.c **** *
+ 440:.\DriverControl.c **** * Summary:
+ 441:.\DriverControl.c **** *  Returns the new max brightness that was adjusted during regulation.
+ 442:.\DriverControl.c **** *
+ 443:.\DriverControl.c **** * Parameters:
+ 444:.\DriverControl.c **** *  None
+ 445:.\DriverControl.c **** *
+ 446:.\DriverControl.c **** * Return:
+ 447:.\DriverControl.c **** *  Adjusted max brightness
+ 448:.\DriverControl.c **** *
+ 449:.\DriverControl.c **** *******************************************************************************/
+ 450:.\DriverControl.c **** uint8 getNewMaxBrightness(void)
+ 451:.\DriverControl.c **** {
+ 937              		.loc 1 451 0
+ 938              		.cfi_startproc
+ 939 0000 80B5     		push	{r7, lr}
+ 940              		.cfi_def_cfa_offset 8
+ 941              		.cfi_offset 7, -8
+ 942              		.cfi_offset 14, -4
+ 943 0002 00AF     		add	r7, sp, #0
+ 944              		.cfi_def_cfa_register 7
+ 452:.\DriverControl.c ****     return RegulationData.scalingFactor;
+ 945              		.loc 1 452 0
+ 946 0004 024B     		ldr	r3, .L76
+ 947 0006 1B79     		ldrb	r3, [r3, #4]
+ 453:.\DriverControl.c **** }
+ 948              		.loc 1 453 0
+ 949 0008 181C     		mov	r0, r3
+ 950 000a BD46     		mov	sp, r7
+ 951              		@ sp needed
+ 952 000c 80BD     		pop	{r7, pc}
+ 953              	.L77:
+ 954 000e C046     		.align	2
+ 955              	.L76:
+ 956 0010 14000000 		.word	RegulationData
+ 957              		.cfi_endproc
+ 958              	.LFE45:
+ 959              		.size	getNewMaxBrightness, .-getNewMaxBrightness
+ 960              		.global	__aeabi_idiv
+ 961              		.section	.text.regulateBrightness,"ax",%progbits
+ 962              		.align	2
+ 963              		.global	regulateBrightness
+ 964              		.code	16
+ 965              		.thumb_func
+ 966              		.type	regulateBrightness, %function
+ 967              	regulateBrightness:
+ 968              	.LFB46:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 26
+
+
+ 454:.\DriverControl.c **** 
+ 455:.\DriverControl.c **** /*******************************************************************************
+ 456:.\DriverControl.c **** * Function Name: regulateBrightness
+ 457:.\DriverControl.c **** ********************************************************************************
+ 458:.\DriverControl.c **** *
+ 459:.\DriverControl.c **** * Summary:
+ 460:.\DriverControl.c **** *  Adjusts the brightness of the LED based on 4 temperature readings
+ 461:.\DriverControl.c **** *  and the current regulation state.
+ 462:.\DriverControl.c **** *
+ 463:.\DriverControl.c **** * Parameters:
+ 464:.\DriverControl.c **** *  TemperatureData: Reference to the 4 temperature points
+ 465:.\DriverControl.c **** *  length: Size of array in # of temperature points
+ 466:.\DriverControl.c **** *
+ 467:.\DriverControl.c **** * Return:
+ 468:.\DriverControl.c **** *  The updated brightness based on regulation
+ 469:.\DriverControl.c **** *
+ 470:.\DriverControl.c **** *******************************************************************************/
+ 471:.\DriverControl.c **** uint8 regulateBrightness(int16* TemperatureData, uint8 length)
+ 472:.\DriverControl.c **** {
+ 969              		.loc 1 472 0
+ 970              		.cfi_startproc
+ 971 0000 90B5     		push	{r4, r7, lr}
+ 972              		.cfi_def_cfa_offset 12
+ 973              		.cfi_offset 4, -12
+ 974              		.cfi_offset 7, -8
+ 975              		.cfi_offset 14, -4
+ 976 0002 85B0     		sub	sp, sp, #20
+ 977              		.cfi_def_cfa_offset 32
+ 978 0004 00AF     		add	r7, sp, #0
+ 979              		.cfi_def_cfa_register 7
+ 980 0006 7860     		str	r0, [r7, #4]
+ 981 0008 0A1C     		mov	r2, r1
+ 982 000a FB1C     		add	r3, r7, #3
+ 983 000c 1A70     		strb	r2, [r3]
+ 473:.\DriverControl.c ****     static uint8 timerCountLocal = 0;
+ 474:.\DriverControl.c ****     enum TemperatureStatus temperatureStatus = WITHIN_TOLERANCE;
+ 984              		.loc 1 474 0
+ 985 000e 0F23     		mov	r3, #15
+ 986 0010 FB18     		add	r3, r7, r3
+ 987 0012 0022     		mov	r2, #0
+ 988 0014 1A70     		strb	r2, [r3]
+ 475:.\DriverControl.c ****     
+ 476:.\DriverControl.c ****     if(TemperatureData == NULL || length > ADC_SAMPLE_COUNT || PositionData.ID_Number != 1)
+ 989              		.loc 1 476 0
+ 990 0016 7B68     		ldr	r3, [r7, #4]
+ 991 0018 002B     		cmp	r3, #0
+ 992 001a 07D0     		beq	.L79
+ 993              		.loc 1 476 0 is_stmt 0 discriminator 1
+ 994 001c FB1C     		add	r3, r7, #3
+ 995 001e 1B78     		ldrb	r3, [r3]
+ 996 0020 042B     		cmp	r3, #4
+ 997 0022 03D8     		bhi	.L79
+ 998              		.loc 1 476 0 discriminator 2
+ 999 0024 6A4B     		ldr	r3, .L98
+ 1000 0026 1B78     		ldrb	r3, [r3]
+ 1001 0028 012B     		cmp	r3, #1
+ 1002 002a 01D0     		beq	.L80
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 27
+
+
+ 1003              	.L79:
+ 477:.\DriverControl.c ****         return 0;
+ 1004              		.loc 1 477 0 is_stmt 1
+ 1005 002c 0023     		mov	r3, #0
+ 1006 002e CAE0     		b	.L81
+ 1007              	.L80:
+ 478:.\DriverControl.c ****     
+ 479:.\DriverControl.c ****     switch(RegulationData.currentState)
+ 1008              		.loc 1 479 0
+ 1009 0030 684B     		ldr	r3, .L98+4
+ 1010 0032 DB78     		ldrb	r3, [r3, #3]
+ 1011 0034 012B     		cmp	r3, #1
+ 1012 0036 5DD0     		beq	.L83
+ 1013 0038 02DC     		bgt	.L84
+ 1014 003a 002B     		cmp	r3, #0
+ 1015 003c 06D0     		beq	.L85
+ 1016 003e BDE0     		b	.L82
+ 1017              	.L84:
+ 1018 0040 022B     		cmp	r3, #2
+ 1019 0042 20D0     		beq	.L86
+ 1020 0044 032B     		cmp	r3, #3
+ 1021 0046 00D1     		bne	.LCB888
+ 1022 0048 8BE0     		b	.L87	@long jump
+ 1023              	.LCB888:
+ 1024 004a B7E0     		b	.L82
+ 1025              	.L85:
+ 480:.\DriverControl.c ****     {
+ 481:.\DriverControl.c ****         case STARTUP:
+ 482:.\DriverControl.c ****             if((timerCountLocal % SAMPLE_COUNT_PER_CYCLE) == 0)
+ 483:.\DriverControl.c ****             {
+ 484:.\DriverControl.c ****                 RegulationData.scalingFactor = MAX_SCALING_FACTOR;
+ 1026              		.loc 1 484 0
+ 1027 004c 614B     		ldr	r3, .L98+4
+ 1028 004e FF22     		mov	r2, #255
+ 1029 0050 1A71     		strb	r2, [r3, #4]
+ 485:.\DriverControl.c ****                 RegulationData.regulatedBrightness = RegulationData.requestedBrightness;
+ 1030              		.loc 1 485 0
+ 1031 0052 604B     		ldr	r3, .L98+4
+ 1032 0054 1A78     		ldrb	r2, [r3]
+ 1033 0056 5F4B     		ldr	r3, .L98+4
+ 1034 0058 5A70     		strb	r2, [r3, #1]
+ 486:.\DriverControl.c ****             }
+ 487:.\DriverControl.c ****             if((timerCountLocal % (SAMPLE_COUNT_PER_CYCLE * BRIGHTNESS_CHANGE_PER_SAMPLE)) == 0)
+ 488:.\DriverControl.c ****             {
+ 489:.\DriverControl.c ****                 temperatureStatus = getTemperatureStatus(TemperatureData, length, 0);
+ 1035              		.loc 1 489 0
+ 1036 005a 0F23     		mov	r3, #15
+ 1037 005c FC18     		add	r4, r7, r3
+ 1038 005e 7A68     		ldr	r2, [r7, #4]
+ 1039 0060 FB1C     		add	r3, r7, #3
+ 1040 0062 1B78     		ldrb	r3, [r3]
+ 1041 0064 101C     		mov	r0, r2
+ 1042 0066 191C     		mov	r1, r3
+ 1043 0068 0022     		mov	r2, #0
+ 1044 006a FFF7FEFF 		bl	getTemperatureStatus
+ 1045 006e 031C     		mov	r3, r0
+ 1046 0070 2370     		strb	r3, [r4]
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 28
+
+
+ 490:.\DriverControl.c ****                 if(temperatureStatus == EXCEEDED_UPPER_BOUND)
+ 1047              		.loc 1 490 0
+ 1048 0072 0F23     		mov	r3, #15
+ 1049 0074 FB18     		add	r3, r7, r3
+ 1050 0076 1B78     		ldrb	r3, [r3]
+ 1051 0078 012B     		cmp	r3, #1
+ 1052 007a 03D1     		bne	.L88
+ 491:.\DriverControl.c ****                     RegulationData.currentState = STEADY_DECREASE;
+ 1053              		.loc 1 491 0
+ 1054 007c 554B     		ldr	r3, .L98+4
+ 1055 007e 0222     		mov	r2, #2
+ 1056 0080 DA70     		strb	r2, [r3, #3]
+ 492:.\DriverControl.c ****             }
+ 493:.\DriverControl.c ****             break;            
+ 1057              		.loc 1 493 0
+ 1058 0082 9BE0     		b	.L82
+ 1059              	.L88:
+ 1060 0084 9AE0     		b	.L82
+ 1061              	.L86:
+ 494:.\DriverControl.c ****         case STEADY_DECREASE:  
+ 495:.\DriverControl.c ****             if((timerCountLocal % SAMPLE_COUNT_PER_CYCLE) == 0)
+ 496:.\DriverControl.c ****             {
+ 497:.\DriverControl.c ****                 if(RegulationData.scalingFactor > 0)
+ 1062              		.loc 1 497 0
+ 1063 0086 534B     		ldr	r3, .L98+4
+ 1064 0088 1B79     		ldrb	r3, [r3, #4]
+ 1065 008a 002B     		cmp	r3, #0
+ 1066 008c 05D0     		beq	.L89
+ 498:.\DriverControl.c ****                     RegulationData.scalingFactor--;
+ 1067              		.loc 1 498 0
+ 1068 008e 514B     		ldr	r3, .L98+4
+ 1069 0090 1B79     		ldrb	r3, [r3, #4]
+ 1070 0092 013B     		sub	r3, r3, #1
+ 1071 0094 DAB2     		uxtb	r2, r3
+ 1072 0096 4F4B     		ldr	r3, .L98+4
+ 1073 0098 1A71     		strb	r2, [r3, #4]
+ 1074              	.L89:
+ 499:.\DriverControl.c ****             
+ 500:.\DriverControl.c ****                 RegulationData.regulatedBrightness = (uint8)((uint16)(RegulationData.requestedBrigh
+ 1075              		.loc 1 500 0
+ 1076 009a 4E4B     		ldr	r3, .L98+4
+ 1077 009c 1B78     		ldrb	r3, [r3]
+ 1078 009e 1A1C     		mov	r2, r3
+ 501:.\DriverControl.c ****                     (uint16)(RegulationData.scalingFactor) / MAX_SCALING_FACTOR);
+ 1079              		.loc 1 501 0
+ 1080 00a0 4C4B     		ldr	r3, .L98+4
+ 1081 00a2 1B79     		ldrb	r3, [r3, #4]
+ 500:.\DriverControl.c ****                     (uint16)(RegulationData.scalingFactor) / MAX_SCALING_FACTOR);
+ 1082              		.loc 1 500 0
+ 1083 00a4 5343     		mul	r3, r2
+ 1084              		.loc 1 501 0
+ 1085 00a6 181C     		mov	r0, r3
+ 1086 00a8 FF21     		mov	r1, #255
+ 1087 00aa FFF7FEFF 		bl	__aeabi_idiv
+ 1088 00ae 031C     		mov	r3, r0
+ 500:.\DriverControl.c ****                     (uint16)(RegulationData.scalingFactor) / MAX_SCALING_FACTOR);
+ 1089              		.loc 1 500 0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 29
+
+
+ 1090 00b0 DAB2     		uxtb	r2, r3
+ 1091 00b2 484B     		ldr	r3, .L98+4
+ 1092 00b4 5A70     		strb	r2, [r3, #1]
+ 502:.\DriverControl.c ****             }
+ 503:.\DriverControl.c ****             if((timerCountLocal % (SAMPLE_COUNT_PER_CYCLE * BRIGHTNESS_CHANGE_PER_SAMPLE)) == 0)
+ 504:.\DriverControl.c ****             {
+ 505:.\DriverControl.c ****                 temperatureStatus = getTemperatureStatus(TemperatureData, length,
+ 1093              		.loc 1 505 0
+ 1094 00b6 0F23     		mov	r3, #15
+ 1095 00b8 FC18     		add	r4, r7, r3
+ 1096 00ba 7A68     		ldr	r2, [r7, #4]
+ 1097 00bc FB1C     		add	r3, r7, #3
+ 1098 00be 1B78     		ldrb	r3, [r3]
+ 1099 00c0 101C     		mov	r0, r2
+ 1100 00c2 191C     		mov	r1, r3
+ 1101 00c4 0022     		mov	r2, #0
+ 1102 00c6 FFF7FEFF 		bl	getTemperatureStatus
+ 1103 00ca 031C     		mov	r3, r0
+ 1104 00cc 2370     		strb	r3, [r4]
+ 506:.\DriverControl.c ****                     SAFE_TEMPERATURE_TOLERANCE);
+ 507:.\DriverControl.c ****                 
+ 508:.\DriverControl.c ****                 if(temperatureStatus == WITHIN_TOLERANCE)
+ 1105              		.loc 1 508 0
+ 1106 00ce 0F23     		mov	r3, #15
+ 1107 00d0 FB18     		add	r3, r7, r3
+ 1108 00d2 1B78     		ldrb	r3, [r3]
+ 1109 00d4 002B     		cmp	r3, #0
+ 1110 00d6 03D1     		bne	.L90
+ 509:.\DriverControl.c ****                     RegulationData.currentState = NO_CHANGE;
+ 1111              		.loc 1 509 0
+ 1112 00d8 3E4B     		ldr	r3, .L98+4
+ 1113 00da 0322     		mov	r2, #3
+ 1114 00dc DA70     		strb	r2, [r3, #3]
+ 1115 00de 08E0     		b	.L91
+ 1116              	.L90:
+ 510:.\DriverControl.c ****                 else if(temperatureStatus == EXCEEDED_LOWER_BOUND)
+ 1117              		.loc 1 510 0
+ 1118 00e0 0F23     		mov	r3, #15
+ 1119 00e2 FB18     		add	r3, r7, r3
+ 1120 00e4 1B78     		ldrb	r3, [r3]
+ 1121 00e6 022B     		cmp	r3, #2
+ 1122 00e8 03D1     		bne	.L91
+ 511:.\DriverControl.c ****                     RegulationData.currentState = STEADY_INCREASE;
+ 1123              		.loc 1 511 0
+ 1124 00ea 3A4B     		ldr	r3, .L98+4
+ 1125 00ec 0122     		mov	r2, #1
+ 1126 00ee DA70     		strb	r2, [r3, #3]
+ 512:.\DriverControl.c ****             }
+ 513:.\DriverControl.c ****             break;
+ 1127              		.loc 1 513 0
+ 1128 00f0 64E0     		b	.L82
+ 1129              	.L91:
+ 1130 00f2 63E0     		b	.L82
+ 1131              	.L83:
+ 514:.\DriverControl.c ****         case STEADY_INCREASE:
+ 515:.\DriverControl.c ****             if((timerCountLocal % SAMPLE_COUNT_PER_CYCLE) == 0)
+ 516:.\DriverControl.c ****             {
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 30
+
+
+ 517:.\DriverControl.c ****                 if(RegulationData.scalingFactor < MAX_SCALING_FACTOR)
+ 1132              		.loc 1 517 0
+ 1133 00f4 374B     		ldr	r3, .L98+4
+ 1134 00f6 1B79     		ldrb	r3, [r3, #4]
+ 1135 00f8 FF2B     		cmp	r3, #255
+ 1136 00fa 05D0     		beq	.L92
+ 518:.\DriverControl.c ****                     RegulationData.scalingFactor++;
+ 1137              		.loc 1 518 0
+ 1138 00fc 354B     		ldr	r3, .L98+4
+ 1139 00fe 1B79     		ldrb	r3, [r3, #4]
+ 1140 0100 0133     		add	r3, r3, #1
+ 1141 0102 DAB2     		uxtb	r2, r3
+ 1142 0104 334B     		ldr	r3, .L98+4
+ 1143 0106 1A71     		strb	r2, [r3, #4]
+ 1144              	.L92:
+ 519:.\DriverControl.c ****             
+ 520:.\DriverControl.c ****                 RegulationData.regulatedBrightness = (uint8)((uint16)(RegulationData.requestedBrigh
+ 1145              		.loc 1 520 0
+ 1146 0108 324B     		ldr	r3, .L98+4
+ 1147 010a 1B78     		ldrb	r3, [r3]
+ 1148 010c 1A1C     		mov	r2, r3
+ 521:.\DriverControl.c ****                     (uint16)(RegulationData.scalingFactor) / MAX_SCALING_FACTOR);
+ 1149              		.loc 1 521 0
+ 1150 010e 314B     		ldr	r3, .L98+4
+ 1151 0110 1B79     		ldrb	r3, [r3, #4]
+ 520:.\DriverControl.c ****                     (uint16)(RegulationData.scalingFactor) / MAX_SCALING_FACTOR);
+ 1152              		.loc 1 520 0
+ 1153 0112 5343     		mul	r3, r2
+ 1154              		.loc 1 521 0
+ 1155 0114 181C     		mov	r0, r3
+ 1156 0116 FF21     		mov	r1, #255
+ 1157 0118 FFF7FEFF 		bl	__aeabi_idiv
+ 1158 011c 031C     		mov	r3, r0
+ 520:.\DriverControl.c ****                     (uint16)(RegulationData.scalingFactor) / MAX_SCALING_FACTOR);
+ 1159              		.loc 1 520 0
+ 1160 011e DAB2     		uxtb	r2, r3
+ 1161 0120 2C4B     		ldr	r3, .L98+4
+ 1162 0122 5A70     		strb	r2, [r3, #1]
+ 522:.\DriverControl.c ****             }
+ 523:.\DriverControl.c ****             if((timerCountLocal % (SAMPLE_COUNT_PER_CYCLE * BRIGHTNESS_CHANGE_PER_SAMPLE)) == 0)
+ 524:.\DriverControl.c ****             {
+ 525:.\DriverControl.c ****                 temperatureStatus = getTemperatureStatus(TemperatureData, length,
+ 1163              		.loc 1 525 0
+ 1164 0124 0F23     		mov	r3, #15
+ 1165 0126 FC18     		add	r4, r7, r3
+ 1166 0128 7A68     		ldr	r2, [r7, #4]
+ 1167 012a FB1C     		add	r3, r7, #3
+ 1168 012c 1B78     		ldrb	r3, [r3]
+ 1169 012e 101C     		mov	r0, r2
+ 1170 0130 191C     		mov	r1, r3
+ 1171 0132 0022     		mov	r2, #0
+ 1172 0134 FFF7FEFF 		bl	getTemperatureStatus
+ 1173 0138 031C     		mov	r3, r0
+ 1174 013a 2370     		strb	r3, [r4]
+ 526:.\DriverControl.c ****                     SAFE_TEMPERATURE_TOLERANCE);
+ 527:.\DriverControl.c ****                 
+ 528:.\DriverControl.c ****                 if(temperatureStatus == EXCEEDED_UPPER_BOUND)
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 31
+
+
+ 1175              		.loc 1 528 0
+ 1176 013c 0F23     		mov	r3, #15
+ 1177 013e FB18     		add	r3, r7, r3
+ 1178 0140 1B78     		ldrb	r3, [r3]
+ 1179 0142 012B     		cmp	r3, #1
+ 1180 0144 03D1     		bne	.L93
+ 529:.\DriverControl.c ****                     RegulationData.currentState = STEADY_DECREASE;
+ 1181              		.loc 1 529 0
+ 1182 0146 234B     		ldr	r3, .L98+4
+ 1183 0148 0222     		mov	r2, #2
+ 1184 014a DA70     		strb	r2, [r3, #3]
+ 1185 014c 08E0     		b	.L94
+ 1186              	.L93:
+ 530:.\DriverControl.c ****                 else if(temperatureStatus == WITHIN_TOLERANCE)
+ 1187              		.loc 1 530 0
+ 1188 014e 0F23     		mov	r3, #15
+ 1189 0150 FB18     		add	r3, r7, r3
+ 1190 0152 1B78     		ldrb	r3, [r3]
+ 1191 0154 002B     		cmp	r3, #0
+ 1192 0156 03D1     		bne	.L94
+ 531:.\DriverControl.c ****                     RegulationData.currentState = NO_CHANGE;
+ 1193              		.loc 1 531 0
+ 1194 0158 1E4B     		ldr	r3, .L98+4
+ 1195 015a 0322     		mov	r2, #3
+ 1196 015c DA70     		strb	r2, [r3, #3]
+ 532:.\DriverControl.c ****             }
+ 533:.\DriverControl.c ****             break;
+ 1197              		.loc 1 533 0
+ 1198 015e 2DE0     		b	.L82
+ 1199              	.L94:
+ 1200 0160 2CE0     		b	.L82
+ 1201              	.L87:
+ 534:.\DriverControl.c ****         case NO_CHANGE:
+ 535:.\DriverControl.c ****             if((timerCountLocal % SAMPLE_COUNT_PER_CYCLE) == 0)
+ 536:.\DriverControl.c ****             {
+ 537:.\DriverControl.c ****                 RegulationData.regulatedBrightness = (uint8)((uint16)(RegulationData.requestedBrigh
+ 1202              		.loc 1 537 0
+ 1203 0162 1C4B     		ldr	r3, .L98+4
+ 1204 0164 1B78     		ldrb	r3, [r3]
+ 1205 0166 1A1C     		mov	r2, r3
+ 538:.\DriverControl.c ****                     (uint16)(RegulationData.scalingFactor) / MAX_SCALING_FACTOR);
+ 1206              		.loc 1 538 0
+ 1207 0168 1A4B     		ldr	r3, .L98+4
+ 1208 016a 1B79     		ldrb	r3, [r3, #4]
+ 537:.\DriverControl.c ****                     (uint16)(RegulationData.scalingFactor) / MAX_SCALING_FACTOR);
+ 1209              		.loc 1 537 0
+ 1210 016c 5343     		mul	r3, r2
+ 1211              		.loc 1 538 0
+ 1212 016e 181C     		mov	r0, r3
+ 1213 0170 FF21     		mov	r1, #255
+ 1214 0172 FFF7FEFF 		bl	__aeabi_idiv
+ 1215 0176 031C     		mov	r3, r0
+ 537:.\DriverControl.c ****                     (uint16)(RegulationData.scalingFactor) / MAX_SCALING_FACTOR);
+ 1216              		.loc 1 537 0
+ 1217 0178 DAB2     		uxtb	r2, r3
+ 1218 017a 164B     		ldr	r3, .L98+4
+ 1219 017c 5A70     		strb	r2, [r3, #1]
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 32
+
+
+ 539:.\DriverControl.c ****             }
+ 540:.\DriverControl.c ****             if((timerCountLocal % (SAMPLE_COUNT_PER_CYCLE * BRIGHTNESS_CHANGE_PER_SAMPLE)) == 0)
+ 541:.\DriverControl.c ****             {
+ 542:.\DriverControl.c ****                 temperatureStatus = getTemperatureStatus(TemperatureData, length,
+ 1220              		.loc 1 542 0
+ 1221 017e 0F23     		mov	r3, #15
+ 1222 0180 FC18     		add	r4, r7, r3
+ 1223 0182 7A68     		ldr	r2, [r7, #4]
+ 1224 0184 FB1C     		add	r3, r7, #3
+ 1225 0186 1B78     		ldrb	r3, [r3]
+ 1226 0188 101C     		mov	r0, r2
+ 1227 018a 191C     		mov	r1, r3
+ 1228 018c 0022     		mov	r2, #0
+ 1229 018e FFF7FEFF 		bl	getTemperatureStatus
+ 1230 0192 031C     		mov	r3, r0
+ 1231 0194 2370     		strb	r3, [r4]
+ 543:.\DriverControl.c ****                     SAFE_TEMPERATURE_TOLERANCE);
+ 544:.\DriverControl.c ****                 
+ 545:.\DriverControl.c ****                 if(temperatureStatus == EXCEEDED_UPPER_BOUND)
+ 1232              		.loc 1 545 0
+ 1233 0196 0F23     		mov	r3, #15
+ 1234 0198 FB18     		add	r3, r7, r3
+ 1235 019a 1B78     		ldrb	r3, [r3]
+ 1236 019c 012B     		cmp	r3, #1
+ 1237 019e 03D1     		bne	.L95
+ 546:.\DriverControl.c ****                     RegulationData.currentState = STEADY_DECREASE;
+ 1238              		.loc 1 546 0
+ 1239 01a0 0C4B     		ldr	r3, .L98+4
+ 1240 01a2 0222     		mov	r2, #2
+ 1241 01a4 DA70     		strb	r2, [r3, #3]
+ 1242 01a6 08E0     		b	.L96
+ 1243              	.L95:
+ 547:.\DriverControl.c ****                 else if(temperatureStatus == EXCEEDED_LOWER_BOUND)
+ 1244              		.loc 1 547 0
+ 1245 01a8 0F23     		mov	r3, #15
+ 1246 01aa FB18     		add	r3, r7, r3
+ 1247 01ac 1B78     		ldrb	r3, [r3]
+ 1248 01ae 022B     		cmp	r3, #2
+ 1249 01b0 03D1     		bne	.L96
+ 548:.\DriverControl.c ****                     RegulationData.currentState = STEADY_INCREASE;
+ 1250              		.loc 1 548 0
+ 1251 01b2 084B     		ldr	r3, .L98+4
+ 1252 01b4 0122     		mov	r2, #1
+ 1253 01b6 DA70     		strb	r2, [r3, #3]
+ 549:.\DriverControl.c ****             }
+ 550:.\DriverControl.c ****             break;
+ 1254              		.loc 1 550 0
+ 1255 01b8 FFE7     		b	.L97
+ 1256              	.L96:
+ 1257              	.L97:
+ 1258 01ba C046     		mov	r8, r8
+ 1259              	.L82:
+ 551:.\DriverControl.c ****     }
+ 552:.\DriverControl.c ****     
+ 553:.\DriverControl.c ****     timerCountLocal = (timerCountLocal + 1) % (SAMPLE_COUNT_PER_CYCLE * BRIGHTNESS_CHANGE_PER_SAMPL
+ 1260              		.loc 1 553 0
+ 1261 01bc 064B     		ldr	r3, .L98+8
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 33
+
+
+ 1262 01be 0022     		mov	r2, #0
+ 1263 01c0 1A70     		strb	r2, [r3]
+ 554:.\DriverControl.c ****     return RegulationData.regulatedBrightness;    
+ 1264              		.loc 1 554 0
+ 1265 01c2 044B     		ldr	r3, .L98+4
+ 1266 01c4 5B78     		ldrb	r3, [r3, #1]
+ 1267              	.L81:
+ 555:.\DriverControl.c **** }
+ 1268              		.loc 1 555 0
+ 1269 01c6 181C     		mov	r0, r3
+ 1270 01c8 BD46     		mov	sp, r7
+ 1271 01ca 05B0     		add	sp, sp, #20
+ 1272              		@ sp needed
+ 1273 01cc 90BD     		pop	{r4, r7, pc}
+ 1274              	.L99:
+ 1275 01ce C046     		.align	2
+ 1276              	.L98:
+ 1277 01d0 10000000 		.word	PositionData
+ 1278 01d4 14000000 		.word	RegulationData
+ 1279 01d8 00000000 		.word	timerCountLocal.6214
+ 1280              		.cfi_endproc
+ 1281              	.LFE46:
+ 1282              		.size	regulateBrightness, .-regulateBrightness
+ 1283              		.section	.text.getTemperatureStatus,"ax",%progbits
+ 1284              		.align	2
+ 1285              		.code	16
+ 1286              		.thumb_func
+ 1287              		.type	getTemperatureStatus, %function
+ 1288              	getTemperatureStatus:
+ 1289              	.LFB47:
+ 556:.\DriverControl.c **** 
+ 557:.\DriverControl.c **** /**********DEFINED LOCAL FUNCTIONS**********/
+ 558:.\DriverControl.c **** /*******************************************************************************
+ 559:.\DriverControl.c **** * Function Name: getTemperatureStatus
+ 560:.\DriverControl.c **** ********************************************************************************
+ 561:.\DriverControl.c **** *
+ 562:.\DriverControl.c **** * Summary:
+ 563:.\DriverControl.c **** *  Returns temperature status based on 4 temperature points
+ 564:.\DriverControl.c **** *
+ 565:.\DriverControl.c **** * Parameters:
+ 566:.\DriverControl.c **** *  TemperatureData: Reference to the 4 temperature samples to check
+ 567:.\DriverControl.c **** *  length: Size of int16 array
+ 568:.\DriverControl.c **** *  tolerance: Tolerance amount for regulation (Range: temperature +/- tolerance)
+ 569:.\DriverControl.c **** *
+ 570:.\DriverControl.c **** * Return:
+ 571:.\DriverControl.c **** *  EXCEEDED_UPPER_BOUND, EXCEEDED_LOWER_BOUND, or WITHIN_TOLERANCE as valid inputs,
+ 572:.\DriverControl.c **** *  ERROR otherwise
+ 573:.\DriverControl.c **** *
+ 574:.\DriverControl.c **** *******************************************************************************/
+ 575:.\DriverControl.c **** static enum TemperatureStatus getTemperatureStatus(int16* TemperatureData,
+ 576:.\DriverControl.c ****     uint8 length, int16 tolerance)
+ 577:.\DriverControl.c **** {
+ 1290              		.loc 1 577 0
+ 1291              		.cfi_startproc
+ 1292 0000 80B5     		push	{r7, lr}
+ 1293              		.cfi_def_cfa_offset 8
+ 1294              		.cfi_offset 7, -8
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 34
+
+
+ 1295              		.cfi_offset 14, -4
+ 1296 0002 84B0     		sub	sp, sp, #16
+ 1297              		.cfi_def_cfa_offset 24
+ 1298 0004 00AF     		add	r7, sp, #0
+ 1299              		.cfi_def_cfa_register 7
+ 1300 0006 7860     		str	r0, [r7, #4]
+ 1301 0008 081C     		mov	r0, r1
+ 1302 000a 111C     		mov	r1, r2
+ 1303 000c FB1C     		add	r3, r7, #3
+ 1304 000e 021C     		add	r2, r0, #0
+ 1305 0010 1A70     		strb	r2, [r3]
+ 1306 0012 3B1C     		mov	r3, r7
+ 1307 0014 0A1C     		add	r2, r1, #0
+ 1308 0016 1A80     		strh	r2, [r3]
+ 578:.\DriverControl.c ****     enum TemperaturePoint dataIndex = LED;
+ 1309              		.loc 1 578 0
+ 1310 0018 0F23     		mov	r3, #15
+ 1311 001a FB18     		add	r3, r7, r3
+ 1312 001c 0022     		mov	r2, #0
+ 1313 001e 1A70     		strb	r2, [r3]
+ 579:.\DriverControl.c ****     
+ 580:.\DriverControl.c ****     if(TemperatureData == NULL)
+ 1314              		.loc 1 580 0
+ 1315 0020 7B68     		ldr	r3, [r7, #4]
+ 1316 0022 002B     		cmp	r3, #0
+ 1317 0024 01D1     		bne	.L101
+ 581:.\DriverControl.c ****         return ERROR;
+ 1318              		.loc 1 581 0
+ 1319 0026 0323     		mov	r3, #3
+ 1320 0028 5AE0     		b	.L102
+ 1321              	.L101:
+ 582:.\DriverControl.c ****     
+ 583:.\DriverControl.c ****     if(length > ADC_SAMPLE_COUNT)
+ 1322              		.loc 1 583 0
+ 1323 002a FB1C     		add	r3, r7, #3
+ 1324 002c 1B78     		ldrb	r3, [r3]
+ 1325 002e 042B     		cmp	r3, #4
+ 1326 0030 01D9     		bls	.L103
+ 584:.\DriverControl.c ****         return ERROR;
+ 1327              		.loc 1 584 0
+ 1328 0032 0323     		mov	r3, #3
+ 1329 0034 54E0     		b	.L102
+ 1330              	.L103:
+ 585:.\DriverControl.c ****     
+ 586:.\DriverControl.c ****     for(dataIndex = LED; dataIndex < length; dataIndex++)
+ 1331              		.loc 1 586 0
+ 1332 0036 0F23     		mov	r3, #15
+ 1333 0038 FB18     		add	r3, r7, r3
+ 1334 003a 0022     		mov	r2, #0
+ 1335 003c 1A70     		strb	r2, [r3]
+ 1336 003e 1DE0     		b	.L104
+ 1337              	.L106:
+ 587:.\DriverControl.c ****     {
+ 588:.\DriverControl.c ****         if(TemperatureData[dataIndex] > 
+ 1338              		.loc 1 588 0
+ 1339 0040 0F23     		mov	r3, #15
+ 1340 0042 FB18     		add	r3, r7, r3
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 35
+
+
+ 1341 0044 1B78     		ldrb	r3, [r3]
+ 1342 0046 5B00     		lsl	r3, r3, #1
+ 1343 0048 7A68     		ldr	r2, [r7, #4]
+ 1344 004a D318     		add	r3, r2, r3
+ 1345 004c 1B88     		ldrh	r3, [r3]
+ 1346 004e 1AB2     		sxth	r2, r3
+ 589:.\DriverControl.c ****             (ThermalLimitArray[dataIndex].MAX_TEMPERATURE + tolerance))
+ 1347              		.loc 1 589 0
+ 1348 0050 0F23     		mov	r3, #15
+ 1349 0052 FB18     		add	r3, r7, r3
+ 1350 0054 1978     		ldrb	r1, [r3]
+ 1351 0056 244B     		ldr	r3, .L110
+ 1352 0058 8900     		lsl	r1, r1, #2
+ 1353 005a CB5A     		ldrh	r3, [r1, r3]
+ 1354 005c 19B2     		sxth	r1, r3
+ 1355 005e 3B1C     		mov	r3, r7
+ 1356 0060 0020     		mov	r0, #0
+ 1357 0062 1B5E     		ldrsh	r3, [r3, r0]
+ 1358 0064 CB18     		add	r3, r1, r3
+ 588:.\DriverControl.c ****             (ThermalLimitArray[dataIndex].MAX_TEMPERATURE + tolerance))
+ 1359              		.loc 1 588 0
+ 1360 0066 9A42     		cmp	r2, r3
+ 1361 0068 01DD     		ble	.L105
+ 590:.\DriverControl.c ****             return EXCEEDED_UPPER_BOUND;
+ 1362              		.loc 1 590 0
+ 1363 006a 0123     		mov	r3, #1
+ 1364 006c 38E0     		b	.L102
+ 1365              	.L105:
+ 586:.\DriverControl.c ****     {
+ 1366              		.loc 1 586 0 discriminator 2
+ 1367 006e 0F23     		mov	r3, #15
+ 1368 0070 FB18     		add	r3, r7, r3
+ 1369 0072 1A78     		ldrb	r2, [r3]
+ 1370 0074 0F23     		mov	r3, #15
+ 1371 0076 FB18     		add	r3, r7, r3
+ 1372 0078 0132     		add	r2, r2, #1
+ 1373 007a 1A70     		strb	r2, [r3]
+ 1374              	.L104:
+ 586:.\DriverControl.c ****     {
+ 1375              		.loc 1 586 0 is_stmt 0 discriminator 1
+ 1376 007c 0F23     		mov	r3, #15
+ 1377 007e FA18     		add	r2, r7, r3
+ 1378 0080 FB1C     		add	r3, r7, #3
+ 1379 0082 1278     		ldrb	r2, [r2]
+ 1380 0084 1B78     		ldrb	r3, [r3]
+ 1381 0086 9A42     		cmp	r2, r3
+ 1382 0088 DAD3     		bcc	.L106
+ 591:.\DriverControl.c ****     }
+ 592:.\DriverControl.c ****     
+ 593:.\DriverControl.c ****     for(dataIndex = LED; dataIndex < length; dataIndex++)
+ 1383              		.loc 1 593 0 is_stmt 1
+ 1384 008a 0F23     		mov	r3, #15
+ 1385 008c FB18     		add	r3, r7, r3
+ 1386 008e 0022     		mov	r2, #0
+ 1387 0090 1A70     		strb	r2, [r3]
+ 1388 0092 1DE0     		b	.L107
+ 1389              	.L109:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 36
+
+
+ 594:.\DriverControl.c ****     {
+ 595:.\DriverControl.c ****         if(TemperatureData[dataIndex] < 
+ 1390              		.loc 1 595 0
+ 1391 0094 0F23     		mov	r3, #15
+ 1392 0096 FB18     		add	r3, r7, r3
+ 1393 0098 1B78     		ldrb	r3, [r3]
+ 1394 009a 5B00     		lsl	r3, r3, #1
+ 1395 009c 7A68     		ldr	r2, [r7, #4]
+ 1396 009e D318     		add	r3, r2, r3
+ 1397 00a0 1B88     		ldrh	r3, [r3]
+ 1398 00a2 1AB2     		sxth	r2, r3
+ 596:.\DriverControl.c ****             (ThermalLimitArray[dataIndex].MAX_TEMPERATURE - tolerance))
+ 1399              		.loc 1 596 0
+ 1400 00a4 0F23     		mov	r3, #15
+ 1401 00a6 FB18     		add	r3, r7, r3
+ 1402 00a8 1978     		ldrb	r1, [r3]
+ 1403 00aa 0F4B     		ldr	r3, .L110
+ 1404 00ac 8900     		lsl	r1, r1, #2
+ 1405 00ae CB5A     		ldrh	r3, [r1, r3]
+ 1406 00b0 19B2     		sxth	r1, r3
+ 1407 00b2 3B1C     		mov	r3, r7
+ 1408 00b4 0020     		mov	r0, #0
+ 1409 00b6 1B5E     		ldrsh	r3, [r3, r0]
+ 1410 00b8 CB1A     		sub	r3, r1, r3
+ 595:.\DriverControl.c ****             (ThermalLimitArray[dataIndex].MAX_TEMPERATURE - tolerance))
+ 1411              		.loc 1 595 0
+ 1412 00ba 9A42     		cmp	r2, r3
+ 1413 00bc 01DA     		bge	.L108
+ 597:.\DriverControl.c ****             return EXCEEDED_LOWER_BOUND;
+ 1414              		.loc 1 597 0
+ 1415 00be 0223     		mov	r3, #2
+ 1416 00c0 0EE0     		b	.L102
+ 1417              	.L108:
+ 593:.\DriverControl.c ****     {
+ 1418              		.loc 1 593 0 discriminator 2
+ 1419 00c2 0F23     		mov	r3, #15
+ 1420 00c4 FB18     		add	r3, r7, r3
+ 1421 00c6 1A78     		ldrb	r2, [r3]
+ 1422 00c8 0F23     		mov	r3, #15
+ 1423 00ca FB18     		add	r3, r7, r3
+ 1424 00cc 0132     		add	r2, r2, #1
+ 1425 00ce 1A70     		strb	r2, [r3]
+ 1426              	.L107:
+ 593:.\DriverControl.c ****     {
+ 1427              		.loc 1 593 0 is_stmt 0 discriminator 1
+ 1428 00d0 0F23     		mov	r3, #15
+ 1429 00d2 FA18     		add	r2, r7, r3
+ 1430 00d4 FB1C     		add	r3, r7, #3
+ 1431 00d6 1278     		ldrb	r2, [r2]
+ 1432 00d8 1B78     		ldrb	r3, [r3]
+ 1433 00da 9A42     		cmp	r2, r3
+ 1434 00dc DAD3     		bcc	.L109
+ 598:.\DriverControl.c ****     }
+ 599:.\DriverControl.c ****     
+ 600:.\DriverControl.c ****     return WITHIN_TOLERANCE;
+ 1435              		.loc 1 600 0 is_stmt 1
+ 1436 00de 0023     		mov	r3, #0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 37
+
+
+ 1437              	.L102:
+ 601:.\DriverControl.c **** }
+ 1438              		.loc 1 601 0
+ 1439 00e0 181C     		mov	r0, r3
+ 1440 00e2 BD46     		mov	sp, r7
+ 1441 00e4 04B0     		add	sp, sp, #16
+ 1442              		@ sp needed
+ 1443 00e6 80BD     		pop	{r7, pc}
+ 1444              	.L111:
+ 1445              		.align	2
+ 1446              	.L110:
+ 1447 00e8 00000000 		.word	ThermalLimitArray
+ 1448              		.cfi_endproc
+ 1449              	.LFE47:
+ 1450              		.size	getTemperatureStatus, .-getTemperatureStatus
+ 1451              		.bss
+ 1452              	timerCountLocal.6214:
+ 1453 0000 00       		.space	1
+ 1454              		.text
+ 1455              	.Letext0:
+ 1456              		.file 2 "Generated_Source\\PSoC4/cytypes.h"
+ 1457              		.file 3 ".\\DriverControl.h"
+ 1458              		.section	.debug_info,"",%progbits
+ 1459              	.Ldebug_info0:
+ 1460 0000 01050000 		.4byte	0x501
+ 1461 0004 0400     		.2byte	0x4
+ 1462 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 1463 000a 04       		.byte	0x4
+ 1464 000b 01       		.uleb128 0x1
+ 1465 000c AB030000 		.4byte	.LASF81
+ 1466 0010 01       		.byte	0x1
+ 1467 0011 6B030000 		.4byte	.LASF82
+ 1468 0015 56020000 		.4byte	.LASF83
+ 1469 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 1470 001d 00000000 		.4byte	0
+ 1471 0021 00000000 		.4byte	.Ldebug_line0
+ 1472 0025 02       		.uleb128 0x2
+ 1473 0026 01       		.byte	0x1
+ 1474 0027 06       		.byte	0x6
+ 1475 0028 D1020000 		.4byte	.LASF0
+ 1476 002c 02       		.uleb128 0x2
+ 1477 002d 01       		.byte	0x1
+ 1478 002e 08       		.byte	0x8
+ 1479 002f 14020000 		.4byte	.LASF1
+ 1480 0033 02       		.uleb128 0x2
+ 1481 0034 02       		.byte	0x2
+ 1482 0035 05       		.byte	0x5
+ 1483 0036 7C000000 		.4byte	.LASF2
+ 1484 003a 02       		.uleb128 0x2
+ 1485 003b 02       		.byte	0x2
+ 1486 003c 07       		.byte	0x7
+ 1487 003d 58030000 		.4byte	.LASF3
+ 1488 0041 02       		.uleb128 0x2
+ 1489 0042 04       		.byte	0x4
+ 1490 0043 05       		.byte	0x5
+ 1491 0044 A8010000 		.4byte	.LASF4
+ 1492 0048 02       		.uleb128 0x2
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 38
+
+
+ 1493 0049 04       		.byte	0x4
+ 1494 004a 07       		.byte	0x7
+ 1495 004b A7040000 		.4byte	.LASF5
+ 1496 004f 02       		.uleb128 0x2
+ 1497 0050 08       		.byte	0x8
+ 1498 0051 05       		.byte	0x5
+ 1499 0052 7B010000 		.4byte	.LASF6
+ 1500 0056 02       		.uleb128 0x2
+ 1501 0057 08       		.byte	0x8
+ 1502 0058 07       		.byte	0x7
+ 1503 0059 DD020000 		.4byte	.LASF7
+ 1504 005d 03       		.uleb128 0x3
+ 1505 005e 04       		.byte	0x4
+ 1506 005f 05       		.byte	0x5
+ 1507 0060 696E7400 		.ascii	"int\000"
+ 1508 0064 02       		.uleb128 0x2
+ 1509 0065 04       		.byte	0x4
+ 1510 0066 07       		.byte	0x7
+ 1511 0067 F4020000 		.4byte	.LASF8
+ 1512 006b 04       		.uleb128 0x4
+ 1513 006c 2F010000 		.4byte	.LASF9
+ 1514 0070 02       		.byte	0x2
+ 1515 0071 3801     		.2byte	0x138
+ 1516 0073 2C000000 		.4byte	0x2c
+ 1517 0077 04       		.uleb128 0x4
+ 1518 0078 11010000 		.4byte	.LASF10
+ 1519 007c 02       		.byte	0x2
+ 1520 007d 3901     		.2byte	0x139
+ 1521 007f 3A000000 		.4byte	0x3a
+ 1522 0083 04       		.uleb128 0x4
+ 1523 0084 A0040000 		.4byte	.LASF11
+ 1524 0088 02       		.byte	0x2
+ 1525 0089 3A01     		.2byte	0x13a
+ 1526 008b 48000000 		.4byte	0x48
+ 1527 008f 04       		.uleb128 0x4
+ 1528 0090 18010000 		.4byte	.LASF12
+ 1529 0094 02       		.byte	0x2
+ 1530 0095 3C01     		.2byte	0x13c
+ 1531 0097 33000000 		.4byte	0x33
+ 1532 009b 04       		.uleb128 0x4
+ 1533 009c B9040000 		.4byte	.LASF13
+ 1534 00a0 02       		.byte	0x2
+ 1535 00a1 3D01     		.2byte	0x13d
+ 1536 00a3 41000000 		.4byte	0x41
+ 1537 00a7 02       		.uleb128 0x2
+ 1538 00a8 04       		.byte	0x4
+ 1539 00a9 04       		.byte	0x4
+ 1540 00aa 75010000 		.4byte	.LASF14
+ 1541 00ae 02       		.uleb128 0x2
+ 1542 00af 08       		.byte	0x8
+ 1543 00b0 04       		.byte	0x4
+ 1544 00b1 94050000 		.4byte	.LASF15
+ 1545 00b5 02       		.uleb128 0x2
+ 1546 00b6 01       		.byte	0x1
+ 1547 00b7 08       		.byte	0x8
+ 1548 00b8 91030000 		.4byte	.LASF16
+ 1549 00bc 02       		.uleb128 0x2
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 39
+
+
+ 1550 00bd 04       		.byte	0x4
+ 1551 00be 07       		.byte	0x7
+ 1552 00bf 99000000 		.4byte	.LASF17
+ 1553 00c3 05       		.uleb128 0x5
+ 1554 00c4 5F050000 		.4byte	.LASF21
+ 1555 00c8 01       		.byte	0x1
+ 1556 00c9 03       		.byte	0x3
+ 1557 00ca 17       		.byte	0x17
+ 1558 00cb E8000000 		.4byte	0xe8
+ 1559 00cf 06       		.uleb128 0x6
+ 1560 00d0 4C454400 		.ascii	"LED\000"
+ 1561 00d4 00       		.sleb128 0
+ 1562 00d5 07       		.uleb128 0x7
+ 1563 00d6 94040000 		.4byte	.LASF18
+ 1564 00da 01       		.sleb128 1
+ 1565 00db 07       		.uleb128 0x7
+ 1566 00dc F3010000 		.4byte	.LASF19
+ 1567 00e0 02       		.sleb128 2
+ 1568 00e1 07       		.uleb128 0x7
+ 1569 00e2 5F010000 		.4byte	.LASF20
+ 1570 00e6 03       		.sleb128 3
+ 1571 00e7 00       		.byte	0
+ 1572 00e8 05       		.uleb128 0x5
+ 1573 00e9 C1020000 		.4byte	.LASF22
+ 1574 00ed 01       		.byte	0x1
+ 1575 00ee 01       		.byte	0x1
+ 1576 00ef 23       		.byte	0x23
+ 1577 00f0 0D010000 		.4byte	0x10d
+ 1578 00f4 07       		.uleb128 0x7
+ 1579 00f5 6D010000 		.4byte	.LASF23
+ 1580 00f9 00       		.sleb128 0
+ 1581 00fa 07       		.uleb128 0x7
+ 1582 00fb A9050000 		.4byte	.LASF24
+ 1583 00ff 01       		.sleb128 1
+ 1584 0100 07       		.uleb128 0x7
+ 1585 0101 4F050000 		.4byte	.LASF25
+ 1586 0105 02       		.sleb128 2
+ 1587 0106 07       		.uleb128 0x7
+ 1588 0107 22020000 		.4byte	.LASF26
+ 1589 010b 03       		.sleb128 3
+ 1590 010c 00       		.byte	0
+ 1591 010d 05       		.uleb128 0x5
+ 1592 010e C1000000 		.4byte	.LASF27
+ 1593 0112 01       		.byte	0x1
+ 1594 0113 01       		.byte	0x1
+ 1595 0114 2B       		.byte	0x2b
+ 1596 0115 32010000 		.4byte	0x132
+ 1597 0119 07       		.uleb128 0x7
+ 1598 011a 32050000 		.4byte	.LASF28
+ 1599 011e 00       		.sleb128 0
+ 1600 011f 07       		.uleb128 0x7
+ 1601 0120 96030000 		.4byte	.LASF29
+ 1602 0124 01       		.sleb128 1
+ 1603 0125 07       		.uleb128 0x7
+ 1604 0126 B1010000 		.4byte	.LASF30
+ 1605 012a 02       		.sleb128 2
+ 1606 012b 07       		.uleb128 0x7
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 40
+
+
+ 1607 012c F9010000 		.4byte	.LASF31
+ 1608 0130 03       		.sleb128 3
+ 1609 0131 00       		.byte	0
+ 1610 0132 08       		.uleb128 0x8
+ 1611 0133 04       		.byte	0x4
+ 1612 0134 01       		.byte	0x1
+ 1613 0135 33       		.byte	0x33
+ 1614 0136 53010000 		.4byte	0x153
+ 1615 013a 09       		.uleb128 0x9
+ 1616 013b 06050000 		.4byte	.LASF32
+ 1617 013f 01       		.byte	0x1
+ 1618 0140 35       		.byte	0x35
+ 1619 0141 53010000 		.4byte	0x153
+ 1620 0145 00       		.byte	0
+ 1621 0146 09       		.uleb128 0x9
+ 1622 0147 1E010000 		.4byte	.LASF33
+ 1623 014b 01       		.byte	0x1
+ 1624 014c 36       		.byte	0x36
+ 1625 014d 53010000 		.4byte	0x153
+ 1626 0151 02       		.byte	0x2
+ 1627 0152 00       		.byte	0
+ 1628 0153 0A       		.uleb128 0xa
+ 1629 0154 8F000000 		.4byte	0x8f
+ 1630 0158 0B       		.uleb128 0xb
+ 1631 0159 9B010000 		.4byte	.LASF34
+ 1632 015d 01       		.byte	0x1
+ 1633 015e 37       		.byte	0x37
+ 1634 015f 32010000 		.4byte	0x132
+ 1635 0163 08       		.uleb128 0x8
+ 1636 0164 03       		.byte	0x3
+ 1637 0165 01       		.byte	0x1
+ 1638 0166 42       		.byte	0x42
+ 1639 0167 90010000 		.4byte	0x190
+ 1640 016b 09       		.uleb128 0x9
+ 1641 016c B9050000 		.4byte	.LASF35
+ 1642 0170 01       		.byte	0x1
+ 1643 0171 44       		.byte	0x44
+ 1644 0172 6B000000 		.4byte	0x6b
+ 1645 0176 00       		.byte	0
+ 1646 0177 09       		.uleb128 0x9
+ 1647 0178 46040000 		.4byte	.LASF36
+ 1648 017c 01       		.byte	0x1
+ 1649 017d 45       		.byte	0x45
+ 1650 017e 6B000000 		.4byte	0x6b
+ 1651 0182 01       		.byte	0x1
+ 1652 0183 09       		.uleb128 0x9
+ 1653 0184 01030000 		.4byte	.LASF37
+ 1654 0188 01       		.byte	0x1
+ 1655 0189 46       		.byte	0x46
+ 1656 018a 6B000000 		.4byte	0x6b
+ 1657 018e 02       		.byte	0x2
+ 1658 018f 00       		.byte	0
+ 1659 0190 0B       		.uleb128 0xb
+ 1660 0191 D3000000 		.4byte	.LASF38
+ 1661 0195 01       		.byte	0x1
+ 1662 0196 47       		.byte	0x47
+ 1663 0197 63010000 		.4byte	0x163
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 41
+
+
+ 1664 019b 08       		.uleb128 0x8
+ 1665 019c 05       		.byte	0x5
+ 1666 019d 01       		.byte	0x1
+ 1667 019e 4B       		.byte	0x4b
+ 1668 019f E0010000 		.4byte	0x1e0
+ 1669 01a3 09       		.uleb128 0x9
+ 1670 01a4 7D030000 		.4byte	.LASF39
+ 1671 01a8 01       		.byte	0x1
+ 1672 01a9 4D       		.byte	0x4d
+ 1673 01aa 6B000000 		.4byte	0x6b
+ 1674 01ae 00       		.byte	0
+ 1675 01af 09       		.uleb128 0x9
+ 1676 01b0 44030000 		.4byte	.LASF40
+ 1677 01b4 01       		.byte	0x1
+ 1678 01b5 4E       		.byte	0x4e
+ 1679 01b6 6B000000 		.4byte	0x6b
+ 1680 01ba 01       		.byte	0x1
+ 1681 01bb 09       		.uleb128 0x9
+ 1682 01bc 86000000 		.4byte	.LASF41
+ 1683 01c0 01       		.byte	0x1
+ 1684 01c1 4F       		.byte	0x4f
+ 1685 01c2 6B000000 		.4byte	0x6b
+ 1686 01c6 02       		.byte	0x2
+ 1687 01c7 09       		.uleb128 0x9
+ 1688 01c8 39040000 		.4byte	.LASF42
+ 1689 01cc 01       		.byte	0x1
+ 1690 01cd 50       		.byte	0x50
+ 1691 01ce E8000000 		.4byte	0xe8
+ 1692 01d2 03       		.byte	0x3
+ 1693 01d3 09       		.uleb128 0x9
+ 1694 01d4 9B050000 		.4byte	.LASF43
+ 1695 01d8 01       		.byte	0x1
+ 1696 01d9 51       		.byte	0x51
+ 1697 01da 6B000000 		.4byte	0x6b
+ 1698 01de 04       		.byte	0x4
+ 1699 01df 00       		.byte	0
+ 1700 01e0 0B       		.uleb128 0xb
+ 1701 01e1 F1040000 		.4byte	.LASF44
+ 1702 01e5 01       		.byte	0x1
+ 1703 01e6 52       		.byte	0x52
+ 1704 01e7 9B010000 		.4byte	0x19b
+ 1705 01eb 08       		.uleb128 0x8
+ 1706 01ec 02       		.byte	0x2
+ 1707 01ed 01       		.byte	0x1
+ 1708 01ee 56       		.byte	0x56
+ 1709 01ef 0C020000 		.4byte	0x20c
+ 1710 01f3 09       		.uleb128 0x9
+ 1711 01f4 2A050000 		.4byte	.LASF45
+ 1712 01f8 01       		.byte	0x1
+ 1713 01f9 58       		.byte	0x58
+ 1714 01fa 6B000000 		.4byte	0x6b
+ 1715 01fe 00       		.byte	0
+ 1716 01ff 09       		.uleb128 0x9
+ 1717 0200 9B050000 		.4byte	.LASF43
+ 1718 0204 01       		.byte	0x1
+ 1719 0205 59       		.byte	0x59
+ 1720 0206 6B000000 		.4byte	0x6b
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 42
+
+
+ 1721 020a 01       		.byte	0x1
+ 1722 020b 00       		.byte	0
+ 1723 020c 0B       		.uleb128 0xb
+ 1724 020d C6010000 		.4byte	.LASF46
+ 1725 0211 01       		.byte	0x1
+ 1726 0212 5A       		.byte	0x5a
+ 1727 0213 EB010000 		.4byte	0x1eb
+ 1728 0217 0C       		.uleb128 0xc
+ 1729 0218 DD010000 		.4byte	.LASF47
+ 1730 021c 01       		.byte	0x1
+ 1731 021d 66       		.byte	0x66
+ 1732 021e 6B000000 		.4byte	0x6b
+ 1733 0222 00000000 		.4byte	.LFB34
+ 1734 0226 14000000 		.4byte	.LFE34-.LFB34
+ 1735 022a 01       		.uleb128 0x1
+ 1736 022b 9C       		.byte	0x9c
+ 1737 022c 0C       		.uleb128 0xc
+ 1738 022d 4D000000 		.4byte	.LASF48
+ 1739 0231 01       		.byte	0x1
+ 1740 0232 79       		.byte	0x79
+ 1741 0233 6B000000 		.4byte	0x6b
+ 1742 0237 00000000 		.4byte	.LFB35
+ 1743 023b 14000000 		.4byte	.LFE35-.LFB35
+ 1744 023f 01       		.uleb128 0x1
+ 1745 0240 9C       		.byte	0x9c
+ 1746 0241 0D       		.uleb128 0xd
+ 1747 0242 4D010000 		.4byte	.LASF49
+ 1748 0246 01       		.byte	0x1
+ 1749 0247 8D       		.byte	0x8d
+ 1750 0248 6B000000 		.4byte	0x6b
+ 1751 024c 00000000 		.4byte	.LFB36
+ 1752 0250 38000000 		.4byte	.LFE36-.LFB36
+ 1753 0254 01       		.uleb128 0x1
+ 1754 0255 9C       		.byte	0x9c
+ 1755 0256 69020000 		.4byte	0x269
+ 1756 025a 0E       		.uleb128 0xe
+ 1757 025b 70050000 		.4byte	.LASF51
+ 1758 025f 01       		.byte	0x1
+ 1759 0260 8D       		.byte	0x8d
+ 1760 0261 6B000000 		.4byte	0x6b
+ 1761 0265 02       		.uleb128 0x2
+ 1762 0266 91       		.byte	0x91
+ 1763 0267 77       		.sleb128 -9
+ 1764 0268 00       		.byte	0
+ 1765 0269 0D       		.uleb128 0xd
+ 1766 026a 47020000 		.4byte	.LASF50
+ 1767 026e 01       		.byte	0x1
+ 1768 026f A5       		.byte	0xa5
+ 1769 0270 6B000000 		.4byte	0x6b
+ 1770 0274 00000000 		.4byte	.LFB37
+ 1771 0278 38000000 		.4byte	.LFE37-.LFB37
+ 1772 027c 01       		.uleb128 0x1
+ 1773 027d 9C       		.byte	0x9c
+ 1774 027e 91020000 		.4byte	0x291
+ 1775 0282 0E       		.uleb128 0xe
+ 1776 0283 F2000000 		.4byte	.LASF52
+ 1777 0287 01       		.byte	0x1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 43
+
+
+ 1778 0288 A5       		.byte	0xa5
+ 1779 0289 6B000000 		.4byte	0x6b
+ 1780 028d 02       		.uleb128 0x2
+ 1781 028e 91       		.byte	0x91
+ 1782 028f 77       		.sleb128 -9
+ 1783 0290 00       		.byte	0
+ 1784 0291 0C       		.uleb128 0xc
+ 1785 0292 16050000 		.4byte	.LASF53
+ 1786 0296 01       		.byte	0x1
+ 1787 0297 BD       		.byte	0xbd
+ 1788 0298 6B000000 		.4byte	0x6b
+ 1789 029c 00000000 		.4byte	.LFB38
+ 1790 02a0 14000000 		.4byte	.LFE38-.LFB38
+ 1791 02a4 01       		.uleb128 0x1
+ 1792 02a5 9C       		.byte	0x9c
+ 1793 02a6 0F       		.uleb128 0xf
+ 1794 02a7 7A040000 		.4byte	.LASF55
+ 1795 02ab 01       		.byte	0x1
+ 1796 02ac D2       		.byte	0xd2
+ 1797 02ad 00000000 		.4byte	.LFB39
+ 1798 02b1 14000000 		.4byte	.LFE39-.LFB39
+ 1799 02b5 01       		.uleb128 0x1
+ 1800 02b6 9C       		.byte	0x9c
+ 1801 02b7 10       		.uleb128 0x10
+ 1802 02b8 AC000000 		.4byte	.LASF84
+ 1803 02bc 01       		.byte	0x1
+ 1804 02bd E5       		.byte	0xe5
+ 1805 02be 00000000 		.4byte	.LFB40
+ 1806 02c2 60000000 		.4byte	.LFE40-.LFB40
+ 1807 02c6 01       		.uleb128 0x1
+ 1808 02c7 9C       		.byte	0x9c
+ 1809 02c8 DB020000 		.4byte	0x2db
+ 1810 02cc 0E       		.uleb128 0xe
+ 1811 02cd A2000000 		.4byte	.LASF54
+ 1812 02d1 01       		.byte	0x1
+ 1813 02d2 E5       		.byte	0xe5
+ 1814 02d3 77000000 		.4byte	0x77
+ 1815 02d7 02       		.uleb128 0x2
+ 1816 02d8 91       		.byte	0x91
+ 1817 02d9 76       		.sleb128 -10
+ 1818 02da 00       		.byte	0
+ 1819 02db 11       		.uleb128 0x11
+ 1820 02dc 14030000 		.4byte	.LASF56
+ 1821 02e0 01       		.byte	0x1
+ 1822 02e1 0201     		.2byte	0x102
+ 1823 02e3 00000000 		.4byte	.LFB41
+ 1824 02e7 2C000000 		.4byte	.LFE41-.LFB41
+ 1825 02eb 01       		.uleb128 0x1
+ 1826 02ec 9C       		.byte	0x9c
+ 1827 02ed 12       		.uleb128 0x12
+ 1828 02ee 37000000 		.4byte	.LASF57
+ 1829 02f2 01       		.byte	0x1
+ 1830 02f3 1B01     		.2byte	0x11b
+ 1831 02f5 6B000000 		.4byte	0x6b
+ 1832 02f9 00000000 		.4byte	.LFB42
+ 1833 02fd CC000000 		.4byte	.LFE42-.LFB42
+ 1834 0301 01       		.uleb128 0x1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 44
+
+
+ 1835 0302 9C       		.byte	0x9c
+ 1836 0303 26030000 		.4byte	0x326
+ 1837 0307 13       		.uleb128 0x13
+ 1838 0308 25030000 		.4byte	.LASF58
+ 1839 030c 01       		.byte	0x1
+ 1840 030d 1B01     		.2byte	0x11b
+ 1841 030f 6B000000 		.4byte	0x6b
+ 1842 0313 02       		.uleb128 0x2
+ 1843 0314 91       		.byte	0x91
+ 1844 0315 77       		.sleb128 -9
+ 1845 0316 13       		.uleb128 0x13
+ 1846 0317 E6040000 		.4byte	.LASF59
+ 1847 031b 01       		.byte	0x1
+ 1848 031c 1B01     		.2byte	0x11b
+ 1849 031e 6B000000 		.4byte	0x6b
+ 1850 0322 02       		.uleb128 0x2
+ 1851 0323 91       		.byte	0x91
+ 1852 0324 76       		.sleb128 -10
+ 1853 0325 00       		.byte	0
+ 1854 0326 14       		.uleb128 0x14
+ 1855 0327 89010000 		.4byte	.LASF60
+ 1856 032b 01       		.byte	0x1
+ 1857 032c 5601     		.2byte	0x156
+ 1858 032e 8F000000 		.4byte	0x8f
+ 1859 0332 00000000 		.4byte	.LFB43
+ 1860 0336 30000000 		.4byte	.LFE43-.LFB43
+ 1861 033a 01       		.uleb128 0x1
+ 1862 033b 9C       		.byte	0x9c
+ 1863 033c 50030000 		.4byte	0x350
+ 1864 0340 13       		.uleb128 0x13
+ 1865 0341 B3020000 		.4byte	.LASF61
+ 1866 0345 01       		.byte	0x1
+ 1867 0346 5601     		.2byte	0x156
+ 1868 0348 C3000000 		.4byte	0xc3
+ 1869 034c 02       		.uleb128 0x2
+ 1870 034d 91       		.byte	0x91
+ 1871 034e 77       		.sleb128 -9
+ 1872 034f 00       		.byte	0
+ 1873 0350 12       		.uleb128 0x12
+ 1874 0351 7F050000 		.4byte	.LASF62
+ 1875 0355 01       		.byte	0x1
+ 1876 0356 7001     		.2byte	0x170
+ 1877 0358 8F000000 		.4byte	0x8f
+ 1878 035c 00000000 		.4byte	.LFB44
+ 1879 0360 04020000 		.4byte	.LFE44-.LFB44
+ 1880 0364 01       		.uleb128 0x1
+ 1881 0365 9C       		.byte	0x9c
+ 1882 0366 E3030000 		.4byte	0x3e3
+ 1883 036a 13       		.uleb128 0x13
+ 1884 036b 6C040000 		.4byte	.LASF63
+ 1885 036f 01       		.byte	0x1
+ 1886 0370 7001     		.2byte	0x170
+ 1887 0372 6B000000 		.4byte	0x6b
+ 1888 0376 02       		.uleb128 0x2
+ 1889 0377 91       		.byte	0x91
+ 1890 0378 5F       		.sleb128 -33
+ 1891 0379 13       		.uleb128 0x13
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 45
+
+
+ 1892 037a B3020000 		.4byte	.LASF61
+ 1893 037e 01       		.byte	0x1
+ 1894 037f 7001     		.2byte	0x170
+ 1895 0381 C3000000 		.4byte	0xc3
+ 1896 0385 02       		.uleb128 0x2
+ 1897 0386 91       		.byte	0x91
+ 1898 0387 5E       		.sleb128 -34
+ 1899 0388 13       		.uleb128 0x13
+ 1900 0389 43050000 		.4byte	.LASF64
+ 1901 038d 01       		.byte	0x1
+ 1902 038e 7101     		.2byte	0x171
+ 1903 0390 E3030000 		.4byte	0x3e3
+ 1904 0394 02       		.uleb128 0x2
+ 1905 0395 91       		.byte	0x91
+ 1906 0396 58       		.sleb128 -40
+ 1907 0397 13       		.uleb128 0x13
+ 1908 0398 2C020000 		.4byte	.LASF65
+ 1909 039c 01       		.byte	0x1
+ 1910 039d 7101     		.2byte	0x171
+ 1911 039f 6B000000 		.4byte	0x6b
+ 1912 03a3 02       		.uleb128 0x2
+ 1913 03a4 91       		.byte	0x91
+ 1914 03a5 5D       		.sleb128 -35
+ 1915 03a6 15       		.uleb128 0x15
+ 1916 03a7 E4000000 		.4byte	.LASF66
+ 1917 03ab 01       		.byte	0x1
+ 1918 03ac 7301     		.2byte	0x173
+ 1919 03ae 6B000000 		.4byte	0x6b
+ 1920 03b2 02       		.uleb128 0x2
+ 1921 03b3 91       		.byte	0x91
+ 1922 03b4 6F       		.sleb128 -17
+ 1923 03b5 15       		.uleb128 0x15
+ 1924 03b6 D1040000 		.4byte	.LASF67
+ 1925 03ba 01       		.byte	0x1
+ 1926 03bb 7401     		.2byte	0x174
+ 1927 03bd 8F000000 		.4byte	0x8f
+ 1928 03c1 02       		.uleb128 0x2
+ 1929 03c2 91       		.byte	0x91
+ 1930 03c3 6C       		.sleb128 -20
+ 1931 03c4 15       		.uleb128 0x15
+ 1932 03c5 35010000 		.4byte	.LASF68
+ 1933 03c9 01       		.byte	0x1
+ 1934 03ca 7501     		.2byte	0x175
+ 1935 03cc A7000000 		.4byte	0xa7
+ 1936 03d0 02       		.uleb128 0x2
+ 1937 03d1 91       		.byte	0x91
+ 1938 03d2 64       		.sleb128 -28
+ 1939 03d3 15       		.uleb128 0x15
+ 1940 03d4 5F040000 		.4byte	.LASF69
+ 1941 03d8 01       		.byte	0x1
+ 1942 03d9 7601     		.2byte	0x176
+ 1943 03db 83000000 		.4byte	0x83
+ 1944 03df 02       		.uleb128 0x2
+ 1945 03e0 91       		.byte	0x91
+ 1946 03e1 68       		.sleb128 -24
+ 1947 03e2 00       		.byte	0
+ 1948 03e3 16       		.uleb128 0x16
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 46
+
+
+ 1949 03e4 04       		.byte	0x4
+ 1950 03e5 8F000000 		.4byte	0x8f
+ 1951 03e9 17       		.uleb128 0x17
+ 1952 03ea 33020000 		.4byte	.LASF70
+ 1953 03ee 01       		.byte	0x1
+ 1954 03ef C201     		.2byte	0x1c2
+ 1955 03f1 6B000000 		.4byte	0x6b
+ 1956 03f5 00000000 		.4byte	.LFB45
+ 1957 03f9 14000000 		.4byte	.LFE45-.LFB45
+ 1958 03fd 01       		.uleb128 0x1
+ 1959 03fe 9C       		.byte	0x9c
+ 1960 03ff 12       		.uleb128 0x12
+ 1961 0400 00000000 		.4byte	.LASF71
+ 1962 0404 01       		.byte	0x1
+ 1963 0405 D701     		.2byte	0x1d7
+ 1964 0407 6B000000 		.4byte	0x6b
+ 1965 040b 00000000 		.4byte	.LFB46
+ 1966 040f DC010000 		.4byte	.LFE46-.LFB46
+ 1967 0413 01       		.uleb128 0x1
+ 1968 0414 9C       		.byte	0x9c
+ 1969 0415 59040000 		.4byte	0x459
+ 1970 0419 13       		.uleb128 0x13
+ 1971 041a 01010000 		.4byte	.LASF72
+ 1972 041e 01       		.byte	0x1
+ 1973 041f D701     		.2byte	0x1d7
+ 1974 0421 E3030000 		.4byte	0x3e3
+ 1975 0425 02       		.uleb128 0x2
+ 1976 0426 91       		.byte	0x91
+ 1977 0427 64       		.sleb128 -28
+ 1978 0428 13       		.uleb128 0x13
+ 1979 0429 2C020000 		.4byte	.LASF65
+ 1980 042d 01       		.byte	0x1
+ 1981 042e D701     		.2byte	0x1d7
+ 1982 0430 6B000000 		.4byte	0x6b
+ 1983 0434 02       		.uleb128 0x2
+ 1984 0435 91       		.byte	0x91
+ 1985 0436 63       		.sleb128 -29
+ 1986 0437 15       		.uleb128 0x15
+ 1987 0438 13000000 		.4byte	.LASF73
+ 1988 043c 01       		.byte	0x1
+ 1989 043d D901     		.2byte	0x1d9
+ 1990 043f 6B000000 		.4byte	0x6b
+ 1991 0443 05       		.uleb128 0x5
+ 1992 0444 03       		.byte	0x3
+ 1993 0445 00000000 		.4byte	timerCountLocal.6214
+ 1994 0449 15       		.uleb128 0x15
+ 1995 044a 59000000 		.4byte	.LASF74
+ 1996 044e 01       		.byte	0x1
+ 1997 044f DA01     		.2byte	0x1da
+ 1998 0451 0D010000 		.4byte	0x10d
+ 1999 0455 02       		.uleb128 0x2
+ 2000 0456 91       		.byte	0x91
+ 2001 0457 6F       		.sleb128 -17
+ 2002 0458 00       		.byte	0
+ 2003 0459 18       		.uleb128 0x18
+ 2004 045a FF010000 		.4byte	.LASF85
+ 2005 045e 01       		.byte	0x1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 47
+
+
+ 2006 045f 3F02     		.2byte	0x23f
+ 2007 0461 0D010000 		.4byte	0x10d
+ 2008 0465 00000000 		.4byte	.LFB47
+ 2009 0469 EC000000 		.4byte	.LFE47-.LFB47
+ 2010 046d 01       		.uleb128 0x1
+ 2011 046e 9C       		.byte	0x9c
+ 2012 046f B0040000 		.4byte	0x4b0
+ 2013 0473 13       		.uleb128 0x13
+ 2014 0474 01010000 		.4byte	.LASF72
+ 2015 0478 01       		.byte	0x1
+ 2016 0479 3F02     		.2byte	0x23f
+ 2017 047b E3030000 		.4byte	0x3e3
+ 2018 047f 02       		.uleb128 0x2
+ 2019 0480 91       		.byte	0x91
+ 2020 0481 6C       		.sleb128 -20
+ 2021 0482 13       		.uleb128 0x13
+ 2022 0483 2C020000 		.4byte	.LASF65
+ 2023 0487 01       		.byte	0x1
+ 2024 0488 4002     		.2byte	0x240
+ 2025 048a 6B000000 		.4byte	0x6b
+ 2026 048e 02       		.uleb128 0x2
+ 2027 048f 91       		.byte	0x91
+ 2028 0490 6B       		.sleb128 -21
+ 2029 0491 13       		.uleb128 0x13
+ 2030 0492 2D000000 		.4byte	.LASF75
+ 2031 0496 01       		.byte	0x1
+ 2032 0497 4002     		.2byte	0x240
+ 2033 0499 8F000000 		.4byte	0x8f
+ 2034 049d 02       		.uleb128 0x2
+ 2035 049e 91       		.byte	0x91
+ 2036 049f 68       		.sleb128 -24
+ 2037 04a0 15       		.uleb128 0x15
+ 2038 04a1 23000000 		.4byte	.LASF76
+ 2039 04a5 01       		.byte	0x1
+ 2040 04a6 4202     		.2byte	0x242
+ 2041 04a8 C3000000 		.4byte	0xc3
+ 2042 04ac 02       		.uleb128 0x2
+ 2043 04ad 91       		.byte	0x91
+ 2044 04ae 77       		.sleb128 -9
+ 2045 04af 00       		.byte	0
+ 2046 04b0 19       		.uleb128 0x19
+ 2047 04b1 58010000 		.4byte	0x158
+ 2048 04b5 C0040000 		.4byte	0x4c0
+ 2049 04b9 1A       		.uleb128 0x1a
+ 2050 04ba BC000000 		.4byte	0xbc
+ 2051 04be 03       		.byte	0x3
+ 2052 04bf 00       		.byte	0
+ 2053 04c0 1B       		.uleb128 0x1b
+ 2054 04c1 BF040000 		.4byte	.LASF77
+ 2055 04c5 01       		.byte	0x1
+ 2056 04c6 39       		.byte	0x39
+ 2057 04c7 B0040000 		.4byte	0x4b0
+ 2058 04cb 05       		.uleb128 0x5
+ 2059 04cc 03       		.byte	0x3
+ 2060 04cd 00000000 		.4byte	ThermalLimitArray
+ 2061 04d1 1B       		.uleb128 0x1b
+ 2062 04d2 52040000 		.4byte	.LASF78
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 48
+
+
+ 2063 04d6 01       		.byte	0x1
+ 2064 04d7 49       		.byte	0x49
+ 2065 04d8 90010000 		.4byte	0x190
+ 2066 04dc 05       		.uleb128 0x5
+ 2067 04dd 03       		.byte	0x3
+ 2068 04de 10000000 		.4byte	PositionData
+ 2069 04e2 1B       		.uleb128 0x1b
+ 2070 04e3 35030000 		.4byte	.LASF79
+ 2071 04e7 01       		.byte	0x1
+ 2072 04e8 54       		.byte	0x54
+ 2073 04e9 E0010000 		.4byte	0x1e0
+ 2074 04ed 05       		.uleb128 0x5
+ 2075 04ee 03       		.byte	0x3
+ 2076 04ef 14000000 		.4byte	RegulationData
+ 2077 04f3 1B       		.uleb128 0x1b
+ 2078 04f4 6B000000 		.4byte	.LASF80
+ 2079 04f8 01       		.byte	0x1
+ 2080 04f9 5C       		.byte	0x5c
+ 2081 04fa 0C020000 		.4byte	0x20c
+ 2082 04fe 05       		.uleb128 0x5
+ 2083 04ff 03       		.byte	0x3
+ 2084 0500 1C000000 		.4byte	VoltageSenseData
+ 2085 0504 00       		.byte	0
+ 2086              		.section	.debug_abbrev,"",%progbits
+ 2087              	.Ldebug_abbrev0:
+ 2088 0000 01       		.uleb128 0x1
+ 2089 0001 11       		.uleb128 0x11
+ 2090 0002 01       		.byte	0x1
+ 2091 0003 25       		.uleb128 0x25
+ 2092 0004 0E       		.uleb128 0xe
+ 2093 0005 13       		.uleb128 0x13
+ 2094 0006 0B       		.uleb128 0xb
+ 2095 0007 03       		.uleb128 0x3
+ 2096 0008 0E       		.uleb128 0xe
+ 2097 0009 1B       		.uleb128 0x1b
+ 2098 000a 0E       		.uleb128 0xe
+ 2099 000b 55       		.uleb128 0x55
+ 2100 000c 17       		.uleb128 0x17
+ 2101 000d 11       		.uleb128 0x11
+ 2102 000e 01       		.uleb128 0x1
+ 2103 000f 10       		.uleb128 0x10
+ 2104 0010 17       		.uleb128 0x17
+ 2105 0011 00       		.byte	0
+ 2106 0012 00       		.byte	0
+ 2107 0013 02       		.uleb128 0x2
+ 2108 0014 24       		.uleb128 0x24
+ 2109 0015 00       		.byte	0
+ 2110 0016 0B       		.uleb128 0xb
+ 2111 0017 0B       		.uleb128 0xb
+ 2112 0018 3E       		.uleb128 0x3e
+ 2113 0019 0B       		.uleb128 0xb
+ 2114 001a 03       		.uleb128 0x3
+ 2115 001b 0E       		.uleb128 0xe
+ 2116 001c 00       		.byte	0
+ 2117 001d 00       		.byte	0
+ 2118 001e 03       		.uleb128 0x3
+ 2119 001f 24       		.uleb128 0x24
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 49
+
+
+ 2120 0020 00       		.byte	0
+ 2121 0021 0B       		.uleb128 0xb
+ 2122 0022 0B       		.uleb128 0xb
+ 2123 0023 3E       		.uleb128 0x3e
+ 2124 0024 0B       		.uleb128 0xb
+ 2125 0025 03       		.uleb128 0x3
+ 2126 0026 08       		.uleb128 0x8
+ 2127 0027 00       		.byte	0
+ 2128 0028 00       		.byte	0
+ 2129 0029 04       		.uleb128 0x4
+ 2130 002a 16       		.uleb128 0x16
+ 2131 002b 00       		.byte	0
+ 2132 002c 03       		.uleb128 0x3
+ 2133 002d 0E       		.uleb128 0xe
+ 2134 002e 3A       		.uleb128 0x3a
+ 2135 002f 0B       		.uleb128 0xb
+ 2136 0030 3B       		.uleb128 0x3b
+ 2137 0031 05       		.uleb128 0x5
+ 2138 0032 49       		.uleb128 0x49
+ 2139 0033 13       		.uleb128 0x13
+ 2140 0034 00       		.byte	0
+ 2141 0035 00       		.byte	0
+ 2142 0036 05       		.uleb128 0x5
+ 2143 0037 04       		.uleb128 0x4
+ 2144 0038 01       		.byte	0x1
+ 2145 0039 03       		.uleb128 0x3
+ 2146 003a 0E       		.uleb128 0xe
+ 2147 003b 0B       		.uleb128 0xb
+ 2148 003c 0B       		.uleb128 0xb
+ 2149 003d 3A       		.uleb128 0x3a
+ 2150 003e 0B       		.uleb128 0xb
+ 2151 003f 3B       		.uleb128 0x3b
+ 2152 0040 0B       		.uleb128 0xb
+ 2153 0041 01       		.uleb128 0x1
+ 2154 0042 13       		.uleb128 0x13
+ 2155 0043 00       		.byte	0
+ 2156 0044 00       		.byte	0
+ 2157 0045 06       		.uleb128 0x6
+ 2158 0046 28       		.uleb128 0x28
+ 2159 0047 00       		.byte	0
+ 2160 0048 03       		.uleb128 0x3
+ 2161 0049 08       		.uleb128 0x8
+ 2162 004a 1C       		.uleb128 0x1c
+ 2163 004b 0D       		.uleb128 0xd
+ 2164 004c 00       		.byte	0
+ 2165 004d 00       		.byte	0
+ 2166 004e 07       		.uleb128 0x7
+ 2167 004f 28       		.uleb128 0x28
+ 2168 0050 00       		.byte	0
+ 2169 0051 03       		.uleb128 0x3
+ 2170 0052 0E       		.uleb128 0xe
+ 2171 0053 1C       		.uleb128 0x1c
+ 2172 0054 0D       		.uleb128 0xd
+ 2173 0055 00       		.byte	0
+ 2174 0056 00       		.byte	0
+ 2175 0057 08       		.uleb128 0x8
+ 2176 0058 13       		.uleb128 0x13
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 50
+
+
+ 2177 0059 01       		.byte	0x1
+ 2178 005a 0B       		.uleb128 0xb
+ 2179 005b 0B       		.uleb128 0xb
+ 2180 005c 3A       		.uleb128 0x3a
+ 2181 005d 0B       		.uleb128 0xb
+ 2182 005e 3B       		.uleb128 0x3b
+ 2183 005f 0B       		.uleb128 0xb
+ 2184 0060 01       		.uleb128 0x1
+ 2185 0061 13       		.uleb128 0x13
+ 2186 0062 00       		.byte	0
+ 2187 0063 00       		.byte	0
+ 2188 0064 09       		.uleb128 0x9
+ 2189 0065 0D       		.uleb128 0xd
+ 2190 0066 00       		.byte	0
+ 2191 0067 03       		.uleb128 0x3
+ 2192 0068 0E       		.uleb128 0xe
+ 2193 0069 3A       		.uleb128 0x3a
+ 2194 006a 0B       		.uleb128 0xb
+ 2195 006b 3B       		.uleb128 0x3b
+ 2196 006c 0B       		.uleb128 0xb
+ 2197 006d 49       		.uleb128 0x49
+ 2198 006e 13       		.uleb128 0x13
+ 2199 006f 38       		.uleb128 0x38
+ 2200 0070 0B       		.uleb128 0xb
+ 2201 0071 00       		.byte	0
+ 2202 0072 00       		.byte	0
+ 2203 0073 0A       		.uleb128 0xa
+ 2204 0074 26       		.uleb128 0x26
+ 2205 0075 00       		.byte	0
+ 2206 0076 49       		.uleb128 0x49
+ 2207 0077 13       		.uleb128 0x13
+ 2208 0078 00       		.byte	0
+ 2209 0079 00       		.byte	0
+ 2210 007a 0B       		.uleb128 0xb
+ 2211 007b 16       		.uleb128 0x16
+ 2212 007c 00       		.byte	0
+ 2213 007d 03       		.uleb128 0x3
+ 2214 007e 0E       		.uleb128 0xe
+ 2215 007f 3A       		.uleb128 0x3a
+ 2216 0080 0B       		.uleb128 0xb
+ 2217 0081 3B       		.uleb128 0x3b
+ 2218 0082 0B       		.uleb128 0xb
+ 2219 0083 49       		.uleb128 0x49
+ 2220 0084 13       		.uleb128 0x13
+ 2221 0085 00       		.byte	0
+ 2222 0086 00       		.byte	0
+ 2223 0087 0C       		.uleb128 0xc
+ 2224 0088 2E       		.uleb128 0x2e
+ 2225 0089 00       		.byte	0
+ 2226 008a 3F       		.uleb128 0x3f
+ 2227 008b 19       		.uleb128 0x19
+ 2228 008c 03       		.uleb128 0x3
+ 2229 008d 0E       		.uleb128 0xe
+ 2230 008e 3A       		.uleb128 0x3a
+ 2231 008f 0B       		.uleb128 0xb
+ 2232 0090 3B       		.uleb128 0x3b
+ 2233 0091 0B       		.uleb128 0xb
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 51
+
+
+ 2234 0092 27       		.uleb128 0x27
+ 2235 0093 19       		.uleb128 0x19
+ 2236 0094 49       		.uleb128 0x49
+ 2237 0095 13       		.uleb128 0x13
+ 2238 0096 11       		.uleb128 0x11
+ 2239 0097 01       		.uleb128 0x1
+ 2240 0098 12       		.uleb128 0x12
+ 2241 0099 06       		.uleb128 0x6
+ 2242 009a 40       		.uleb128 0x40
+ 2243 009b 18       		.uleb128 0x18
+ 2244 009c 9742     		.uleb128 0x2117
+ 2245 009e 19       		.uleb128 0x19
+ 2246 009f 00       		.byte	0
+ 2247 00a0 00       		.byte	0
+ 2248 00a1 0D       		.uleb128 0xd
+ 2249 00a2 2E       		.uleb128 0x2e
+ 2250 00a3 01       		.byte	0x1
+ 2251 00a4 3F       		.uleb128 0x3f
+ 2252 00a5 19       		.uleb128 0x19
+ 2253 00a6 03       		.uleb128 0x3
+ 2254 00a7 0E       		.uleb128 0xe
+ 2255 00a8 3A       		.uleb128 0x3a
+ 2256 00a9 0B       		.uleb128 0xb
+ 2257 00aa 3B       		.uleb128 0x3b
+ 2258 00ab 0B       		.uleb128 0xb
+ 2259 00ac 27       		.uleb128 0x27
+ 2260 00ad 19       		.uleb128 0x19
+ 2261 00ae 49       		.uleb128 0x49
+ 2262 00af 13       		.uleb128 0x13
+ 2263 00b0 11       		.uleb128 0x11
+ 2264 00b1 01       		.uleb128 0x1
+ 2265 00b2 12       		.uleb128 0x12
+ 2266 00b3 06       		.uleb128 0x6
+ 2267 00b4 40       		.uleb128 0x40
+ 2268 00b5 18       		.uleb128 0x18
+ 2269 00b6 9742     		.uleb128 0x2117
+ 2270 00b8 19       		.uleb128 0x19
+ 2271 00b9 01       		.uleb128 0x1
+ 2272 00ba 13       		.uleb128 0x13
+ 2273 00bb 00       		.byte	0
+ 2274 00bc 00       		.byte	0
+ 2275 00bd 0E       		.uleb128 0xe
+ 2276 00be 05       		.uleb128 0x5
+ 2277 00bf 00       		.byte	0
+ 2278 00c0 03       		.uleb128 0x3
+ 2279 00c1 0E       		.uleb128 0xe
+ 2280 00c2 3A       		.uleb128 0x3a
+ 2281 00c3 0B       		.uleb128 0xb
+ 2282 00c4 3B       		.uleb128 0x3b
+ 2283 00c5 0B       		.uleb128 0xb
+ 2284 00c6 49       		.uleb128 0x49
+ 2285 00c7 13       		.uleb128 0x13
+ 2286 00c8 02       		.uleb128 0x2
+ 2287 00c9 18       		.uleb128 0x18
+ 2288 00ca 00       		.byte	0
+ 2289 00cb 00       		.byte	0
+ 2290 00cc 0F       		.uleb128 0xf
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 52
+
+
+ 2291 00cd 2E       		.uleb128 0x2e
+ 2292 00ce 00       		.byte	0
+ 2293 00cf 3F       		.uleb128 0x3f
+ 2294 00d0 19       		.uleb128 0x19
+ 2295 00d1 03       		.uleb128 0x3
+ 2296 00d2 0E       		.uleb128 0xe
+ 2297 00d3 3A       		.uleb128 0x3a
+ 2298 00d4 0B       		.uleb128 0xb
+ 2299 00d5 3B       		.uleb128 0x3b
+ 2300 00d6 0B       		.uleb128 0xb
+ 2301 00d7 27       		.uleb128 0x27
+ 2302 00d8 19       		.uleb128 0x19
+ 2303 00d9 11       		.uleb128 0x11
+ 2304 00da 01       		.uleb128 0x1
+ 2305 00db 12       		.uleb128 0x12
+ 2306 00dc 06       		.uleb128 0x6
+ 2307 00dd 40       		.uleb128 0x40
+ 2308 00de 18       		.uleb128 0x18
+ 2309 00df 9742     		.uleb128 0x2117
+ 2310 00e1 19       		.uleb128 0x19
+ 2311 00e2 00       		.byte	0
+ 2312 00e3 00       		.byte	0
+ 2313 00e4 10       		.uleb128 0x10
+ 2314 00e5 2E       		.uleb128 0x2e
+ 2315 00e6 01       		.byte	0x1
+ 2316 00e7 3F       		.uleb128 0x3f
+ 2317 00e8 19       		.uleb128 0x19
+ 2318 00e9 03       		.uleb128 0x3
+ 2319 00ea 0E       		.uleb128 0xe
+ 2320 00eb 3A       		.uleb128 0x3a
+ 2321 00ec 0B       		.uleb128 0xb
+ 2322 00ed 3B       		.uleb128 0x3b
+ 2323 00ee 0B       		.uleb128 0xb
+ 2324 00ef 27       		.uleb128 0x27
+ 2325 00f0 19       		.uleb128 0x19
+ 2326 00f1 11       		.uleb128 0x11
+ 2327 00f2 01       		.uleb128 0x1
+ 2328 00f3 12       		.uleb128 0x12
+ 2329 00f4 06       		.uleb128 0x6
+ 2330 00f5 40       		.uleb128 0x40
+ 2331 00f6 18       		.uleb128 0x18
+ 2332 00f7 9642     		.uleb128 0x2116
+ 2333 00f9 19       		.uleb128 0x19
+ 2334 00fa 01       		.uleb128 0x1
+ 2335 00fb 13       		.uleb128 0x13
+ 2336 00fc 00       		.byte	0
+ 2337 00fd 00       		.byte	0
+ 2338 00fe 11       		.uleb128 0x11
+ 2339 00ff 2E       		.uleb128 0x2e
+ 2340 0100 00       		.byte	0
+ 2341 0101 3F       		.uleb128 0x3f
+ 2342 0102 19       		.uleb128 0x19
+ 2343 0103 03       		.uleb128 0x3
+ 2344 0104 0E       		.uleb128 0xe
+ 2345 0105 3A       		.uleb128 0x3a
+ 2346 0106 0B       		.uleb128 0xb
+ 2347 0107 3B       		.uleb128 0x3b
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 53
+
+
+ 2348 0108 05       		.uleb128 0x5
+ 2349 0109 27       		.uleb128 0x27
+ 2350 010a 19       		.uleb128 0x19
+ 2351 010b 11       		.uleb128 0x11
+ 2352 010c 01       		.uleb128 0x1
+ 2353 010d 12       		.uleb128 0x12
+ 2354 010e 06       		.uleb128 0x6
+ 2355 010f 40       		.uleb128 0x40
+ 2356 0110 18       		.uleb128 0x18
+ 2357 0111 9642     		.uleb128 0x2116
+ 2358 0113 19       		.uleb128 0x19
+ 2359 0114 00       		.byte	0
+ 2360 0115 00       		.byte	0
+ 2361 0116 12       		.uleb128 0x12
+ 2362 0117 2E       		.uleb128 0x2e
+ 2363 0118 01       		.byte	0x1
+ 2364 0119 3F       		.uleb128 0x3f
+ 2365 011a 19       		.uleb128 0x19
+ 2366 011b 03       		.uleb128 0x3
+ 2367 011c 0E       		.uleb128 0xe
+ 2368 011d 3A       		.uleb128 0x3a
+ 2369 011e 0B       		.uleb128 0xb
+ 2370 011f 3B       		.uleb128 0x3b
+ 2371 0120 05       		.uleb128 0x5
+ 2372 0121 27       		.uleb128 0x27
+ 2373 0122 19       		.uleb128 0x19
+ 2374 0123 49       		.uleb128 0x49
+ 2375 0124 13       		.uleb128 0x13
+ 2376 0125 11       		.uleb128 0x11
+ 2377 0126 01       		.uleb128 0x1
+ 2378 0127 12       		.uleb128 0x12
+ 2379 0128 06       		.uleb128 0x6
+ 2380 0129 40       		.uleb128 0x40
+ 2381 012a 18       		.uleb128 0x18
+ 2382 012b 9642     		.uleb128 0x2116
+ 2383 012d 19       		.uleb128 0x19
+ 2384 012e 01       		.uleb128 0x1
+ 2385 012f 13       		.uleb128 0x13
+ 2386 0130 00       		.byte	0
+ 2387 0131 00       		.byte	0
+ 2388 0132 13       		.uleb128 0x13
+ 2389 0133 05       		.uleb128 0x5
+ 2390 0134 00       		.byte	0
+ 2391 0135 03       		.uleb128 0x3
+ 2392 0136 0E       		.uleb128 0xe
+ 2393 0137 3A       		.uleb128 0x3a
+ 2394 0138 0B       		.uleb128 0xb
+ 2395 0139 3B       		.uleb128 0x3b
+ 2396 013a 05       		.uleb128 0x5
+ 2397 013b 49       		.uleb128 0x49
+ 2398 013c 13       		.uleb128 0x13
+ 2399 013d 02       		.uleb128 0x2
+ 2400 013e 18       		.uleb128 0x18
+ 2401 013f 00       		.byte	0
+ 2402 0140 00       		.byte	0
+ 2403 0141 14       		.uleb128 0x14
+ 2404 0142 2E       		.uleb128 0x2e
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 54
+
+
+ 2405 0143 01       		.byte	0x1
+ 2406 0144 3F       		.uleb128 0x3f
+ 2407 0145 19       		.uleb128 0x19
+ 2408 0146 03       		.uleb128 0x3
+ 2409 0147 0E       		.uleb128 0xe
+ 2410 0148 3A       		.uleb128 0x3a
+ 2411 0149 0B       		.uleb128 0xb
+ 2412 014a 3B       		.uleb128 0x3b
+ 2413 014b 05       		.uleb128 0x5
+ 2414 014c 27       		.uleb128 0x27
+ 2415 014d 19       		.uleb128 0x19
+ 2416 014e 49       		.uleb128 0x49
+ 2417 014f 13       		.uleb128 0x13
+ 2418 0150 11       		.uleb128 0x11
+ 2419 0151 01       		.uleb128 0x1
+ 2420 0152 12       		.uleb128 0x12
+ 2421 0153 06       		.uleb128 0x6
+ 2422 0154 40       		.uleb128 0x40
+ 2423 0155 18       		.uleb128 0x18
+ 2424 0156 9742     		.uleb128 0x2117
+ 2425 0158 19       		.uleb128 0x19
+ 2426 0159 01       		.uleb128 0x1
+ 2427 015a 13       		.uleb128 0x13
+ 2428 015b 00       		.byte	0
+ 2429 015c 00       		.byte	0
+ 2430 015d 15       		.uleb128 0x15
+ 2431 015e 34       		.uleb128 0x34
+ 2432 015f 00       		.byte	0
+ 2433 0160 03       		.uleb128 0x3
+ 2434 0161 0E       		.uleb128 0xe
+ 2435 0162 3A       		.uleb128 0x3a
+ 2436 0163 0B       		.uleb128 0xb
+ 2437 0164 3B       		.uleb128 0x3b
+ 2438 0165 05       		.uleb128 0x5
+ 2439 0166 49       		.uleb128 0x49
+ 2440 0167 13       		.uleb128 0x13
+ 2441 0168 02       		.uleb128 0x2
+ 2442 0169 18       		.uleb128 0x18
+ 2443 016a 00       		.byte	0
+ 2444 016b 00       		.byte	0
+ 2445 016c 16       		.uleb128 0x16
+ 2446 016d 0F       		.uleb128 0xf
+ 2447 016e 00       		.byte	0
+ 2448 016f 0B       		.uleb128 0xb
+ 2449 0170 0B       		.uleb128 0xb
+ 2450 0171 49       		.uleb128 0x49
+ 2451 0172 13       		.uleb128 0x13
+ 2452 0173 00       		.byte	0
+ 2453 0174 00       		.byte	0
+ 2454 0175 17       		.uleb128 0x17
+ 2455 0176 2E       		.uleb128 0x2e
+ 2456 0177 00       		.byte	0
+ 2457 0178 3F       		.uleb128 0x3f
+ 2458 0179 19       		.uleb128 0x19
+ 2459 017a 03       		.uleb128 0x3
+ 2460 017b 0E       		.uleb128 0xe
+ 2461 017c 3A       		.uleb128 0x3a
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 55
+
+
+ 2462 017d 0B       		.uleb128 0xb
+ 2463 017e 3B       		.uleb128 0x3b
+ 2464 017f 05       		.uleb128 0x5
+ 2465 0180 27       		.uleb128 0x27
+ 2466 0181 19       		.uleb128 0x19
+ 2467 0182 49       		.uleb128 0x49
+ 2468 0183 13       		.uleb128 0x13
+ 2469 0184 11       		.uleb128 0x11
+ 2470 0185 01       		.uleb128 0x1
+ 2471 0186 12       		.uleb128 0x12
+ 2472 0187 06       		.uleb128 0x6
+ 2473 0188 40       		.uleb128 0x40
+ 2474 0189 18       		.uleb128 0x18
+ 2475 018a 9742     		.uleb128 0x2117
+ 2476 018c 19       		.uleb128 0x19
+ 2477 018d 00       		.byte	0
+ 2478 018e 00       		.byte	0
+ 2479 018f 18       		.uleb128 0x18
+ 2480 0190 2E       		.uleb128 0x2e
+ 2481 0191 01       		.byte	0x1
+ 2482 0192 03       		.uleb128 0x3
+ 2483 0193 0E       		.uleb128 0xe
+ 2484 0194 3A       		.uleb128 0x3a
+ 2485 0195 0B       		.uleb128 0xb
+ 2486 0196 3B       		.uleb128 0x3b
+ 2487 0197 05       		.uleb128 0x5
+ 2488 0198 27       		.uleb128 0x27
+ 2489 0199 19       		.uleb128 0x19
+ 2490 019a 49       		.uleb128 0x49
+ 2491 019b 13       		.uleb128 0x13
+ 2492 019c 11       		.uleb128 0x11
+ 2493 019d 01       		.uleb128 0x1
+ 2494 019e 12       		.uleb128 0x12
+ 2495 019f 06       		.uleb128 0x6
+ 2496 01a0 40       		.uleb128 0x40
+ 2497 01a1 18       		.uleb128 0x18
+ 2498 01a2 9742     		.uleb128 0x2117
+ 2499 01a4 19       		.uleb128 0x19
+ 2500 01a5 01       		.uleb128 0x1
+ 2501 01a6 13       		.uleb128 0x13
+ 2502 01a7 00       		.byte	0
+ 2503 01a8 00       		.byte	0
+ 2504 01a9 19       		.uleb128 0x19
+ 2505 01aa 01       		.uleb128 0x1
+ 2506 01ab 01       		.byte	0x1
+ 2507 01ac 49       		.uleb128 0x49
+ 2508 01ad 13       		.uleb128 0x13
+ 2509 01ae 01       		.uleb128 0x1
+ 2510 01af 13       		.uleb128 0x13
+ 2511 01b0 00       		.byte	0
+ 2512 01b1 00       		.byte	0
+ 2513 01b2 1A       		.uleb128 0x1a
+ 2514 01b3 21       		.uleb128 0x21
+ 2515 01b4 00       		.byte	0
+ 2516 01b5 49       		.uleb128 0x49
+ 2517 01b6 13       		.uleb128 0x13
+ 2518 01b7 2F       		.uleb128 0x2f
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 56
+
+
+ 2519 01b8 0B       		.uleb128 0xb
+ 2520 01b9 00       		.byte	0
+ 2521 01ba 00       		.byte	0
+ 2522 01bb 1B       		.uleb128 0x1b
+ 2523 01bc 34       		.uleb128 0x34
+ 2524 01bd 00       		.byte	0
+ 2525 01be 03       		.uleb128 0x3
+ 2526 01bf 0E       		.uleb128 0xe
+ 2527 01c0 3A       		.uleb128 0x3a
+ 2528 01c1 0B       		.uleb128 0xb
+ 2529 01c2 3B       		.uleb128 0x3b
+ 2530 01c3 0B       		.uleb128 0xb
+ 2531 01c4 49       		.uleb128 0x49
+ 2532 01c5 13       		.uleb128 0x13
+ 2533 01c6 02       		.uleb128 0x2
+ 2534 01c7 18       		.uleb128 0x18
+ 2535 01c8 00       		.byte	0
+ 2536 01c9 00       		.byte	0
+ 2537 01ca 00       		.byte	0
+ 2538              		.section	.debug_aranges,"",%progbits
+ 2539 0000 84000000 		.4byte	0x84
+ 2540 0004 0200     		.2byte	0x2
+ 2541 0006 00000000 		.4byte	.Ldebug_info0
+ 2542 000a 04       		.byte	0x4
+ 2543 000b 00       		.byte	0
+ 2544 000c 0000     		.2byte	0
+ 2545 000e 0000     		.2byte	0
+ 2546 0010 00000000 		.4byte	.LFB34
+ 2547 0014 14000000 		.4byte	.LFE34-.LFB34
+ 2548 0018 00000000 		.4byte	.LFB35
+ 2549 001c 14000000 		.4byte	.LFE35-.LFB35
+ 2550 0020 00000000 		.4byte	.LFB36
+ 2551 0024 38000000 		.4byte	.LFE36-.LFB36
+ 2552 0028 00000000 		.4byte	.LFB37
+ 2553 002c 38000000 		.4byte	.LFE37-.LFB37
+ 2554 0030 00000000 		.4byte	.LFB38
+ 2555 0034 14000000 		.4byte	.LFE38-.LFB38
+ 2556 0038 00000000 		.4byte	.LFB39
+ 2557 003c 14000000 		.4byte	.LFE39-.LFB39
+ 2558 0040 00000000 		.4byte	.LFB40
+ 2559 0044 60000000 		.4byte	.LFE40-.LFB40
+ 2560 0048 00000000 		.4byte	.LFB41
+ 2561 004c 2C000000 		.4byte	.LFE41-.LFB41
+ 2562 0050 00000000 		.4byte	.LFB42
+ 2563 0054 CC000000 		.4byte	.LFE42-.LFB42
+ 2564 0058 00000000 		.4byte	.LFB43
+ 2565 005c 30000000 		.4byte	.LFE43-.LFB43
+ 2566 0060 00000000 		.4byte	.LFB44
+ 2567 0064 04020000 		.4byte	.LFE44-.LFB44
+ 2568 0068 00000000 		.4byte	.LFB45
+ 2569 006c 14000000 		.4byte	.LFE45-.LFB45
+ 2570 0070 00000000 		.4byte	.LFB46
+ 2571 0074 DC010000 		.4byte	.LFE46-.LFB46
+ 2572 0078 00000000 		.4byte	.LFB47
+ 2573 007c EC000000 		.4byte	.LFE47-.LFB47
+ 2574 0080 00000000 		.4byte	0
+ 2575 0084 00000000 		.4byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 57
+
+
+ 2576              		.section	.debug_ranges,"",%progbits
+ 2577              	.Ldebug_ranges0:
+ 2578 0000 00000000 		.4byte	.LFB34
+ 2579 0004 14000000 		.4byte	.LFE34
+ 2580 0008 00000000 		.4byte	.LFB35
+ 2581 000c 14000000 		.4byte	.LFE35
+ 2582 0010 00000000 		.4byte	.LFB36
+ 2583 0014 38000000 		.4byte	.LFE36
+ 2584 0018 00000000 		.4byte	.LFB37
+ 2585 001c 38000000 		.4byte	.LFE37
+ 2586 0020 00000000 		.4byte	.LFB38
+ 2587 0024 14000000 		.4byte	.LFE38
+ 2588 0028 00000000 		.4byte	.LFB39
+ 2589 002c 14000000 		.4byte	.LFE39
+ 2590 0030 00000000 		.4byte	.LFB40
+ 2591 0034 60000000 		.4byte	.LFE40
+ 2592 0038 00000000 		.4byte	.LFB41
+ 2593 003c 2C000000 		.4byte	.LFE41
+ 2594 0040 00000000 		.4byte	.LFB42
+ 2595 0044 CC000000 		.4byte	.LFE42
+ 2596 0048 00000000 		.4byte	.LFB43
+ 2597 004c 30000000 		.4byte	.LFE43
+ 2598 0050 00000000 		.4byte	.LFB44
+ 2599 0054 04020000 		.4byte	.LFE44
+ 2600 0058 00000000 		.4byte	.LFB45
+ 2601 005c 14000000 		.4byte	.LFE45
+ 2602 0060 00000000 		.4byte	.LFB46
+ 2603 0064 DC010000 		.4byte	.LFE46
+ 2604 0068 00000000 		.4byte	.LFB47
+ 2605 006c EC000000 		.4byte	.LFE47
+ 2606 0070 00000000 		.4byte	0
+ 2607 0074 00000000 		.4byte	0
+ 2608              		.section	.debug_line,"",%progbits
+ 2609              	.Ldebug_line0:
+ 2610 0000 5E020000 		.section	.debug_str,"MS",%progbits,1
+ 2610      02006100 
+ 2610      00000201 
+ 2610      FB0E0D00 
+ 2610      01010101 
+ 2611              	.LASF71:
+ 2612 0000 72656775 		.ascii	"regulateBrightness\000"
+ 2612      6C617465 
+ 2612      42726967 
+ 2612      68746E65 
+ 2612      737300
+ 2613              	.LASF73:
+ 2614 0013 74696D65 		.ascii	"timerCountLocal\000"
+ 2614      72436F75 
+ 2614      6E744C6F 
+ 2614      63616C00 
+ 2615              	.LASF76:
+ 2616 0023 64617461 		.ascii	"dataIndex\000"
+ 2616      496E6465 
+ 2616      7800
+ 2617              	.LASF75:
+ 2618 002d 746F6C65 		.ascii	"tolerance\000"
+ 2618      72616E63 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 58
+
+
+ 2618      6500
+ 2619              	.LASF57:
+ 2620 0037 75706461 		.ascii	"updateBrightnessLevel\000"
+ 2620      74654272 
+ 2620      69676874 
+ 2620      6E657373 
+ 2620      4C657665 
+ 2621              	.LASF48:
+ 2622 004d 67657444 		.ascii	"getDriverID\000"
+ 2622      72697665 
+ 2622      72494400 
+ 2623              	.LASF74:
+ 2624 0059 74656D70 		.ascii	"temperatureStatus\000"
+ 2624      65726174 
+ 2624      75726553 
+ 2624      74617475 
+ 2624      7300
+ 2625              	.LASF80:
+ 2626 006b 566F6C74 		.ascii	"VoltageSenseData\000"
+ 2626      61676553 
+ 2626      656E7365 
+ 2626      44617461 
+ 2626      00
+ 2627              	.LASF2:
+ 2628 007c 73686F72 		.ascii	"short int\000"
+ 2628      7420696E 
+ 2628      7400
+ 2629              	.LASF41:
+ 2630 0086 70726576 		.ascii	"previousBrightness\000"
+ 2630      696F7573 
+ 2630      42726967 
+ 2630      68746E65 
+ 2630      737300
+ 2631              	.LASF17:
+ 2632 0099 73697A65 		.ascii	"sizetype\000"
+ 2632      74797065 
+ 2632      00
+ 2633              	.LASF54:
+ 2634 00a2 4144435F 		.ascii	"ADC_Value\000"
+ 2634      56616C75 
+ 2634      6500
+ 2635              	.LASF84:
+ 2636 00ac 63686563 		.ascii	"checkForUnderVoltage\000"
+ 2636      6B466F72 
+ 2636      556E6465 
+ 2636      72566F6C 
+ 2636      74616765 
+ 2637              	.LASF27:
+ 2638 00c1 54656D70 		.ascii	"TemperatureStatus\000"
+ 2638      65726174 
+ 2638      75726553 
+ 2638      74617475 
+ 2638      7300
+ 2639              	.LASF38:
+ 2640 00d3 44726976 		.ascii	"DriverProperties\000"
+ 2640      65725072 
+ 2640      6F706572 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 59
+
+
+ 2640      74696573 
+ 2640      00
+ 2641              	.LASF66:
+ 2642 00e4 4144435F 		.ascii	"ADC_WaitCount\000"
+ 2642      57616974 
+ 2642      436F756E 
+ 2642      7400
+ 2643              	.LASF52:
+ 2644 00f2 6E657744 		.ascii	"newDriverCount\000"
+ 2644      72697665 
+ 2644      72436F75 
+ 2644      6E7400
+ 2645              	.LASF72:
+ 2646 0101 54656D70 		.ascii	"TemperatureData\000"
+ 2646      65726174 
+ 2646      75726544 
+ 2646      61746100 
+ 2647              	.LASF10:
+ 2648 0111 75696E74 		.ascii	"uint16\000"
+ 2648      313600
+ 2649              	.LASF12:
+ 2650 0118 696E7431 		.ascii	"int16\000"
+ 2650      3600
+ 2651              	.LASF33:
+ 2652 011e 53414645 		.ascii	"SAFE_TEMPERATURE\000"
+ 2652      5F54454D 
+ 2652      50455241 
+ 2652      54555245 
+ 2652      00
+ 2653              	.LASF9:
+ 2654 012f 75696E74 		.ascii	"uint8\000"
+ 2654      3800
+ 2655              	.LASF68:
+ 2656 0135 74656D70 		.ascii	"temperatureSample_float\000"
+ 2656      65726174 
+ 2656      75726553 
+ 2656      616D706C 
+ 2656      655F666C 
+ 2657              	.LASF49:
+ 2658 014d 73657449 		.ascii	"setIdentityByComm\000"
+ 2658      64656E74 
+ 2658      69747942 
+ 2658      79436F6D 
+ 2658      6D00
+ 2659              	.LASF20:
+ 2660 015f 564F4C54 		.ascii	"VOLTAGE_SENSE\000"
+ 2660      4147455F 
+ 2660      53454E53 
+ 2660      4500
+ 2661              	.LASF23:
+ 2662 016d 53544152 		.ascii	"STARTUP\000"
+ 2662      54555000 
+ 2663              	.LASF14:
+ 2664 0175 666C6F61 		.ascii	"float\000"
+ 2664      7400
+ 2665              	.LASF6:
+ 2666 017b 6C6F6E67 		.ascii	"long long int\000"
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 60
+
+
+ 2666      206C6F6E 
+ 2666      6720696E 
+ 2666      7400
+ 2667              	.LASF60:
+ 2668 0189 6765744D 		.ascii	"getMaxTemperature\000"
+ 2668      61785465 
+ 2668      6D706572 
+ 2668      61747572 
+ 2668      6500
+ 2669              	.LASF34:
+ 2670 019b 54686572 		.ascii	"ThermalLimit\000"
+ 2670      6D616C4C 
+ 2670      696D6974 
+ 2670      00
+ 2671              	.LASF4:
+ 2672 01a8 6C6F6E67 		.ascii	"long int\000"
+ 2672      20696E74 
+ 2672      00
+ 2673              	.LASF30:
+ 2674 01b1 45584345 		.ascii	"EXCEEDED_LOWER_BOUND\000"
+ 2674      45444544 
+ 2674      5F4C4F57 
+ 2674      45525F42 
+ 2674      4F554E44 
+ 2675              	.LASF46:
+ 2676 01c6 566F6C74 		.ascii	"VoltageSenseProperties\000"
+ 2676      61676553 
+ 2676      656E7365 
+ 2676      50726F70 
+ 2676      65727469 
+ 2677              	.LASF47:
+ 2678 01dd 67657450 		.ascii	"getPreviousBrightness\000"
+ 2678      72657669 
+ 2678      6F757342 
+ 2678      72696768 
+ 2678      746E6573 
+ 2679              	.LASF19:
+ 2680 01f3 4D494352 		.ascii	"MICRO\000"
+ 2680      4F00
+ 2681              	.LASF31:
+ 2682 01f9 4552524F 		.ascii	"ERROR\000"
+ 2682      5200
+ 2683              	.LASF85:
+ 2684 01ff 67657454 		.ascii	"getTemperatureStatus\000"
+ 2684      656D7065 
+ 2684      72617475 
+ 2684      72655374 
+ 2684      61747573 
+ 2685              	.LASF1:
+ 2686 0214 756E7369 		.ascii	"unsigned char\000"
+ 2686      676E6564 
+ 2686      20636861 
+ 2686      7200
+ 2687              	.LASF26:
+ 2688 0222 4E4F5F43 		.ascii	"NO_CHANGE\000"
+ 2688      48414E47 
+ 2688      4500
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 61
+
+
+ 2689              	.LASF65:
+ 2690 022c 6C656E67 		.ascii	"length\000"
+ 2690      746800
+ 2691              	.LASF70:
+ 2692 0233 6765744E 		.ascii	"getNewMaxBrightness\000"
+ 2692      65774D61 
+ 2692      78427269 
+ 2692      6768746E 
+ 2692      65737300 
+ 2693              	.LASF50:
+ 2694 0247 73657444 		.ascii	"setDriverCount\000"
+ 2694      72697665 
+ 2694      72436F75 
+ 2694      6E7400
+ 2695              	.LASF83:
+ 2696 0256 433A5C55 		.ascii	"C:\\Users\\kylep\\Box Sync\\Feniex Firmware Files\\"
+ 2696      73657273 
+ 2696      5C6B796C 
+ 2696      65705C42 
+ 2696      6F782053 
+ 2697 0284 414C4220 		.ascii	"ALB Cube\\81-00024-01 AI Cube\\81-00024-01.cydsn\000"
+ 2697      43756265 
+ 2697      5C38312D 
+ 2697      30303032 
+ 2697      342D3031 
+ 2698              	.LASF61:
+ 2699 02b3 6368616E 		.ascii	"channelNumber\000"
+ 2699      6E656C4E 
+ 2699      756D6265 
+ 2699      7200
+ 2700              	.LASF22:
+ 2701 02c1 52656775 		.ascii	"RegulationState\000"
+ 2701      6C617469 
+ 2701      6F6E5374 
+ 2701      61746500 
+ 2702              	.LASF0:
+ 2703 02d1 7369676E 		.ascii	"signed char\000"
+ 2703      65642063 
+ 2703      68617200 
+ 2704              	.LASF7:
+ 2705 02dd 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 2705      206C6F6E 
+ 2705      6720756E 
+ 2705      7369676E 
+ 2705      65642069 
+ 2706              	.LASF8:
+ 2707 02f4 756E7369 		.ascii	"unsigned int\000"
+ 2707      676E6564 
+ 2707      20696E74 
+ 2707      00
+ 2708              	.LASF37:
+ 2709 0301 624C6173 		.ascii	"bLastDriverInChain\000"
+ 2709      74447269 
+ 2709      76657249 
+ 2709      6E436861 
+ 2709      696E00
+ 2710              	.LASF56:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 62
+
+
+ 2711 0314 70726F63 		.ascii	"processSoftStart\000"
+ 2711      65737353 
+ 2711      6F667453 
+ 2711      74617274 
+ 2711      00
+ 2712              	.LASF58:
+ 2713 0325 62726967 		.ascii	"brightnessLevel\000"
+ 2713      68746E65 
+ 2713      73734C65 
+ 2713      76656C00 
+ 2714              	.LASF79:
+ 2715 0335 52656775 		.ascii	"RegulationData\000"
+ 2715      6C617469 
+ 2715      6F6E4461 
+ 2715      746100
+ 2716              	.LASF40:
+ 2717 0344 72656775 		.ascii	"regulatedBrightness\000"
+ 2717      6C617465 
+ 2717      64427269 
+ 2717      6768746E 
+ 2717      65737300 
+ 2718              	.LASF3:
+ 2719 0358 73686F72 		.ascii	"short unsigned int\000"
+ 2719      7420756E 
+ 2719      7369676E 
+ 2719      65642069 
+ 2719      6E7400
+ 2720              	.LASF82:
+ 2721 036b 2E5C4472 		.ascii	".\\DriverControl.c\000"
+ 2721      69766572 
+ 2721      436F6E74 
+ 2721      726F6C2E 
+ 2721      6300
+ 2722              	.LASF39:
+ 2723 037d 72657175 		.ascii	"requestedBrightness\000"
+ 2723      65737465 
+ 2723      64427269 
+ 2723      6768746E 
+ 2723      65737300 
+ 2724              	.LASF16:
+ 2725 0391 63686172 		.ascii	"char\000"
+ 2725      00
+ 2726              	.LASF29:
+ 2727 0396 45584345 		.ascii	"EXCEEDED_UPPER_BOUND\000"
+ 2727      45444544 
+ 2727      5F555050 
+ 2727      45525F42 
+ 2727      4F554E44 
+ 2728              	.LASF81:
+ 2729 03ab 474E5520 		.ascii	"GNU C 4.9.3 20150303 (release) [ARM/embedded-4_9-br"
+ 2729      4320342E 
+ 2729      392E3320 
+ 2729      32303135 
+ 2729      30333033 
+ 2730 03de 616E6368 		.ascii	"anch revision 221220] -mcpu=cortex-m0 -mthumb -g -O"
+ 2730      20726576 
+ 2730      6973696F 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 63
+
+
+ 2730      6E203232 
+ 2730      31323230 
+ 2731 0411 30202D66 		.ascii	"0 -ffunction-sections -ffat-lto-objects\000"
+ 2731      66756E63 
+ 2731      74696F6E 
+ 2731      2D736563 
+ 2731      74696F6E 
+ 2732              	.LASF42:
+ 2733 0439 63757272 		.ascii	"currentState\000"
+ 2733      656E7453 
+ 2733      74617465 
+ 2733      00
+ 2734              	.LASF36:
+ 2735 0446 64726976 		.ascii	"driverCount\000"
+ 2735      6572436F 
+ 2735      756E7400 
+ 2736              	.LASF78:
+ 2737 0452 506F7369 		.ascii	"PositionData\000"
+ 2737      74696F6E 
+ 2737      44617461 
+ 2737      00
+ 2738              	.LASF69:
+ 2739 045f 6368616E 		.ascii	"channelIndex\000"
+ 2739      6E656C49 
+ 2739      6E646578 
+ 2739      00
+ 2740              	.LASF63:
+ 2741 046c 6253696E 		.ascii	"bSingleSample\000"
+ 2741      676C6553 
+ 2741      616D706C 
+ 2741      6500
+ 2742              	.LASF55:
+ 2743 047a 73657441 		.ascii	"setAsNotLastDriverInChain\000"
+ 2743      734E6F74 
+ 2743      4C617374 
+ 2743      44726976 
+ 2743      6572496E 
+ 2744              	.LASF18:
+ 2745 0494 53574954 		.ascii	"SWITCH_NODE\000"
+ 2745      43485F4E 
+ 2745      4F444500 
+ 2746              	.LASF11:
+ 2747 04a0 75696E74 		.ascii	"uint32\000"
+ 2747      333200
+ 2748              	.LASF5:
+ 2749 04a7 6C6F6E67 		.ascii	"long unsigned int\000"
+ 2749      20756E73 
+ 2749      69676E65 
+ 2749      6420696E 
+ 2749      7400
+ 2750              	.LASF13:
+ 2751 04b9 696E7433 		.ascii	"int32\000"
+ 2751      3200
+ 2752              	.LASF77:
+ 2753 04bf 54686572 		.ascii	"ThermalLimitArray\000"
+ 2753      6D616C4C 
+ 2753      696D6974 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 64
+
+
+ 2753      41727261 
+ 2753      7900
+ 2754              	.LASF67:
+ 2755 04d1 74656D70 		.ascii	"temperatureSample_16\000"
+ 2755      65726174 
+ 2755      75726553 
+ 2755      616D706C 
+ 2755      655F3136 
+ 2756              	.LASF59:
+ 2757 04e6 62526567 		.ascii	"bRegulated\000"
+ 2757      756C6174 
+ 2757      656400
+ 2758              	.LASF44:
+ 2759 04f1 52656775 		.ascii	"RegulationProperties\000"
+ 2759      6C617469 
+ 2759      6F6E5072 
+ 2759      6F706572 
+ 2759      74696573 
+ 2760              	.LASF32:
+ 2761 0506 4D41585F 		.ascii	"MAX_TEMPERATURE\000"
+ 2761      54454D50 
+ 2761      45524154 
+ 2761      55524500 
+ 2762              	.LASF53:
+ 2763 0516 69734C61 		.ascii	"isLastDriverInChain\000"
+ 2763      73744472 
+ 2763      69766572 
+ 2763      496E4368 
+ 2763      61696E00 
+ 2764              	.LASF45:
+ 2765 052a 62456E61 		.ascii	"bEnable\000"
+ 2765      626C6500 
+ 2766              	.LASF28:
+ 2767 0532 57495448 		.ascii	"WITHIN_TOLERANCE\000"
+ 2767      494E5F54 
+ 2767      4F4C4552 
+ 2767      414E4345 
+ 2767      00
+ 2768              	.LASF64:
+ 2769 0543 73616D70 		.ascii	"sampleArray\000"
+ 2769      6C654172 
+ 2769      72617900 
+ 2770              	.LASF25:
+ 2771 054f 53544541 		.ascii	"STEADY_DECREASE\000"
+ 2771      44595F44 
+ 2771      45435245 
+ 2771      41534500 
+ 2772              	.LASF21:
+ 2773 055f 54656D70 		.ascii	"TemperaturePoint\000"
+ 2773      65726174 
+ 2773      75726550 
+ 2773      6F696E74 
+ 2773      00
+ 2774              	.LASF51:
+ 2775 0570 706F7369 		.ascii	"positionNumber\000"
+ 2775      74696F6E 
+ 2775      4E756D62 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWR86sf.s 			page 65
+
+
+ 2775      657200
+ 2776              	.LASF62:
+ 2777 057f 67657454 		.ascii	"getTemperatureSample\000"
+ 2777      656D7065 
+ 2777      72617475 
+ 2777      72655361 
+ 2777      6D706C65 
+ 2778              	.LASF15:
+ 2779 0594 646F7562 		.ascii	"double\000"
+ 2779      6C6500
+ 2780              	.LASF43:
+ 2781 059b 7363616C 		.ascii	"scalingFactor\000"
+ 2781      696E6746 
+ 2781      6163746F 
+ 2781      7200
+ 2782              	.LASF24:
+ 2783 05a9 53544541 		.ascii	"STEADY_INCREASE\000"
+ 2783      44595F49 
+ 2783      4E435245 
+ 2783      41534500 
+ 2784              	.LASF35:
+ 2785 05b9 49445F4E 		.ascii	"ID_Number\000"
+ 2785      756D6265 
+ 2785      7200
+ 2786              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 4.9.3 20150303 (release) [ARM/embedded-4_9-br

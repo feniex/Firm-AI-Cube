@@ -1,0 +1,677 @@
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc2Bmexa.s 			page 1
+
+
+   1              		.cpu cortex-m0
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 34, 0
+  11              		.eabi_attribute 18, 4
+  12              		.code	16
+  13              		.file	"DieTemp.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.global	__aeabi_idiv
+  18              		.section	.text.DieTemp_CountsTo_Celsius,"ax",%progbits
+  19              		.align	2
+  20              		.global	DieTemp_CountsTo_Celsius
+  21              		.code	16
+  22              		.thumb_func
+  23              		.type	DieTemp_CountsTo_Celsius, %function
+  24              	DieTemp_CountsTo_Celsius:
+  25              	.LFB0:
+  26              		.file 1 ".\\Generated_Source\\PSoC4\\DieTemp.c"
+   1:.\Generated_Source\PSoC4/DieTemp.c **** /*******************************************************************************
+   2:.\Generated_Source\PSoC4/DieTemp.c **** * File Name: DieTemp.c
+   3:.\Generated_Source\PSoC4/DieTemp.c **** * Version 1.0
+   4:.\Generated_Source\PSoC4/DieTemp.c **** *
+   5:.\Generated_Source\PSoC4/DieTemp.c **** * Description:
+   6:.\Generated_Source\PSoC4/DieTemp.c **** *  This file provides the source code of APIs for the DieTemp_P4 component.
+   7:.\Generated_Source\PSoC4/DieTemp.c **** *
+   8:.\Generated_Source\PSoC4/DieTemp.c **** *******************************************************************************
+   9:.\Generated_Source\PSoC4/DieTemp.c **** * Copyright 2013, Cypress Semiconductor Corporation.  All rights reserved.
+  10:.\Generated_Source\PSoC4/DieTemp.c **** * You may use this file only in accordance with the license, terms, conditions,
+  11:.\Generated_Source\PSoC4/DieTemp.c **** * disclaimers, and limitations in the end user license agreement accompanying
+  12:.\Generated_Source\PSoC4/DieTemp.c **** * the software package with which this file was provided.
+  13:.\Generated_Source\PSoC4/DieTemp.c **** *******************************************************************************/
+  14:.\Generated_Source\PSoC4/DieTemp.c **** 
+  15:.\Generated_Source\PSoC4/DieTemp.c **** #include "DieTemp.h"
+  16:.\Generated_Source\PSoC4/DieTemp.c **** 
+  17:.\Generated_Source\PSoC4/DieTemp.c **** 
+  18:.\Generated_Source\PSoC4/DieTemp.c **** /*******************************************************************************
+  19:.\Generated_Source\PSoC4/DieTemp.c **** * Function Name: DieTemp_CountsTo_Celsius
+  20:.\Generated_Source\PSoC4/DieTemp.c **** ********************************************************************************
+  21:.\Generated_Source\PSoC4/DieTemp.c **** *
+  22:.\Generated_Source\PSoC4/DieTemp.c **** * Summary:
+  23:.\Generated_Source\PSoC4/DieTemp.c **** *  Converts the ADC output to degrees Celsius.
+  24:.\Generated_Source\PSoC4/DieTemp.c **** *
+  25:.\Generated_Source\PSoC4/DieTemp.c **** * Parameters:
+  26:.\Generated_Source\PSoC4/DieTemp.c **** *  int32 adcCounts:
+  27:.\Generated_Source\PSoC4/DieTemp.c **** *   Result from the ADC Conversion
+  28:.\Generated_Source\PSoC4/DieTemp.c **** *
+  29:.\Generated_Source\PSoC4/DieTemp.c **** * Return:
+  30:.\Generated_Source\PSoC4/DieTemp.c **** *  Temperature in degrees Celsius
+  31:.\Generated_Source\PSoC4/DieTemp.c **** *
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc2Bmexa.s 			page 2
+
+
+  32:.\Generated_Source\PSoC4/DieTemp.c **** * Global variables:
+  33:.\Generated_Source\PSoC4/DieTemp.c **** *  None
+  34:.\Generated_Source\PSoC4/DieTemp.c **** *
+  35:.\Generated_Source\PSoC4/DieTemp.c **** *******************************************************************************/
+  36:.\Generated_Source\PSoC4/DieTemp.c **** int32 DieTemp_CountsTo_Celsius(int32 adcCounts)
+  37:.\Generated_Source\PSoC4/DieTemp.c **** {
+  27              		.loc 1 37 0
+  28              		.cfi_startproc
+  29 0000 80B5     		push	{r7, lr}
+  30              		.cfi_def_cfa_offset 8
+  31              		.cfi_offset 7, -8
+  32              		.cfi_offset 14, -4
+  33 0002 88B0     		sub	sp, sp, #32
+  34              		.cfi_def_cfa_offset 40
+  35 0004 00AF     		add	r7, sp, #0
+  36              		.cfi_def_cfa_register 7
+  37 0006 7860     		str	r0, [r7, #4]
+  38:.\Generated_Source\PSoC4/DieTemp.c ****     int32 tempCelsius;
+  39:.\Generated_Source\PSoC4/DieTemp.c ****     int32 tInitial;
+  40:.\Generated_Source\PSoC4/DieTemp.c ****     int32 tAdjust;
+  41:.\Generated_Source\PSoC4/DieTemp.c ****     int32 offsetReg;
+  42:.\Generated_Source\PSoC4/DieTemp.c ****     int32 multReg;
+  43:.\Generated_Source\PSoC4/DieTemp.c **** 
+  44:.\Generated_Source\PSoC4/DieTemp.c ****     offsetReg = (int16)DieTemp_SAR_TEMP_OFFSET_REG;
+  38              		.loc 1 44 0
+  39 0008 244B     		ldr	r3, .L8
+  40 000a 1B88     		ldrh	r3, [r3]
+  41 000c 9BB2     		uxth	r3, r3
+  42 000e 9BB2     		uxth	r3, r3
+  43 0010 1BB2     		sxth	r3, r3
+  44 0012 BB61     		str	r3, [r7, #24]
+  45:.\Generated_Source\PSoC4/DieTemp.c ****     multReg   = (int16)DieTemp_SAR_TEMP_MULTIPLIER_REG;
+  45              		.loc 1 45 0
+  46 0014 224B     		ldr	r3, .L8+4
+  47 0016 1B88     		ldrh	r3, [r3]
+  48 0018 9BB2     		uxth	r3, r3
+  49 001a 9BB2     		uxth	r3, r3
+  50 001c 1BB2     		sxth	r3, r3
+  51 001e 7B61     		str	r3, [r7, #20]
+  46:.\Generated_Source\PSoC4/DieTemp.c ****     /* Calculate tInitial in Q16.16 */
+  47:.\Generated_Source\PSoC4/DieTemp.c ****     tInitial = (adcCounts * multReg) + (offsetReg * DieTemp_SAR_TEMP_OFFSET_MULT);
+  52              		.loc 1 47 0
+  53 0020 7B68     		ldr	r3, [r7, #4]
+  54 0022 7A69     		ldr	r2, [r7, #20]
+  55 0024 5A43     		mul	r2, r3
+  56 0026 BB69     		ldr	r3, [r7, #24]
+  57 0028 9B02     		lsl	r3, r3, #10
+  58 002a D318     		add	r3, r2, r3
+  59 002c 3B61     		str	r3, [r7, #16]
+  48:.\Generated_Source\PSoC4/DieTemp.c **** 
+  49:.\Generated_Source\PSoC4/DieTemp.c ****     if(tInitial >= DieTemp_DUAL_SLOPE_CORRECTION)
+  60              		.loc 1 49 0
+  61 002e 3B69     		ldr	r3, [r7, #16]
+  62 0030 1C4A     		ldr	r2, .L8+8
+  63 0032 9342     		cmp	r3, r2
+  64 0034 0EDD     		ble	.L2
+  50:.\Generated_Source\PSoC4/DieTemp.c ****     {
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc2Bmexa.s 			page 3
+
+
+  51:.\Generated_Source\PSoC4/DieTemp.c ****         /* Shift (100 - tInitial) by 4 bits to prevent scale-adjustment from overflowing. */
+  52:.\Generated_Source\PSoC4/DieTemp.c ****         /* Then divide by the integer bits of (100 - cutoff) to end up with a Q16.16 tAdjust */
+  53:.\Generated_Source\PSoC4/DieTemp.c ****         tAdjust = (DieTemp_SCALE_ADJUSTMENT * (((int32)DieTemp_HIGH_TEMPERATURE - tInitial)
+  65              		.loc 1 53 0
+  66 0036 3B69     		ldr	r3, [r7, #16]
+  67 0038 C822     		mov	r2, #200
+  68 003a D203     		lsl	r2, r2, #15
+  69 003c D31A     		sub	r3, r2, r3
+  54:.\Generated_Source\PSoC4/DieTemp.c ****             / (int32)DieTemp_SCALE_ADJUSTMENT_DIVIDER)) /
+  70              		.loc 1 54 0
+  71 003e 00D5     		bpl	.L3
+  72 0040 0F33     		add	r3, r3, #15
+  73              	.L3:
+  74 0042 1B11     		asr	r3, r3, #4
+  53:.\Generated_Source\PSoC4/DieTemp.c ****             / (int32)DieTemp_SCALE_ADJUSTMENT_DIVIDER)) /
+  75              		.loc 1 53 0
+  76 0044 DB00     		lsl	r3, r3, #3
+  77 0046 181C     		mov	r0, r3
+  78 0048 5521     		mov	r1, #85
+  79 004a FFF7FEFF 		bl	__aeabi_idiv
+  80 004e 031C     		mov	r3, r0
+  81 0050 FB61     		str	r3, [r7, #28]
+  82 0052 0FE0     		b	.L4
+  83              	.L2:
+  55:.\Generated_Source\PSoC4/DieTemp.c ****             (((int32)DieTemp_HIGH_TEMPERATURE - (int32)DieTemp_DUAL_SLOPE_CORRECTION) /
+  56:.\Generated_Source\PSoC4/DieTemp.c ****             DieTemp_SAR_TEMP_DIVIDER);
+  57:.\Generated_Source\PSoC4/DieTemp.c ****     }
+  58:.\Generated_Source\PSoC4/DieTemp.c ****     else
+  59:.\Generated_Source\PSoC4/DieTemp.c ****     {
+  60:.\Generated_Source\PSoC4/DieTemp.c ****         /* Shift (40 + tInitial) by 4 bits to prevent scale-adjustment from overflowing. */
+  61:.\Generated_Source\PSoC4/DieTemp.c ****         /* Then divide by the integer bits of (40 + cutoff) to end up with a Q16.16 tAdjust */
+  62:.\Generated_Source\PSoC4/DieTemp.c ****         tAdjust = ((int32)DieTemp_SCALE_ADJUSTMENT * (((int32)DieTemp_LOW_TEMPERATURE + tInitial)
+  84              		.loc 1 62 0
+  85 0054 3B69     		ldr	r3, [r7, #16]
+  86 0056 A022     		mov	r2, #160
+  87 0058 9203     		lsl	r2, r2, #14
+  88 005a 9446     		mov	ip, r2
+  89 005c 6344     		add	r3, r3, ip
+  63:.\Generated_Source\PSoC4/DieTemp.c ****            / (int32)DieTemp_SCALE_ADJUSTMENT_DIVIDER)) /
+  90              		.loc 1 63 0
+  91 005e 002B     		cmp	r3, #0
+  92 0060 00DA     		bge	.L5
+  93 0062 0F33     		add	r3, r3, #15
+  94              	.L5:
+  95 0064 1B11     		asr	r3, r3, #4
+  62:.\Generated_Source\PSoC4/DieTemp.c ****            / (int32)DieTemp_SCALE_ADJUSTMENT_DIVIDER)) /
+  96              		.loc 1 62 0
+  97 0066 DB00     		lsl	r3, r3, #3
+  98 0068 181C     		mov	r0, r3
+  99 006a 3721     		mov	r1, #55
+ 100 006c FFF7FEFF 		bl	__aeabi_idiv
+ 101 0070 031C     		mov	r3, r0
+ 102 0072 FB61     		str	r3, [r7, #28]
+ 103              	.L4:
+  64:.\Generated_Source\PSoC4/DieTemp.c ****             (((int32)DieTemp_LOW_TEMPERATURE + (int32)DieTemp_DUAL_SLOPE_CORRECTION) /
+  65:.\Generated_Source\PSoC4/DieTemp.c ****             (int32)DieTemp_SAR_TEMP_DIVIDER);
+  66:.\Generated_Source\PSoC4/DieTemp.c ****     }
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc2Bmexa.s 			page 4
+
+
+  67:.\Generated_Source\PSoC4/DieTemp.c **** 
+  68:.\Generated_Source\PSoC4/DieTemp.c ****     /* Add tInitial + tAdjust + 0.5 to round to nearest int. Shift off frac bits, and return. */
+  69:.\Generated_Source\PSoC4/DieTemp.c ****     tempCelsius = tInitial + tAdjust + DieTemp_HALF_OF_ONE;
+ 104              		.loc 1 69 0
+ 105 0074 3A69     		ldr	r2, [r7, #16]
+ 106 0076 FB69     		ldr	r3, [r7, #28]
+ 107 0078 D318     		add	r3, r2, r3
+ 108 007a 8022     		mov	r2, #128
+ 109 007c 1202     		lsl	r2, r2, #8
+ 110 007e 9446     		mov	ip, r2
+ 111 0080 6344     		add	r3, r3, ip
+ 112 0082 FB60     		str	r3, [r7, #12]
+  70:.\Generated_Source\PSoC4/DieTemp.c **** 
+  71:.\Generated_Source\PSoC4/DieTemp.c ****     return (tempCelsius / DieTemp_SAR_TEMP_OFFSET_DIVIDER);
+ 113              		.loc 1 71 0
+ 114 0084 FB68     		ldr	r3, [r7, #12]
+ 115 0086 002B     		cmp	r3, #0
+ 116 0088 02DA     		bge	.L6
+ 117 008a 074A     		ldr	r2, .L8+12
+ 118 008c 9446     		mov	ip, r2
+ 119 008e 6344     		add	r3, r3, ip
+ 120              	.L6:
+ 121 0090 1B14     		asr	r3, r3, #16
+  72:.\Generated_Source\PSoC4/DieTemp.c **** }
+ 122              		.loc 1 72 0
+ 123 0092 181C     		mov	r0, r3
+ 124 0094 BD46     		mov	sp, r7
+ 125 0096 08B0     		add	sp, sp, #32
+ 126              		@ sp needed
+ 127 0098 80BD     		pop	{r7, pc}
+ 128              	.L9:
+ 129 009a C046     		.align	2
+ 130              	.L8:
+ 131 009c 66F1FF0F 		.word	268431718
+ 132 00a0 64F1FF0F 		.word	268431716
+ 133 00a4 FFFF0E00 		.word	983039
+ 134 00a8 FFFF0000 		.word	65535
+ 135              		.cfi_endproc
+ 136              	.LFE0:
+ 137              		.size	DieTemp_CountsTo_Celsius, .-DieTemp_CountsTo_Celsius
+ 138              		.text
+ 139              	.Letext0:
+ 140              		.file 2 ".\\Generated_Source\\PSoC4\\cytypes.h"
+ 141              		.section	.debug_info,"",%progbits
+ 142              	.Ldebug_info0:
+ 143 0000 23010000 		.4byte	0x123
+ 144 0004 0400     		.2byte	0x4
+ 145 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 146 000a 04       		.byte	0x4
+ 147 000b 01       		.uleb128 0x1
+ 148 000c 0E000000 		.4byte	.LASF22
+ 149 0010 01       		.byte	0x1
+ 150 0011 A9000000 		.4byte	.LASF23
+ 151 0015 FE000000 		.4byte	.LASF24
+ 152 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 153 001d 00000000 		.4byte	0
+ 154 0021 00000000 		.4byte	.Ldebug_line0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc2Bmexa.s 			page 5
+
+
+ 155 0025 02       		.uleb128 0x2
+ 156 0026 01       		.byte	0x1
+ 157 0027 06       		.byte	0x6
+ 158 0028 D8010000 		.4byte	.LASF0
+ 159 002c 02       		.uleb128 0x2
+ 160 002d 01       		.byte	0x1
+ 161 002e 08       		.byte	0x8
+ 162 002f 74010000 		.4byte	.LASF1
+ 163 0033 02       		.uleb128 0x2
+ 164 0034 02       		.byte	0x2
+ 165 0035 05       		.byte	0x5
+ 166 0036 F8010000 		.4byte	.LASF2
+ 167 003a 02       		.uleb128 0x2
+ 168 003b 02       		.byte	0x2
+ 169 003c 07       		.byte	0x7
+ 170 003d C5010000 		.4byte	.LASF3
+ 171 0041 02       		.uleb128 0x2
+ 172 0042 04       		.byte	0x4
+ 173 0043 05       		.byte	0x5
+ 174 0044 8F010000 		.4byte	.LASF4
+ 175 0048 02       		.uleb128 0x2
+ 176 0049 04       		.byte	0x4
+ 177 004a 07       		.byte	0x7
+ 178 004b CC000000 		.4byte	.LASF5
+ 179 004f 02       		.uleb128 0x2
+ 180 0050 08       		.byte	0x8
+ 181 0051 05       		.byte	0x5
+ 182 0052 00000000 		.4byte	.LASF6
+ 183 0056 02       		.uleb128 0x2
+ 184 0057 08       		.byte	0x8
+ 185 0058 07       		.byte	0x7
+ 186 0059 DE000000 		.4byte	.LASF7
+ 187 005d 03       		.uleb128 0x3
+ 188 005e 04       		.byte	0x4
+ 189 005f 05       		.byte	0x5
+ 190 0060 696E7400 		.ascii	"int\000"
+ 191 0064 02       		.uleb128 0x2
+ 192 0065 04       		.byte	0x4
+ 193 0066 07       		.byte	0x7
+ 194 0067 9C000000 		.4byte	.LASF8
+ 195 006b 04       		.uleb128 0x4
+ 196 006c 02020000 		.4byte	.LASF9
+ 197 0070 02       		.byte	0x2
+ 198 0071 3901     		.2byte	0x139
+ 199 0073 3A000000 		.4byte	0x3a
+ 200 0077 04       		.uleb128 0x4
+ 201 0078 F2010000 		.4byte	.LASF10
+ 202 007c 02       		.byte	0x2
+ 203 007d 3C01     		.2byte	0x13c
+ 204 007f 33000000 		.4byte	0x33
+ 205 0083 04       		.uleb128 0x4
+ 206 0084 12020000 		.4byte	.LASF11
+ 207 0088 02       		.byte	0x2
+ 208 0089 3D01     		.2byte	0x13d
+ 209 008b 41000000 		.4byte	0x41
+ 210 008f 02       		.uleb128 0x2
+ 211 0090 04       		.byte	0x4
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc2Bmexa.s 			page 6
+
+
+ 212 0091 04       		.byte	0x4
+ 213 0092 EC010000 		.4byte	.LASF12
+ 214 0096 02       		.uleb128 0x2
+ 215 0097 08       		.byte	0x8
+ 216 0098 04       		.byte	0x4
+ 217 0099 A8010000 		.4byte	.LASF13
+ 218 009d 02       		.uleb128 0x2
+ 219 009e 01       		.byte	0x1
+ 220 009f 08       		.byte	0x8
+ 221 00a0 82010000 		.4byte	.LASF14
+ 222 00a4 04       		.uleb128 0x4
+ 223 00a5 A2010000 		.4byte	.LASF15
+ 224 00a9 02       		.byte	0x2
+ 225 00aa E301     		.2byte	0x1e3
+ 226 00ac B0000000 		.4byte	0xb0
+ 227 00b0 05       		.uleb128 0x5
+ 228 00b1 6B000000 		.4byte	0x6b
+ 229 00b5 02       		.uleb128 0x2
+ 230 00b6 04       		.byte	0x4
+ 231 00b7 07       		.byte	0x7
+ 232 00b8 09020000 		.4byte	.LASF16
+ 233 00bc 06       		.uleb128 0x6
+ 234 00bd 5B010000 		.4byte	.LASF25
+ 235 00c1 01       		.byte	0x1
+ 236 00c2 24       		.byte	0x24
+ 237 00c3 83000000 		.4byte	0x83
+ 238 00c7 00000000 		.4byte	.LFB0
+ 239 00cb AC000000 		.4byte	.LFE0-.LFB0
+ 240 00cf 01       		.uleb128 0x1
+ 241 00d0 9C       		.byte	0x9c
+ 242 00d1 07       		.uleb128 0x7
+ 243 00d2 AF010000 		.4byte	.LASF26
+ 244 00d6 01       		.byte	0x1
+ 245 00d7 24       		.byte	0x24
+ 246 00d8 83000000 		.4byte	0x83
+ 247 00dc 02       		.uleb128 0x2
+ 248 00dd 91       		.byte	0x91
+ 249 00de 5C       		.sleb128 -36
+ 250 00df 08       		.uleb128 0x8
+ 251 00e0 B9010000 		.4byte	.LASF17
+ 252 00e4 01       		.byte	0x1
+ 253 00e5 26       		.byte	0x26
+ 254 00e6 83000000 		.4byte	0x83
+ 255 00ea 02       		.uleb128 0x2
+ 256 00eb 91       		.byte	0x91
+ 257 00ec 64       		.sleb128 -28
+ 258 00ed 08       		.uleb128 0x8
+ 259 00ee F5000000 		.4byte	.LASF18
+ 260 00f2 01       		.byte	0x1
+ 261 00f3 27       		.byte	0x27
+ 262 00f4 83000000 		.4byte	0x83
+ 263 00f8 02       		.uleb128 0x2
+ 264 00f9 91       		.byte	0x91
+ 265 00fa 68       		.sleb128 -24
+ 266 00fb 08       		.uleb128 0x8
+ 267 00fc 87010000 		.4byte	.LASF19
+ 268 0100 01       		.byte	0x1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc2Bmexa.s 			page 7
+
+
+ 269 0101 28       		.byte	0x28
+ 270 0102 83000000 		.4byte	0x83
+ 271 0106 02       		.uleb128 0x2
+ 272 0107 91       		.byte	0x91
+ 273 0108 74       		.sleb128 -12
+ 274 0109 08       		.uleb128 0x8
+ 275 010a 98010000 		.4byte	.LASF20
+ 276 010e 01       		.byte	0x1
+ 277 010f 29       		.byte	0x29
+ 278 0110 83000000 		.4byte	0x83
+ 279 0114 02       		.uleb128 0x2
+ 280 0115 91       		.byte	0x91
+ 281 0116 70       		.sleb128 -16
+ 282 0117 08       		.uleb128 0x8
+ 283 0118 E4010000 		.4byte	.LASF21
+ 284 011c 01       		.byte	0x1
+ 285 011d 2A       		.byte	0x2a
+ 286 011e 83000000 		.4byte	0x83
+ 287 0122 02       		.uleb128 0x2
+ 288 0123 91       		.byte	0x91
+ 289 0124 6C       		.sleb128 -20
+ 290 0125 00       		.byte	0
+ 291 0126 00       		.byte	0
+ 292              		.section	.debug_abbrev,"",%progbits
+ 293              	.Ldebug_abbrev0:
+ 294 0000 01       		.uleb128 0x1
+ 295 0001 11       		.uleb128 0x11
+ 296 0002 01       		.byte	0x1
+ 297 0003 25       		.uleb128 0x25
+ 298 0004 0E       		.uleb128 0xe
+ 299 0005 13       		.uleb128 0x13
+ 300 0006 0B       		.uleb128 0xb
+ 301 0007 03       		.uleb128 0x3
+ 302 0008 0E       		.uleb128 0xe
+ 303 0009 1B       		.uleb128 0x1b
+ 304 000a 0E       		.uleb128 0xe
+ 305 000b 55       		.uleb128 0x55
+ 306 000c 17       		.uleb128 0x17
+ 307 000d 11       		.uleb128 0x11
+ 308 000e 01       		.uleb128 0x1
+ 309 000f 10       		.uleb128 0x10
+ 310 0010 17       		.uleb128 0x17
+ 311 0011 00       		.byte	0
+ 312 0012 00       		.byte	0
+ 313 0013 02       		.uleb128 0x2
+ 314 0014 24       		.uleb128 0x24
+ 315 0015 00       		.byte	0
+ 316 0016 0B       		.uleb128 0xb
+ 317 0017 0B       		.uleb128 0xb
+ 318 0018 3E       		.uleb128 0x3e
+ 319 0019 0B       		.uleb128 0xb
+ 320 001a 03       		.uleb128 0x3
+ 321 001b 0E       		.uleb128 0xe
+ 322 001c 00       		.byte	0
+ 323 001d 00       		.byte	0
+ 324 001e 03       		.uleb128 0x3
+ 325 001f 24       		.uleb128 0x24
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc2Bmexa.s 			page 8
+
+
+ 326 0020 00       		.byte	0
+ 327 0021 0B       		.uleb128 0xb
+ 328 0022 0B       		.uleb128 0xb
+ 329 0023 3E       		.uleb128 0x3e
+ 330 0024 0B       		.uleb128 0xb
+ 331 0025 03       		.uleb128 0x3
+ 332 0026 08       		.uleb128 0x8
+ 333 0027 00       		.byte	0
+ 334 0028 00       		.byte	0
+ 335 0029 04       		.uleb128 0x4
+ 336 002a 16       		.uleb128 0x16
+ 337 002b 00       		.byte	0
+ 338 002c 03       		.uleb128 0x3
+ 339 002d 0E       		.uleb128 0xe
+ 340 002e 3A       		.uleb128 0x3a
+ 341 002f 0B       		.uleb128 0xb
+ 342 0030 3B       		.uleb128 0x3b
+ 343 0031 05       		.uleb128 0x5
+ 344 0032 49       		.uleb128 0x49
+ 345 0033 13       		.uleb128 0x13
+ 346 0034 00       		.byte	0
+ 347 0035 00       		.byte	0
+ 348 0036 05       		.uleb128 0x5
+ 349 0037 35       		.uleb128 0x35
+ 350 0038 00       		.byte	0
+ 351 0039 49       		.uleb128 0x49
+ 352 003a 13       		.uleb128 0x13
+ 353 003b 00       		.byte	0
+ 354 003c 00       		.byte	0
+ 355 003d 06       		.uleb128 0x6
+ 356 003e 2E       		.uleb128 0x2e
+ 357 003f 01       		.byte	0x1
+ 358 0040 3F       		.uleb128 0x3f
+ 359 0041 19       		.uleb128 0x19
+ 360 0042 03       		.uleb128 0x3
+ 361 0043 0E       		.uleb128 0xe
+ 362 0044 3A       		.uleb128 0x3a
+ 363 0045 0B       		.uleb128 0xb
+ 364 0046 3B       		.uleb128 0x3b
+ 365 0047 0B       		.uleb128 0xb
+ 366 0048 27       		.uleb128 0x27
+ 367 0049 19       		.uleb128 0x19
+ 368 004a 49       		.uleb128 0x49
+ 369 004b 13       		.uleb128 0x13
+ 370 004c 11       		.uleb128 0x11
+ 371 004d 01       		.uleb128 0x1
+ 372 004e 12       		.uleb128 0x12
+ 373 004f 06       		.uleb128 0x6
+ 374 0050 40       		.uleb128 0x40
+ 375 0051 18       		.uleb128 0x18
+ 376 0052 9642     		.uleb128 0x2116
+ 377 0054 19       		.uleb128 0x19
+ 378 0055 00       		.byte	0
+ 379 0056 00       		.byte	0
+ 380 0057 07       		.uleb128 0x7
+ 381 0058 05       		.uleb128 0x5
+ 382 0059 00       		.byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc2Bmexa.s 			page 9
+
+
+ 383 005a 03       		.uleb128 0x3
+ 384 005b 0E       		.uleb128 0xe
+ 385 005c 3A       		.uleb128 0x3a
+ 386 005d 0B       		.uleb128 0xb
+ 387 005e 3B       		.uleb128 0x3b
+ 388 005f 0B       		.uleb128 0xb
+ 389 0060 49       		.uleb128 0x49
+ 390 0061 13       		.uleb128 0x13
+ 391 0062 02       		.uleb128 0x2
+ 392 0063 18       		.uleb128 0x18
+ 393 0064 00       		.byte	0
+ 394 0065 00       		.byte	0
+ 395 0066 08       		.uleb128 0x8
+ 396 0067 34       		.uleb128 0x34
+ 397 0068 00       		.byte	0
+ 398 0069 03       		.uleb128 0x3
+ 399 006a 0E       		.uleb128 0xe
+ 400 006b 3A       		.uleb128 0x3a
+ 401 006c 0B       		.uleb128 0xb
+ 402 006d 3B       		.uleb128 0x3b
+ 403 006e 0B       		.uleb128 0xb
+ 404 006f 49       		.uleb128 0x49
+ 405 0070 13       		.uleb128 0x13
+ 406 0071 02       		.uleb128 0x2
+ 407 0072 18       		.uleb128 0x18
+ 408 0073 00       		.byte	0
+ 409 0074 00       		.byte	0
+ 410 0075 00       		.byte	0
+ 411              		.section	.debug_aranges,"",%progbits
+ 412 0000 1C000000 		.4byte	0x1c
+ 413 0004 0200     		.2byte	0x2
+ 414 0006 00000000 		.4byte	.Ldebug_info0
+ 415 000a 04       		.byte	0x4
+ 416 000b 00       		.byte	0
+ 417 000c 0000     		.2byte	0
+ 418 000e 0000     		.2byte	0
+ 419 0010 00000000 		.4byte	.LFB0
+ 420 0014 AC000000 		.4byte	.LFE0-.LFB0
+ 421 0018 00000000 		.4byte	0
+ 422 001c 00000000 		.4byte	0
+ 423              		.section	.debug_ranges,"",%progbits
+ 424              	.Ldebug_ranges0:
+ 425 0000 00000000 		.4byte	.LFB0
+ 426 0004 AC000000 		.4byte	.LFE0
+ 427 0008 00000000 		.4byte	0
+ 428 000c 00000000 		.4byte	0
+ 429              		.section	.debug_line,"",%progbits
+ 430              	.Ldebug_line0:
+ 431 0000 6A000000 		.section	.debug_str,"MS",%progbits,1
+ 431      02004600 
+ 431      00000201 
+ 431      FB0E0D00 
+ 431      01010101 
+ 432              	.LASF6:
+ 433 0000 6C6F6E67 		.ascii	"long long int\000"
+ 433      206C6F6E 
+ 433      6720696E 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc2Bmexa.s 			page 10
+
+
+ 433      7400
+ 434              	.LASF22:
+ 435 000e 474E5520 		.ascii	"GNU C 4.9.3 20150303 (release) [ARM/embedded-4_9-br"
+ 435      4320342E 
+ 435      392E3320 
+ 435      32303135 
+ 435      30333033 
+ 436 0041 616E6368 		.ascii	"anch revision 221220] -mcpu=cortex-m0 -mthumb -g -O"
+ 436      20726576 
+ 436      6973696F 
+ 436      6E203232 
+ 436      31323230 
+ 437 0074 30202D66 		.ascii	"0 -ffunction-sections -ffat-lto-objects\000"
+ 437      66756E63 
+ 437      74696F6E 
+ 437      2D736563 
+ 437      74696F6E 
+ 438              	.LASF8:
+ 439 009c 756E7369 		.ascii	"unsigned int\000"
+ 439      676E6564 
+ 439      20696E74 
+ 439      00
+ 440              	.LASF23:
+ 441 00a9 2E5C4765 		.ascii	".\\Generated_Source\\PSoC4\\DieTemp.c\000"
+ 441      6E657261 
+ 441      7465645F 
+ 441      536F7572 
+ 441      63655C50 
+ 442              	.LASF5:
+ 443 00cc 6C6F6E67 		.ascii	"long unsigned int\000"
+ 443      20756E73 
+ 443      69676E65 
+ 443      6420696E 
+ 443      7400
+ 444              	.LASF7:
+ 445 00de 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 445      206C6F6E 
+ 445      6720756E 
+ 445      7369676E 
+ 445      65642069 
+ 446              	.LASF18:
+ 447 00f5 74496E69 		.ascii	"tInitial\000"
+ 447      7469616C 
+ 447      00
+ 448              	.LASF24:
+ 449 00fe 433A5C55 		.ascii	"C:\\Users\\kylep\\Box Sync\\Feniex Firmware Files\\"
+ 449      73657273 
+ 449      5C6B796C 
+ 449      65705C42 
+ 449      6F782053 
+ 450 012c 414C4220 		.ascii	"ALB Cube\\81-00024-01 AI Cube\\81-00024-01.cydsn\000"
+ 450      43756265 
+ 450      5C38312D 
+ 450      30303032 
+ 450      342D3031 
+ 451              	.LASF25:
+ 452 015b 44696554 		.ascii	"DieTemp_CountsTo_Celsius\000"
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc2Bmexa.s 			page 11
+
+
+ 452      656D705F 
+ 452      436F756E 
+ 452      7473546F 
+ 452      5F43656C 
+ 453              	.LASF1:
+ 454 0174 756E7369 		.ascii	"unsigned char\000"
+ 454      676E6564 
+ 454      20636861 
+ 454      7200
+ 455              	.LASF14:
+ 456 0182 63686172 		.ascii	"char\000"
+ 456      00
+ 457              	.LASF19:
+ 458 0187 7441646A 		.ascii	"tAdjust\000"
+ 458      75737400 
+ 459              	.LASF4:
+ 460 018f 6C6F6E67 		.ascii	"long int\000"
+ 460      20696E74 
+ 460      00
+ 461              	.LASF20:
+ 462 0198 6F666673 		.ascii	"offsetReg\000"
+ 462      65745265 
+ 462      6700
+ 463              	.LASF15:
+ 464 01a2 72656731 		.ascii	"reg16\000"
+ 464      3600
+ 465              	.LASF13:
+ 466 01a8 646F7562 		.ascii	"double\000"
+ 466      6C6500
+ 467              	.LASF26:
+ 468 01af 61646343 		.ascii	"adcCounts\000"
+ 468      6F756E74 
+ 468      7300
+ 469              	.LASF17:
+ 470 01b9 74656D70 		.ascii	"tempCelsius\000"
+ 470      43656C73 
+ 470      69757300 
+ 471              	.LASF3:
+ 472 01c5 73686F72 		.ascii	"short unsigned int\000"
+ 472      7420756E 
+ 472      7369676E 
+ 472      65642069 
+ 472      6E7400
+ 473              	.LASF0:
+ 474 01d8 7369676E 		.ascii	"signed char\000"
+ 474      65642063 
+ 474      68617200 
+ 475              	.LASF21:
+ 476 01e4 6D756C74 		.ascii	"multReg\000"
+ 476      52656700 
+ 477              	.LASF12:
+ 478 01ec 666C6F61 		.ascii	"float\000"
+ 478      7400
+ 479              	.LASF10:
+ 480 01f2 696E7431 		.ascii	"int16\000"
+ 480      3600
+ 481              	.LASF2:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc2Bmexa.s 			page 12
+
+
+ 482 01f8 73686F72 		.ascii	"short int\000"
+ 482      7420696E 
+ 482      7400
+ 483              	.LASF9:
+ 484 0202 75696E74 		.ascii	"uint16\000"
+ 484      313600
+ 485              	.LASF16:
+ 486 0209 73697A65 		.ascii	"sizetype\000"
+ 486      74797065 
+ 486      00
+ 487              	.LASF11:
+ 488 0212 696E7433 		.ascii	"int32\000"
+ 488      3200
+ 489              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 4.9.3 20150303 (release) [ARM/embedded-4_9-br

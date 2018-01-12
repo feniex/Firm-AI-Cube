@@ -1,0 +1,2022 @@
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 1
+
+
+   1              		.cpu cortex-m0
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 1
+  10              		.eabi_attribute 34, 0
+  11              		.eabi_attribute 18, 4
+  12              		.code	16
+  13              		.file	"SamplingTimerISR.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.section	.text.SamplingTimerISR_Interrupt,"ax",%progbits
+  18              		.align	2
+  19              		.global	SamplingTimerISR_Interrupt
+  20              		.code	16
+  21              		.thumb_func
+  22              		.type	SamplingTimerISR_Interrupt, %function
+  23              	SamplingTimerISR_Interrupt:
+  24              	.LFB37:
+  25              		.file 1 ".\\Generated_Source\\PSoC4\\SamplingTimerISR.c"
+   1:.\Generated_Source\PSoC4/SamplingTimerISR.c **** /*******************************************************************************
+   2:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * File Name: SamplingTimerISR.c  
+   3:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Version 1.70
+   4:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+   5:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *  Description:
+   6:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   API for controlling the state of an interrupt.
+   7:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+   8:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+   9:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *  Note:
+  10:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+  11:.\Generated_Source\PSoC4/SamplingTimerISR.c **** ********************************************************************************
+  12:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+  13:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * You may use this file only in accordance with the license, terms, conditions, 
+  14:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * disclaimers, and limitations in the end user license agreement accompanying 
+  15:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * the software package with which this file was provided.
+  16:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *******************************************************************************/
+  17:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+  18:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+  19:.\Generated_Source\PSoC4/SamplingTimerISR.c **** #include <cydevice_trm.h>
+  20:.\Generated_Source\PSoC4/SamplingTimerISR.c **** #include <CyLib.h>
+  21:.\Generated_Source\PSoC4/SamplingTimerISR.c **** #include <SamplingTimerISR.h>
+  22:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+  23:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+  24:.\Generated_Source\PSoC4/SamplingTimerISR.c **** #if !defined(SamplingTimerISR__REMOVED) /* Check for removal by optimization */
+  25:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+  26:.\Generated_Source\PSoC4/SamplingTimerISR.c **** /*******************************************************************************
+  27:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *  Place your includes, defines and code here 
+  28:.\Generated_Source\PSoC4/SamplingTimerISR.c **** ********************************************************************************/
+  29:.\Generated_Source\PSoC4/SamplingTimerISR.c **** /* `#START SamplingTimerISR_intc` */
+  30:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+  31:.\Generated_Source\PSoC4/SamplingTimerISR.c **** #include "TemperatureCommManager.h"
+  32:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 2
+
+
+  33:.\Generated_Source\PSoC4/SamplingTimerISR.c **** /* `#END` */
+  34:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+  35:.\Generated_Source\PSoC4/SamplingTimerISR.c **** extern cyisraddress CyRamVectors[CYINT_IRQ_BASE + CY_NUM_INTERRUPTS];
+  36:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+  37:.\Generated_Source\PSoC4/SamplingTimerISR.c **** /* Declared in startup, used to set unused interrupts to. */
+  38:.\Generated_Source\PSoC4/SamplingTimerISR.c **** CY_ISR_PROTO(IntDefaultHandler);
+  39:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+  40:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+  41:.\Generated_Source\PSoC4/SamplingTimerISR.c **** /*******************************************************************************
+  42:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Function Name: SamplingTimerISR_Start
+  43:.\Generated_Source\PSoC4/SamplingTimerISR.c **** ********************************************************************************
+  44:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+  45:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Summary:
+  46:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *  Set up the interrupt and enable it. This function disables the interrupt, 
+  47:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *  sets the default interrupt vector, sets the priority from the value in the
+  48:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *  Design Wide Resources Interrupt Editor, then enables the interrupt to the 
+  49:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *  interrupt controller.
+  50:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+  51:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Parameters:  
+  52:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   None
+  53:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+  54:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Return:
+  55:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   None
+  56:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+  57:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *******************************************************************************/
+  58:.\Generated_Source\PSoC4/SamplingTimerISR.c **** void SamplingTimerISR_Start(void)
+  59:.\Generated_Source\PSoC4/SamplingTimerISR.c **** {
+  60:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     /* For all we know the interrupt is active. */
+  61:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     SamplingTimerISR_Disable();
+  62:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+  63:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     /* Set the ISR to point to the SamplingTimerISR Interrupt. */
+  64:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     SamplingTimerISR_SetVector(&SamplingTimerISR_Interrupt);
+  65:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+  66:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     /* Set the priority. */
+  67:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     SamplingTimerISR_SetPriority((uint8)SamplingTimerISR_INTC_PRIOR_NUMBER);
+  68:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+  69:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     /* Enable it. */
+  70:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     SamplingTimerISR_Enable();
+  71:.\Generated_Source\PSoC4/SamplingTimerISR.c **** }
+  72:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+  73:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+  74:.\Generated_Source\PSoC4/SamplingTimerISR.c **** /*******************************************************************************
+  75:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Function Name: SamplingTimerISR_StartEx
+  76:.\Generated_Source\PSoC4/SamplingTimerISR.c **** ********************************************************************************
+  77:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+  78:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Summary:
+  79:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *  Sets up the interrupt and enables it. This function disables the interrupt,
+  80:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *  sets the interrupt vector based on the address passed in, sets the priority 
+  81:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *  from the value in the Design Wide Resources Interrupt Editor, then enables 
+  82:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *  the interrupt to the interrupt controller.
+  83:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *  
+  84:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *  When defining ISR functions, the CY_ISR and CY_ISR_PROTO macros should be 
+  85:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *  used to provide consistent definition across compilers:
+  86:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *  
+  87:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *  Function definition example:
+  88:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   CY_ISR(MyISR)
+  89:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   {
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 3
+
+
+  90:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   }
+  91:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   Function prototype example:
+  92:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   CY_ISR_PROTO(MyISR);
+  93:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+  94:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Parameters:  
+  95:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   address: Address of the ISR to set in the interrupt vector table.
+  96:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+  97:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Return:
+  98:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   None
+  99:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 100:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *******************************************************************************/
+ 101:.\Generated_Source\PSoC4/SamplingTimerISR.c **** void SamplingTimerISR_StartEx(cyisraddress address)
+ 102:.\Generated_Source\PSoC4/SamplingTimerISR.c **** {
+ 103:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     /* For all we know the interrupt is active. */
+ 104:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     SamplingTimerISR_Disable();
+ 105:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 106:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     /* Set the ISR to point to the SamplingTimerISR Interrupt. */
+ 107:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     SamplingTimerISR_SetVector(address);
+ 108:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 109:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     /* Set the priority. */
+ 110:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     SamplingTimerISR_SetPriority((uint8)SamplingTimerISR_INTC_PRIOR_NUMBER);
+ 111:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 112:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     /* Enable it. */
+ 113:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     SamplingTimerISR_Enable();
+ 114:.\Generated_Source\PSoC4/SamplingTimerISR.c **** }
+ 115:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 116:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 117:.\Generated_Source\PSoC4/SamplingTimerISR.c **** /*******************************************************************************
+ 118:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Function Name: SamplingTimerISR_Stop
+ 119:.\Generated_Source\PSoC4/SamplingTimerISR.c **** ********************************************************************************
+ 120:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 121:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Summary:
+ 122:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   Disables and removes the interrupt.
+ 123:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 124:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Parameters:  
+ 125:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   None
+ 126:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 127:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Return:
+ 128:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   None
+ 129:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 130:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *******************************************************************************/
+ 131:.\Generated_Source\PSoC4/SamplingTimerISR.c **** void SamplingTimerISR_Stop(void)
+ 132:.\Generated_Source\PSoC4/SamplingTimerISR.c **** {
+ 133:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     /* Disable this interrupt. */
+ 134:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     SamplingTimerISR_Disable();
+ 135:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 136:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     /* Set the ISR to point to the passive one. */
+ 137:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     SamplingTimerISR_SetVector(&IntDefaultHandler);
+ 138:.\Generated_Source\PSoC4/SamplingTimerISR.c **** }
+ 139:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 140:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 141:.\Generated_Source\PSoC4/SamplingTimerISR.c **** /*******************************************************************************
+ 142:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Function Name: SamplingTimerISR_Interrupt
+ 143:.\Generated_Source\PSoC4/SamplingTimerISR.c **** ********************************************************************************
+ 144:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 145:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Summary:
+ 146:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   The default Interrupt Service Routine for SamplingTimerISR.
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 4
+
+
+ 147:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 148:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   Add custom code between the START and END comments to keep the next version
+ 149:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   of this file from over-writing your code.
+ 150:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 151:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   Note You may use either the default ISR by using this API, or you may define
+ 152:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   your own separate ISR through ISR_StartEx().
+ 153:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 154:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Parameters:  
+ 155:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   None
+ 156:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 157:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Return:
+ 158:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   None
+ 159:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 160:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *******************************************************************************/
+ 161:.\Generated_Source\PSoC4/SamplingTimerISR.c **** CY_ISR(SamplingTimerISR_Interrupt)
+ 162:.\Generated_Source\PSoC4/SamplingTimerISR.c **** {
+  26              		.loc 1 162 0
+  27              		.cfi_startproc
+  28 0000 08B5     		push	{r3, lr}
+  29              		.cfi_def_cfa_offset 8
+  30              		.cfi_offset 3, -8
+  31              		.cfi_offset 14, -4
+ 163:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     #ifdef SamplingTimerISR_INTERRUPT_INTERRUPT_CALLBACK
+ 164:.\Generated_Source\PSoC4/SamplingTimerISR.c ****         SamplingTimerISR_Interrupt_InterruptCallback();
+ 165:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     #endif /* SamplingTimerISR_INTERRUPT_INTERRUPT_CALLBACK */ 
+ 166:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 167:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     /*  Place your Interrupt code here. */
+ 168:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     /* `#START SamplingTimerISR_Interrupt` */
+ 169:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 170:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     
+ 171:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     
+ 172:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     processSamplingTimerRoutine();
+  32              		.loc 1 172 0
+  33 0002 FFF7FEFF 		bl	processSamplingTimerRoutine
+  34              	.LVL0:
+ 173:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     
+ 174:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     /* `#END` */
+ 175:.\Generated_Source\PSoC4/SamplingTimerISR.c **** }
+  35              		.loc 1 175 0
+  36              		@ sp needed
+  37 0006 08BD     		pop	{r3, pc}
+  38              		.cfi_endproc
+  39              	.LFE37:
+  40              		.size	SamplingTimerISR_Interrupt, .-SamplingTimerISR_Interrupt
+  41              		.section	.text.SamplingTimerISR_SetVector,"ax",%progbits
+  42              		.align	2
+  43              		.global	SamplingTimerISR_SetVector
+  44              		.code	16
+  45              		.thumb_func
+  46              		.type	SamplingTimerISR_SetVector, %function
+  47              	SamplingTimerISR_SetVector:
+  48              	.LFB38:
+ 176:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 177:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 178:.\Generated_Source\PSoC4/SamplingTimerISR.c **** /*******************************************************************************
+ 179:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Function Name: SamplingTimerISR_SetVector
+ 180:.\Generated_Source\PSoC4/SamplingTimerISR.c **** ********************************************************************************
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 5
+
+
+ 181:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 182:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Summary:
+ 183:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   Change the ISR vector for the Interrupt. Note calling SamplingTimerISR_Start
+ 184:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   will override any effect this method would have had. To set the vector 
+ 185:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   before the component has been started use SamplingTimerISR_StartEx instead.
+ 186:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * 
+ 187:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   When defining ISR functions, the CY_ISR and CY_ISR_PROTO macros should be 
+ 188:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   used to provide consistent definition across compilers:
+ 189:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 190:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   Function definition example:
+ 191:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   CY_ISR(MyISR)
+ 192:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   {
+ 193:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   }
+ 194:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 195:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   Function prototype example:
+ 196:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *     CY_ISR_PROTO(MyISR);
+ 197:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 198:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Parameters:
+ 199:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   address: Address of the ISR to set in the interrupt vector table.
+ 200:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 201:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Return:
+ 202:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   None
+ 203:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 204:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *******************************************************************************/
+ 205:.\Generated_Source\PSoC4/SamplingTimerISR.c **** void SamplingTimerISR_SetVector(cyisraddress address)
+ 206:.\Generated_Source\PSoC4/SamplingTimerISR.c **** {
+  49              		.loc 1 206 0
+  50              		.cfi_startproc
+  51              	.LVL1:
+ 207:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     CyRamVectors[CYINT_IRQ_BASE + SamplingTimerISR__INTC_NUMBER] = address;
+  52              		.loc 1 207 0
+  53 0000 014B     		ldr	r3, .L3
+  54 0002 1865     		str	r0, [r3, #80]
+ 208:.\Generated_Source\PSoC4/SamplingTimerISR.c **** }
+  55              		.loc 1 208 0
+  56              		@ sp needed
+  57 0004 7047     		bx	lr
+  58              	.L4:
+  59 0006 C046     		.align	2
+  60              	.L3:
+  61 0008 00000000 		.word	CyRamVectors
+  62              		.cfi_endproc
+  63              	.LFE38:
+  64              		.size	SamplingTimerISR_SetVector, .-SamplingTimerISR_SetVector
+  65              		.section	.text.SamplingTimerISR_GetVector,"ax",%progbits
+  66              		.align	2
+  67              		.global	SamplingTimerISR_GetVector
+  68              		.code	16
+  69              		.thumb_func
+  70              		.type	SamplingTimerISR_GetVector, %function
+  71              	SamplingTimerISR_GetVector:
+  72              	.LFB39:
+ 209:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 210:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 211:.\Generated_Source\PSoC4/SamplingTimerISR.c **** /*******************************************************************************
+ 212:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Function Name: SamplingTimerISR_GetVector
+ 213:.\Generated_Source\PSoC4/SamplingTimerISR.c **** ********************************************************************************
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 6
+
+
+ 214:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 215:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Summary:
+ 216:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   Gets the "address" of the current ISR vector for the Interrupt.
+ 217:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 218:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Parameters:
+ 219:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   None
+ 220:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 221:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Return:
+ 222:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   Address of the ISR in the interrupt vector table.
+ 223:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 224:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *******************************************************************************/
+ 225:.\Generated_Source\PSoC4/SamplingTimerISR.c **** cyisraddress SamplingTimerISR_GetVector(void)
+ 226:.\Generated_Source\PSoC4/SamplingTimerISR.c **** {
+  73              		.loc 1 226 0
+  74              		.cfi_startproc
+ 227:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     return CyRamVectors[CYINT_IRQ_BASE + SamplingTimerISR__INTC_NUMBER];
+  75              		.loc 1 227 0
+  76 0000 014B     		ldr	r3, .L6
+  77 0002 186D     		ldr	r0, [r3, #80]
+ 228:.\Generated_Source\PSoC4/SamplingTimerISR.c **** }
+  78              		.loc 1 228 0
+  79              		@ sp needed
+  80 0004 7047     		bx	lr
+  81              	.L7:
+  82 0006 C046     		.align	2
+  83              	.L6:
+  84 0008 00000000 		.word	CyRamVectors
+  85              		.cfi_endproc
+  86              	.LFE39:
+  87              		.size	SamplingTimerISR_GetVector, .-SamplingTimerISR_GetVector
+  88              		.section	.text.SamplingTimerISR_SetPriority,"ax",%progbits
+  89              		.align	2
+  90              		.global	SamplingTimerISR_SetPriority
+  91              		.code	16
+  92              		.thumb_func
+  93              		.type	SamplingTimerISR_SetPriority, %function
+  94              	SamplingTimerISR_SetPriority:
+  95              	.LFB40:
+ 229:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 230:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 231:.\Generated_Source\PSoC4/SamplingTimerISR.c **** /*******************************************************************************
+ 232:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Function Name: SamplingTimerISR_SetPriority
+ 233:.\Generated_Source\PSoC4/SamplingTimerISR.c **** ********************************************************************************
+ 234:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 235:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Summary:
+ 236:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   Sets the Priority of the Interrupt. 
+ 237:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 238:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   Note calling SamplingTimerISR_Start or SamplingTimerISR_StartEx will 
+ 239:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   override any effect this API would have had. This API should only be called
+ 240:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   after SamplingTimerISR_Start or SamplingTimerISR_StartEx has been called. 
+ 241:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   To set the initial priority for the component, use the Design-Wide Resources
+ 242:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   Interrupt Editor.
+ 243:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 244:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   Note This API has no effect on Non-maskable interrupt NMI).
+ 245:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 246:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Parameters:
+ 247:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   priority: Priority of the interrupt, 0 being the highest priority
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 7
+
+
+ 248:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *             PSoC 3 and PSoC 5LP: Priority is from 0 to 7.
+ 249:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *             PSoC 4: Priority is from 0 to 3.
+ 250:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 251:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Return:
+ 252:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   None
+ 253:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 254:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *******************************************************************************/
+ 255:.\Generated_Source\PSoC4/SamplingTimerISR.c **** void SamplingTimerISR_SetPriority(uint8 priority)
+ 256:.\Generated_Source\PSoC4/SamplingTimerISR.c **** {
+  96              		.loc 1 256 0
+  97              		.cfi_startproc
+  98              	.LVL2:
+  99 0000 10B5     		push	{r4, lr}
+ 100              		.cfi_def_cfa_offset 8
+ 101              		.cfi_offset 4, -8
+ 102              		.cfi_offset 14, -4
+ 103 0002 041C     		mov	r4, r0
+ 104              	.LVL3:
+ 257:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 	uint8 interruptState;
+ 258:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     uint32 priorityOffset = ((SamplingTimerISR__INTC_NUMBER % 4u) * 8u) + 6u;
+ 259:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     
+ 260:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 	interruptState = CyEnterCriticalSection();
+ 105              		.loc 1 260 0
+ 106 0004 FFF7FEFF 		bl	CyEnterCriticalSection
+ 107              	.LVL4:
+ 261:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     *SamplingTimerISR_INTC_PRIOR = (*SamplingTimerISR_INTC_PRIOR & (uint32)(~SamplingTimerISR__INTC
+ 108              		.loc 1 261 0
+ 109 0008 044A     		ldr	r2, .L9
+ 110 000a 1368     		ldr	r3, [r2]
+ 111 000c C021     		mov	r1, #192
+ 112 000e 8B43     		bic	r3, r1
+ 262:.\Generated_Source\PSoC4/SamplingTimerISR.c ****                                     ((uint32)priority << priorityOffset);
+ 113              		.loc 1 262 0
+ 114 0010 A401     		lsl	r4, r4, #6
+ 261:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     *SamplingTimerISR_INTC_PRIOR = (*SamplingTimerISR_INTC_PRIOR & (uint32)(~SamplingTimerISR__INTC
+ 115              		.loc 1 261 0
+ 116 0012 1C43     		orr	r4, r3
+ 117 0014 1460     		str	r4, [r2]
+ 263:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 	CyExitCriticalSection(interruptState);
+ 118              		.loc 1 263 0
+ 119 0016 FFF7FEFF 		bl	CyExitCriticalSection
+ 120              	.LVL5:
+ 264:.\Generated_Source\PSoC4/SamplingTimerISR.c **** }
+ 121              		.loc 1 264 0
+ 122              		@ sp needed
+ 123 001a 10BD     		pop	{r4, pc}
+ 124              	.L10:
+ 125              		.align	2
+ 126              	.L9:
+ 127 001c 04E400E0 		.word	-536812540
+ 128              		.cfi_endproc
+ 129              	.LFE40:
+ 130              		.size	SamplingTimerISR_SetPriority, .-SamplingTimerISR_SetPriority
+ 131              		.section	.text.SamplingTimerISR_GetPriority,"ax",%progbits
+ 132              		.align	2
+ 133              		.global	SamplingTimerISR_GetPriority
+ 134              		.code	16
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 8
+
+
+ 135              		.thumb_func
+ 136              		.type	SamplingTimerISR_GetPriority, %function
+ 137              	SamplingTimerISR_GetPriority:
+ 138              	.LFB41:
+ 265:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 266:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 267:.\Generated_Source\PSoC4/SamplingTimerISR.c **** /*******************************************************************************
+ 268:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Function Name: SamplingTimerISR_GetPriority
+ 269:.\Generated_Source\PSoC4/SamplingTimerISR.c **** ********************************************************************************
+ 270:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 271:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Summary:
+ 272:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   Gets the Priority of the Interrupt.
+ 273:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 274:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Parameters:
+ 275:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   None
+ 276:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 277:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Return:
+ 278:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   Priority of the interrupt, 0 being the highest priority
+ 279:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *    PSoC 3 and PSoC 5LP: Priority is from 0 to 7.
+ 280:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *    PSoC 4: Priority is from 0 to 3.
+ 281:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 282:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *******************************************************************************/
+ 283:.\Generated_Source\PSoC4/SamplingTimerISR.c **** uint8 SamplingTimerISR_GetPriority(void)
+ 284:.\Generated_Source\PSoC4/SamplingTimerISR.c **** {
+ 139              		.loc 1 284 0
+ 140              		.cfi_startproc
+ 141              	.LVL6:
+ 285:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     uint32 priority;
+ 286:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 	uint32 priorityOffset = ((SamplingTimerISR__INTC_NUMBER % 4u) * 8u) + 6u;
+ 287:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 288:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     priority = (*SamplingTimerISR_INTC_PRIOR & SamplingTimerISR__INTC_PRIOR_MASK) >> priorityOffset
+ 142              		.loc 1 288 0
+ 143 0000 024B     		ldr	r3, .L12
+ 144 0002 1868     		ldr	r0, [r3]
+ 145 0004 0006     		lsl	r0, r0, #24
+ 146              	.LVL7:
+ 289:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 290:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     return (uint8)priority;
+ 147              		.loc 1 290 0
+ 148 0006 800F     		lsr	r0, r0, #30
+ 149              	.LVL8:
+ 291:.\Generated_Source\PSoC4/SamplingTimerISR.c **** }
+ 150              		.loc 1 291 0
+ 151              		@ sp needed
+ 152 0008 7047     		bx	lr
+ 153              	.L13:
+ 154 000a C046     		.align	2
+ 155              	.L12:
+ 156 000c 04E400E0 		.word	-536812540
+ 157              		.cfi_endproc
+ 158              	.LFE41:
+ 159              		.size	SamplingTimerISR_GetPriority, .-SamplingTimerISR_GetPriority
+ 160              		.section	.text.SamplingTimerISR_Enable,"ax",%progbits
+ 161              		.align	2
+ 162              		.global	SamplingTimerISR_Enable
+ 163              		.code	16
+ 164              		.thumb_func
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 9
+
+
+ 165              		.type	SamplingTimerISR_Enable, %function
+ 166              	SamplingTimerISR_Enable:
+ 167              	.LFB42:
+ 292:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 293:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 294:.\Generated_Source\PSoC4/SamplingTimerISR.c **** /*******************************************************************************
+ 295:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Function Name: SamplingTimerISR_Enable
+ 296:.\Generated_Source\PSoC4/SamplingTimerISR.c **** ********************************************************************************
+ 297:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 298:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Summary:
+ 299:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   Enables the interrupt to the interrupt controller. Do not call this function
+ 300:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   unless ISR_Start() has been called or the functionality of the ISR_Start() 
+ 301:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   function, which sets the vector and the priority, has been called.
+ 302:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 303:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Parameters:
+ 304:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   None
+ 305:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 306:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Return:
+ 307:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   None
+ 308:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 309:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *******************************************************************************/
+ 310:.\Generated_Source\PSoC4/SamplingTimerISR.c **** void SamplingTimerISR_Enable(void)
+ 311:.\Generated_Source\PSoC4/SamplingTimerISR.c **** {
+ 168              		.loc 1 311 0
+ 169              		.cfi_startproc
+ 312:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     /* Enable the general interrupt. */
+ 313:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     *SamplingTimerISR_INTC_SET_EN = SamplingTimerISR__INTC_MASK;
+ 170              		.loc 1 313 0
+ 171 0000 1022     		mov	r2, #16
+ 172 0002 014B     		ldr	r3, .L15
+ 173 0004 1A60     		str	r2, [r3]
+ 314:.\Generated_Source\PSoC4/SamplingTimerISR.c **** }
+ 174              		.loc 1 314 0
+ 175              		@ sp needed
+ 176 0006 7047     		bx	lr
+ 177              	.L16:
+ 178              		.align	2
+ 179              	.L15:
+ 180 0008 00E100E0 		.word	-536813312
+ 181              		.cfi_endproc
+ 182              	.LFE42:
+ 183              		.size	SamplingTimerISR_Enable, .-SamplingTimerISR_Enable
+ 184              		.section	.text.SamplingTimerISR_GetState,"ax",%progbits
+ 185              		.align	2
+ 186              		.global	SamplingTimerISR_GetState
+ 187              		.code	16
+ 188              		.thumb_func
+ 189              		.type	SamplingTimerISR_GetState, %function
+ 190              	SamplingTimerISR_GetState:
+ 191              	.LFB43:
+ 315:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 316:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 317:.\Generated_Source\PSoC4/SamplingTimerISR.c **** /*******************************************************************************
+ 318:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Function Name: SamplingTimerISR_GetState
+ 319:.\Generated_Source\PSoC4/SamplingTimerISR.c **** ********************************************************************************
+ 320:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 321:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Summary:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 10
+
+
+ 322:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   Gets the state (enabled, disabled) of the Interrupt.
+ 323:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 324:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Parameters:
+ 325:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   None
+ 326:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 327:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Return:
+ 328:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   1 if enabled, 0 if disabled.
+ 329:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 330:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *******************************************************************************/
+ 331:.\Generated_Source\PSoC4/SamplingTimerISR.c **** uint8 SamplingTimerISR_GetState(void)
+ 332:.\Generated_Source\PSoC4/SamplingTimerISR.c **** {
+ 192              		.loc 1 332 0
+ 193              		.cfi_startproc
+ 333:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     /* Get the state of the general interrupt. */
+ 334:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     return ((*SamplingTimerISR_INTC_SET_EN & (uint32)SamplingTimerISR__INTC_MASK) != 0u) ? 1u:0u;
+ 194              		.loc 1 334 0
+ 195 0000 034B     		ldr	r3, .L20
+ 196 0002 1B68     		ldr	r3, [r3]
+ 197 0004 DB06     		lsl	r3, r3, #27
+ 198 0006 01D5     		bpl	.L19
+ 199 0008 0120     		mov	r0, #1
+ 200 000a 00E0     		b	.L18
+ 201              	.L19:
+ 202 000c 0020     		mov	r0, #0
+ 203              	.L18:
+ 335:.\Generated_Source\PSoC4/SamplingTimerISR.c **** }
+ 204              		.loc 1 335 0 discriminator 4
+ 205              		@ sp needed
+ 206 000e 7047     		bx	lr
+ 207              	.L21:
+ 208              		.align	2
+ 209              	.L20:
+ 210 0010 00E100E0 		.word	-536813312
+ 211              		.cfi_endproc
+ 212              	.LFE43:
+ 213              		.size	SamplingTimerISR_GetState, .-SamplingTimerISR_GetState
+ 214              		.section	.text.SamplingTimerISR_Disable,"ax",%progbits
+ 215              		.align	2
+ 216              		.global	SamplingTimerISR_Disable
+ 217              		.code	16
+ 218              		.thumb_func
+ 219              		.type	SamplingTimerISR_Disable, %function
+ 220              	SamplingTimerISR_Disable:
+ 221              	.LFB44:
+ 336:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 337:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 338:.\Generated_Source\PSoC4/SamplingTimerISR.c **** /*******************************************************************************
+ 339:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Function Name: SamplingTimerISR_Disable
+ 340:.\Generated_Source\PSoC4/SamplingTimerISR.c **** ********************************************************************************
+ 341:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 342:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Summary:
+ 343:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   Disables the Interrupt in the interrupt controller.
+ 344:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 345:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Parameters:
+ 346:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   None
+ 347:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 348:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Return:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 11
+
+
+ 349:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   None
+ 350:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 351:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *******************************************************************************/
+ 352:.\Generated_Source\PSoC4/SamplingTimerISR.c **** void SamplingTimerISR_Disable(void)
+ 353:.\Generated_Source\PSoC4/SamplingTimerISR.c **** {
+ 222              		.loc 1 353 0
+ 223              		.cfi_startproc
+ 354:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     /* Disable the general interrupt. */
+ 355:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     *SamplingTimerISR_INTC_CLR_EN = SamplingTimerISR__INTC_MASK;
+ 224              		.loc 1 355 0
+ 225 0000 1022     		mov	r2, #16
+ 226 0002 014B     		ldr	r3, .L23
+ 227 0004 1A60     		str	r2, [r3]
+ 356:.\Generated_Source\PSoC4/SamplingTimerISR.c **** }
+ 228              		.loc 1 356 0
+ 229              		@ sp needed
+ 230 0006 7047     		bx	lr
+ 231              	.L24:
+ 232              		.align	2
+ 233              	.L23:
+ 234 0008 80E100E0 		.word	-536813184
+ 235              		.cfi_endproc
+ 236              	.LFE44:
+ 237              		.size	SamplingTimerISR_Disable, .-SamplingTimerISR_Disable
+ 238              		.section	.text.SamplingTimerISR_Start,"ax",%progbits
+ 239              		.align	2
+ 240              		.global	SamplingTimerISR_Start
+ 241              		.code	16
+ 242              		.thumb_func
+ 243              		.type	SamplingTimerISR_Start, %function
+ 244              	SamplingTimerISR_Start:
+ 245              	.LFB34:
+  59:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     /* For all we know the interrupt is active. */
+ 246              		.loc 1 59 0
+ 247              		.cfi_startproc
+ 248 0000 08B5     		push	{r3, lr}
+ 249              		.cfi_def_cfa_offset 8
+ 250              		.cfi_offset 3, -8
+ 251              		.cfi_offset 14, -4
+  61:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 252              		.loc 1 61 0
+ 253 0002 FFF7FEFF 		bl	SamplingTimerISR_Disable
+ 254              	.LVL9:
+  64:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 255              		.loc 1 64 0
+ 256 0006 0448     		ldr	r0, .L26
+ 257 0008 FFF7FEFF 		bl	SamplingTimerISR_SetVector
+ 258              	.LVL10:
+  67:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 259              		.loc 1 67 0
+ 260 000c 0320     		mov	r0, #3
+ 261 000e FFF7FEFF 		bl	SamplingTimerISR_SetPriority
+ 262              	.LVL11:
+  70:.\Generated_Source\PSoC4/SamplingTimerISR.c **** }
+ 263              		.loc 1 70 0
+ 264 0012 FFF7FEFF 		bl	SamplingTimerISR_Enable
+ 265              	.LVL12:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 12
+
+
+  71:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 266              		.loc 1 71 0
+ 267              		@ sp needed
+ 268 0016 08BD     		pop	{r3, pc}
+ 269              	.L27:
+ 270              		.align	2
+ 271              	.L26:
+ 272 0018 00000000 		.word	SamplingTimerISR_Interrupt
+ 273              		.cfi_endproc
+ 274              	.LFE34:
+ 275              		.size	SamplingTimerISR_Start, .-SamplingTimerISR_Start
+ 276              		.section	.text.SamplingTimerISR_StartEx,"ax",%progbits
+ 277              		.align	2
+ 278              		.global	SamplingTimerISR_StartEx
+ 279              		.code	16
+ 280              		.thumb_func
+ 281              		.type	SamplingTimerISR_StartEx, %function
+ 282              	SamplingTimerISR_StartEx:
+ 283              	.LFB35:
+ 102:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     /* For all we know the interrupt is active. */
+ 284              		.loc 1 102 0
+ 285              		.cfi_startproc
+ 286              	.LVL13:
+ 287 0000 10B5     		push	{r4, lr}
+ 288              		.cfi_def_cfa_offset 8
+ 289              		.cfi_offset 4, -8
+ 290              		.cfi_offset 14, -4
+ 291 0002 041C     		mov	r4, r0
+ 104:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 292              		.loc 1 104 0
+ 293 0004 FFF7FEFF 		bl	SamplingTimerISR_Disable
+ 294              	.LVL14:
+ 107:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 295              		.loc 1 107 0
+ 296 0008 201C     		mov	r0, r4
+ 297 000a FFF7FEFF 		bl	SamplingTimerISR_SetVector
+ 298              	.LVL15:
+ 110:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 299              		.loc 1 110 0
+ 300 000e 0320     		mov	r0, #3
+ 301 0010 FFF7FEFF 		bl	SamplingTimerISR_SetPriority
+ 302              	.LVL16:
+ 113:.\Generated_Source\PSoC4/SamplingTimerISR.c **** }
+ 303              		.loc 1 113 0
+ 304 0014 FFF7FEFF 		bl	SamplingTimerISR_Enable
+ 305              	.LVL17:
+ 114:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 306              		.loc 1 114 0
+ 307              		@ sp needed
+ 308              	.LVL18:
+ 309 0018 10BD     		pop	{r4, pc}
+ 310              		.cfi_endproc
+ 311              	.LFE35:
+ 312              		.size	SamplingTimerISR_StartEx, .-SamplingTimerISR_StartEx
+ 313 001a C046     		.section	.text.SamplingTimerISR_Stop,"ax",%progbits
+ 314              		.align	2
+ 315              		.global	SamplingTimerISR_Stop
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 13
+
+
+ 316              		.code	16
+ 317              		.thumb_func
+ 318              		.type	SamplingTimerISR_Stop, %function
+ 319              	SamplingTimerISR_Stop:
+ 320              	.LFB36:
+ 132:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     /* Disable this interrupt. */
+ 321              		.loc 1 132 0
+ 322              		.cfi_startproc
+ 323 0000 08B5     		push	{r3, lr}
+ 324              		.cfi_def_cfa_offset 8
+ 325              		.cfi_offset 3, -8
+ 326              		.cfi_offset 14, -4
+ 134:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 327              		.loc 1 134 0
+ 328 0002 FFF7FEFF 		bl	SamplingTimerISR_Disable
+ 329              	.LVL19:
+ 137:.\Generated_Source\PSoC4/SamplingTimerISR.c **** }
+ 330              		.loc 1 137 0
+ 331 0006 0248     		ldr	r0, .L30
+ 332 0008 FFF7FEFF 		bl	SamplingTimerISR_SetVector
+ 333              	.LVL20:
+ 138:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 334              		.loc 1 138 0
+ 335              		@ sp needed
+ 336 000c 08BD     		pop	{r3, pc}
+ 337              	.L31:
+ 338 000e C046     		.align	2
+ 339              	.L30:
+ 340 0010 00000000 		.word	IntDefaultHandler
+ 341              		.cfi_endproc
+ 342              	.LFE36:
+ 343              		.size	SamplingTimerISR_Stop, .-SamplingTimerISR_Stop
+ 344              		.section	.text.SamplingTimerISR_SetPending,"ax",%progbits
+ 345              		.align	2
+ 346              		.global	SamplingTimerISR_SetPending
+ 347              		.code	16
+ 348              		.thumb_func
+ 349              		.type	SamplingTimerISR_SetPending, %function
+ 350              	SamplingTimerISR_SetPending:
+ 351              	.LFB45:
+ 357:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 358:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 359:.\Generated_Source\PSoC4/SamplingTimerISR.c **** /*******************************************************************************
+ 360:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Function Name: SamplingTimerISR_SetPending
+ 361:.\Generated_Source\PSoC4/SamplingTimerISR.c **** ********************************************************************************
+ 362:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 363:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Summary:
+ 364:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   Causes the Interrupt to enter the pending state, a software method of
+ 365:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   generating the interrupt.
+ 366:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 367:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Parameters:
+ 368:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   None
+ 369:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 370:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Return:
+ 371:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   None
+ 372:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 373:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Side Effects:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 14
+
+
+ 374:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   If interrupts are enabled and the interrupt is set up properly, the ISR is
+ 375:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   entered (depending on the priority of this interrupt and other pending 
+ 376:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   interrupts).
+ 377:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 378:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *******************************************************************************/
+ 379:.\Generated_Source\PSoC4/SamplingTimerISR.c **** void SamplingTimerISR_SetPending(void)
+ 380:.\Generated_Source\PSoC4/SamplingTimerISR.c **** {
+ 352              		.loc 1 380 0
+ 353              		.cfi_startproc
+ 381:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     *SamplingTimerISR_INTC_SET_PD = SamplingTimerISR__INTC_MASK;
+ 354              		.loc 1 381 0
+ 355 0000 1022     		mov	r2, #16
+ 356 0002 014B     		ldr	r3, .L33
+ 357 0004 1A60     		str	r2, [r3]
+ 382:.\Generated_Source\PSoC4/SamplingTimerISR.c **** }
+ 358              		.loc 1 382 0
+ 359              		@ sp needed
+ 360 0006 7047     		bx	lr
+ 361              	.L34:
+ 362              		.align	2
+ 363              	.L33:
+ 364 0008 00E200E0 		.word	-536813056
+ 365              		.cfi_endproc
+ 366              	.LFE45:
+ 367              		.size	SamplingTimerISR_SetPending, .-SamplingTimerISR_SetPending
+ 368              		.section	.text.SamplingTimerISR_ClearPending,"ax",%progbits
+ 369              		.align	2
+ 370              		.global	SamplingTimerISR_ClearPending
+ 371              		.code	16
+ 372              		.thumb_func
+ 373              		.type	SamplingTimerISR_ClearPending, %function
+ 374              	SamplingTimerISR_ClearPending:
+ 375              	.LFB46:
+ 383:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 384:.\Generated_Source\PSoC4/SamplingTimerISR.c **** 
+ 385:.\Generated_Source\PSoC4/SamplingTimerISR.c **** /*******************************************************************************
+ 386:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Function Name: SamplingTimerISR_ClearPending
+ 387:.\Generated_Source\PSoC4/SamplingTimerISR.c **** ********************************************************************************
+ 388:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 389:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Summary:
+ 390:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   Clears a pending interrupt in the interrupt controller.
+ 391:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 392:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   Note Some interrupt sources are clear-on-read and require the block 
+ 393:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   interrupt/status register to be read/cleared with the appropriate block API 
+ 394:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   (GPIO, UART, and so on). Otherwise the ISR will continue to remain in 
+ 395:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   pending state even though the interrupt itself is cleared using this API.
+ 396:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 397:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Parameters:
+ 398:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   None
+ 399:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 400:.\Generated_Source\PSoC4/SamplingTimerISR.c **** * Return:
+ 401:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *   None
+ 402:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *
+ 403:.\Generated_Source\PSoC4/SamplingTimerISR.c **** *******************************************************************************/
+ 404:.\Generated_Source\PSoC4/SamplingTimerISR.c **** void SamplingTimerISR_ClearPending(void)
+ 405:.\Generated_Source\PSoC4/SamplingTimerISR.c **** {
+ 376              		.loc 1 405 0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 15
+
+
+ 377              		.cfi_startproc
+ 406:.\Generated_Source\PSoC4/SamplingTimerISR.c ****     *SamplingTimerISR_INTC_CLR_PD = SamplingTimerISR__INTC_MASK;
+ 378              		.loc 1 406 0
+ 379 0000 1022     		mov	r2, #16
+ 380 0002 014B     		ldr	r3, .L36
+ 381 0004 1A60     		str	r2, [r3]
+ 407:.\Generated_Source\PSoC4/SamplingTimerISR.c **** }
+ 382              		.loc 1 407 0
+ 383              		@ sp needed
+ 384 0006 7047     		bx	lr
+ 385              	.L37:
+ 386              		.align	2
+ 387              	.L36:
+ 388 0008 80E200E0 		.word	-536812928
+ 389              		.cfi_endproc
+ 390              	.LFE46:
+ 391              		.size	SamplingTimerISR_ClearPending, .-SamplingTimerISR_ClearPending
+ 392              		.text
+ 393              	.Letext0:
+ 394              		.file 2 "Generated_Source\\PSoC4/cytypes.h"
+ 395              		.file 3 "./TemperatureCommManager.h"
+ 396              		.file 4 "Generated_Source\\PSoC4/CyLib.h"
+ 397              		.section	.debug_info,"",%progbits
+ 398              	.Ldebug_info0:
+ 399 0000 13030000 		.4byte	0x313
+ 400 0004 0400     		.2byte	0x4
+ 401 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 402 000a 04       		.byte	0x4
+ 403 000b 01       		.uleb128 0x1
+ 404 000c 84020000 		.4byte	.LASF33
+ 405 0010 01       		.byte	0x1
+ 406 0011 B2000000 		.4byte	.LASF34
+ 407 0015 06000000 		.4byte	.LASF35
+ 408 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 409 001d 00000000 		.4byte	0
+ 410 0021 00000000 		.4byte	.Ldebug_line0
+ 411 0025 02       		.uleb128 0x2
+ 412 0026 01       		.byte	0x1
+ 413 0027 06       		.byte	0x6
+ 414 0028 8D030000 		.4byte	.LASF0
+ 415 002c 02       		.uleb128 0x2
+ 416 002d 01       		.byte	0x1
+ 417 002e 08       		.byte	0x8
+ 418 002f 43010000 		.4byte	.LASF1
+ 419 0033 02       		.uleb128 0x2
+ 420 0034 02       		.byte	0x2
+ 421 0035 05       		.byte	0x5
+ 422 0036 1F030000 		.4byte	.LASF2
+ 423 003a 02       		.uleb128 0x2
+ 424 003b 02       		.byte	0x2
+ 425 003c 07       		.byte	0x7
+ 426 003d DE000000 		.4byte	.LASF3
+ 427 0041 02       		.uleb128 0x2
+ 428 0042 04       		.byte	0x4
+ 429 0043 05       		.byte	0x5
+ 430 0044 84030000 		.4byte	.LASF4
+ 431 0048 02       		.uleb128 0x2
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 16
+
+
+ 432 0049 04       		.byte	0x4
+ 433 004a 07       		.byte	0x7
+ 434 004b 60010000 		.4byte	.LASF5
+ 435 004f 02       		.uleb128 0x2
+ 436 0050 08       		.byte	0x8
+ 437 0051 05       		.byte	0x5
+ 438 0052 71020000 		.4byte	.LASF6
+ 439 0056 02       		.uleb128 0x2
+ 440 0057 08       		.byte	0x8
+ 441 0058 07       		.byte	0x7
+ 442 0059 44020000 		.4byte	.LASF7
+ 443 005d 03       		.uleb128 0x3
+ 444 005e 04       		.byte	0x4
+ 445 005f 05       		.byte	0x5
+ 446 0060 696E7400 		.ascii	"int\000"
+ 447 0064 02       		.uleb128 0x2
+ 448 0065 04       		.byte	0x4
+ 449 0066 07       		.byte	0x7
+ 450 0067 2F020000 		.4byte	.LASF8
+ 451 006b 04       		.uleb128 0x4
+ 452 006c 89010000 		.4byte	.LASF9
+ 453 0070 02       		.byte	0x2
+ 454 0071 3801     		.2byte	0x138
+ 455 0073 2C000000 		.4byte	0x2c
+ 456 0077 04       		.uleb128 0x4
+ 457 0078 11020000 		.4byte	.LASF10
+ 458 007c 02       		.byte	0x2
+ 459 007d 3A01     		.2byte	0x13a
+ 460 007f 48000000 		.4byte	0x48
+ 461 0083 02       		.uleb128 0x2
+ 462 0084 04       		.byte	0x4
+ 463 0085 04       		.byte	0x4
+ 464 0086 27010000 		.4byte	.LASF11
+ 465 008a 02       		.uleb128 0x2
+ 466 008b 08       		.byte	0x8
+ 467 008c 04       		.byte	0x4
+ 468 008d B3010000 		.4byte	.LASF12
+ 469 0091 02       		.uleb128 0x2
+ 470 0092 01       		.byte	0x1
+ 471 0093 08       		.byte	0x8
+ 472 0094 7F020000 		.4byte	.LASF13
+ 473 0098 04       		.uleb128 0x4
+ 474 0099 00000000 		.4byte	.LASF14
+ 475 009d 02       		.byte	0x2
+ 476 009e E401     		.2byte	0x1e4
+ 477 00a0 A4000000 		.4byte	0xa4
+ 478 00a4 05       		.uleb128 0x5
+ 479 00a5 77000000 		.4byte	0x77
+ 480 00a9 04       		.uleb128 0x4
+ 481 00aa 5B020000 		.4byte	.LASF15
+ 482 00ae 02       		.byte	0x2
+ 483 00af F401     		.2byte	0x1f4
+ 484 00b1 B5000000 		.4byte	0xb5
+ 485 00b5 06       		.uleb128 0x6
+ 486 00b6 04       		.byte	0x4
+ 487 00b7 BB000000 		.4byte	0xbb
+ 488 00bb 07       		.uleb128 0x7
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 17
+
+
+ 489 00bc 02       		.uleb128 0x2
+ 490 00bd 04       		.byte	0x4
+ 491 00be 07       		.byte	0x7
+ 492 00bf 68020000 		.4byte	.LASF16
+ 493 00c3 08       		.uleb128 0x8
+ 494 00c4 44030000 		.4byte	.LASF17
+ 495 00c8 01       		.byte	0x1
+ 496 00c9 A1       		.byte	0xa1
+ 497 00ca 00000000 		.4byte	.LFB37
+ 498 00ce 08000000 		.4byte	.LFE37-.LFB37
+ 499 00d2 01       		.uleb128 0x1
+ 500 00d3 9C       		.byte	0x9c
+ 501 00d4 E2000000 		.4byte	0xe2
+ 502 00d8 09       		.uleb128 0x9
+ 503 00d9 06000000 		.4byte	.LVL0
+ 504 00dd F7020000 		.4byte	0x2f7
+ 505 00e1 00       		.byte	0
+ 506 00e2 08       		.uleb128 0x8
+ 507 00e3 98010000 		.4byte	.LASF18
+ 508 00e7 01       		.byte	0x1
+ 509 00e8 CD       		.byte	0xcd
+ 510 00e9 00000000 		.4byte	.LFB38
+ 511 00ed 0C000000 		.4byte	.LFE38-.LFB38
+ 512 00f1 01       		.uleb128 0x1
+ 513 00f2 9C       		.byte	0x9c
+ 514 00f3 05010000 		.4byte	0x105
+ 515 00f7 0A       		.uleb128 0xa
+ 516 00f8 3C020000 		.4byte	.LASF20
+ 517 00fc 01       		.byte	0x1
+ 518 00fd CD       		.byte	0xcd
+ 519 00fe A9000000 		.4byte	0xa9
+ 520 0102 01       		.uleb128 0x1
+ 521 0103 50       		.byte	0x50
+ 522 0104 00       		.byte	0
+ 523 0105 0B       		.uleb128 0xb
+ 524 0106 29030000 		.4byte	.LASF24
+ 525 010a 01       		.byte	0x1
+ 526 010b E1       		.byte	0xe1
+ 527 010c A9000000 		.4byte	0xa9
+ 528 0110 00000000 		.4byte	.LFB39
+ 529 0114 0C000000 		.4byte	.LFE39-.LFB39
+ 530 0118 01       		.uleb128 0x1
+ 531 0119 9C       		.byte	0x9c
+ 532 011a 08       		.uleb128 0x8
+ 533 011b D6010000 		.4byte	.LASF19
+ 534 011f 01       		.byte	0x1
+ 535 0120 FF       		.byte	0xff
+ 536 0121 00000000 		.4byte	.LFB40
+ 537 0125 20000000 		.4byte	.LFE40-.LFB40
+ 538 0129 01       		.uleb128 0x1
+ 539 012a 9C       		.byte	0x9c
+ 540 012b 6E010000 		.4byte	0x16e
+ 541 012f 0C       		.uleb128 0xc
+ 542 0130 8F010000 		.4byte	.LASF21
+ 543 0134 01       		.byte	0x1
+ 544 0135 FF       		.byte	0xff
+ 545 0136 6B000000 		.4byte	0x6b
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 18
+
+
+ 546 013a 00000000 		.4byte	.LLST0
+ 547 013e 0D       		.uleb128 0xd
+ 548 013f 51010000 		.4byte	.LASF22
+ 549 0143 01       		.byte	0x1
+ 550 0144 0101     		.2byte	0x101
+ 551 0146 6B000000 		.4byte	0x6b
+ 552 014a 21000000 		.4byte	.LLST1
+ 553 014e 0E       		.uleb128 0xe
+ 554 014f 75030000 		.4byte	.LASF23
+ 555 0153 01       		.byte	0x1
+ 556 0154 0201     		.2byte	0x102
+ 557 0156 77000000 		.4byte	0x77
+ 558 015a 06       		.byte	0x6
+ 559 015b 09       		.uleb128 0x9
+ 560 015c 08000000 		.4byte	.LVL4
+ 561 0160 FE020000 		.4byte	0x2fe
+ 562 0164 09       		.uleb128 0x9
+ 563 0165 1A000000 		.4byte	.LVL5
+ 564 0169 09030000 		.4byte	0x309
+ 565 016d 00       		.byte	0
+ 566 016e 0F       		.uleb128 0xf
+ 567 016f F1000000 		.4byte	.LASF36
+ 568 0173 01       		.byte	0x1
+ 569 0174 1B01     		.2byte	0x11b
+ 570 0176 6B000000 		.4byte	0x6b
+ 571 017a 00000000 		.4byte	.LFB41
+ 572 017e 10000000 		.4byte	.LFE41-.LFB41
+ 573 0182 01       		.uleb128 0x1
+ 574 0183 9C       		.byte	0x9c
+ 575 0184 A6010000 		.4byte	0x1a6
+ 576 0188 0D       		.uleb128 0xd
+ 577 0189 8F010000 		.4byte	.LASF21
+ 578 018d 01       		.byte	0x1
+ 579 018e 1D01     		.2byte	0x11d
+ 580 0190 77000000 		.4byte	0x77
+ 581 0194 34000000 		.4byte	.LLST2
+ 582 0198 0E       		.uleb128 0xe
+ 583 0199 75030000 		.4byte	.LASF23
+ 584 019d 01       		.byte	0x1
+ 585 019e 1E01     		.2byte	0x11e
+ 586 01a0 77000000 		.4byte	0x77
+ 587 01a4 06       		.byte	0x6
+ 588 01a5 00       		.byte	0
+ 589 01a6 10       		.uleb128 0x10
+ 590 01a7 99030000 		.4byte	.LASF26
+ 591 01ab 01       		.byte	0x1
+ 592 01ac 3601     		.2byte	0x136
+ 593 01ae 00000000 		.4byte	.LFB42
+ 594 01b2 0C000000 		.4byte	.LFE42-.LFB42
+ 595 01b6 01       		.uleb128 0x1
+ 596 01b7 9C       		.byte	0x9c
+ 597 01b8 11       		.uleb128 0x11
+ 598 01b9 98000000 		.4byte	.LASF25
+ 599 01bd 01       		.byte	0x1
+ 600 01be 4B01     		.2byte	0x14b
+ 601 01c0 6B000000 		.4byte	0x6b
+ 602 01c4 00000000 		.4byte	.LFB43
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 19
+
+
+ 603 01c8 14000000 		.4byte	.LFE43-.LFB43
+ 604 01cc 01       		.uleb128 0x1
+ 605 01cd 9C       		.byte	0x9c
+ 606 01ce 10       		.uleb128 0x10
+ 607 01cf 0E010000 		.4byte	.LASF27
+ 608 01d3 01       		.byte	0x1
+ 609 01d4 6001     		.2byte	0x160
+ 610 01d6 00000000 		.4byte	.LFB44
+ 611 01da 0C000000 		.4byte	.LFE44-.LFB44
+ 612 01de 01       		.uleb128 0x1
+ 613 01df 9C       		.byte	0x9c
+ 614 01e0 08       		.uleb128 0x8
+ 615 01e1 72010000 		.4byte	.LASF28
+ 616 01e5 01       		.byte	0x1
+ 617 01e6 3A       		.byte	0x3a
+ 618 01e7 00000000 		.4byte	.LFB34
+ 619 01eb 1C000000 		.4byte	.LFE34-.LFB34
+ 620 01ef 01       		.uleb128 0x1
+ 621 01f0 9C       		.byte	0x9c
+ 622 01f1 32020000 		.4byte	0x232
+ 623 01f5 09       		.uleb128 0x9
+ 624 01f6 06000000 		.4byte	.LVL9
+ 625 01fa CE010000 		.4byte	0x1ce
+ 626 01fe 12       		.uleb128 0x12
+ 627 01ff 0C000000 		.4byte	.LVL10
+ 628 0203 E2000000 		.4byte	0xe2
+ 629 0207 15020000 		.4byte	0x215
+ 630 020b 13       		.uleb128 0x13
+ 631 020c 01       		.uleb128 0x1
+ 632 020d 50       		.byte	0x50
+ 633 020e 05       		.uleb128 0x5
+ 634 020f 03       		.byte	0x3
+ 635 0210 00000000 		.4byte	SamplingTimerISR_Interrupt
+ 636 0214 00       		.byte	0
+ 637 0215 12       		.uleb128 0x12
+ 638 0216 12000000 		.4byte	.LVL11
+ 639 021a 1A010000 		.4byte	0x11a
+ 640 021e 28020000 		.4byte	0x228
+ 641 0222 13       		.uleb128 0x13
+ 642 0223 01       		.uleb128 0x1
+ 643 0224 50       		.byte	0x50
+ 644 0225 01       		.uleb128 0x1
+ 645 0226 33       		.byte	0x33
+ 646 0227 00       		.byte	0
+ 647 0228 09       		.uleb128 0x9
+ 648 0229 16000000 		.4byte	.LVL12
+ 649 022d A6010000 		.4byte	0x1a6
+ 650 0231 00       		.byte	0
+ 651 0232 08       		.uleb128 0x8
+ 652 0233 7F000000 		.4byte	.LASF29
+ 653 0237 01       		.byte	0x1
+ 654 0238 65       		.byte	0x65
+ 655 0239 00000000 		.4byte	.LFB35
+ 656 023d 1A000000 		.4byte	.LFE35-.LFB35
+ 657 0241 01       		.uleb128 0x1
+ 658 0242 9C       		.byte	0x9c
+ 659 0243 90020000 		.4byte	0x290
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 20
+
+
+ 660 0247 0C       		.uleb128 0xc
+ 661 0248 3C020000 		.4byte	.LASF20
+ 662 024c 01       		.byte	0x1
+ 663 024d 65       		.byte	0x65
+ 664 024e A9000000 		.4byte	0xa9
+ 665 0252 56000000 		.4byte	.LLST3
+ 666 0256 09       		.uleb128 0x9
+ 667 0257 08000000 		.4byte	.LVL14
+ 668 025b CE010000 		.4byte	0x1ce
+ 669 025f 12       		.uleb128 0x12
+ 670 0260 0E000000 		.4byte	.LVL15
+ 671 0264 E2000000 		.4byte	0xe2
+ 672 0268 73020000 		.4byte	0x273
+ 673 026c 13       		.uleb128 0x13
+ 674 026d 01       		.uleb128 0x1
+ 675 026e 50       		.byte	0x50
+ 676 026f 02       		.uleb128 0x2
+ 677 0270 74       		.byte	0x74
+ 678 0271 00       		.sleb128 0
+ 679 0272 00       		.byte	0
+ 680 0273 12       		.uleb128 0x12
+ 681 0274 14000000 		.4byte	.LVL16
+ 682 0278 1A010000 		.4byte	0x11a
+ 683 027c 86020000 		.4byte	0x286
+ 684 0280 13       		.uleb128 0x13
+ 685 0281 01       		.uleb128 0x1
+ 686 0282 50       		.byte	0x50
+ 687 0283 01       		.uleb128 0x1
+ 688 0284 33       		.byte	0x33
+ 689 0285 00       		.byte	0
+ 690 0286 09       		.uleb128 0x9
+ 691 0287 18000000 		.4byte	.LVL17
+ 692 028b A6010000 		.4byte	0x1a6
+ 693 028f 00       		.byte	0
+ 694 0290 08       		.uleb128 0x8
+ 695 0291 2D010000 		.4byte	.LASF30
+ 696 0295 01       		.byte	0x1
+ 697 0296 83       		.byte	0x83
+ 698 0297 00000000 		.4byte	.LFB36
+ 699 029b 14000000 		.4byte	.LFE36-.LFB36
+ 700 029f 01       		.uleb128 0x1
+ 701 02a0 9C       		.byte	0x9c
+ 702 02a1 B8020000 		.4byte	0x2b8
+ 703 02a5 09       		.uleb128 0x9
+ 704 02a6 06000000 		.4byte	.LVL19
+ 705 02aa CE010000 		.4byte	0x1ce
+ 706 02ae 09       		.uleb128 0x9
+ 707 02af 0C000000 		.4byte	.LVL20
+ 708 02b3 E2000000 		.4byte	0xe2
+ 709 02b7 00       		.byte	0
+ 710 02b8 10       		.uleb128 0x10
+ 711 02b9 BA010000 		.4byte	.LASF31
+ 712 02bd 01       		.byte	0x1
+ 713 02be 7B01     		.2byte	0x17b
+ 714 02c0 00000000 		.4byte	.LFB45
+ 715 02c4 0C000000 		.4byte	.LFE45-.LFB45
+ 716 02c8 01       		.uleb128 0x1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 21
+
+
+ 717 02c9 9C       		.byte	0x9c
+ 718 02ca 10       		.uleb128 0x10
+ 719 02cb F3010000 		.4byte	.LASF32
+ 720 02cf 01       		.byte	0x1
+ 721 02d0 9401     		.2byte	0x194
+ 722 02d2 00000000 		.4byte	.LFB46
+ 723 02d6 0C000000 		.4byte	.LFE46-.LFB46
+ 724 02da 01       		.uleb128 0x1
+ 725 02db 9C       		.byte	0x9c
+ 726 02dc 14       		.uleb128 0x14
+ 727 02dd A9000000 		.4byte	0xa9
+ 728 02e1 EC020000 		.4byte	0x2ec
+ 729 02e5 15       		.uleb128 0x15
+ 730 02e6 BC000000 		.4byte	0xbc
+ 731 02ea 2F       		.byte	0x2f
+ 732 02eb 00       		.byte	0
+ 733 02ec 16       		.uleb128 0x16
+ 734 02ed 12030000 		.4byte	.LASF37
+ 735 02f1 01       		.byte	0x1
+ 736 02f2 23       		.byte	0x23
+ 737 02f3 DC020000 		.4byte	0x2dc
+ 738 02f7 17       		.uleb128 0x17
+ 739 02f8 63000000 		.4byte	.LASF38
+ 740 02fc 03       		.byte	0x3
+ 741 02fd 22       		.byte	0x22
+ 742 02fe 18       		.uleb128 0x18
+ 743 02ff 18020000 		.4byte	.LASF39
+ 744 0303 04       		.byte	0x4
+ 745 0304 61       		.byte	0x61
+ 746 0305 6B000000 		.4byte	0x6b
+ 747 0309 19       		.uleb128 0x19
+ 748 030a 5F030000 		.4byte	.LASF40
+ 749 030e 04       		.byte	0x4
+ 750 030f 62       		.byte	0x62
+ 751 0310 1A       		.uleb128 0x1a
+ 752 0311 6B000000 		.4byte	0x6b
+ 753 0315 00       		.byte	0
+ 754 0316 00       		.byte	0
+ 755              		.section	.debug_abbrev,"",%progbits
+ 756              	.Ldebug_abbrev0:
+ 757 0000 01       		.uleb128 0x1
+ 758 0001 11       		.uleb128 0x11
+ 759 0002 01       		.byte	0x1
+ 760 0003 25       		.uleb128 0x25
+ 761 0004 0E       		.uleb128 0xe
+ 762 0005 13       		.uleb128 0x13
+ 763 0006 0B       		.uleb128 0xb
+ 764 0007 03       		.uleb128 0x3
+ 765 0008 0E       		.uleb128 0xe
+ 766 0009 1B       		.uleb128 0x1b
+ 767 000a 0E       		.uleb128 0xe
+ 768 000b 55       		.uleb128 0x55
+ 769 000c 17       		.uleb128 0x17
+ 770 000d 11       		.uleb128 0x11
+ 771 000e 01       		.uleb128 0x1
+ 772 000f 10       		.uleb128 0x10
+ 773 0010 17       		.uleb128 0x17
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 22
+
+
+ 774 0011 00       		.byte	0
+ 775 0012 00       		.byte	0
+ 776 0013 02       		.uleb128 0x2
+ 777 0014 24       		.uleb128 0x24
+ 778 0015 00       		.byte	0
+ 779 0016 0B       		.uleb128 0xb
+ 780 0017 0B       		.uleb128 0xb
+ 781 0018 3E       		.uleb128 0x3e
+ 782 0019 0B       		.uleb128 0xb
+ 783 001a 03       		.uleb128 0x3
+ 784 001b 0E       		.uleb128 0xe
+ 785 001c 00       		.byte	0
+ 786 001d 00       		.byte	0
+ 787 001e 03       		.uleb128 0x3
+ 788 001f 24       		.uleb128 0x24
+ 789 0020 00       		.byte	0
+ 790 0021 0B       		.uleb128 0xb
+ 791 0022 0B       		.uleb128 0xb
+ 792 0023 3E       		.uleb128 0x3e
+ 793 0024 0B       		.uleb128 0xb
+ 794 0025 03       		.uleb128 0x3
+ 795 0026 08       		.uleb128 0x8
+ 796 0027 00       		.byte	0
+ 797 0028 00       		.byte	0
+ 798 0029 04       		.uleb128 0x4
+ 799 002a 16       		.uleb128 0x16
+ 800 002b 00       		.byte	0
+ 801 002c 03       		.uleb128 0x3
+ 802 002d 0E       		.uleb128 0xe
+ 803 002e 3A       		.uleb128 0x3a
+ 804 002f 0B       		.uleb128 0xb
+ 805 0030 3B       		.uleb128 0x3b
+ 806 0031 05       		.uleb128 0x5
+ 807 0032 49       		.uleb128 0x49
+ 808 0033 13       		.uleb128 0x13
+ 809 0034 00       		.byte	0
+ 810 0035 00       		.byte	0
+ 811 0036 05       		.uleb128 0x5
+ 812 0037 35       		.uleb128 0x35
+ 813 0038 00       		.byte	0
+ 814 0039 49       		.uleb128 0x49
+ 815 003a 13       		.uleb128 0x13
+ 816 003b 00       		.byte	0
+ 817 003c 00       		.byte	0
+ 818 003d 06       		.uleb128 0x6
+ 819 003e 0F       		.uleb128 0xf
+ 820 003f 00       		.byte	0
+ 821 0040 0B       		.uleb128 0xb
+ 822 0041 0B       		.uleb128 0xb
+ 823 0042 49       		.uleb128 0x49
+ 824 0043 13       		.uleb128 0x13
+ 825 0044 00       		.byte	0
+ 826 0045 00       		.byte	0
+ 827 0046 07       		.uleb128 0x7
+ 828 0047 15       		.uleb128 0x15
+ 829 0048 00       		.byte	0
+ 830 0049 27       		.uleb128 0x27
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 23
+
+
+ 831 004a 19       		.uleb128 0x19
+ 832 004b 00       		.byte	0
+ 833 004c 00       		.byte	0
+ 834 004d 08       		.uleb128 0x8
+ 835 004e 2E       		.uleb128 0x2e
+ 836 004f 01       		.byte	0x1
+ 837 0050 3F       		.uleb128 0x3f
+ 838 0051 19       		.uleb128 0x19
+ 839 0052 03       		.uleb128 0x3
+ 840 0053 0E       		.uleb128 0xe
+ 841 0054 3A       		.uleb128 0x3a
+ 842 0055 0B       		.uleb128 0xb
+ 843 0056 3B       		.uleb128 0x3b
+ 844 0057 0B       		.uleb128 0xb
+ 845 0058 27       		.uleb128 0x27
+ 846 0059 19       		.uleb128 0x19
+ 847 005a 11       		.uleb128 0x11
+ 848 005b 01       		.uleb128 0x1
+ 849 005c 12       		.uleb128 0x12
+ 850 005d 06       		.uleb128 0x6
+ 851 005e 40       		.uleb128 0x40
+ 852 005f 18       		.uleb128 0x18
+ 853 0060 9742     		.uleb128 0x2117
+ 854 0062 19       		.uleb128 0x19
+ 855 0063 01       		.uleb128 0x1
+ 856 0064 13       		.uleb128 0x13
+ 857 0065 00       		.byte	0
+ 858 0066 00       		.byte	0
+ 859 0067 09       		.uleb128 0x9
+ 860 0068 898201   		.uleb128 0x4109
+ 861 006b 00       		.byte	0
+ 862 006c 11       		.uleb128 0x11
+ 863 006d 01       		.uleb128 0x1
+ 864 006e 31       		.uleb128 0x31
+ 865 006f 13       		.uleb128 0x13
+ 866 0070 00       		.byte	0
+ 867 0071 00       		.byte	0
+ 868 0072 0A       		.uleb128 0xa
+ 869 0073 05       		.uleb128 0x5
+ 870 0074 00       		.byte	0
+ 871 0075 03       		.uleb128 0x3
+ 872 0076 0E       		.uleb128 0xe
+ 873 0077 3A       		.uleb128 0x3a
+ 874 0078 0B       		.uleb128 0xb
+ 875 0079 3B       		.uleb128 0x3b
+ 876 007a 0B       		.uleb128 0xb
+ 877 007b 49       		.uleb128 0x49
+ 878 007c 13       		.uleb128 0x13
+ 879 007d 02       		.uleb128 0x2
+ 880 007e 18       		.uleb128 0x18
+ 881 007f 00       		.byte	0
+ 882 0080 00       		.byte	0
+ 883 0081 0B       		.uleb128 0xb
+ 884 0082 2E       		.uleb128 0x2e
+ 885 0083 00       		.byte	0
+ 886 0084 3F       		.uleb128 0x3f
+ 887 0085 19       		.uleb128 0x19
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 24
+
+
+ 888 0086 03       		.uleb128 0x3
+ 889 0087 0E       		.uleb128 0xe
+ 890 0088 3A       		.uleb128 0x3a
+ 891 0089 0B       		.uleb128 0xb
+ 892 008a 3B       		.uleb128 0x3b
+ 893 008b 0B       		.uleb128 0xb
+ 894 008c 27       		.uleb128 0x27
+ 895 008d 19       		.uleb128 0x19
+ 896 008e 49       		.uleb128 0x49
+ 897 008f 13       		.uleb128 0x13
+ 898 0090 11       		.uleb128 0x11
+ 899 0091 01       		.uleb128 0x1
+ 900 0092 12       		.uleb128 0x12
+ 901 0093 06       		.uleb128 0x6
+ 902 0094 40       		.uleb128 0x40
+ 903 0095 18       		.uleb128 0x18
+ 904 0096 9742     		.uleb128 0x2117
+ 905 0098 19       		.uleb128 0x19
+ 906 0099 00       		.byte	0
+ 907 009a 00       		.byte	0
+ 908 009b 0C       		.uleb128 0xc
+ 909 009c 05       		.uleb128 0x5
+ 910 009d 00       		.byte	0
+ 911 009e 03       		.uleb128 0x3
+ 912 009f 0E       		.uleb128 0xe
+ 913 00a0 3A       		.uleb128 0x3a
+ 914 00a1 0B       		.uleb128 0xb
+ 915 00a2 3B       		.uleb128 0x3b
+ 916 00a3 0B       		.uleb128 0xb
+ 917 00a4 49       		.uleb128 0x49
+ 918 00a5 13       		.uleb128 0x13
+ 919 00a6 02       		.uleb128 0x2
+ 920 00a7 17       		.uleb128 0x17
+ 921 00a8 00       		.byte	0
+ 922 00a9 00       		.byte	0
+ 923 00aa 0D       		.uleb128 0xd
+ 924 00ab 34       		.uleb128 0x34
+ 925 00ac 00       		.byte	0
+ 926 00ad 03       		.uleb128 0x3
+ 927 00ae 0E       		.uleb128 0xe
+ 928 00af 3A       		.uleb128 0x3a
+ 929 00b0 0B       		.uleb128 0xb
+ 930 00b1 3B       		.uleb128 0x3b
+ 931 00b2 05       		.uleb128 0x5
+ 932 00b3 49       		.uleb128 0x49
+ 933 00b4 13       		.uleb128 0x13
+ 934 00b5 02       		.uleb128 0x2
+ 935 00b6 17       		.uleb128 0x17
+ 936 00b7 00       		.byte	0
+ 937 00b8 00       		.byte	0
+ 938 00b9 0E       		.uleb128 0xe
+ 939 00ba 34       		.uleb128 0x34
+ 940 00bb 00       		.byte	0
+ 941 00bc 03       		.uleb128 0x3
+ 942 00bd 0E       		.uleb128 0xe
+ 943 00be 3A       		.uleb128 0x3a
+ 944 00bf 0B       		.uleb128 0xb
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 25
+
+
+ 945 00c0 3B       		.uleb128 0x3b
+ 946 00c1 05       		.uleb128 0x5
+ 947 00c2 49       		.uleb128 0x49
+ 948 00c3 13       		.uleb128 0x13
+ 949 00c4 1C       		.uleb128 0x1c
+ 950 00c5 0B       		.uleb128 0xb
+ 951 00c6 00       		.byte	0
+ 952 00c7 00       		.byte	0
+ 953 00c8 0F       		.uleb128 0xf
+ 954 00c9 2E       		.uleb128 0x2e
+ 955 00ca 01       		.byte	0x1
+ 956 00cb 3F       		.uleb128 0x3f
+ 957 00cc 19       		.uleb128 0x19
+ 958 00cd 03       		.uleb128 0x3
+ 959 00ce 0E       		.uleb128 0xe
+ 960 00cf 3A       		.uleb128 0x3a
+ 961 00d0 0B       		.uleb128 0xb
+ 962 00d1 3B       		.uleb128 0x3b
+ 963 00d2 05       		.uleb128 0x5
+ 964 00d3 27       		.uleb128 0x27
+ 965 00d4 19       		.uleb128 0x19
+ 966 00d5 49       		.uleb128 0x49
+ 967 00d6 13       		.uleb128 0x13
+ 968 00d7 11       		.uleb128 0x11
+ 969 00d8 01       		.uleb128 0x1
+ 970 00d9 12       		.uleb128 0x12
+ 971 00da 06       		.uleb128 0x6
+ 972 00db 40       		.uleb128 0x40
+ 973 00dc 18       		.uleb128 0x18
+ 974 00dd 9742     		.uleb128 0x2117
+ 975 00df 19       		.uleb128 0x19
+ 976 00e0 01       		.uleb128 0x1
+ 977 00e1 13       		.uleb128 0x13
+ 978 00e2 00       		.byte	0
+ 979 00e3 00       		.byte	0
+ 980 00e4 10       		.uleb128 0x10
+ 981 00e5 2E       		.uleb128 0x2e
+ 982 00e6 00       		.byte	0
+ 983 00e7 3F       		.uleb128 0x3f
+ 984 00e8 19       		.uleb128 0x19
+ 985 00e9 03       		.uleb128 0x3
+ 986 00ea 0E       		.uleb128 0xe
+ 987 00eb 3A       		.uleb128 0x3a
+ 988 00ec 0B       		.uleb128 0xb
+ 989 00ed 3B       		.uleb128 0x3b
+ 990 00ee 05       		.uleb128 0x5
+ 991 00ef 27       		.uleb128 0x27
+ 992 00f0 19       		.uleb128 0x19
+ 993 00f1 11       		.uleb128 0x11
+ 994 00f2 01       		.uleb128 0x1
+ 995 00f3 12       		.uleb128 0x12
+ 996 00f4 06       		.uleb128 0x6
+ 997 00f5 40       		.uleb128 0x40
+ 998 00f6 18       		.uleb128 0x18
+ 999 00f7 9742     		.uleb128 0x2117
+ 1000 00f9 19       		.uleb128 0x19
+ 1001 00fa 00       		.byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 26
+
+
+ 1002 00fb 00       		.byte	0
+ 1003 00fc 11       		.uleb128 0x11
+ 1004 00fd 2E       		.uleb128 0x2e
+ 1005 00fe 00       		.byte	0
+ 1006 00ff 3F       		.uleb128 0x3f
+ 1007 0100 19       		.uleb128 0x19
+ 1008 0101 03       		.uleb128 0x3
+ 1009 0102 0E       		.uleb128 0xe
+ 1010 0103 3A       		.uleb128 0x3a
+ 1011 0104 0B       		.uleb128 0xb
+ 1012 0105 3B       		.uleb128 0x3b
+ 1013 0106 05       		.uleb128 0x5
+ 1014 0107 27       		.uleb128 0x27
+ 1015 0108 19       		.uleb128 0x19
+ 1016 0109 49       		.uleb128 0x49
+ 1017 010a 13       		.uleb128 0x13
+ 1018 010b 11       		.uleb128 0x11
+ 1019 010c 01       		.uleb128 0x1
+ 1020 010d 12       		.uleb128 0x12
+ 1021 010e 06       		.uleb128 0x6
+ 1022 010f 40       		.uleb128 0x40
+ 1023 0110 18       		.uleb128 0x18
+ 1024 0111 9742     		.uleb128 0x2117
+ 1025 0113 19       		.uleb128 0x19
+ 1026 0114 00       		.byte	0
+ 1027 0115 00       		.byte	0
+ 1028 0116 12       		.uleb128 0x12
+ 1029 0117 898201   		.uleb128 0x4109
+ 1030 011a 01       		.byte	0x1
+ 1031 011b 11       		.uleb128 0x11
+ 1032 011c 01       		.uleb128 0x1
+ 1033 011d 31       		.uleb128 0x31
+ 1034 011e 13       		.uleb128 0x13
+ 1035 011f 01       		.uleb128 0x1
+ 1036 0120 13       		.uleb128 0x13
+ 1037 0121 00       		.byte	0
+ 1038 0122 00       		.byte	0
+ 1039 0123 13       		.uleb128 0x13
+ 1040 0124 8A8201   		.uleb128 0x410a
+ 1041 0127 00       		.byte	0
+ 1042 0128 02       		.uleb128 0x2
+ 1043 0129 18       		.uleb128 0x18
+ 1044 012a 9142     		.uleb128 0x2111
+ 1045 012c 18       		.uleb128 0x18
+ 1046 012d 00       		.byte	0
+ 1047 012e 00       		.byte	0
+ 1048 012f 14       		.uleb128 0x14
+ 1049 0130 01       		.uleb128 0x1
+ 1050 0131 01       		.byte	0x1
+ 1051 0132 49       		.uleb128 0x49
+ 1052 0133 13       		.uleb128 0x13
+ 1053 0134 01       		.uleb128 0x1
+ 1054 0135 13       		.uleb128 0x13
+ 1055 0136 00       		.byte	0
+ 1056 0137 00       		.byte	0
+ 1057 0138 15       		.uleb128 0x15
+ 1058 0139 21       		.uleb128 0x21
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 27
+
+
+ 1059 013a 00       		.byte	0
+ 1060 013b 49       		.uleb128 0x49
+ 1061 013c 13       		.uleb128 0x13
+ 1062 013d 2F       		.uleb128 0x2f
+ 1063 013e 0B       		.uleb128 0xb
+ 1064 013f 00       		.byte	0
+ 1065 0140 00       		.byte	0
+ 1066 0141 16       		.uleb128 0x16
+ 1067 0142 34       		.uleb128 0x34
+ 1068 0143 00       		.byte	0
+ 1069 0144 03       		.uleb128 0x3
+ 1070 0145 0E       		.uleb128 0xe
+ 1071 0146 3A       		.uleb128 0x3a
+ 1072 0147 0B       		.uleb128 0xb
+ 1073 0148 3B       		.uleb128 0x3b
+ 1074 0149 0B       		.uleb128 0xb
+ 1075 014a 49       		.uleb128 0x49
+ 1076 014b 13       		.uleb128 0x13
+ 1077 014c 3F       		.uleb128 0x3f
+ 1078 014d 19       		.uleb128 0x19
+ 1079 014e 3C       		.uleb128 0x3c
+ 1080 014f 19       		.uleb128 0x19
+ 1081 0150 00       		.byte	0
+ 1082 0151 00       		.byte	0
+ 1083 0152 17       		.uleb128 0x17
+ 1084 0153 2E       		.uleb128 0x2e
+ 1085 0154 00       		.byte	0
+ 1086 0155 3F       		.uleb128 0x3f
+ 1087 0156 19       		.uleb128 0x19
+ 1088 0157 03       		.uleb128 0x3
+ 1089 0158 0E       		.uleb128 0xe
+ 1090 0159 3A       		.uleb128 0x3a
+ 1091 015a 0B       		.uleb128 0xb
+ 1092 015b 3B       		.uleb128 0x3b
+ 1093 015c 0B       		.uleb128 0xb
+ 1094 015d 27       		.uleb128 0x27
+ 1095 015e 19       		.uleb128 0x19
+ 1096 015f 3C       		.uleb128 0x3c
+ 1097 0160 19       		.uleb128 0x19
+ 1098 0161 00       		.byte	0
+ 1099 0162 00       		.byte	0
+ 1100 0163 18       		.uleb128 0x18
+ 1101 0164 2E       		.uleb128 0x2e
+ 1102 0165 00       		.byte	0
+ 1103 0166 3F       		.uleb128 0x3f
+ 1104 0167 19       		.uleb128 0x19
+ 1105 0168 03       		.uleb128 0x3
+ 1106 0169 0E       		.uleb128 0xe
+ 1107 016a 3A       		.uleb128 0x3a
+ 1108 016b 0B       		.uleb128 0xb
+ 1109 016c 3B       		.uleb128 0x3b
+ 1110 016d 0B       		.uleb128 0xb
+ 1111 016e 27       		.uleb128 0x27
+ 1112 016f 19       		.uleb128 0x19
+ 1113 0170 49       		.uleb128 0x49
+ 1114 0171 13       		.uleb128 0x13
+ 1115 0172 3C       		.uleb128 0x3c
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 28
+
+
+ 1116 0173 19       		.uleb128 0x19
+ 1117 0174 00       		.byte	0
+ 1118 0175 00       		.byte	0
+ 1119 0176 19       		.uleb128 0x19
+ 1120 0177 2E       		.uleb128 0x2e
+ 1121 0178 01       		.byte	0x1
+ 1122 0179 3F       		.uleb128 0x3f
+ 1123 017a 19       		.uleb128 0x19
+ 1124 017b 03       		.uleb128 0x3
+ 1125 017c 0E       		.uleb128 0xe
+ 1126 017d 3A       		.uleb128 0x3a
+ 1127 017e 0B       		.uleb128 0xb
+ 1128 017f 3B       		.uleb128 0x3b
+ 1129 0180 0B       		.uleb128 0xb
+ 1130 0181 27       		.uleb128 0x27
+ 1131 0182 19       		.uleb128 0x19
+ 1132 0183 3C       		.uleb128 0x3c
+ 1133 0184 19       		.uleb128 0x19
+ 1134 0185 00       		.byte	0
+ 1135 0186 00       		.byte	0
+ 1136 0187 1A       		.uleb128 0x1a
+ 1137 0188 05       		.uleb128 0x5
+ 1138 0189 00       		.byte	0
+ 1139 018a 49       		.uleb128 0x49
+ 1140 018b 13       		.uleb128 0x13
+ 1141 018c 00       		.byte	0
+ 1142 018d 00       		.byte	0
+ 1143 018e 00       		.byte	0
+ 1144              		.section	.debug_loc,"",%progbits
+ 1145              	.Ldebug_loc0:
+ 1146              	.LLST0:
+ 1147 0000 00000000 		.4byte	.LVL2
+ 1148 0004 07000000 		.4byte	.LVL4-1
+ 1149 0008 0100     		.2byte	0x1
+ 1150 000a 50       		.byte	0x50
+ 1151 000b 07000000 		.4byte	.LVL4-1
+ 1152 000f 20000000 		.4byte	.LFE40
+ 1153 0013 0400     		.2byte	0x4
+ 1154 0015 F3       		.byte	0xf3
+ 1155 0016 01       		.uleb128 0x1
+ 1156 0017 50       		.byte	0x50
+ 1157 0018 9F       		.byte	0x9f
+ 1158 0019 00000000 		.4byte	0
+ 1159 001d 00000000 		.4byte	0
+ 1160              	.LLST1:
+ 1161 0021 08000000 		.4byte	.LVL4
+ 1162 0025 19000000 		.4byte	.LVL5-1
+ 1163 0029 0100     		.2byte	0x1
+ 1164 002b 50       		.byte	0x50
+ 1165 002c 00000000 		.4byte	0
+ 1166 0030 00000000 		.4byte	0
+ 1167              	.LLST2:
+ 1168 0034 06000000 		.4byte	.LVL7
+ 1169 0038 08000000 		.4byte	.LVL8
+ 1170 003c 0500     		.2byte	0x5
+ 1171 003e 70       		.byte	0x70
+ 1172 003f 00       		.sleb128 0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 29
+
+
+ 1173 0040 4E       		.byte	0x4e
+ 1174 0041 25       		.byte	0x25
+ 1175 0042 9F       		.byte	0x9f
+ 1176 0043 08000000 		.4byte	.LVL8
+ 1177 0047 10000000 		.4byte	.LFE41
+ 1178 004b 0100     		.2byte	0x1
+ 1179 004d 50       		.byte	0x50
+ 1180 004e 00000000 		.4byte	0
+ 1181 0052 00000000 		.4byte	0
+ 1182              	.LLST3:
+ 1183 0056 00000000 		.4byte	.LVL13
+ 1184 005a 07000000 		.4byte	.LVL14-1
+ 1185 005e 0100     		.2byte	0x1
+ 1186 0060 50       		.byte	0x50
+ 1187 0061 07000000 		.4byte	.LVL14-1
+ 1188 0065 18000000 		.4byte	.LVL18
+ 1189 0069 0100     		.2byte	0x1
+ 1190 006b 54       		.byte	0x54
+ 1191 006c 18000000 		.4byte	.LVL18
+ 1192 0070 1A000000 		.4byte	.LFE35
+ 1193 0074 0400     		.2byte	0x4
+ 1194 0076 F3       		.byte	0xf3
+ 1195 0077 01       		.uleb128 0x1
+ 1196 0078 50       		.byte	0x50
+ 1197 0079 9F       		.byte	0x9f
+ 1198 007a 00000000 		.4byte	0
+ 1199 007e 00000000 		.4byte	0
+ 1200              		.section	.debug_aranges,"",%progbits
+ 1201 0000 7C000000 		.4byte	0x7c
+ 1202 0004 0200     		.2byte	0x2
+ 1203 0006 00000000 		.4byte	.Ldebug_info0
+ 1204 000a 04       		.byte	0x4
+ 1205 000b 00       		.byte	0
+ 1206 000c 0000     		.2byte	0
+ 1207 000e 0000     		.2byte	0
+ 1208 0010 00000000 		.4byte	.LFB37
+ 1209 0014 08000000 		.4byte	.LFE37-.LFB37
+ 1210 0018 00000000 		.4byte	.LFB38
+ 1211 001c 0C000000 		.4byte	.LFE38-.LFB38
+ 1212 0020 00000000 		.4byte	.LFB39
+ 1213 0024 0C000000 		.4byte	.LFE39-.LFB39
+ 1214 0028 00000000 		.4byte	.LFB40
+ 1215 002c 20000000 		.4byte	.LFE40-.LFB40
+ 1216 0030 00000000 		.4byte	.LFB41
+ 1217 0034 10000000 		.4byte	.LFE41-.LFB41
+ 1218 0038 00000000 		.4byte	.LFB42
+ 1219 003c 0C000000 		.4byte	.LFE42-.LFB42
+ 1220 0040 00000000 		.4byte	.LFB43
+ 1221 0044 14000000 		.4byte	.LFE43-.LFB43
+ 1222 0048 00000000 		.4byte	.LFB44
+ 1223 004c 0C000000 		.4byte	.LFE44-.LFB44
+ 1224 0050 00000000 		.4byte	.LFB34
+ 1225 0054 1C000000 		.4byte	.LFE34-.LFB34
+ 1226 0058 00000000 		.4byte	.LFB35
+ 1227 005c 1A000000 		.4byte	.LFE35-.LFB35
+ 1228 0060 00000000 		.4byte	.LFB36
+ 1229 0064 14000000 		.4byte	.LFE36-.LFB36
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 30
+
+
+ 1230 0068 00000000 		.4byte	.LFB45
+ 1231 006c 0C000000 		.4byte	.LFE45-.LFB45
+ 1232 0070 00000000 		.4byte	.LFB46
+ 1233 0074 0C000000 		.4byte	.LFE46-.LFB46
+ 1234 0078 00000000 		.4byte	0
+ 1235 007c 00000000 		.4byte	0
+ 1236              		.section	.debug_ranges,"",%progbits
+ 1237              	.Ldebug_ranges0:
+ 1238 0000 00000000 		.4byte	.LFB37
+ 1239 0004 08000000 		.4byte	.LFE37
+ 1240 0008 00000000 		.4byte	.LFB38
+ 1241 000c 0C000000 		.4byte	.LFE38
+ 1242 0010 00000000 		.4byte	.LFB39
+ 1243 0014 0C000000 		.4byte	.LFE39
+ 1244 0018 00000000 		.4byte	.LFB40
+ 1245 001c 20000000 		.4byte	.LFE40
+ 1246 0020 00000000 		.4byte	.LFB41
+ 1247 0024 10000000 		.4byte	.LFE41
+ 1248 0028 00000000 		.4byte	.LFB42
+ 1249 002c 0C000000 		.4byte	.LFE42
+ 1250 0030 00000000 		.4byte	.LFB43
+ 1251 0034 14000000 		.4byte	.LFE43
+ 1252 0038 00000000 		.4byte	.LFB44
+ 1253 003c 0C000000 		.4byte	.LFE44
+ 1254 0040 00000000 		.4byte	.LFB34
+ 1255 0044 1C000000 		.4byte	.LFE34
+ 1256 0048 00000000 		.4byte	.LFB35
+ 1257 004c 1A000000 		.4byte	.LFE35
+ 1258 0050 00000000 		.4byte	.LFB36
+ 1259 0054 14000000 		.4byte	.LFE36
+ 1260 0058 00000000 		.4byte	.LFB45
+ 1261 005c 0C000000 		.4byte	.LFE45
+ 1262 0060 00000000 		.4byte	.LFB46
+ 1263 0064 0C000000 		.4byte	.LFE46
+ 1264 0068 00000000 		.4byte	0
+ 1265 006c 00000000 		.4byte	0
+ 1266              		.section	.debug_line,"",%progbits
+ 1267              	.Ldebug_line0:
+ 1268 0000 90010000 		.section	.debug_str,"MS",%progbits,1
+ 1268      02008F00 
+ 1268      00000201 
+ 1268      FB0E0D00 
+ 1268      01010101 
+ 1269              	.LASF14:
+ 1270 0000 72656733 		.ascii	"reg32\000"
+ 1270      3200
+ 1271              	.LASF35:
+ 1272 0006 433A5C55 		.ascii	"C:\\Users\\kylep\\Box Sync\\Feniex Firmware Files\\"
+ 1272      73657273 
+ 1272      5C6B796C 
+ 1272      65705C42 
+ 1272      6F782053 
+ 1273 0034 414C4220 		.ascii	"ALB Cube\\81-00024-01 AI Cube\\81-00024-01.cydsn\000"
+ 1273      43756265 
+ 1273      5C38312D 
+ 1273      30303032 
+ 1273      342D3031 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 31
+
+
+ 1274              	.LASF38:
+ 1275 0063 70726F63 		.ascii	"processSamplingTimerRoutine\000"
+ 1275      65737353 
+ 1275      616D706C 
+ 1275      696E6754 
+ 1275      696D6572 
+ 1276              	.LASF29:
+ 1277 007f 53616D70 		.ascii	"SamplingTimerISR_StartEx\000"
+ 1277      6C696E67 
+ 1277      54696D65 
+ 1277      72495352 
+ 1277      5F537461 
+ 1278              	.LASF25:
+ 1279 0098 53616D70 		.ascii	"SamplingTimerISR_GetState\000"
+ 1279      6C696E67 
+ 1279      54696D65 
+ 1279      72495352 
+ 1279      5F476574 
+ 1280              	.LASF34:
+ 1281 00b2 2E5C4765 		.ascii	".\\Generated_Source\\PSoC4\\SamplingTimerISR.c\000"
+ 1281      6E657261 
+ 1281      7465645F 
+ 1281      536F7572 
+ 1281      63655C50 
+ 1282              	.LASF3:
+ 1283 00de 73686F72 		.ascii	"short unsigned int\000"
+ 1283      7420756E 
+ 1283      7369676E 
+ 1283      65642069 
+ 1283      6E7400
+ 1284              	.LASF36:
+ 1285 00f1 53616D70 		.ascii	"SamplingTimerISR_GetPriority\000"
+ 1285      6C696E67 
+ 1285      54696D65 
+ 1285      72495352 
+ 1285      5F476574 
+ 1286              	.LASF27:
+ 1287 010e 53616D70 		.ascii	"SamplingTimerISR_Disable\000"
+ 1287      6C696E67 
+ 1287      54696D65 
+ 1287      72495352 
+ 1287      5F446973 
+ 1288              	.LASF11:
+ 1289 0127 666C6F61 		.ascii	"float\000"
+ 1289      7400
+ 1290              	.LASF30:
+ 1291 012d 53616D70 		.ascii	"SamplingTimerISR_Stop\000"
+ 1291      6C696E67 
+ 1291      54696D65 
+ 1291      72495352 
+ 1291      5F53746F 
+ 1292              	.LASF1:
+ 1293 0143 756E7369 		.ascii	"unsigned char\000"
+ 1293      676E6564 
+ 1293      20636861 
+ 1293      7200
+ 1294              	.LASF22:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 32
+
+
+ 1295 0151 696E7465 		.ascii	"interruptState\000"
+ 1295      72727570 
+ 1295      74537461 
+ 1295      746500
+ 1296              	.LASF5:
+ 1297 0160 6C6F6E67 		.ascii	"long unsigned int\000"
+ 1297      20756E73 
+ 1297      69676E65 
+ 1297      6420696E 
+ 1297      7400
+ 1298              	.LASF28:
+ 1299 0172 53616D70 		.ascii	"SamplingTimerISR_Start\000"
+ 1299      6C696E67 
+ 1299      54696D65 
+ 1299      72495352 
+ 1299      5F537461 
+ 1300              	.LASF9:
+ 1301 0189 75696E74 		.ascii	"uint8\000"
+ 1301      3800
+ 1302              	.LASF21:
+ 1303 018f 7072696F 		.ascii	"priority\000"
+ 1303      72697479 
+ 1303      00
+ 1304              	.LASF18:
+ 1305 0198 53616D70 		.ascii	"SamplingTimerISR_SetVector\000"
+ 1305      6C696E67 
+ 1305      54696D65 
+ 1305      72495352 
+ 1305      5F536574 
+ 1306              	.LASF12:
+ 1307 01b3 646F7562 		.ascii	"double\000"
+ 1307      6C6500
+ 1308              	.LASF31:
+ 1309 01ba 53616D70 		.ascii	"SamplingTimerISR_SetPending\000"
+ 1309      6C696E67 
+ 1309      54696D65 
+ 1309      72495352 
+ 1309      5F536574 
+ 1310              	.LASF19:
+ 1311 01d6 53616D70 		.ascii	"SamplingTimerISR_SetPriority\000"
+ 1311      6C696E67 
+ 1311      54696D65 
+ 1311      72495352 
+ 1311      5F536574 
+ 1312              	.LASF32:
+ 1313 01f3 53616D70 		.ascii	"SamplingTimerISR_ClearPending\000"
+ 1313      6C696E67 
+ 1313      54696D65 
+ 1313      72495352 
+ 1313      5F436C65 
+ 1314              	.LASF10:
+ 1315 0211 75696E74 		.ascii	"uint32\000"
+ 1315      333200
+ 1316              	.LASF39:
+ 1317 0218 4379456E 		.ascii	"CyEnterCriticalSection\000"
+ 1317      74657243 
+ 1317      72697469 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 33
+
+
+ 1317      63616C53 
+ 1317      65637469 
+ 1318              	.LASF8:
+ 1319 022f 756E7369 		.ascii	"unsigned int\000"
+ 1319      676E6564 
+ 1319      20696E74 
+ 1319      00
+ 1320              	.LASF20:
+ 1321 023c 61646472 		.ascii	"address\000"
+ 1321      65737300 
+ 1322              	.LASF7:
+ 1323 0244 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 1323      206C6F6E 
+ 1323      6720756E 
+ 1323      7369676E 
+ 1323      65642069 
+ 1324              	.LASF15:
+ 1325 025b 63796973 		.ascii	"cyisraddress\000"
+ 1325      72616464 
+ 1325      72657373 
+ 1325      00
+ 1326              	.LASF16:
+ 1327 0268 73697A65 		.ascii	"sizetype\000"
+ 1327      74797065 
+ 1327      00
+ 1328              	.LASF6:
+ 1329 0271 6C6F6E67 		.ascii	"long long int\000"
+ 1329      206C6F6E 
+ 1329      6720696E 
+ 1329      7400
+ 1330              	.LASF13:
+ 1331 027f 63686172 		.ascii	"char\000"
+ 1331      00
+ 1332              	.LASF33:
+ 1333 0284 474E5520 		.ascii	"GNU C 4.9.3 20150303 (release) [ARM/embedded-4_9-br"
+ 1333      4320342E 
+ 1333      392E3320 
+ 1333      32303135 
+ 1333      30333033 
+ 1334 02b7 616E6368 		.ascii	"anch revision 221220] -mcpu=cortex-m0 -mthumb -g -O"
+ 1334      20726576 
+ 1334      6973696F 
+ 1334      6E203232 
+ 1334      31323230 
+ 1335 02ea 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 1335      66756E63 
+ 1335      74696F6E 
+ 1335      2D736563 
+ 1335      74696F6E 
+ 1336              	.LASF37:
+ 1337 0312 43795261 		.ascii	"CyRamVectors\000"
+ 1337      6D566563 
+ 1337      746F7273 
+ 1337      00
+ 1338              	.LASF2:
+ 1339 031f 73686F72 		.ascii	"short int\000"
+ 1339      7420696E 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMYoqcU.s 			page 34
+
+
+ 1339      7400
+ 1340              	.LASF24:
+ 1341 0329 53616D70 		.ascii	"SamplingTimerISR_GetVector\000"
+ 1341      6C696E67 
+ 1341      54696D65 
+ 1341      72495352 
+ 1341      5F476574 
+ 1342              	.LASF17:
+ 1343 0344 53616D70 		.ascii	"SamplingTimerISR_Interrupt\000"
+ 1343      6C696E67 
+ 1343      54696D65 
+ 1343      72495352 
+ 1343      5F496E74 
+ 1344              	.LASF40:
+ 1345 035f 43794578 		.ascii	"CyExitCriticalSection\000"
+ 1345      69744372 
+ 1345      69746963 
+ 1345      616C5365 
+ 1345      6374696F 
+ 1346              	.LASF23:
+ 1347 0375 7072696F 		.ascii	"priorityOffset\000"
+ 1347      72697479 
+ 1347      4F666673 
+ 1347      657400
+ 1348              	.LASF4:
+ 1349 0384 6C6F6E67 		.ascii	"long int\000"
+ 1349      20696E74 
+ 1349      00
+ 1350              	.LASF0:
+ 1351 038d 7369676E 		.ascii	"signed char\000"
+ 1351      65642063 
+ 1351      68617200 
+ 1352              	.LASF26:
+ 1353 0399 53616D70 		.ascii	"SamplingTimerISR_Enable\000"
+ 1353      6C696E67 
+ 1353      54696D65 
+ 1353      72495352 
+ 1353      5F456E61 
+ 1354              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 4.9.3 20150303 (release) [ARM/embedded-4_9-br

@@ -1,0 +1,3492 @@
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 1
+
+
+   1              		.cpu cortex-m0
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 34, 0
+  11              		.eabi_attribute 18, 4
+  12              		.code	16
+  13              		.file	"IO_Control.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.data
+  18              		.align	2
+  19              		.type	ThermalLimitArray, %object
+  20              		.size	ThermalLimitArray, 16
+  21              	ThermalLimitArray:
+  22 0000 C201     		.short	450
+  23 0002 6400     		.short	100
+  24 0004 9001     		.short	400
+  25 0006 6400     		.short	100
+  26 0008 2C01     		.short	300
+  27 000a 6400     		.short	100
+  28 000c 6400     		.short	100
+  29 000e 5000     		.short	80
+  30              		.align	2
+  31              		.type	PositionData, %object
+  32              		.size	PositionData, 3
+  33              	PositionData:
+  34 0010 00       		.byte	0
+  35 0011 00       		.byte	0
+  36 0012 01       		.byte	1
+  37 0013 00       		.align	2
+  38              		.type	ThermalData, %object
+  39              		.size	ThermalData, 5
+  40              	ThermalData:
+  41 0014 00       		.byte	0
+  42 0015 00       		.byte	0
+  43 0016 00       		.byte	0
+  44 0017 00       		.byte	0
+  45 0018 FF       		.byte	-1
+  46 0019 000000   		.section	.text.toggleLED,"ax",%progbits
+  47              		.align	2
+  48              		.global	toggleLED
+  49              		.code	16
+  50              		.thumb_func
+  51              		.type	toggleLED, %function
+  52              	toggleLED:
+  53              	.LFB34:
+  54              		.file 1 ".\\IO_Control.c"
+   1:.\IO_Control.c **** /* ========================================
+   2:.\IO_Control.c ****  *
+   3:.\IO_Control.c ****  * Copyright YOUR COMPANY, THE YEAR
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 2
+
+
+   4:.\IO_Control.c ****  * All Rights Reserved
+   5:.\IO_Control.c ****  * UNPUBLISHED, LICENSED SOFTWARE.
+   6:.\IO_Control.c ****  *
+   7:.\IO_Control.c ****  * CONFIDENTIAL AND PROPRIETARY INFORMATION
+   8:.\IO_Control.c ****  * WHICH IS THE PROPERTY OF your company.
+   9:.\IO_Control.c ****  *
+  10:.\IO_Control.c ****  * ========================================
+  11:.\IO_Control.c **** */
+  12:.\IO_Control.c **** /**********CHANGE LOG**********/
+  13:.\IO_Control.c **** 
+  14:.\IO_Control.c **** 
+  15:.\IO_Control.c **** /**********PREPROCESSOR DIRECTIVES**********/
+  16:.\IO_Control.c **** #include "CommonVariables.h"
+  17:.\IO_Control.c **** #include "IO_Control.h"
+  18:.\IO_Control.c **** #include "BrightnessCommManager.h"
+  19:.\IO_Control.c **** 
+  20:.\IO_Control.c **** #define MAX_ADC_CONVERSION_WAIT_LIMIT   5
+  21:.\IO_Control.c **** #define SAMPLE_COUNT_PER_CYCLE          1
+  22:.\IO_Control.c **** #define BRIGHTNESS_CHANGE_PER_SAMPLE    1
+  23:.\IO_Control.c **** 
+  24:.\IO_Control.c **** #define RAMP_DOWN_RATE                  1
+  25:.\IO_Control.c **** #define STEADY_INCREASE_RATE            1
+  26:.\IO_Control.c **** #define STEADY_DECREASE_RATE            1
+  27:.\IO_Control.c **** 
+  28:.\IO_Control.c **** #define MAX_SCALING_FACTOR              0xFF
+  29:.\IO_Control.c **** #define SAFE_TEMPERATURE_TOLERANCE      0
+  30:.\IO_Control.c ****     
+  31:.\IO_Control.c **** /**********DEFINED CONSTANTS**********/
+  32:.\IO_Control.c **** enum RegulationState
+  33:.\IO_Control.c **** {
+  34:.\IO_Control.c ****     STARTUP,
+  35:.\IO_Control.c ****     STEADY_INCREASE,
+  36:.\IO_Control.c ****     STEADY_DECREASE,
+  37:.\IO_Control.c ****     NO_CHANGE
+  38:.\IO_Control.c **** };
+  39:.\IO_Control.c **** 
+  40:.\IO_Control.c **** enum TemperatureStatus
+  41:.\IO_Control.c **** {
+  42:.\IO_Control.c ****     WITHIN_TOLERANCE,
+  43:.\IO_Control.c ****     EXCEEDED_UPPER_BOUND,
+  44:.\IO_Control.c ****     EXCEEDED_LOWER_BOUND,
+  45:.\IO_Control.c ****     ERROR
+  46:.\IO_Control.c **** };
+  47:.\IO_Control.c **** 
+  48:.\IO_Control.c **** typedef struct
+  49:.\IO_Control.c **** {
+  50:.\IO_Control.c ****     const int16 MAX_TEMPERATURE;
+  51:.\IO_Control.c ****     const int16 SAFE_TEMPERATURE;
+  52:.\IO_Control.c **** }ThermalLimit;
+  53:.\IO_Control.c **** 
+  54:.\IO_Control.c **** static ThermalLimit ThermalLimitArray[ADC_SAMPLE_COUNT] = 
+  55:.\IO_Control.c **** {
+  56:.\IO_Control.c ****     {450, 100}, //LED
+  57:.\IO_Control.c ****     {400, 100}, //SwitchNode
+  58:.\IO_Control.c ****     {300, 100}, //Ambient
+  59:.\IO_Control.c ****     {100,  80}  //Micro
+  60:.\IO_Control.c **** };
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 3
+
+
+  61:.\IO_Control.c **** 
+  62:.\IO_Control.c **** /**********DATA STRUCTURES**********/
+  63:.\IO_Control.c **** typedef struct
+  64:.\IO_Control.c **** {
+  65:.\IO_Control.c ****     uint8 ID_Number;
+  66:.\IO_Control.c ****     uint8 driverCount;
+  67:.\IO_Control.c ****     uint8 bLastDriverInChain;
+  68:.\IO_Control.c **** }DriverProperties;
+  69:.\IO_Control.c **** 
+  70:.\IO_Control.c **** static DriverProperties PositionData = {0, 0, TRUE};
+  71:.\IO_Control.c **** 
+  72:.\IO_Control.c **** typedef struct
+  73:.\IO_Control.c **** {
+  74:.\IO_Control.c ****     uint8 requestedBrightness;
+  75:.\IO_Control.c ****     uint8 regulatedBrightness;
+  76:.\IO_Control.c ****     uint8 previousRegulatedBrightness;
+  77:.\IO_Control.c ****     enum RegulationState currentState;
+  78:.\IO_Control.c ****     uint8 scalingFactor;
+  79:.\IO_Control.c **** }ThermalProperties;
+  80:.\IO_Control.c **** 
+  81:.\IO_Control.c **** static ThermalProperties ThermalData = {0, 0, 0, STARTUP, 0xFF};
+  82:.\IO_Control.c **** 
+  83:.\IO_Control.c **** /**********GLOBAL VARIABLES**********/
+  84:.\IO_Control.c **** 
+  85:.\IO_Control.c **** 
+  86:.\IO_Control.c **** /**********LOCAL FUNCTION PROTOTYPES**********/
+  87:.\IO_Control.c **** static enum TemperatureStatus getTemperatureStatus(int16* TemperatureData,
+  88:.\IO_Control.c ****     uint8 length, int16 tolerance);
+  89:.\IO_Control.c **** 
+  90:.\IO_Control.c **** /**********DEFINED GLOBAL FUNCTIONS**********/
+  91:.\IO_Control.c **** /*******************************************************************************
+  92:.\IO_Control.c **** * Function Name: toggleLED
+  93:.\IO_Control.c **** ********************************************************************************
+  94:.\IO_Control.c **** *
+  95:.\IO_Control.c **** * Summary:
+  96:.\IO_Control.c **** *  Called in LED_ISR, toggles LED indicator at 1 Hz rate.
+  97:.\IO_Control.c **** *
+  98:.\IO_Control.c **** * Parameters:
+  99:.\IO_Control.c **** *  None.
+ 100:.\IO_Control.c **** *
+ 101:.\IO_Control.c **** * Return:
+ 102:.\IO_Control.c **** *  None.
+ 103:.\IO_Control.c **** *
+ 104:.\IO_Control.c **** *******************************************************************************/
+ 105:.\IO_Control.c **** void toggleLED(void)
+ 106:.\IO_Control.c **** {
+  55              		.loc 1 106 0
+  56              		.cfi_startproc
+  57 0000 80B5     		push	{r7, lr}
+  58              		.cfi_def_cfa_offset 8
+  59              		.cfi_offset 7, -8
+  60              		.cfi_offset 14, -4
+  61 0002 00AF     		add	r7, sp, #0
+  62              		.cfi_def_cfa_register 7
+ 107:.\IO_Control.c ****     static uint8 bLED_On = FALSE;
+ 108:.\IO_Control.c ****     
+ 109:.\IO_Control.c ****     SecondsTimer_ClearInterrupt(SecondsTimer_INTR_MASK_TC);
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 4
+
+
+  63              		.loc 1 109 0
+  64 0004 0120     		mov	r0, #1
+  65 0006 FFF7FEFF 		bl	SecondsTimer_ClearInterrupt
+ 110:.\IO_Control.c ****     
+ 111:.\IO_Control.c ****     bLED_On = !bLED_On;
+  66              		.loc 1 111 0
+  67 000a 074B     		ldr	r3, .L2
+  68 000c 1B78     		ldrb	r3, [r3]
+  69 000e 5A42     		neg	r2, r3
+  70 0010 5341     		adc	r3, r3, r2
+  71 0012 DBB2     		uxtb	r3, r3
+  72 0014 1A1C     		mov	r2, r3
+  73 0016 044B     		ldr	r3, .L2
+  74 0018 1A70     		strb	r2, [r3]
+ 112:.\IO_Control.c ****     LED_Output_Write(bLED_On);
+  75              		.loc 1 112 0
+  76 001a 034B     		ldr	r3, .L2
+  77 001c 1B78     		ldrb	r3, [r3]
+  78 001e 181C     		mov	r0, r3
+  79 0020 FFF7FEFF 		bl	LED_Output_Write
+ 113:.\IO_Control.c **** }
+  80              		.loc 1 113 0
+  81 0024 BD46     		mov	sp, r7
+  82              		@ sp needed
+  83 0026 80BD     		pop	{r7, pc}
+  84              	.L3:
+  85              		.align	2
+  86              	.L2:
+  87 0028 00000000 		.word	bLED_On.6197
+  88              		.cfi_endproc
+  89              	.LFE34:
+  90              		.size	toggleLED, .-toggleLED
+  91              		.section	.text.getDriverID,"ax",%progbits
+  92              		.align	2
+  93              		.global	getDriverID
+  94              		.code	16
+  95              		.thumb_func
+  96              		.type	getDriverID, %function
+  97              	getDriverID:
+  98              	.LFB35:
+ 114:.\IO_Control.c **** 
+ 115:.\IO_Control.c **** /*******************************************************************************
+ 116:.\IO_Control.c **** * Function Name: getDriverID
+ 117:.\IO_Control.c **** ********************************************************************************
+ 118:.\IO_Control.c **** *
+ 119:.\IO_Control.c **** * Summary:
+ 120:.\IO_Control.c **** *  Returns the ID number of this driver.
+ 121:.\IO_Control.c **** *
+ 122:.\IO_Control.c **** * Parameters:
+ 123:.\IO_Control.c **** *  None.
+ 124:.\IO_Control.c **** *
+ 125:.\IO_Control.c **** * Return:
+ 126:.\IO_Control.c **** *  Value 1 for head module, 2 - 8 for trailer module
+ 127:.\IO_Control.c **** *
+ 128:.\IO_Control.c **** *******************************************************************************/
+ 129:.\IO_Control.c **** uint8 getDriverID(void)
+ 130:.\IO_Control.c **** {
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 5
+
+
+  99              		.loc 1 130 0
+ 100              		.cfi_startproc
+ 101 0000 80B5     		push	{r7, lr}
+ 102              		.cfi_def_cfa_offset 8
+ 103              		.cfi_offset 7, -8
+ 104              		.cfi_offset 14, -4
+ 105 0002 00AF     		add	r7, sp, #0
+ 106              		.cfi_def_cfa_register 7
+ 131:.\IO_Control.c ****     return PositionData.ID_Number;
+ 107              		.loc 1 131 0
+ 108 0004 024B     		ldr	r3, .L6
+ 109 0006 1B78     		ldrb	r3, [r3]
+ 132:.\IO_Control.c **** }
+ 110              		.loc 1 132 0
+ 111 0008 181C     		mov	r0, r3
+ 112 000a BD46     		mov	sp, r7
+ 113              		@ sp needed
+ 114 000c 80BD     		pop	{r7, pc}
+ 115              	.L7:
+ 116 000e C046     		.align	2
+ 117              	.L6:
+ 118 0010 10000000 		.word	PositionData
+ 119              		.cfi_endproc
+ 120              	.LFE35:
+ 121              		.size	getDriverID, .-getDriverID
+ 122              		.section	.text.setIdentityByComm,"ax",%progbits
+ 123              		.align	2
+ 124              		.global	setIdentityByComm
+ 125              		.code	16
+ 126              		.thumb_func
+ 127              		.type	setIdentityByComm, %function
+ 128              	setIdentityByComm:
+ 129              	.LFB36:
+ 133:.\IO_Control.c **** 
+ 134:.\IO_Control.c **** /*******************************************************************************
+ 135:.\IO_Control.c **** * Function Name: setIdentityByComm
+ 136:.\IO_Control.c **** ********************************************************************************
+ 137:.\IO_Control.c **** *
+ 138:.\IO_Control.c **** * Summary:
+ 139:.\IO_Control.c **** *  Sets the ID number for this driver based on UART communication. The number
+ 140:.\IO_Control.c **** *  assigned is the driver position away from the controller.
+ 141:.\IO_Control.c **** *
+ 142:.\IO_Control.c **** * Parameters:
+ 143:.\IO_Control.c **** *  positionNumber: The ID number based on position in the chain.
+ 144:.\IO_Control.c **** *
+ 145:.\IO_Control.c **** * Return:
+ 146:.\IO_Control.c **** *  SUCCESS for valid input, FAILURE otherwise
+ 147:.\IO_Control.c **** *
+ 148:.\IO_Control.c **** *******************************************************************************/
+ 149:.\IO_Control.c **** uint8 setIdentityByComm(uint8 positionNumber)
+ 150:.\IO_Control.c **** {
+ 130              		.loc 1 150 0
+ 131              		.cfi_startproc
+ 132 0000 80B5     		push	{r7, lr}
+ 133              		.cfi_def_cfa_offset 8
+ 134              		.cfi_offset 7, -8
+ 135              		.cfi_offset 14, -4
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 6
+
+
+ 136 0002 82B0     		sub	sp, sp, #8
+ 137              		.cfi_def_cfa_offset 16
+ 138 0004 00AF     		add	r7, sp, #0
+ 139              		.cfi_def_cfa_register 7
+ 140 0006 021C     		mov	r2, r0
+ 141 0008 FB1D     		add	r3, r7, #7
+ 142 000a 1A70     		strb	r2, [r3]
+ 151:.\IO_Control.c ****     if(positionNumber < 1 || positionNumber > MAX_DRIVER_COUNT)
+ 143              		.loc 1 151 0
+ 144 000c FB1D     		add	r3, r7, #7
+ 145 000e 1B78     		ldrb	r3, [r3]
+ 146 0010 002B     		cmp	r3, #0
+ 147 0012 03D0     		beq	.L9
+ 148              		.loc 1 151 0 is_stmt 0 discriminator 1
+ 149 0014 FB1D     		add	r3, r7, #7
+ 150 0016 1B78     		ldrb	r3, [r3]
+ 151 0018 082B     		cmp	r3, #8
+ 152 001a 01D9     		bls	.L10
+ 153              	.L9:
+ 152:.\IO_Control.c ****         return FAILURE;
+ 154              		.loc 1 152 0 is_stmt 1
+ 155 001c 0123     		mov	r3, #1
+ 156 001e 04E0     		b	.L11
+ 157              	.L10:
+ 153:.\IO_Control.c ****     
+ 154:.\IO_Control.c ****     PositionData.ID_Number = positionNumber;
+ 158              		.loc 1 154 0
+ 159 0020 044B     		ldr	r3, .L12
+ 160 0022 FA1D     		add	r2, r7, #7
+ 161 0024 1278     		ldrb	r2, [r2]
+ 162 0026 1A70     		strb	r2, [r3]
+ 155:.\IO_Control.c ****     
+ 156:.\IO_Control.c ****     return SUCCESS;
+ 163              		.loc 1 156 0
+ 164 0028 0023     		mov	r3, #0
+ 165              	.L11:
+ 157:.\IO_Control.c **** }
+ 166              		.loc 1 157 0
+ 167 002a 181C     		mov	r0, r3
+ 168 002c BD46     		mov	sp, r7
+ 169 002e 02B0     		add	sp, sp, #8
+ 170              		@ sp needed
+ 171 0030 80BD     		pop	{r7, pc}
+ 172              	.L13:
+ 173 0032 C046     		.align	2
+ 174              	.L12:
+ 175 0034 10000000 		.word	PositionData
+ 176              		.cfi_endproc
+ 177              	.LFE36:
+ 178              		.size	setIdentityByComm, .-setIdentityByComm
+ 179              		.section	.text.setDriverCount,"ax",%progbits
+ 180              		.align	2
+ 181              		.global	setDriverCount
+ 182              		.code	16
+ 183              		.thumb_func
+ 184              		.type	setDriverCount, %function
+ 185              	setDriverCount:
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 7
+
+
+ 186              	.LFB37:
+ 158:.\IO_Control.c **** 
+ 159:.\IO_Control.c **** /*******************************************************************************
+ 160:.\IO_Control.c **** * Function Name: setDriverCount
+ 161:.\IO_Control.c **** ********************************************************************************
+ 162:.\IO_Control.c **** *
+ 163:.\IO_Control.c **** * Summary:
+ 164:.\IO_Control.c **** *  Sets the number of drivers in the chain.
+ 165:.\IO_Control.c **** *
+ 166:.\IO_Control.c **** * Parameters:
+ 167:.\IO_Control.c **** *  newDriverCount: The updated number of drivers in the chain.
+ 168:.\IO_Control.c **** *
+ 169:.\IO_Control.c **** * Return:
+ 170:.\IO_Control.c **** *  SUCCESS for valid input, FAILURE otherwise
+ 171:.\IO_Control.c **** *
+ 172:.\IO_Control.c **** *******************************************************************************/
+ 173:.\IO_Control.c **** uint8 setDriverCount(uint8 newDriverCount)
+ 174:.\IO_Control.c **** {
+ 187              		.loc 1 174 0
+ 188              		.cfi_startproc
+ 189 0000 80B5     		push	{r7, lr}
+ 190              		.cfi_def_cfa_offset 8
+ 191              		.cfi_offset 7, -8
+ 192              		.cfi_offset 14, -4
+ 193 0002 82B0     		sub	sp, sp, #8
+ 194              		.cfi_def_cfa_offset 16
+ 195 0004 00AF     		add	r7, sp, #0
+ 196              		.cfi_def_cfa_register 7
+ 197 0006 021C     		mov	r2, r0
+ 198 0008 FB1D     		add	r3, r7, #7
+ 199 000a 1A70     		strb	r2, [r3]
+ 175:.\IO_Control.c ****     if(newDriverCount < 1 || newDriverCount > MAX_DRIVER_COUNT)
+ 200              		.loc 1 175 0
+ 201 000c FB1D     		add	r3, r7, #7
+ 202 000e 1B78     		ldrb	r3, [r3]
+ 203 0010 002B     		cmp	r3, #0
+ 204 0012 03D0     		beq	.L15
+ 205              		.loc 1 175 0 is_stmt 0 discriminator 1
+ 206 0014 FB1D     		add	r3, r7, #7
+ 207 0016 1B78     		ldrb	r3, [r3]
+ 208 0018 082B     		cmp	r3, #8
+ 209 001a 01D9     		bls	.L16
+ 210              	.L15:
+ 176:.\IO_Control.c ****         return FAILURE;
+ 211              		.loc 1 176 0 is_stmt 1
+ 212 001c 0123     		mov	r3, #1
+ 213 001e 04E0     		b	.L17
+ 214              	.L16:
+ 177:.\IO_Control.c ****     
+ 178:.\IO_Control.c ****     PositionData.driverCount = newDriverCount;
+ 215              		.loc 1 178 0
+ 216 0020 044B     		ldr	r3, .L18
+ 217 0022 FA1D     		add	r2, r7, #7
+ 218 0024 1278     		ldrb	r2, [r2]
+ 219 0026 5A70     		strb	r2, [r3, #1]
+ 179:.\IO_Control.c ****     
+ 180:.\IO_Control.c ****     return SUCCESS;
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 8
+
+
+ 220              		.loc 1 180 0
+ 221 0028 0023     		mov	r3, #0
+ 222              	.L17:
+ 181:.\IO_Control.c **** }
+ 223              		.loc 1 181 0
+ 224 002a 181C     		mov	r0, r3
+ 225 002c BD46     		mov	sp, r7
+ 226 002e 02B0     		add	sp, sp, #8
+ 227              		@ sp needed
+ 228 0030 80BD     		pop	{r7, pc}
+ 229              	.L19:
+ 230 0032 C046     		.align	2
+ 231              	.L18:
+ 232 0034 10000000 		.word	PositionData
+ 233              		.cfi_endproc
+ 234              	.LFE37:
+ 235              		.size	setDriverCount, .-setDriverCount
+ 236              		.section	.text.isLastDriverInChain,"ax",%progbits
+ 237              		.align	2
+ 238              		.global	isLastDriverInChain
+ 239              		.code	16
+ 240              		.thumb_func
+ 241              		.type	isLastDriverInChain, %function
+ 242              	isLastDriverInChain:
+ 243              	.LFB38:
+ 182:.\IO_Control.c **** 
+ 183:.\IO_Control.c **** /*******************************************************************************
+ 184:.\IO_Control.c **** * Function Name: isLastDriverInChain
+ 185:.\IO_Control.c **** ********************************************************************************
+ 186:.\IO_Control.c **** *
+ 187:.\IO_Control.c **** * Summary:
+ 188:.\IO_Control.c **** *  Determines if this driver is at the end of the chain.
+ 189:.\IO_Control.c **** *
+ 190:.\IO_Control.c **** * Parameters:
+ 191:.\IO_Control.c **** *  None.
+ 192:.\IO_Control.c **** *
+ 193:.\IO_Control.c **** * Return:
+ 194:.\IO_Control.c **** *  TRUE if last driver in the chain, FALSE if otherwise
+ 195:.\IO_Control.c **** *
+ 196:.\IO_Control.c **** *******************************************************************************/
+ 197:.\IO_Control.c **** uint8 isLastDriverInChain(void)
+ 198:.\IO_Control.c **** {
+ 244              		.loc 1 198 0
+ 245              		.cfi_startproc
+ 246 0000 80B5     		push	{r7, lr}
+ 247              		.cfi_def_cfa_offset 8
+ 248              		.cfi_offset 7, -8
+ 249              		.cfi_offset 14, -4
+ 250 0002 00AF     		add	r7, sp, #0
+ 251              		.cfi_def_cfa_register 7
+ 199:.\IO_Control.c ****     return PositionData.bLastDriverInChain;
+ 252              		.loc 1 199 0
+ 253 0004 024B     		ldr	r3, .L22
+ 254 0006 9B78     		ldrb	r3, [r3, #2]
+ 200:.\IO_Control.c **** }
+ 255              		.loc 1 200 0
+ 256 0008 181C     		mov	r0, r3
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 9
+
+
+ 257 000a BD46     		mov	sp, r7
+ 258              		@ sp needed
+ 259 000c 80BD     		pop	{r7, pc}
+ 260              	.L23:
+ 261 000e C046     		.align	2
+ 262              	.L22:
+ 263 0010 10000000 		.word	PositionData
+ 264              		.cfi_endproc
+ 265              	.LFE38:
+ 266              		.size	isLastDriverInChain, .-isLastDriverInChain
+ 267              		.section	.text.setAsNotLastDriverInChain,"ax",%progbits
+ 268              		.align	2
+ 269              		.global	setAsNotLastDriverInChain
+ 270              		.code	16
+ 271              		.thumb_func
+ 272              		.type	setAsNotLastDriverInChain, %function
+ 273              	setAsNotLastDriverInChain:
+ 274              	.LFB39:
+ 201:.\IO_Control.c **** 
+ 202:.\IO_Control.c **** /*******************************************************************************
+ 203:.\IO_Control.c **** * Function Name: setAsNotLastDriverInChain
+ 204:.\IO_Control.c **** ********************************************************************************
+ 205:.\IO_Control.c **** *
+ 206:.\IO_Control.c **** * Summary:
+ 207:.\IO_Control.c **** *  At the start of the program, this driver is assumed to the be the last driver
+ 208:.\IO_Control.c **** *  in the chain. If an ACK packet is received at startup, this function is called
+ 209:.\IO_Control.c **** *  to update the status for not being in the last driver.
+ 210:.\IO_Control.c **** *
+ 211:.\IO_Control.c **** * Parameters:
+ 212:.\IO_Control.c **** *  None.
+ 213:.\IO_Control.c **** *
+ 214:.\IO_Control.c **** * Return:
+ 215:.\IO_Control.c **** *  None.
+ 216:.\IO_Control.c **** *
+ 217:.\IO_Control.c **** *******************************************************************************/
+ 218:.\IO_Control.c **** void setAsNotLastDriverInChain(void)
+ 219:.\IO_Control.c **** {
+ 275              		.loc 1 219 0
+ 276              		.cfi_startproc
+ 277 0000 80B5     		push	{r7, lr}
+ 278              		.cfi_def_cfa_offset 8
+ 279              		.cfi_offset 7, -8
+ 280              		.cfi_offset 14, -4
+ 281 0002 00AF     		add	r7, sp, #0
+ 282              		.cfi_def_cfa_register 7
+ 220:.\IO_Control.c ****     PositionData.bLastDriverInChain = FALSE;
+ 283              		.loc 1 220 0
+ 284 0004 024B     		ldr	r3, .L25
+ 285 0006 0022     		mov	r2, #0
+ 286 0008 9A70     		strb	r2, [r3, #2]
+ 221:.\IO_Control.c **** }
+ 287              		.loc 1 221 0
+ 288 000a BD46     		mov	sp, r7
+ 289              		@ sp needed
+ 290 000c 80BD     		pop	{r7, pc}
+ 291              	.L26:
+ 292 000e C046     		.align	2
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 10
+
+
+ 293              	.L25:
+ 294 0010 10000000 		.word	PositionData
+ 295              		.cfi_endproc
+ 296              	.LFE39:
+ 297              		.size	setAsNotLastDriverInChain, .-setAsNotLastDriverInChain
+ 298              		.section	.text.updateBrightnessLevel,"ax",%progbits
+ 299              		.align	2
+ 300              		.global	updateBrightnessLevel
+ 301              		.code	16
+ 302              		.thumb_func
+ 303              		.type	updateBrightnessLevel, %function
+ 304              	updateBrightnessLevel:
+ 305              	.LFB40:
+ 222:.\IO_Control.c **** 
+ 223:.\IO_Control.c **** /*******************************************************************************
+ 224:.\IO_Control.c **** * Function Name: updateBrightnessLevel
+ 225:.\IO_Control.c **** ********************************************************************************
+ 226:.\IO_Control.c **** *
+ 227:.\IO_Control.c **** * Summary:
+ 228:.\IO_Control.c **** *  Updates the brightness of the LED. Resulting brightness may not match the
+ 229:.\IO_Control.c **** *  requested brightness depending on temperature regulation state.
+ 230:.\IO_Control.c **** *
+ 231:.\IO_Control.c **** * Parameters:
+ 232:.\IO_Control.c **** *  brightnessLevel: The desired brightness level for the LED.
+ 233:.\IO_Control.c **** *
+ 234:.\IO_Control.c **** * Return:
+ 235:.\IO_Control.c **** *  The resulting brightness level of the LED
+ 236:.\IO_Control.c **** *
+ 237:.\IO_Control.c **** *******************************************************************************/
+ 238:.\IO_Control.c **** uint8 updateBrightnessLevel(uint8 brightnessLevel)
+ 239:.\IO_Control.c **** {
+ 306              		.loc 1 239 0
+ 307              		.cfi_startproc
+ 308 0000 80B5     		push	{r7, lr}
+ 309              		.cfi_def_cfa_offset 8
+ 310              		.cfi_offset 7, -8
+ 311              		.cfi_offset 14, -4
+ 312 0002 82B0     		sub	sp, sp, #8
+ 313              		.cfi_def_cfa_offset 16
+ 314 0004 00AF     		add	r7, sp, #0
+ 315              		.cfi_def_cfa_register 7
+ 316 0006 021C     		mov	r2, r0
+ 317 0008 FB1D     		add	r3, r7, #7
+ 318 000a 1A70     		strb	r2, [r3]
+ 240:.\IO_Control.c ****     if(PositionData.ID_Number != 1)
+ 319              		.loc 1 240 0
+ 320 000c 254B     		ldr	r3, .L35
+ 321 000e 1B78     		ldrb	r3, [r3]
+ 322 0010 012B     		cmp	r3, #1
+ 323 0012 1CD0     		beq	.L28
+ 241:.\IO_Control.c ****     {
+ 242:.\IO_Control.c ****         if(brightnessLevel != ThermalData.requestedBrightness)
+ 324              		.loc 1 242 0
+ 325 0014 244B     		ldr	r3, .L35+4
+ 326 0016 1B78     		ldrb	r3, [r3]
+ 327 0018 FA1D     		add	r2, r7, #7
+ 328 001a 1278     		ldrb	r2, [r2]
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 11
+
+
+ 329 001c 9A42     		cmp	r2, r3
+ 330 001e 13D0     		beq	.L29
+ 243:.\IO_Control.c ****         {
+ 244:.\IO_Control.c ****             ThermalData.requestedBrightness = brightnessLevel;
+ 331              		.loc 1 244 0
+ 332 0020 214B     		ldr	r3, .L35+4
+ 333 0022 FA1D     		add	r2, r7, #7
+ 334 0024 1278     		ldrb	r2, [r2]
+ 335 0026 1A70     		strb	r2, [r3]
+ 245:.\IO_Control.c ****             if(ThermalData.requestedBrightness > 0)
+ 336              		.loc 1 245 0
+ 337 0028 1F4B     		ldr	r3, .L35+4
+ 338 002a 1B78     		ldrb	r3, [r3]
+ 339 002c 002B     		cmp	r3, #0
+ 340 002e 08D0     		beq	.L30
+ 246:.\IO_Control.c ****             {
+ 247:.\IO_Control.c ****                 PWM_Enable_Write(TRUE);
+ 341              		.loc 1 247 0
+ 342 0030 0120     		mov	r0, #1
+ 343 0032 FFF7FEFF 		bl	PWM_Enable_Write
+ 248:.\IO_Control.c ****                 PWM_WriteCompare(ThermalData.requestedBrightness);
+ 344              		.loc 1 248 0
+ 345 0036 1C4B     		ldr	r3, .L35+4
+ 346 0038 1B78     		ldrb	r3, [r3]
+ 347 003a 181C     		mov	r0, r3
+ 348 003c FFF7FEFF 		bl	PWM_WriteCompare
+ 349 0040 02E0     		b	.L29
+ 350              	.L30:
+ 249:.\IO_Control.c ****             }
+ 250:.\IO_Control.c ****             else
+ 251:.\IO_Control.c ****                 PWM_Enable_Write(FALSE);
+ 351              		.loc 1 251 0
+ 352 0042 0020     		mov	r0, #0
+ 353 0044 FFF7FEFF 		bl	PWM_Enable_Write
+ 354              	.L29:
+ 252:.\IO_Control.c ****         }
+ 253:.\IO_Control.c ****         
+ 254:.\IO_Control.c ****         return ThermalData.requestedBrightness;
+ 355              		.loc 1 254 0
+ 356 0048 174B     		ldr	r3, .L35+4
+ 357 004a 1B78     		ldrb	r3, [r3]
+ 358 004c 25E0     		b	.L31
+ 359              	.L28:
+ 255:.\IO_Control.c ****     }
+ 256:.\IO_Control.c ****    
+ 257:.\IO_Control.c ****     //This should be head module by this point
+ 258:.\IO_Control.c ****     if(brightnessLevel != ThermalData.requestedBrightness)
+ 360              		.loc 1 258 0
+ 361 004e 164B     		ldr	r3, .L35+4
+ 362 0050 1B78     		ldrb	r3, [r3]
+ 363 0052 FA1D     		add	r2, r7, #7
+ 364 0054 1278     		ldrb	r2, [r2]
+ 365 0056 9A42     		cmp	r2, r3
+ 366 0058 03D0     		beq	.L32
+ 259:.\IO_Control.c ****         ThermalData.requestedBrightness = brightnessLevel;
+ 367              		.loc 1 259 0
+ 368 005a 134B     		ldr	r3, .L35+4
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 12
+
+
+ 369 005c FA1D     		add	r2, r7, #7
+ 370 005e 1278     		ldrb	r2, [r2]
+ 371 0060 1A70     		strb	r2, [r3]
+ 372              	.L32:
+ 260:.\IO_Control.c ****     
+ 261:.\IO_Control.c ****     #if(ENABLE_REGULATION)
+ 262:.\IO_Control.c ****         if(ThermalData.regulatedBrightness != ThermalData.previousRegulatedBrightness)
+ 373              		.loc 1 262 0
+ 374 0062 114B     		ldr	r3, .L35+4
+ 375 0064 5A78     		ldrb	r2, [r3, #1]
+ 376 0066 104B     		ldr	r3, .L35+4
+ 377 0068 9B78     		ldrb	r3, [r3, #2]
+ 378 006a 9A42     		cmp	r2, r3
+ 379 006c 0FD0     		beq	.L33
+ 263:.\IO_Control.c ****         {
+ 264:.\IO_Control.c ****             if(ThermalData.regulatedBrightness > 0)
+ 380              		.loc 1 264 0
+ 381 006e 0E4B     		ldr	r3, .L35+4
+ 382 0070 5B78     		ldrb	r3, [r3, #1]
+ 383 0072 002B     		cmp	r3, #0
+ 384 0074 08D0     		beq	.L34
+ 265:.\IO_Control.c ****             {
+ 266:.\IO_Control.c ****                 PWM_Enable_Write(TRUE);
+ 385              		.loc 1 266 0
+ 386 0076 0120     		mov	r0, #1
+ 387 0078 FFF7FEFF 		bl	PWM_Enable_Write
+ 267:.\IO_Control.c ****                 PWM_WriteCompare(ThermalData.regulatedBrightness);
+ 388              		.loc 1 267 0
+ 389 007c 0A4B     		ldr	r3, .L35+4
+ 390 007e 5B78     		ldrb	r3, [r3, #1]
+ 391 0080 181C     		mov	r0, r3
+ 392 0082 FFF7FEFF 		bl	PWM_WriteCompare
+ 393 0086 02E0     		b	.L33
+ 394              	.L34:
+ 268:.\IO_Control.c ****             }
+ 269:.\IO_Control.c ****             else
+ 270:.\IO_Control.c ****                 PWM_Enable_Write(FALSE);
+ 395              		.loc 1 270 0
+ 396 0088 0020     		mov	r0, #0
+ 397 008a FFF7FEFF 		bl	PWM_Enable_Write
+ 398              	.L33:
+ 271:.\IO_Control.c ****         }
+ 272:.\IO_Control.c ****         
+ 273:.\IO_Control.c ****         ThermalData.previousRegulatedBrightness = ThermalData.regulatedBrightness;    
+ 399              		.loc 1 273 0
+ 400 008e 064B     		ldr	r3, .L35+4
+ 401 0090 5A78     		ldrb	r2, [r3, #1]
+ 402 0092 054B     		ldr	r3, .L35+4
+ 403 0094 9A70     		strb	r2, [r3, #2]
+ 274:.\IO_Control.c ****         return ThermalData.regulatedBrightness;
+ 404              		.loc 1 274 0
+ 405 0096 044B     		ldr	r3, .L35+4
+ 406 0098 5B78     		ldrb	r3, [r3, #1]
+ 407              	.L31:
+ 275:.\IO_Control.c ****     #else
+ 276:.\IO_Control.c ****         if(ThermalData.previousRegulatedBrightness != ThermalData.requestedBrightness)
+ 277:.\IO_Control.c ****         {
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 13
+
+
+ 278:.\IO_Control.c ****             if(ThermalData.requestedBrightness > 0)
+ 279:.\IO_Control.c ****             {
+ 280:.\IO_Control.c ****                 PWM_Enable_Write(TRUE);
+ 281:.\IO_Control.c ****                 PWM_WriteCompare(ThermalData.requestedBrightness);
+ 282:.\IO_Control.c ****             }
+ 283:.\IO_Control.c ****             else
+ 284:.\IO_Control.c ****                 PWM_Enable_Write(FALSE);
+ 285:.\IO_Control.c ****         }
+ 286:.\IO_Control.c ****             
+ 287:.\IO_Control.c ****         ThermalData.previousRegulatedBrightness = ThermalData.requestedBrightness;  
+ 288:.\IO_Control.c ****         return ThermalData.requestedBrightness;
+ 289:.\IO_Control.c ****     #endif
+ 290:.\IO_Control.c **** }
+ 408              		.loc 1 290 0
+ 409 009a 181C     		mov	r0, r3
+ 410 009c BD46     		mov	sp, r7
+ 411 009e 02B0     		add	sp, sp, #8
+ 412              		@ sp needed
+ 413 00a0 80BD     		pop	{r7, pc}
+ 414              	.L36:
+ 415 00a2 C046     		.align	2
+ 416              	.L35:
+ 417 00a4 10000000 		.word	PositionData
+ 418 00a8 14000000 		.word	ThermalData
+ 419              		.cfi_endproc
+ 420              	.LFE40:
+ 421              		.size	updateBrightnessLevel, .-updateBrightnessLevel
+ 422              		.section	.text.getMaxTemperature,"ax",%progbits
+ 423              		.align	2
+ 424              		.global	getMaxTemperature
+ 425              		.code	16
+ 426              		.thumb_func
+ 427              		.type	getMaxTemperature, %function
+ 428              	getMaxTemperature:
+ 429              	.LFB41:
+ 291:.\IO_Control.c **** 
+ 292:.\IO_Control.c **** /*******************************************************************************
+ 293:.\IO_Control.c **** * Function Name: getMaxTemperature
+ 294:.\IO_Control.c **** ********************************************************************************
+ 295:.\IO_Control.c **** *
+ 296:.\IO_Control.c **** * Summary:
+ 297:.\IO_Control.c **** *  Obtains the next temperature sample from ADC.
+ 298:.\IO_Control.c **** *
+ 299:.\IO_Control.c **** * Parameters:
+ 300:.\IO_Control.c **** *  None.
+ 301:.\IO_Control.c **** *
+ 302:.\IO_Control.c **** * Return:
+ 303:.\IO_Control.c **** *  The next temperature sample from ADC
+ 304:.\IO_Control.c **** *
+ 305:.\IO_Control.c **** *******************************************************************************/
+ 306:.\IO_Control.c **** int16 getMaxTemperature(enum TemperaturePoint channelNumber)
+ 307:.\IO_Control.c **** {
+ 430              		.loc 1 307 0
+ 431              		.cfi_startproc
+ 432 0000 80B5     		push	{r7, lr}
+ 433              		.cfi_def_cfa_offset 8
+ 434              		.cfi_offset 7, -8
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 14
+
+
+ 435              		.cfi_offset 14, -4
+ 436 0002 82B0     		sub	sp, sp, #8
+ 437              		.cfi_def_cfa_offset 16
+ 438 0004 00AF     		add	r7, sp, #0
+ 439              		.cfi_def_cfa_register 7
+ 440 0006 021C     		mov	r2, r0
+ 441 0008 FB1D     		add	r3, r7, #7
+ 442 000a 1A70     		strb	r2, [r3]
+ 308:.\IO_Control.c ****     if(channelNumber < LED || channelNumber > MICRO)
+ 443              		.loc 1 308 0
+ 444 000c FB1D     		add	r3, r7, #7
+ 445 000e 1B78     		ldrb	r3, [r3]
+ 446 0010 032B     		cmp	r3, #3
+ 447 0012 01D9     		bls	.L38
+ 309:.\IO_Control.c ****         return 0;
+ 448              		.loc 1 309 0
+ 449 0014 0023     		mov	r3, #0
+ 450 0016 04E0     		b	.L39
+ 451              	.L38:
+ 310:.\IO_Control.c ****     
+ 311:.\IO_Control.c ****     return ThermalLimitArray[channelNumber].MAX_TEMPERATURE;
+ 452              		.loc 1 311 0
+ 453 0018 FB1D     		add	r3, r7, #7
+ 454 001a 1A78     		ldrb	r2, [r3]
+ 455 001c 034B     		ldr	r3, .L40
+ 456 001e 9200     		lsl	r2, r2, #2
+ 457 0020 D35A     		ldrh	r3, [r2, r3]
+ 458              	.L39:
+ 459 0022 1BB2     		sxth	r3, r3
+ 312:.\IO_Control.c **** }
+ 460              		.loc 1 312 0
+ 461 0024 181C     		mov	r0, r3
+ 462 0026 BD46     		mov	sp, r7
+ 463 0028 02B0     		add	sp, sp, #8
+ 464              		@ sp needed
+ 465 002a 80BD     		pop	{r7, pc}
+ 466              	.L41:
+ 467              		.align	2
+ 468              	.L40:
+ 469 002c 00000000 		.word	ThermalLimitArray
+ 470              		.cfi_endproc
+ 471              	.LFE41:
+ 472              		.size	getMaxTemperature, .-getMaxTemperature
+ 473              		.global	__aeabi_i2f
+ 474              		.global	__aeabi_fmul
+ 475              		.global	__aeabi_f2d
+ 476              		.global	__aeabi_ddiv
+ 477              		.global	__aeabi_d2f
+ 478              		.global	__aeabi_f2iz
+ 479              		.section	.text.getTemperatureSample,"ax",%progbits
+ 480              		.align	2
+ 481              		.global	getTemperatureSample
+ 482              		.code	16
+ 483              		.thumb_func
+ 484              		.type	getTemperatureSample, %function
+ 485              	getTemperatureSample:
+ 486              	.LFB42:
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 15
+
+
+ 313:.\IO_Control.c **** 
+ 314:.\IO_Control.c **** /*******************************************************************************
+ 315:.\IO_Control.c **** * Function Name: getTemperatureSample
+ 316:.\IO_Control.c **** ********************************************************************************
+ 317:.\IO_Control.c **** *
+ 318:.\IO_Control.c **** * Summary:
+ 319:.\IO_Control.c **** *  Obtains the next temperature sample(s) from ADC. This function can return a
+ 320:.\IO_Control.c **** *  single sample or multiple samples in one call.
+ 321:.\IO_Control.c **** *
+ 322:.\IO_Control.c **** * Parameters:
+ 323:.\IO_Control.c **** *  bSingleSample: TRUE for single sample, FALSE for multiple samples
+ 324:.\IO_Control.c **** *  channelNumber: Channel selection for single sample: LED, SWITCH_NODE, AMBIENT, or MICRO
+ 325:.\IO_Control.c **** *  sampleArray: Reference to the array that contains 4 temperature samples
+ 326:.\IO_Control.c **** *  length: Size of the array in # of temperature points
+ 327:.\IO_Control.c **** *
+ 328:.\IO_Control.c **** * Return:
+ 329:.\IO_Control.c **** *  Single temperature value or Reference to array of 4 temperature samples
+ 330:.\IO_Control.c **** *
+ 331:.\IO_Control.c **** *******************************************************************************/
+ 332:.\IO_Control.c **** int16 getTemperatureSample(uint8 bSingleSample, enum TemperaturePoint channelNumber, 
+ 333:.\IO_Control.c ****     int16* sampleArray, uint8 length)
+ 334:.\IO_Control.c **** {  
+ 487              		.loc 1 334 0
+ 488              		.cfi_startproc
+ 489 0000 90B5     		push	{r4, r7, lr}
+ 490              		.cfi_def_cfa_offset 12
+ 491              		.cfi_offset 4, -12
+ 492              		.cfi_offset 7, -8
+ 493              		.cfi_offset 14, -4
+ 494 0002 87B0     		sub	sp, sp, #28
+ 495              		.cfi_def_cfa_offset 40
+ 496 0004 00AF     		add	r7, sp, #0
+ 497              		.cfi_def_cfa_register 7
+ 498 0006 041C     		mov	r4, r0
+ 499 0008 081C     		mov	r0, r1
+ 500 000a 3A60     		str	r2, [r7]
+ 501 000c 191C     		mov	r1, r3
+ 502 000e FB1D     		add	r3, r7, #7
+ 503 0010 221C     		add	r2, r4, #0
+ 504 0012 1A70     		strb	r2, [r3]
+ 505 0014 BB1D     		add	r3, r7, #6
+ 506 0016 021C     		add	r2, r0, #0
+ 507 0018 1A70     		strb	r2, [r3]
+ 508 001a 7B1D     		add	r3, r7, #5
+ 509 001c 0A1C     		add	r2, r1, #0
+ 510 001e 1A70     		strb	r2, [r3]
+ 335:.\IO_Control.c ****     uint8 ADC_WaitCount = 0;
+ 511              		.loc 1 335 0
+ 512 0020 1723     		mov	r3, #23
+ 513 0022 FB18     		add	r3, r7, r3
+ 514 0024 0022     		mov	r2, #0
+ 515 0026 1A70     		strb	r2, [r3]
+ 336:.\IO_Control.c ****     int16 temperatureSample_16 = 0;
+ 516              		.loc 1 336 0
+ 517 0028 1423     		mov	r3, #20
+ 518 002a FB18     		add	r3, r7, r3
+ 519 002c 0022     		mov	r2, #0
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 16
+
+
+ 520 002e 1A80     		strh	r2, [r3]
+ 337:.\IO_Control.c ****     float temperatureSample_float = 0;
+ 521              		.loc 1 337 0
+ 522 0030 0023     		mov	r3, #0
+ 523 0032 FB60     		str	r3, [r7, #12]
+ 338:.\IO_Control.c ****     uint32 channelIndex = 0;    
+ 524              		.loc 1 338 0
+ 525 0034 0023     		mov	r3, #0
+ 526 0036 3B61     		str	r3, [r7, #16]
+ 339:.\IO_Control.c ****     
+ 340:.\IO_Control.c ****     if((bSingleSample != TRUE) && (bSingleSample != FALSE))
+ 527              		.loc 1 340 0
+ 528 0038 FB1D     		add	r3, r7, #7
+ 529 003a 1B78     		ldrb	r3, [r3]
+ 530 003c 012B     		cmp	r3, #1
+ 531 003e 05D0     		beq	.L43
+ 532              		.loc 1 340 0 is_stmt 0 discriminator 1
+ 533 0040 FB1D     		add	r3, r7, #7
+ 534 0042 1B78     		ldrb	r3, [r3]
+ 535 0044 002B     		cmp	r3, #0
+ 536 0046 01D0     		beq	.L43
+ 341:.\IO_Control.c ****         return 0;
+ 537              		.loc 1 341 0 is_stmt 1
+ 538 0048 0023     		mov	r3, #0
+ 539 004a B8E0     		b	.L44
+ 540              	.L43:
+ 342:.\IO_Control.c ****     
+ 343:.\IO_Control.c ****     if(bSingleSample)
+ 541              		.loc 1 343 0
+ 542 004c FB1D     		add	r3, r7, #7
+ 543 004e 1B78     		ldrb	r3, [r3]
+ 544 0050 002B     		cmp	r3, #0
+ 545 0052 05D0     		beq	.L45
+ 344:.\IO_Control.c ****     {   //Input check for single sample
+ 345:.\IO_Control.c ****         if(channelNumber < LED || channelNumber > MICRO)
+ 546              		.loc 1 345 0
+ 547 0054 BB1D     		add	r3, r7, #6
+ 548 0056 1B78     		ldrb	r3, [r3]
+ 549 0058 032B     		cmp	r3, #3
+ 550 005a 0AD9     		bls	.L46
+ 346:.\IO_Control.c ****             return 0;
+ 551              		.loc 1 346 0
+ 552 005c 0023     		mov	r3, #0
+ 553 005e AEE0     		b	.L44
+ 554              	.L45:
+ 347:.\IO_Control.c ****     }
+ 348:.\IO_Control.c ****     else
+ 349:.\IO_Control.c ****     {   //Input check for multiple samples
+ 350:.\IO_Control.c ****         if(sampleArray == NULL || length != ADC_SAMPLE_COUNT)
+ 555              		.loc 1 350 0
+ 556 0060 3B68     		ldr	r3, [r7]
+ 557 0062 002B     		cmp	r3, #0
+ 558 0064 03D0     		beq	.L47
+ 559              		.loc 1 350 0 is_stmt 0 discriminator 1
+ 560 0066 7B1D     		add	r3, r7, #5
+ 561 0068 1B78     		ldrb	r3, [r3]
+ 562 006a 042B     		cmp	r3, #4
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 17
+
+
+ 563 006c 01D0     		beq	.L46
+ 564              	.L47:
+ 351:.\IO_Control.c ****             return 0;
+ 565              		.loc 1 351 0 is_stmt 1
+ 566 006e 0023     		mov	r3, #0
+ 567 0070 A5E0     		b	.L44
+ 568              	.L46:
+ 352:.\IO_Control.c ****     }
+ 353:.\IO_Control.c ****     
+ 354:.\IO_Control.c ****     while(!ADC_SAR_Seq_IsEndConversion(ADC_SAR_Seq_RETURN_STATUS) 
+ 569              		.loc 1 354 0 discriminator 1
+ 570 0072 09E0     		b	.L48
+ 571              	.L50:
+ 355:.\IO_Control.c ****         && (ADC_WaitCount < MAX_ADC_CONVERSION_WAIT_LIMIT))
+ 356:.\IO_Control.c ****     {   //Wait for ADC conversion to complete
+ 357:.\IO_Control.c ****         ADC_WaitCount++;
+ 572              		.loc 1 357 0
+ 573 0074 1723     		mov	r3, #23
+ 574 0076 FB18     		add	r3, r7, r3
+ 575 0078 1A78     		ldrb	r2, [r3]
+ 576 007a 1723     		mov	r3, #23
+ 577 007c FB18     		add	r3, r7, r3
+ 578 007e 0132     		add	r2, r2, #1
+ 579 0080 1A70     		strb	r2, [r3]
+ 358:.\IO_Control.c ****         CyDelayUs(8);
+ 580              		.loc 1 358 0
+ 581 0082 0820     		mov	r0, #8
+ 582 0084 FFF7FEFF 		bl	CyDelayUs
+ 583              	.L48:
+ 354:.\IO_Control.c ****         && (ADC_WaitCount < MAX_ADC_CONVERSION_WAIT_LIMIT))
+ 584              		.loc 1 354 0
+ 585 0088 0120     		mov	r0, #1
+ 586 008a FFF7FEFF 		bl	ADC_SAR_Seq_IsEndConversion
+ 587 008e 031E     		sub	r3, r0, #0
+ 588 0090 04D1     		bne	.L49
+ 355:.\IO_Control.c ****         && (ADC_WaitCount < MAX_ADC_CONVERSION_WAIT_LIMIT))
+ 589              		.loc 1 355 0
+ 590 0092 1723     		mov	r3, #23
+ 591 0094 FB18     		add	r3, r7, r3
+ 592 0096 1B78     		ldrb	r3, [r3]
+ 593 0098 042B     		cmp	r3, #4
+ 594 009a EBD9     		bls	.L50
+ 595              	.L49:
+ 359:.\IO_Control.c ****     }
+ 360:.\IO_Control.c ****     
+ 361:.\IO_Control.c ****     if(ADC_WaitCount > MAX_ADC_CONVERSION_WAIT_LIMIT)
+ 596              		.loc 1 361 0
+ 597 009c 1723     		mov	r3, #23
+ 598 009e FB18     		add	r3, r7, r3
+ 599 00a0 1B78     		ldrb	r3, [r3]
+ 600 00a2 052B     		cmp	r3, #5
+ 601 00a4 01D9     		bls	.L51
+ 362:.\IO_Control.c ****         return 0;   //For case when conversion doesn't complete
+ 602              		.loc 1 362 0
+ 603 00a6 0023     		mov	r3, #0
+ 604 00a8 89E0     		b	.L44
+ 605              	.L51:
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 18
+
+
+ 363:.\IO_Control.c ****     
+ 364:.\IO_Control.c ****     if(bSingleSample)
+ 606              		.loc 1 364 0
+ 607 00aa FB1D     		add	r3, r7, #7
+ 608 00ac 1B78     		ldrb	r3, [r3]
+ 609 00ae 002B     		cmp	r3, #0
+ 610 00b0 3CD0     		beq	.L52
+ 365:.\IO_Control.c ****     {   //Get single sample
+ 366:.\IO_Control.c ****         if(channelNumber < (ADC_SAMPLE_COUNT - 1))
+ 611              		.loc 1 366 0
+ 612 00b2 BB1D     		add	r3, r7, #6
+ 613 00b4 1B78     		ldrb	r3, [r3]
+ 614 00b6 022B     		cmp	r3, #2
+ 615 00b8 09D8     		bhi	.L53
+ 367:.\IO_Control.c ****             temperatureSample_16 = ADC_SAR_Seq_GetResult16((uint32)(channelNumber));
+ 616              		.loc 1 367 0
+ 617 00ba BB1D     		add	r3, r7, #6
+ 618 00bc 1B78     		ldrb	r3, [r3]
+ 619 00be 1422     		mov	r2, #20
+ 620 00c0 BC18     		add	r4, r7, r2
+ 621 00c2 181C     		mov	r0, r3
+ 622 00c4 FFF7FEFF 		bl	ADC_SAR_Seq_GetResult16
+ 623 00c8 031C     		mov	r3, r0
+ 624 00ca 2380     		strh	r3, [r4]
+ 625 00cc 74E0     		b	.L55
+ 626              	.L53:
+ 368:.\IO_Control.c ****         else
+ 369:.\IO_Control.c ****         {
+ 370:.\IO_Control.c ****             temperatureSample_float = (float)(ADC_SAR_Seq_GetResult16((uint32)(channelNumber)));
+ 627              		.loc 1 370 0
+ 628 00ce BB1D     		add	r3, r7, #6
+ 629 00d0 1B78     		ldrb	r3, [r3]
+ 630 00d2 181C     		mov	r0, r3
+ 631 00d4 FFF7FEFF 		bl	ADC_SAR_Seq_GetResult16
+ 632 00d8 031C     		mov	r3, r0
+ 633 00da 181C     		mov	r0, r3
+ 634 00dc FFF7FEFF 		bl	__aeabi_i2f
+ 635 00e0 031C     		add	r3, r0, #0
+ 636 00e2 FB60     		str	r3, [r7, #12]
+ 371:.\IO_Control.c ****             temperatureSample_float = temperatureSample_float * 5 / 1.024;
+ 637              		.loc 1 371 0
+ 638 00e4 F868     		ldr	r0, [r7, #12]
+ 639 00e6 3849     		ldr	r1, .L58
+ 640 00e8 FFF7FEFF 		bl	__aeabi_fmul
+ 641 00ec 031C     		add	r3, r0, #0
+ 642 00ee 181C     		add	r0, r3, #0
+ 643 00f0 FFF7FEFF 		bl	__aeabi_f2d
+ 644 00f4 031C     		mov	r3, r0
+ 645 00f6 0C1C     		mov	r4, r1
+ 646 00f8 181C     		mov	r0, r3
+ 647 00fa 211C     		mov	r1, r4
+ 648 00fc 334A     		ldr	r2, .L58+4
+ 649 00fe 344B     		ldr	r3, .L58+8
+ 650 0100 FFF7FEFF 		bl	__aeabi_ddiv
+ 651 0104 031C     		mov	r3, r0
+ 652 0106 0C1C     		mov	r4, r1
+ 653 0108 181C     		mov	r0, r3
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 19
+
+
+ 654 010a 211C     		mov	r1, r4
+ 655 010c FFF7FEFF 		bl	__aeabi_d2f
+ 656 0110 031C     		add	r3, r0, #0
+ 657 0112 FB60     		str	r3, [r7, #12]
+ 372:.\IO_Control.c ****             temperatureSample_16 = (int16)(DieTemp_CountsTo_Celsius((int32)(temperatureSample_float
+ 658              		.loc 1 372 0
+ 659 0114 F868     		ldr	r0, [r7, #12]
+ 660 0116 FFF7FEFF 		bl	__aeabi_f2iz
+ 661 011a 031C     		mov	r3, r0
+ 662 011c 181C     		mov	r0, r3
+ 663 011e FFF7FEFF 		bl	DieTemp_CountsTo_Celsius
+ 664 0122 021C     		mov	r2, r0
+ 665 0124 1423     		mov	r3, #20
+ 666 0126 FB18     		add	r3, r7, r3
+ 667 0128 1A80     		strh	r2, [r3]
+ 668 012a 45E0     		b	.L55
+ 669              	.L52:
+ 373:.\IO_Control.c ****         }
+ 374:.\IO_Control.c ****     }
+ 375:.\IO_Control.c ****     else
+ 376:.\IO_Control.c ****     {   //Get 4 temperature samples
+ 377:.\IO_Control.c ****         for(channelIndex = 0; channelIndex < (ADC_SAMPLE_COUNT - 1); channelIndex++)
+ 670              		.loc 1 377 0
+ 671 012c 0023     		mov	r3, #0
+ 672 012e 3B61     		str	r3, [r7, #16]
+ 673 0130 12E0     		b	.L56
+ 674              	.L57:
+ 378:.\IO_Control.c ****         {
+ 379:.\IO_Control.c ****             temperatureSample_16 = ADC_SAR_Seq_GetResult16(channelIndex);
+ 675              		.loc 1 379 0 discriminator 3
+ 676 0132 1423     		mov	r3, #20
+ 677 0134 FC18     		add	r4, r7, r3
+ 678 0136 3B69     		ldr	r3, [r7, #16]
+ 679 0138 181C     		mov	r0, r3
+ 680 013a FFF7FEFF 		bl	ADC_SAR_Seq_GetResult16
+ 681 013e 031C     		mov	r3, r0
+ 682 0140 2380     		strh	r3, [r4]
+ 380:.\IO_Control.c ****             sampleArray[channelIndex] = temperatureSample_16;
+ 683              		.loc 1 380 0 discriminator 3
+ 684 0142 3B69     		ldr	r3, [r7, #16]
+ 685 0144 5B00     		lsl	r3, r3, #1
+ 686 0146 3A68     		ldr	r2, [r7]
+ 687 0148 D318     		add	r3, r2, r3
+ 688 014a 1422     		mov	r2, #20
+ 689 014c BA18     		add	r2, r7, r2
+ 690 014e 1288     		ldrh	r2, [r2]
+ 691 0150 1A80     		strh	r2, [r3]
+ 377:.\IO_Control.c ****         {
+ 692              		.loc 1 377 0 discriminator 3
+ 693 0152 3B69     		ldr	r3, [r7, #16]
+ 694 0154 0133     		add	r3, r3, #1
+ 695 0156 3B61     		str	r3, [r7, #16]
+ 696              	.L56:
+ 377:.\IO_Control.c ****         {
+ 697              		.loc 1 377 0 is_stmt 0 discriminator 1
+ 698 0158 3B69     		ldr	r3, [r7, #16]
+ 699 015a 022B     		cmp	r3, #2
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 20
+
+
+ 700 015c E9D9     		bls	.L57
+ 381:.\IO_Control.c ****         }
+ 382:.\IO_Control.c ****             
+ 383:.\IO_Control.c ****         temperatureSample_float = (float)(ADC_SAR_Seq_GetResult16(ADC_SAMPLE_COUNT - 1));
+ 701              		.loc 1 383 0 is_stmt 1
+ 702 015e 0320     		mov	r0, #3
+ 703 0160 FFF7FEFF 		bl	ADC_SAR_Seq_GetResult16
+ 704 0164 031C     		mov	r3, r0
+ 705 0166 181C     		mov	r0, r3
+ 706 0168 FFF7FEFF 		bl	__aeabi_i2f
+ 707 016c 031C     		add	r3, r0, #0
+ 708 016e FB60     		str	r3, [r7, #12]
+ 384:.\IO_Control.c ****         temperatureSample_float = temperatureSample_float * 5 / 1.024;
+ 709              		.loc 1 384 0
+ 710 0170 F868     		ldr	r0, [r7, #12]
+ 711 0172 1549     		ldr	r1, .L58
+ 712 0174 FFF7FEFF 		bl	__aeabi_fmul
+ 713 0178 031C     		add	r3, r0, #0
+ 714 017a 181C     		add	r0, r3, #0
+ 715 017c FFF7FEFF 		bl	__aeabi_f2d
+ 716 0180 031C     		mov	r3, r0
+ 717 0182 0C1C     		mov	r4, r1
+ 718 0184 181C     		mov	r0, r3
+ 719 0186 211C     		mov	r1, r4
+ 720 0188 104A     		ldr	r2, .L58+4
+ 721 018a 114B     		ldr	r3, .L58+8
+ 722 018c FFF7FEFF 		bl	__aeabi_ddiv
+ 723 0190 031C     		mov	r3, r0
+ 724 0192 0C1C     		mov	r4, r1
+ 725 0194 181C     		mov	r0, r3
+ 726 0196 211C     		mov	r1, r4
+ 727 0198 FFF7FEFF 		bl	__aeabi_d2f
+ 728 019c 031C     		add	r3, r0, #0
+ 729 019e FB60     		str	r3, [r7, #12]
+ 385:.\IO_Control.c ****         sampleArray[ADC_SAMPLE_COUNT - 1]
+ 730              		.loc 1 385 0
+ 731 01a0 3B68     		ldr	r3, [r7]
+ 732 01a2 9C1D     		add	r4, r3, #6
+ 386:.\IO_Control.c ****             = (int16)(DieTemp_CountsTo_Celsius((int32)(temperatureSample_float)));
+ 733              		.loc 1 386 0
+ 734 01a4 F868     		ldr	r0, [r7, #12]
+ 735 01a6 FFF7FEFF 		bl	__aeabi_f2iz
+ 736 01aa 031C     		mov	r3, r0
+ 737 01ac 181C     		mov	r0, r3
+ 738 01ae FFF7FEFF 		bl	DieTemp_CountsTo_Celsius
+ 739 01b2 031C     		mov	r3, r0
+ 740 01b4 9BB2     		uxth	r3, r3
+ 741 01b6 2380     		strh	r3, [r4]
+ 742              	.L55:
+ 387:.\IO_Control.c ****     }
+ 388:.\IO_Control.c ****     
+ 389:.\IO_Control.c ****     return temperatureSample_16;
+ 743              		.loc 1 389 0
+ 744 01b8 1423     		mov	r3, #20
+ 745 01ba FB18     		add	r3, r7, r3
+ 746 01bc 1B88     		ldrh	r3, [r3]
+ 747              	.L44:
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 21
+
+
+ 748 01be 1BB2     		sxth	r3, r3
+ 390:.\IO_Control.c **** }
+ 749              		.loc 1 390 0
+ 750 01c0 181C     		mov	r0, r3
+ 751 01c2 BD46     		mov	sp, r7
+ 752 01c4 07B0     		add	sp, sp, #28
+ 753              		@ sp needed
+ 754 01c6 90BD     		pop	{r4, r7, pc}
+ 755              	.L59:
+ 756              		.align	2
+ 757              	.L58:
+ 758 01c8 0000A040 		.word	1084227584
+ 759 01cc FCA9F1D2 		.word	-755914244
+ 760 01d0 4D62F03F 		.word	1072718413
+ 761              		.cfi_endproc
+ 762              	.LFE42:
+ 763              		.size	getTemperatureSample, .-getTemperatureSample
+ 764              		.global	__aeabi_idiv
+ 765              		.section	.text.regulateBrightness,"ax",%progbits
+ 766              		.align	2
+ 767              		.global	regulateBrightness
+ 768              		.code	16
+ 769              		.thumb_func
+ 770              		.type	regulateBrightness, %function
+ 771              	regulateBrightness:
+ 772              	.LFB43:
+ 391:.\IO_Control.c **** 
+ 392:.\IO_Control.c **** /*******************************************************************************
+ 393:.\IO_Control.c **** * Function Name: regulateBrightness
+ 394:.\IO_Control.c **** ********************************************************************************
+ 395:.\IO_Control.c **** *
+ 396:.\IO_Control.c **** * Summary:
+ 397:.\IO_Control.c **** *  Adjusts the brightness of the LED based on 4 temperature readings
+ 398:.\IO_Control.c **** *  and the current regulation state.
+ 399:.\IO_Control.c **** *
+ 400:.\IO_Control.c **** * Parameters:
+ 401:.\IO_Control.c **** *  TemperatureData: Reference to the 4 temperature points
+ 402:.\IO_Control.c **** *  length: Size of array in # of temperature points
+ 403:.\IO_Control.c **** *
+ 404:.\IO_Control.c **** * Return:
+ 405:.\IO_Control.c **** *  The updated brightness based on regulation
+ 406:.\IO_Control.c **** *
+ 407:.\IO_Control.c **** *******************************************************************************/
+ 408:.\IO_Control.c **** uint8 regulateBrightness(int16* TemperatureData, uint8 length)
+ 409:.\IO_Control.c **** {
+ 773              		.loc 1 409 0
+ 774              		.cfi_startproc
+ 775 0000 90B5     		push	{r4, r7, lr}
+ 776              		.cfi_def_cfa_offset 12
+ 777              		.cfi_offset 4, -12
+ 778              		.cfi_offset 7, -8
+ 779              		.cfi_offset 14, -4
+ 780 0002 85B0     		sub	sp, sp, #20
+ 781              		.cfi_def_cfa_offset 32
+ 782 0004 00AF     		add	r7, sp, #0
+ 783              		.cfi_def_cfa_register 7
+ 784 0006 7860     		str	r0, [r7, #4]
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 22
+
+
+ 785 0008 0A1C     		mov	r2, r1
+ 786 000a FB1C     		add	r3, r7, #3
+ 787 000c 1A70     		strb	r2, [r3]
+ 410:.\IO_Control.c ****     static uint8 timerCount = 0;
+ 411:.\IO_Control.c ****     enum TemperatureStatus temperatureStatus = WITHIN_TOLERANCE;
+ 788              		.loc 1 411 0
+ 789 000e 0F23     		mov	r3, #15
+ 790 0010 FB18     		add	r3, r7, r3
+ 791 0012 0022     		mov	r2, #0
+ 792 0014 1A70     		strb	r2, [r3]
+ 412:.\IO_Control.c ****     
+ 413:.\IO_Control.c ****     if(TemperatureData == NULL || length != ADC_SAMPLE_COUNT || PositionData.ID_Number != 1)
+ 793              		.loc 1 413 0
+ 794 0016 7B68     		ldr	r3, [r7, #4]
+ 795 0018 002B     		cmp	r3, #0
+ 796 001a 07D0     		beq	.L61
+ 797              		.loc 1 413 0 is_stmt 0 discriminator 1
+ 798 001c FB1C     		add	r3, r7, #3
+ 799 001e 1B78     		ldrb	r3, [r3]
+ 800 0020 042B     		cmp	r3, #4
+ 801 0022 03D1     		bne	.L61
+ 802              		.loc 1 413 0 discriminator 2
+ 803 0024 664B     		ldr	r3, .L80
+ 804 0026 1B78     		ldrb	r3, [r3]
+ 805 0028 012B     		cmp	r3, #1
+ 806 002a 01D0     		beq	.L62
+ 807              	.L61:
+ 414:.\IO_Control.c ****         return 0;
+ 808              		.loc 1 414 0 is_stmt 1
+ 809 002c 0023     		mov	r3, #0
+ 810 002e C2E0     		b	.L63
+ 811              	.L62:
+ 415:.\IO_Control.c ****     
+ 416:.\IO_Control.c ****     #if(ENABLE_REGULATION)        
+ 417:.\IO_Control.c ****     switch(ThermalData.currentState)
+ 812              		.loc 1 417 0
+ 813 0030 644B     		ldr	r3, .L80+4
+ 814 0032 DB78     		ldrb	r3, [r3, #3]
+ 815 0034 012B     		cmp	r3, #1
+ 816 0036 59D0     		beq	.L65
+ 817 0038 02DC     		bgt	.L66
+ 818 003a 002B     		cmp	r3, #0
+ 819 003c 06D0     		beq	.L67
+ 820 003e B5E0     		b	.L64
+ 821              	.L66:
+ 822 0040 022B     		cmp	r3, #2
+ 823 0042 1ED0     		beq	.L68
+ 824 0044 032B     		cmp	r3, #3
+ 825 0046 00D1     		bne	.LCB714
+ 826 0048 85E0     		b	.L69	@long jump
+ 827              	.LCB714:
+ 828 004a AFE0     		b	.L64
+ 829              	.L67:
+ 418:.\IO_Control.c ****     {
+ 419:.\IO_Control.c ****         case STARTUP:
+ 420:.\IO_Control.c ****             if((timerCount % SAMPLE_COUNT_PER_CYCLE) == 0)
+ 421:.\IO_Control.c ****             {
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 23
+
+
+ 422:.\IO_Control.c ****                 ThermalData.scalingFactor = MAX_SCALING_FACTOR;
+ 830              		.loc 1 422 0
+ 831 004c 5D4B     		ldr	r3, .L80+4
+ 832 004e FF22     		mov	r2, #255
+ 833 0050 1A71     		strb	r2, [r3, #4]
+ 423:.\IO_Control.c ****                 ThermalData.regulatedBrightness = ThermalData.requestedBrightness;
+ 834              		.loc 1 423 0
+ 835 0052 5C4B     		ldr	r3, .L80+4
+ 836 0054 1A78     		ldrb	r2, [r3]
+ 837 0056 5B4B     		ldr	r3, .L80+4
+ 838 0058 5A70     		strb	r2, [r3, #1]
+ 424:.\IO_Control.c ****             }
+ 425:.\IO_Control.c ****             if((timerCount % (SAMPLE_COUNT_PER_CYCLE * BRIGHTNESS_CHANGE_PER_SAMPLE)) == 0)
+ 426:.\IO_Control.c ****             {
+ 427:.\IO_Control.c ****                 temperatureStatus = getTemperatureStatus(TemperatureData, ADC_SAMPLE_COUNT, 0);
+ 839              		.loc 1 427 0
+ 840 005a 0F23     		mov	r3, #15
+ 841 005c FC18     		add	r4, r7, r3
+ 842 005e 7B68     		ldr	r3, [r7, #4]
+ 843 0060 181C     		mov	r0, r3
+ 844 0062 0421     		mov	r1, #4
+ 845 0064 0022     		mov	r2, #0
+ 846 0066 FFF7FEFF 		bl	getTemperatureStatus
+ 847 006a 031C     		mov	r3, r0
+ 848 006c 2370     		strb	r3, [r4]
+ 428:.\IO_Control.c ****                 if(temperatureStatus == EXCEEDED_UPPER_BOUND)
+ 849              		.loc 1 428 0
+ 850 006e 0F23     		mov	r3, #15
+ 851 0070 FB18     		add	r3, r7, r3
+ 852 0072 1B78     		ldrb	r3, [r3]
+ 853 0074 012B     		cmp	r3, #1
+ 854 0076 03D1     		bne	.L70
+ 429:.\IO_Control.c ****                     ThermalData.currentState = STEADY_DECREASE;
+ 855              		.loc 1 429 0
+ 856 0078 524B     		ldr	r3, .L80+4
+ 857 007a 0222     		mov	r2, #2
+ 858 007c DA70     		strb	r2, [r3, #3]
+ 430:.\IO_Control.c ****             }
+ 431:.\IO_Control.c ****             break;            
+ 859              		.loc 1 431 0
+ 860 007e 95E0     		b	.L64
+ 861              	.L70:
+ 862 0080 94E0     		b	.L64
+ 863              	.L68:
+ 432:.\IO_Control.c ****         case STEADY_DECREASE:  
+ 433:.\IO_Control.c ****             if((timerCount % SAMPLE_COUNT_PER_CYCLE) == 0)
+ 434:.\IO_Control.c ****             {
+ 435:.\IO_Control.c ****                 if(ThermalData.scalingFactor > 0)
+ 864              		.loc 1 435 0
+ 865 0082 504B     		ldr	r3, .L80+4
+ 866 0084 1B79     		ldrb	r3, [r3, #4]
+ 867 0086 002B     		cmp	r3, #0
+ 868 0088 05D0     		beq	.L71
+ 436:.\IO_Control.c ****                     ThermalData.scalingFactor--;
+ 869              		.loc 1 436 0
+ 870 008a 4E4B     		ldr	r3, .L80+4
+ 871 008c 1B79     		ldrb	r3, [r3, #4]
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 24
+
+
+ 872 008e 013B     		sub	r3, r3, #1
+ 873 0090 DAB2     		uxtb	r2, r3
+ 874 0092 4C4B     		ldr	r3, .L80+4
+ 875 0094 1A71     		strb	r2, [r3, #4]
+ 876              	.L71:
+ 437:.\IO_Control.c ****             
+ 438:.\IO_Control.c ****                 ThermalData.regulatedBrightness = (uint8)((uint16)(ThermalData.requestedBrightness)
+ 877              		.loc 1 438 0
+ 878 0096 4B4B     		ldr	r3, .L80+4
+ 879 0098 1B78     		ldrb	r3, [r3]
+ 880 009a 1A1C     		mov	r2, r3
+ 439:.\IO_Control.c ****                     (uint16)(ThermalData.scalingFactor) / MAX_SCALING_FACTOR);
+ 881              		.loc 1 439 0
+ 882 009c 494B     		ldr	r3, .L80+4
+ 883 009e 1B79     		ldrb	r3, [r3, #4]
+ 438:.\IO_Control.c ****                     (uint16)(ThermalData.scalingFactor) / MAX_SCALING_FACTOR);
+ 884              		.loc 1 438 0
+ 885 00a0 5343     		mul	r3, r2
+ 886              		.loc 1 439 0
+ 887 00a2 181C     		mov	r0, r3
+ 888 00a4 FF21     		mov	r1, #255
+ 889 00a6 FFF7FEFF 		bl	__aeabi_idiv
+ 890 00aa 031C     		mov	r3, r0
+ 438:.\IO_Control.c ****                     (uint16)(ThermalData.scalingFactor) / MAX_SCALING_FACTOR);
+ 891              		.loc 1 438 0
+ 892 00ac DAB2     		uxtb	r2, r3
+ 893 00ae 454B     		ldr	r3, .L80+4
+ 894 00b0 5A70     		strb	r2, [r3, #1]
+ 440:.\IO_Control.c ****             }
+ 441:.\IO_Control.c ****             if((timerCount % (SAMPLE_COUNT_PER_CYCLE * BRIGHTNESS_CHANGE_PER_SAMPLE)) == 0)
+ 442:.\IO_Control.c ****             {
+ 443:.\IO_Control.c ****                 temperatureStatus = getTemperatureStatus(TemperatureData, ADC_SAMPLE_COUNT,
+ 895              		.loc 1 443 0
+ 896 00b2 0F23     		mov	r3, #15
+ 897 00b4 FC18     		add	r4, r7, r3
+ 898 00b6 7B68     		ldr	r3, [r7, #4]
+ 899 00b8 181C     		mov	r0, r3
+ 900 00ba 0421     		mov	r1, #4
+ 901 00bc 0022     		mov	r2, #0
+ 902 00be FFF7FEFF 		bl	getTemperatureStatus
+ 903 00c2 031C     		mov	r3, r0
+ 904 00c4 2370     		strb	r3, [r4]
+ 444:.\IO_Control.c ****                     SAFE_TEMPERATURE_TOLERANCE);
+ 445:.\IO_Control.c ****                 
+ 446:.\IO_Control.c ****                 if(temperatureStatus == WITHIN_TOLERANCE)
+ 905              		.loc 1 446 0
+ 906 00c6 0F23     		mov	r3, #15
+ 907 00c8 FB18     		add	r3, r7, r3
+ 908 00ca 1B78     		ldrb	r3, [r3]
+ 909 00cc 002B     		cmp	r3, #0
+ 910 00ce 03D1     		bne	.L72
+ 447:.\IO_Control.c ****                     ThermalData.currentState = NO_CHANGE;
+ 911              		.loc 1 447 0
+ 912 00d0 3C4B     		ldr	r3, .L80+4
+ 913 00d2 0322     		mov	r2, #3
+ 914 00d4 DA70     		strb	r2, [r3, #3]
+ 915 00d6 08E0     		b	.L73
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 25
+
+
+ 916              	.L72:
+ 448:.\IO_Control.c ****                 else if(temperatureStatus == EXCEEDED_LOWER_BOUND)
+ 917              		.loc 1 448 0
+ 918 00d8 0F23     		mov	r3, #15
+ 919 00da FB18     		add	r3, r7, r3
+ 920 00dc 1B78     		ldrb	r3, [r3]
+ 921 00de 022B     		cmp	r3, #2
+ 922 00e0 03D1     		bne	.L73
+ 449:.\IO_Control.c ****                     ThermalData.currentState = STEADY_INCREASE;
+ 923              		.loc 1 449 0
+ 924 00e2 384B     		ldr	r3, .L80+4
+ 925 00e4 0122     		mov	r2, #1
+ 926 00e6 DA70     		strb	r2, [r3, #3]
+ 450:.\IO_Control.c ****             }
+ 451:.\IO_Control.c ****             break;
+ 927              		.loc 1 451 0
+ 928 00e8 60E0     		b	.L64
+ 929              	.L73:
+ 930 00ea 5FE0     		b	.L64
+ 931              	.L65:
+ 452:.\IO_Control.c ****         case STEADY_INCREASE:
+ 453:.\IO_Control.c ****             if((timerCount % SAMPLE_COUNT_PER_CYCLE) == 0)
+ 454:.\IO_Control.c ****             {
+ 455:.\IO_Control.c ****                 if(ThermalData.scalingFactor < MAX_SCALING_FACTOR)
+ 932              		.loc 1 455 0
+ 933 00ec 354B     		ldr	r3, .L80+4
+ 934 00ee 1B79     		ldrb	r3, [r3, #4]
+ 935 00f0 FF2B     		cmp	r3, #255
+ 936 00f2 05D0     		beq	.L74
+ 456:.\IO_Control.c ****                     ThermalData.scalingFactor++;
+ 937              		.loc 1 456 0
+ 938 00f4 334B     		ldr	r3, .L80+4
+ 939 00f6 1B79     		ldrb	r3, [r3, #4]
+ 940 00f8 0133     		add	r3, r3, #1
+ 941 00fa DAB2     		uxtb	r2, r3
+ 942 00fc 314B     		ldr	r3, .L80+4
+ 943 00fe 1A71     		strb	r2, [r3, #4]
+ 944              	.L74:
+ 457:.\IO_Control.c ****             
+ 458:.\IO_Control.c ****                 ThermalData.regulatedBrightness = (uint8)((uint16)(ThermalData.requestedBrightness)
+ 945              		.loc 1 458 0
+ 946 0100 304B     		ldr	r3, .L80+4
+ 947 0102 1B78     		ldrb	r3, [r3]
+ 948 0104 1A1C     		mov	r2, r3
+ 459:.\IO_Control.c ****                     (uint16)(ThermalData.scalingFactor) / MAX_SCALING_FACTOR);
+ 949              		.loc 1 459 0
+ 950 0106 2F4B     		ldr	r3, .L80+4
+ 951 0108 1B79     		ldrb	r3, [r3, #4]
+ 458:.\IO_Control.c ****                     (uint16)(ThermalData.scalingFactor) / MAX_SCALING_FACTOR);
+ 952              		.loc 1 458 0
+ 953 010a 5343     		mul	r3, r2
+ 954              		.loc 1 459 0
+ 955 010c 181C     		mov	r0, r3
+ 956 010e FF21     		mov	r1, #255
+ 957 0110 FFF7FEFF 		bl	__aeabi_idiv
+ 958 0114 031C     		mov	r3, r0
+ 458:.\IO_Control.c ****                     (uint16)(ThermalData.scalingFactor) / MAX_SCALING_FACTOR);
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 26
+
+
+ 959              		.loc 1 458 0
+ 960 0116 DAB2     		uxtb	r2, r3
+ 961 0118 2A4B     		ldr	r3, .L80+4
+ 962 011a 5A70     		strb	r2, [r3, #1]
+ 460:.\IO_Control.c ****             }
+ 461:.\IO_Control.c ****             if((timerCount % (SAMPLE_COUNT_PER_CYCLE * BRIGHTNESS_CHANGE_PER_SAMPLE)) == 0)
+ 462:.\IO_Control.c ****             {
+ 463:.\IO_Control.c ****                 temperatureStatus = getTemperatureStatus(TemperatureData, ADC_SAMPLE_COUNT,
+ 963              		.loc 1 463 0
+ 964 011c 0F23     		mov	r3, #15
+ 965 011e FC18     		add	r4, r7, r3
+ 966 0120 7B68     		ldr	r3, [r7, #4]
+ 967 0122 181C     		mov	r0, r3
+ 968 0124 0421     		mov	r1, #4
+ 969 0126 0022     		mov	r2, #0
+ 970 0128 FFF7FEFF 		bl	getTemperatureStatus
+ 971 012c 031C     		mov	r3, r0
+ 972 012e 2370     		strb	r3, [r4]
+ 464:.\IO_Control.c ****                     SAFE_TEMPERATURE_TOLERANCE);
+ 465:.\IO_Control.c ****                 
+ 466:.\IO_Control.c ****                 if(temperatureStatus == EXCEEDED_UPPER_BOUND)
+ 973              		.loc 1 466 0
+ 974 0130 0F23     		mov	r3, #15
+ 975 0132 FB18     		add	r3, r7, r3
+ 976 0134 1B78     		ldrb	r3, [r3]
+ 977 0136 012B     		cmp	r3, #1
+ 978 0138 03D1     		bne	.L75
+ 467:.\IO_Control.c ****                     ThermalData.currentState = STEADY_DECREASE;
+ 979              		.loc 1 467 0
+ 980 013a 224B     		ldr	r3, .L80+4
+ 981 013c 0222     		mov	r2, #2
+ 982 013e DA70     		strb	r2, [r3, #3]
+ 983 0140 08E0     		b	.L76
+ 984              	.L75:
+ 468:.\IO_Control.c ****                 else if(temperatureStatus == WITHIN_TOLERANCE)
+ 985              		.loc 1 468 0
+ 986 0142 0F23     		mov	r3, #15
+ 987 0144 FB18     		add	r3, r7, r3
+ 988 0146 1B78     		ldrb	r3, [r3]
+ 989 0148 002B     		cmp	r3, #0
+ 990 014a 03D1     		bne	.L76
+ 469:.\IO_Control.c ****                     ThermalData.currentState = NO_CHANGE;
+ 991              		.loc 1 469 0
+ 992 014c 1D4B     		ldr	r3, .L80+4
+ 993 014e 0322     		mov	r2, #3
+ 994 0150 DA70     		strb	r2, [r3, #3]
+ 470:.\IO_Control.c ****             }
+ 471:.\IO_Control.c ****             break;
+ 995              		.loc 1 471 0
+ 996 0152 2BE0     		b	.L64
+ 997              	.L76:
+ 998 0154 2AE0     		b	.L64
+ 999              	.L69:
+ 472:.\IO_Control.c ****         case NO_CHANGE:
+ 473:.\IO_Control.c ****             if((timerCount % SAMPLE_COUNT_PER_CYCLE) == 0)
+ 474:.\IO_Control.c ****             {
+ 475:.\IO_Control.c ****                 ThermalData.regulatedBrightness = (uint8)((uint16)(ThermalData.requestedBrightness)
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 27
+
+
+ 1000              		.loc 1 475 0
+ 1001 0156 1B4B     		ldr	r3, .L80+4
+ 1002 0158 1B78     		ldrb	r3, [r3]
+ 1003 015a 1A1C     		mov	r2, r3
+ 476:.\IO_Control.c ****                     (uint16)(ThermalData.scalingFactor) / MAX_SCALING_FACTOR);
+ 1004              		.loc 1 476 0
+ 1005 015c 194B     		ldr	r3, .L80+4
+ 1006 015e 1B79     		ldrb	r3, [r3, #4]
+ 475:.\IO_Control.c ****                     (uint16)(ThermalData.scalingFactor) / MAX_SCALING_FACTOR);
+ 1007              		.loc 1 475 0
+ 1008 0160 5343     		mul	r3, r2
+ 1009              		.loc 1 476 0
+ 1010 0162 181C     		mov	r0, r3
+ 1011 0164 FF21     		mov	r1, #255
+ 1012 0166 FFF7FEFF 		bl	__aeabi_idiv
+ 1013 016a 031C     		mov	r3, r0
+ 475:.\IO_Control.c ****                     (uint16)(ThermalData.scalingFactor) / MAX_SCALING_FACTOR);
+ 1014              		.loc 1 475 0
+ 1015 016c DAB2     		uxtb	r2, r3
+ 1016 016e 154B     		ldr	r3, .L80+4
+ 1017 0170 5A70     		strb	r2, [r3, #1]
+ 477:.\IO_Control.c ****             }
+ 478:.\IO_Control.c ****             if((timerCount % (SAMPLE_COUNT_PER_CYCLE * BRIGHTNESS_CHANGE_PER_SAMPLE)) == 0)
+ 479:.\IO_Control.c ****             {
+ 480:.\IO_Control.c ****                 temperatureStatus = getTemperatureStatus(TemperatureData, ADC_SAMPLE_COUNT,
+ 1018              		.loc 1 480 0
+ 1019 0172 0F23     		mov	r3, #15
+ 1020 0174 FC18     		add	r4, r7, r3
+ 1021 0176 7B68     		ldr	r3, [r7, #4]
+ 1022 0178 181C     		mov	r0, r3
+ 1023 017a 0421     		mov	r1, #4
+ 1024 017c 0022     		mov	r2, #0
+ 1025 017e FFF7FEFF 		bl	getTemperatureStatus
+ 1026 0182 031C     		mov	r3, r0
+ 1027 0184 2370     		strb	r3, [r4]
+ 481:.\IO_Control.c ****                     SAFE_TEMPERATURE_TOLERANCE);
+ 482:.\IO_Control.c ****                 
+ 483:.\IO_Control.c ****                 if(temperatureStatus == EXCEEDED_UPPER_BOUND)
+ 1028              		.loc 1 483 0
+ 1029 0186 0F23     		mov	r3, #15
+ 1030 0188 FB18     		add	r3, r7, r3
+ 1031 018a 1B78     		ldrb	r3, [r3]
+ 1032 018c 012B     		cmp	r3, #1
+ 1033 018e 03D1     		bne	.L77
+ 484:.\IO_Control.c ****                     ThermalData.currentState = STEADY_DECREASE;
+ 1034              		.loc 1 484 0
+ 1035 0190 0C4B     		ldr	r3, .L80+4
+ 1036 0192 0222     		mov	r2, #2
+ 1037 0194 DA70     		strb	r2, [r3, #3]
+ 1038 0196 08E0     		b	.L78
+ 1039              	.L77:
+ 485:.\IO_Control.c ****                 else if(temperatureStatus == EXCEEDED_LOWER_BOUND)
+ 1040              		.loc 1 485 0
+ 1041 0198 0F23     		mov	r3, #15
+ 1042 019a FB18     		add	r3, r7, r3
+ 1043 019c 1B78     		ldrb	r3, [r3]
+ 1044 019e 022B     		cmp	r3, #2
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 28
+
+
+ 1045 01a0 03D1     		bne	.L78
+ 486:.\IO_Control.c ****                     ThermalData.currentState = STEADY_INCREASE;
+ 1046              		.loc 1 486 0
+ 1047 01a2 084B     		ldr	r3, .L80+4
+ 1048 01a4 0122     		mov	r2, #1
+ 1049 01a6 DA70     		strb	r2, [r3, #3]
+ 487:.\IO_Control.c ****             }
+ 488:.\IO_Control.c ****             break;
+ 1050              		.loc 1 488 0
+ 1051 01a8 FFE7     		b	.L79
+ 1052              	.L78:
+ 1053              	.L79:
+ 1054 01aa C046     		mov	r8, r8
+ 1055              	.L64:
+ 489:.\IO_Control.c ****     }
+ 490:.\IO_Control.c ****     
+ 491:.\IO_Control.c ****     timerCount = (timerCount + 1) % (SAMPLE_COUNT_PER_CYCLE * BRIGHTNESS_CHANGE_PER_SAMPLE);   
+ 1056              		.loc 1 491 0
+ 1057 01ac 064B     		ldr	r3, .L80+8
+ 1058 01ae 0022     		mov	r2, #0
+ 1059 01b0 1A70     		strb	r2, [r3]
+ 492:.\IO_Control.c ****     return ThermalData.regulatedBrightness;    
+ 1060              		.loc 1 492 0
+ 1061 01b2 044B     		ldr	r3, .L80+4
+ 1062 01b4 5B78     		ldrb	r3, [r3, #1]
+ 1063              	.L63:
+ 493:.\IO_Control.c ****     #else
+ 494:.\IO_Control.c ****     return ThermalData.requestedBrightness;    
+ 495:.\IO_Control.c ****     #endif
+ 496:.\IO_Control.c **** }
+ 1064              		.loc 1 496 0
+ 1065 01b6 181C     		mov	r0, r3
+ 1066 01b8 BD46     		mov	sp, r7
+ 1067 01ba 05B0     		add	sp, sp, #20
+ 1068              		@ sp needed
+ 1069 01bc 90BD     		pop	{r4, r7, pc}
+ 1070              	.L81:
+ 1071 01be C046     		.align	2
+ 1072              	.L80:
+ 1073 01c0 10000000 		.word	PositionData
+ 1074 01c4 14000000 		.word	ThermalData
+ 1075 01c8 01000000 		.word	timerCount.6239
+ 1076              		.cfi_endproc
+ 1077              	.LFE43:
+ 1078              		.size	regulateBrightness, .-regulateBrightness
+ 1079              		.section	.text.getTemperatureStatus,"ax",%progbits
+ 1080              		.align	2
+ 1081              		.code	16
+ 1082              		.thumb_func
+ 1083              		.type	getTemperatureStatus, %function
+ 1084              	getTemperatureStatus:
+ 1085              	.LFB44:
+ 497:.\IO_Control.c **** 
+ 498:.\IO_Control.c **** /**********DEFINED LOCAL FUNCTIONS**********/
+ 499:.\IO_Control.c **** /*******************************************************************************
+ 500:.\IO_Control.c **** * Function Name: getTemperatureStatus
+ 501:.\IO_Control.c **** ********************************************************************************
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 29
+
+
+ 502:.\IO_Control.c **** *
+ 503:.\IO_Control.c **** * Summary:
+ 504:.\IO_Control.c **** *  Returns temperature status based on 4 temperature points
+ 505:.\IO_Control.c **** *
+ 506:.\IO_Control.c **** * Parameters:
+ 507:.\IO_Control.c **** *  TemperatureData: Reference to the 4 temperature samples to check
+ 508:.\IO_Control.c **** *  length: Size of int16 array
+ 509:.\IO_Control.c **** *  tolerance: Tolerance amount for regulation (Range: temperature +/- tolerance)
+ 510:.\IO_Control.c **** *
+ 511:.\IO_Control.c **** * Return:
+ 512:.\IO_Control.c **** *  EXCEEDED_UPPER_BOUND, EXCEEDED_LOWER_BOUND, or WITHIN_TOLERANCE as valid inputs,
+ 513:.\IO_Control.c **** *  ERROR otherwise
+ 514:.\IO_Control.c **** *
+ 515:.\IO_Control.c **** *******************************************************************************/
+ 516:.\IO_Control.c **** static enum TemperatureStatus getTemperatureStatus(int16* TemperatureData,
+ 517:.\IO_Control.c ****     uint8 length, int16 tolerance)
+ 518:.\IO_Control.c **** {
+ 1086              		.loc 1 518 0
+ 1087              		.cfi_startproc
+ 1088 0000 80B5     		push	{r7, lr}
+ 1089              		.cfi_def_cfa_offset 8
+ 1090              		.cfi_offset 7, -8
+ 1091              		.cfi_offset 14, -4
+ 1092 0002 84B0     		sub	sp, sp, #16
+ 1093              		.cfi_def_cfa_offset 24
+ 1094 0004 00AF     		add	r7, sp, #0
+ 1095              		.cfi_def_cfa_register 7
+ 1096 0006 7860     		str	r0, [r7, #4]
+ 1097 0008 081C     		mov	r0, r1
+ 1098 000a 111C     		mov	r1, r2
+ 1099 000c FB1C     		add	r3, r7, #3
+ 1100 000e 021C     		add	r2, r0, #0
+ 1101 0010 1A70     		strb	r2, [r3]
+ 1102 0012 3B1C     		mov	r3, r7
+ 1103 0014 0A1C     		add	r2, r1, #0
+ 1104 0016 1A80     		strh	r2, [r3]
+ 519:.\IO_Control.c ****     enum TemperaturePoint dataIndex = LED;
+ 1105              		.loc 1 519 0
+ 1106 0018 0F23     		mov	r3, #15
+ 1107 001a FB18     		add	r3, r7, r3
+ 1108 001c 0022     		mov	r2, #0
+ 1109 001e 1A70     		strb	r2, [r3]
+ 520:.\IO_Control.c ****     
+ 521:.\IO_Control.c ****     if(TemperatureData == NULL)
+ 1110              		.loc 1 521 0
+ 1111 0020 7B68     		ldr	r3, [r7, #4]
+ 1112 0022 002B     		cmp	r3, #0
+ 1113 0024 01D1     		bne	.L83
+ 522:.\IO_Control.c ****         return ERROR;
+ 1114              		.loc 1 522 0
+ 1115 0026 0323     		mov	r3, #3
+ 1116 0028 74E0     		b	.L84
+ 1117              	.L83:
+ 523:.\IO_Control.c ****     
+ 524:.\IO_Control.c ****     if(length != ADC_SAMPLE_COUNT)
+ 1118              		.loc 1 524 0
+ 1119 002a FB1C     		add	r3, r7, #3
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 30
+
+
+ 1120 002c 1B78     		ldrb	r3, [r3]
+ 1121 002e 042B     		cmp	r3, #4
+ 1122 0030 01D0     		beq	.L85
+ 525:.\IO_Control.c ****         return ERROR;
+ 1123              		.loc 1 525 0
+ 1124 0032 0323     		mov	r3, #3
+ 1125 0034 6EE0     		b	.L84
+ 1126              	.L85:
+ 526:.\IO_Control.c ****     
+ 527:.\IO_Control.c ****     for(dataIndex = LED; dataIndex <= SWITCH_NODE; dataIndex++)
+ 1127              		.loc 1 527 0
+ 1128 0036 0F23     		mov	r3, #15
+ 1129 0038 FB18     		add	r3, r7, r3
+ 1130 003a 0022     		mov	r2, #0
+ 1131 003c 1A70     		strb	r2, [r3]
+ 1132 003e 1DE0     		b	.L86
+ 1133              	.L88:
+ 528:.\IO_Control.c ****     {
+ 529:.\IO_Control.c ****         if(TemperatureData[dataIndex] > 
+ 1134              		.loc 1 529 0
+ 1135 0040 0F23     		mov	r3, #15
+ 1136 0042 FB18     		add	r3, r7, r3
+ 1137 0044 1B78     		ldrb	r3, [r3]
+ 1138 0046 5B00     		lsl	r3, r3, #1
+ 1139 0048 7A68     		ldr	r2, [r7, #4]
+ 1140 004a D318     		add	r3, r2, r3
+ 1141 004c 1B88     		ldrh	r3, [r3]
+ 1142 004e 1AB2     		sxth	r2, r3
+ 530:.\IO_Control.c ****             (ThermalLimitArray[dataIndex].MAX_TEMPERATURE + tolerance))
+ 1143              		.loc 1 530 0
+ 1144 0050 0F23     		mov	r3, #15
+ 1145 0052 FB18     		add	r3, r7, r3
+ 1146 0054 1978     		ldrb	r1, [r3]
+ 1147 0056 314B     		ldr	r3, .L94
+ 1148 0058 8900     		lsl	r1, r1, #2
+ 1149 005a CB5A     		ldrh	r3, [r1, r3]
+ 1150 005c 19B2     		sxth	r1, r3
+ 1151 005e 3B1C     		mov	r3, r7
+ 1152 0060 0020     		mov	r0, #0
+ 1153 0062 1B5E     		ldrsh	r3, [r3, r0]
+ 1154 0064 CB18     		add	r3, r1, r3
+ 529:.\IO_Control.c ****             (ThermalLimitArray[dataIndex].MAX_TEMPERATURE + tolerance))
+ 1155              		.loc 1 529 0
+ 1156 0066 9A42     		cmp	r2, r3
+ 1157 0068 01DD     		ble	.L87
+ 531:.\IO_Control.c ****             return EXCEEDED_UPPER_BOUND;
+ 1158              		.loc 1 531 0
+ 1159 006a 0123     		mov	r3, #1
+ 1160 006c 52E0     		b	.L84
+ 1161              	.L87:
+ 527:.\IO_Control.c ****     {
+ 1162              		.loc 1 527 0 discriminator 2
+ 1163 006e 0F23     		mov	r3, #15
+ 1164 0070 FB18     		add	r3, r7, r3
+ 1165 0072 1A78     		ldrb	r2, [r3]
+ 1166 0074 0F23     		mov	r3, #15
+ 1167 0076 FB18     		add	r3, r7, r3
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 31
+
+
+ 1168 0078 0132     		add	r2, r2, #1
+ 1169 007a 1A70     		strb	r2, [r3]
+ 1170              	.L86:
+ 527:.\IO_Control.c ****     {
+ 1171              		.loc 1 527 0 is_stmt 0 discriminator 1
+ 1172 007c 0F23     		mov	r3, #15
+ 1173 007e FB18     		add	r3, r7, r3
+ 1174 0080 1B78     		ldrb	r3, [r3]
+ 1175 0082 012B     		cmp	r3, #1
+ 1176 0084 DCD9     		bls	.L88
+ 532:.\IO_Control.c ****     }
+ 533:.\IO_Control.c ****     
+ 534:.\IO_Control.c ****     if(TemperatureData[MICRO] > 
+ 1177              		.loc 1 534 0 is_stmt 1
+ 1178 0086 7B68     		ldr	r3, [r7, #4]
+ 1179 0088 0633     		add	r3, r3, #6
+ 1180 008a 1B88     		ldrh	r3, [r3]
+ 1181 008c 1AB2     		sxth	r2, r3
+ 535:.\IO_Control.c ****         (ThermalLimitArray[MICRO].MAX_TEMPERATURE + tolerance))
+ 1182              		.loc 1 535 0
+ 1183 008e 234B     		ldr	r3, .L94
+ 1184 0090 9B89     		ldrh	r3, [r3, #12]
+ 1185 0092 19B2     		sxth	r1, r3
+ 1186 0094 3B1C     		mov	r3, r7
+ 1187 0096 0020     		mov	r0, #0
+ 1188 0098 1B5E     		ldrsh	r3, [r3, r0]
+ 1189 009a CB18     		add	r3, r1, r3
+ 534:.\IO_Control.c ****         (ThermalLimitArray[MICRO].MAX_TEMPERATURE + tolerance))
+ 1190              		.loc 1 534 0
+ 1191 009c 9A42     		cmp	r2, r3
+ 1192 009e 01DD     		ble	.L89
+ 536:.\IO_Control.c ****         return EXCEEDED_UPPER_BOUND;
+ 1193              		.loc 1 536 0
+ 1194 00a0 0123     		mov	r3, #1
+ 1195 00a2 37E0     		b	.L84
+ 1196              	.L89:
+ 537:.\IO_Control.c ****     
+ 538:.\IO_Control.c ****     for(dataIndex = LED; dataIndex <= SWITCH_NODE; dataIndex++)
+ 1197              		.loc 1 538 0
+ 1198 00a4 0F23     		mov	r3, #15
+ 1199 00a6 FB18     		add	r3, r7, r3
+ 1200 00a8 0022     		mov	r2, #0
+ 1201 00aa 1A70     		strb	r2, [r3]
+ 1202 00ac 1DE0     		b	.L90
+ 1203              	.L92:
+ 539:.\IO_Control.c ****     {
+ 540:.\IO_Control.c ****         if(TemperatureData[dataIndex] < 
+ 1204              		.loc 1 540 0
+ 1205 00ae 0F23     		mov	r3, #15
+ 1206 00b0 FB18     		add	r3, r7, r3
+ 1207 00b2 1B78     		ldrb	r3, [r3]
+ 1208 00b4 5B00     		lsl	r3, r3, #1
+ 1209 00b6 7A68     		ldr	r2, [r7, #4]
+ 1210 00b8 D318     		add	r3, r2, r3
+ 1211 00ba 1B88     		ldrh	r3, [r3]
+ 1212 00bc 1AB2     		sxth	r2, r3
+ 541:.\IO_Control.c ****             (ThermalLimitArray[dataIndex].MAX_TEMPERATURE - tolerance))
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 32
+
+
+ 1213              		.loc 1 541 0
+ 1214 00be 0F23     		mov	r3, #15
+ 1215 00c0 FB18     		add	r3, r7, r3
+ 1216 00c2 1978     		ldrb	r1, [r3]
+ 1217 00c4 154B     		ldr	r3, .L94
+ 1218 00c6 8900     		lsl	r1, r1, #2
+ 1219 00c8 CB5A     		ldrh	r3, [r1, r3]
+ 1220 00ca 19B2     		sxth	r1, r3
+ 1221 00cc 3B1C     		mov	r3, r7
+ 1222 00ce 0020     		mov	r0, #0
+ 1223 00d0 1B5E     		ldrsh	r3, [r3, r0]
+ 1224 00d2 CB1A     		sub	r3, r1, r3
+ 540:.\IO_Control.c ****             (ThermalLimitArray[dataIndex].MAX_TEMPERATURE - tolerance))
+ 1225              		.loc 1 540 0
+ 1226 00d4 9A42     		cmp	r2, r3
+ 1227 00d6 01DA     		bge	.L91
+ 542:.\IO_Control.c ****             return EXCEEDED_LOWER_BOUND;
+ 1228              		.loc 1 542 0
+ 1229 00d8 0223     		mov	r3, #2
+ 1230 00da 1BE0     		b	.L84
+ 1231              	.L91:
+ 538:.\IO_Control.c ****     {
+ 1232              		.loc 1 538 0 discriminator 2
+ 1233 00dc 0F23     		mov	r3, #15
+ 1234 00de FB18     		add	r3, r7, r3
+ 1235 00e0 1A78     		ldrb	r2, [r3]
+ 1236 00e2 0F23     		mov	r3, #15
+ 1237 00e4 FB18     		add	r3, r7, r3
+ 1238 00e6 0132     		add	r2, r2, #1
+ 1239 00e8 1A70     		strb	r2, [r3]
+ 1240              	.L90:
+ 538:.\IO_Control.c ****     {
+ 1241              		.loc 1 538 0 is_stmt 0 discriminator 1
+ 1242 00ea 0F23     		mov	r3, #15
+ 1243 00ec FB18     		add	r3, r7, r3
+ 1244 00ee 1B78     		ldrb	r3, [r3]
+ 1245 00f0 012B     		cmp	r3, #1
+ 1246 00f2 DCD9     		bls	.L92
+ 543:.\IO_Control.c ****     }
+ 544:.\IO_Control.c ****     
+ 545:.\IO_Control.c ****     if(TemperatureData[MICRO] < 
+ 1247              		.loc 1 545 0 is_stmt 1
+ 1248 00f4 7B68     		ldr	r3, [r7, #4]
+ 1249 00f6 0633     		add	r3, r3, #6
+ 1250 00f8 1B88     		ldrh	r3, [r3]
+ 1251 00fa 1AB2     		sxth	r2, r3
+ 546:.\IO_Control.c ****         (ThermalLimitArray[MICRO].MAX_TEMPERATURE - tolerance))
+ 1252              		.loc 1 546 0
+ 1253 00fc 074B     		ldr	r3, .L94
+ 1254 00fe 9B89     		ldrh	r3, [r3, #12]
+ 1255 0100 19B2     		sxth	r1, r3
+ 1256 0102 3B1C     		mov	r3, r7
+ 1257 0104 0020     		mov	r0, #0
+ 1258 0106 1B5E     		ldrsh	r3, [r3, r0]
+ 1259 0108 CB1A     		sub	r3, r1, r3
+ 545:.\IO_Control.c ****         (ThermalLimitArray[MICRO].MAX_TEMPERATURE - tolerance))
+ 1260              		.loc 1 545 0
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 33
+
+
+ 1261 010a 9A42     		cmp	r2, r3
+ 1262 010c 01DA     		bge	.L93
+ 547:.\IO_Control.c ****         return EXCEEDED_LOWER_BOUND;
+ 1263              		.loc 1 547 0
+ 1264 010e 0223     		mov	r3, #2
+ 1265 0110 00E0     		b	.L84
+ 1266              	.L93:
+ 548:.\IO_Control.c ****     
+ 549:.\IO_Control.c ****     return WITHIN_TOLERANCE;
+ 1267              		.loc 1 549 0
+ 1268 0112 0023     		mov	r3, #0
+ 1269              	.L84:
+ 550:.\IO_Control.c **** }
+ 1270              		.loc 1 550 0
+ 1271 0114 181C     		mov	r0, r3
+ 1272 0116 BD46     		mov	sp, r7
+ 1273 0118 04B0     		add	sp, sp, #16
+ 1274              		@ sp needed
+ 1275 011a 80BD     		pop	{r7, pc}
+ 1276              	.L95:
+ 1277              		.align	2
+ 1278              	.L94:
+ 1279 011c 00000000 		.word	ThermalLimitArray
+ 1280              		.cfi_endproc
+ 1281              	.LFE44:
+ 1282              		.size	getTemperatureStatus, .-getTemperatureStatus
+ 1283              		.bss
+ 1284              	bLED_On.6197:
+ 1285 0000 00       		.space	1
+ 1286              	timerCount.6239:
+ 1287 0001 00       		.space	1
+ 1288              		.text
+ 1289              	.Letext0:
+ 1290              		.file 2 "Generated_Source\\PSoC4/cytypes.h"
+ 1291              		.file 3 ".\\IO_Control.h"
+ 1292              		.section	.debug_info,"",%progbits
+ 1293              	.Ldebug_info0:
+ 1294 0000 79040000 		.4byte	0x479
+ 1295 0004 0400     		.2byte	0x4
+ 1296 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 1297 000a 04       		.byte	0x4
+ 1298 000b 01       		.uleb128 0x1
+ 1299 000c 3E030000 		.4byte	.LASF73
+ 1300 0010 01       		.byte	0x1
+ 1301 0011 4A010000 		.4byte	.LASF74
+ 1302 0015 C4020000 		.4byte	.LASF75
+ 1303 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 1304 001d 00000000 		.4byte	0
+ 1305 0021 00000000 		.4byte	.Ldebug_line0
+ 1306 0025 02       		.uleb128 0x2
+ 1307 0026 01       		.byte	0x1
+ 1308 0027 06       		.byte	0x6
+ 1309 0028 19020000 		.4byte	.LASF0
+ 1310 002c 02       		.uleb128 0x2
+ 1311 002d 01       		.byte	0x1
+ 1312 002e 08       		.byte	0x8
+ 1313 002f E5010000 		.4byte	.LASF1
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 34
+
+
+ 1314 0033 02       		.uleb128 0x2
+ 1315 0034 02       		.byte	0x2
+ 1316 0035 05       		.byte	0x5
+ 1317 0036 4D000000 		.4byte	.LASF2
+ 1318 003a 02       		.uleb128 0x2
+ 1319 003b 02       		.byte	0x2
+ 1320 003c 07       		.byte	0x7
+ 1321 003d 92020000 		.4byte	.LASF3
+ 1322 0041 02       		.uleb128 0x2
+ 1323 0042 04       		.byte	0x4
+ 1324 0043 05       		.byte	0x5
+ 1325 0044 86010000 		.4byte	.LASF4
+ 1326 0048 02       		.uleb128 0x2
+ 1327 0049 04       		.byte	0x4
+ 1328 004a 07       		.byte	0x7
+ 1329 004b 3A040000 		.4byte	.LASF5
+ 1330 004f 02       		.uleb128 0x2
+ 1331 0050 08       		.byte	0x8
+ 1332 0051 05       		.byte	0x5
+ 1333 0052 59010000 		.4byte	.LASF6
+ 1334 0056 02       		.uleb128 0x2
+ 1335 0057 08       		.byte	0x8
+ 1336 0058 07       		.byte	0x7
+ 1337 0059 25020000 		.4byte	.LASF7
+ 1338 005d 03       		.uleb128 0x3
+ 1339 005e 04       		.byte	0x4
+ 1340 005f 05       		.byte	0x5
+ 1341 0060 696E7400 		.ascii	"int\000"
+ 1342 0064 02       		.uleb128 0x2
+ 1343 0065 04       		.byte	0x4
+ 1344 0066 07       		.byte	0x7
+ 1345 0067 3C020000 		.4byte	.LASF8
+ 1346 006b 04       		.uleb128 0x4
+ 1347 006c 0C010000 		.4byte	.LASF9
+ 1348 0070 02       		.byte	0x2
+ 1349 0071 3801     		.2byte	0x138
+ 1350 0073 2C000000 		.4byte	0x2c
+ 1351 0077 04       		.uleb128 0x4
+ 1352 0078 D2000000 		.4byte	.LASF10
+ 1353 007c 02       		.byte	0x2
+ 1354 007d 3901     		.2byte	0x139
+ 1355 007f 3A000000 		.4byte	0x3a
+ 1356 0083 04       		.uleb128 0x4
+ 1357 0084 33040000 		.4byte	.LASF11
+ 1358 0088 02       		.byte	0x2
+ 1359 0089 3A01     		.2byte	0x13a
+ 1360 008b 48000000 		.4byte	0x48
+ 1361 008f 04       		.uleb128 0x4
+ 1362 0090 F5000000 		.4byte	.LASF12
+ 1363 0094 02       		.byte	0x2
+ 1364 0095 3C01     		.2byte	0x13c
+ 1365 0097 33000000 		.4byte	0x33
+ 1366 009b 04       		.uleb128 0x4
+ 1367 009c 4C040000 		.4byte	.LASF13
+ 1368 00a0 02       		.byte	0x2
+ 1369 00a1 3D01     		.2byte	0x13d
+ 1370 00a3 41000000 		.4byte	0x41
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 35
+
+
+ 1371 00a7 02       		.uleb128 0x2
+ 1372 00a8 04       		.byte	0x4
+ 1373 00a9 04       		.byte	0x4
+ 1374 00aa 44010000 		.4byte	.LASF14
+ 1375 00ae 02       		.uleb128 0x2
+ 1376 00af 08       		.byte	0x8
+ 1377 00b0 04       		.byte	0x4
+ 1378 00b1 09050000 		.4byte	.LASF15
+ 1379 00b5 02       		.uleb128 0x2
+ 1380 00b6 01       		.byte	0x1
+ 1381 00b7 08       		.byte	0x8
+ 1382 00b8 24030000 		.4byte	.LASF16
+ 1383 00bc 02       		.uleb128 0x2
+ 1384 00bd 04       		.byte	0x4
+ 1385 00be 07       		.byte	0x7
+ 1386 00bf 57000000 		.4byte	.LASF17
+ 1387 00c3 05       		.uleb128 0x5
+ 1388 00c4 D4040000 		.4byte	.LASF21
+ 1389 00c8 01       		.byte	0x1
+ 1390 00c9 03       		.byte	0x3
+ 1391 00ca 17       		.byte	0x17
+ 1392 00cb E8000000 		.4byte	0xe8
+ 1393 00cf 06       		.uleb128 0x6
+ 1394 00d0 4C454400 		.ascii	"LED\000"
+ 1395 00d4 00       		.sleb128 0
+ 1396 00d5 07       		.uleb128 0x7
+ 1397 00d6 27040000 		.4byte	.LASF18
+ 1398 00da 01       		.sleb128 1
+ 1399 00db 07       		.uleb128 0x7
+ 1400 00dc F3010000 		.4byte	.LASF19
+ 1401 00e0 02       		.sleb128 2
+ 1402 00e1 07       		.uleb128 0x7
+ 1403 00e2 A4010000 		.4byte	.LASF20
+ 1404 00e6 03       		.sleb128 3
+ 1405 00e7 00       		.byte	0
+ 1406 00e8 05       		.uleb128 0x5
+ 1407 00e9 09020000 		.4byte	.LASF22
+ 1408 00ed 01       		.byte	0x1
+ 1409 00ee 01       		.byte	0x1
+ 1410 00ef 20       		.byte	0x20
+ 1411 00f0 0D010000 		.4byte	0x10d
+ 1412 00f4 07       		.uleb128 0x7
+ 1413 00f5 3C010000 		.4byte	.LASF23
+ 1414 00f9 00       		.sleb128 0
+ 1415 00fa 07       		.uleb128 0x7
+ 1416 00fb 1E050000 		.4byte	.LASF24
+ 1417 00ff 01       		.sleb128 1
+ 1418 0100 07       		.uleb128 0x7
+ 1419 0101 C4040000 		.4byte	.LASF25
+ 1420 0105 02       		.sleb128 2
+ 1421 0106 07       		.uleb128 0x7
+ 1422 0107 C5010000 		.4byte	.LASF26
+ 1423 010b 03       		.sleb128 3
+ 1424 010c 00       		.byte	0
+ 1425 010d 05       		.uleb128 0x5
+ 1426 010e 76000000 		.4byte	.LASF27
+ 1427 0112 01       		.byte	0x1
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 36
+
+
+ 1428 0113 01       		.byte	0x1
+ 1429 0114 28       		.byte	0x28
+ 1430 0115 32010000 		.4byte	0x132
+ 1431 0119 07       		.uleb128 0x7
+ 1432 011a A7040000 		.4byte	.LASF28
+ 1433 011e 00       		.sleb128 0
+ 1434 011f 07       		.uleb128 0x7
+ 1435 0120 29030000 		.4byte	.LASF29
+ 1436 0124 01       		.sleb128 1
+ 1437 0125 07       		.uleb128 0x7
+ 1438 0126 8F010000 		.4byte	.LASF30
+ 1439 012a 02       		.sleb128 2
+ 1440 012b 07       		.uleb128 0x7
+ 1441 012c AA010000 		.4byte	.LASF31
+ 1442 0130 03       		.sleb128 3
+ 1443 0131 00       		.byte	0
+ 1444 0132 08       		.uleb128 0x8
+ 1445 0133 04       		.byte	0x4
+ 1446 0134 01       		.byte	0x1
+ 1447 0135 30       		.byte	0x30
+ 1448 0136 53010000 		.4byte	0x153
+ 1449 013a 09       		.uleb128 0x9
+ 1450 013b 83040000 		.4byte	.LASF32
+ 1451 013f 01       		.byte	0x1
+ 1452 0140 32       		.byte	0x32
+ 1453 0141 53010000 		.4byte	0x153
+ 1454 0145 00       		.byte	0
+ 1455 0146 09       		.uleb128 0x9
+ 1456 0147 FB000000 		.4byte	.LASF33
+ 1457 014b 01       		.byte	0x1
+ 1458 014c 33       		.byte	0x33
+ 1459 014d 53010000 		.4byte	0x153
+ 1460 0151 02       		.byte	0x2
+ 1461 0152 00       		.byte	0
+ 1462 0153 0A       		.uleb128 0xa
+ 1463 0154 8F000000 		.4byte	0x8f
+ 1464 0158 0B       		.uleb128 0xb
+ 1465 0159 79010000 		.4byte	.LASF34
+ 1466 015d 01       		.byte	0x1
+ 1467 015e 34       		.byte	0x34
+ 1468 015f 32010000 		.4byte	0x132
+ 1469 0163 08       		.uleb128 0x8
+ 1470 0164 03       		.byte	0x3
+ 1471 0165 01       		.byte	0x1
+ 1472 0166 3F       		.byte	0x3f
+ 1473 0167 90010000 		.4byte	0x190
+ 1474 016b 09       		.uleb128 0x9
+ 1475 016c 2E050000 		.4byte	.LASF35
+ 1476 0170 01       		.byte	0x1
+ 1477 0171 41       		.byte	0x41
+ 1478 0172 6B000000 		.4byte	0x6b
+ 1479 0176 00       		.byte	0
+ 1480 0177 09       		.uleb128 0x9
+ 1481 0178 D9030000 		.4byte	.LASF36
+ 1482 017c 01       		.byte	0x1
+ 1483 017d 42       		.byte	0x42
+ 1484 017e 6B000000 		.4byte	0x6b
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 37
+
+
+ 1485 0182 01       		.byte	0x1
+ 1486 0183 09       		.uleb128 0x9
+ 1487 0184 49020000 		.4byte	.LASF37
+ 1488 0188 01       		.byte	0x1
+ 1489 0189 43       		.byte	0x43
+ 1490 018a 6B000000 		.4byte	0x6b
+ 1491 018e 02       		.byte	0x2
+ 1492 018f 00       		.byte	0
+ 1493 0190 0B       		.uleb128 0xb
+ 1494 0191 88000000 		.4byte	.LASF38
+ 1495 0195 01       		.byte	0x1
+ 1496 0196 44       		.byte	0x44
+ 1497 0197 63010000 		.4byte	0x163
+ 1498 019b 08       		.uleb128 0x8
+ 1499 019c 05       		.byte	0x5
+ 1500 019d 01       		.byte	0x1
+ 1501 019e 48       		.byte	0x48
+ 1502 019f E0010000 		.4byte	0x1e0
+ 1503 01a3 09       		.uleb128 0x9
+ 1504 01a4 B0020000 		.4byte	.LASF39
+ 1505 01a8 01       		.byte	0x1
+ 1506 01a9 4A       		.byte	0x4a
+ 1507 01aa 6B000000 		.4byte	0x6b
+ 1508 01ae 00       		.byte	0
+ 1509 01af 09       		.uleb128 0x9
+ 1510 01b0 7E020000 		.4byte	.LASF40
+ 1511 01b4 01       		.byte	0x1
+ 1512 01b5 4B       		.byte	0x4b
+ 1513 01b6 6B000000 		.4byte	0x6b
+ 1514 01ba 01       		.byte	0x1
+ 1515 01bb 09       		.uleb128 0x9
+ 1516 01bc D9000000 		.4byte	.LASF41
+ 1517 01c0 01       		.byte	0x1
+ 1518 01c1 4C       		.byte	0x4c
+ 1519 01c2 6B000000 		.4byte	0x6b
+ 1520 01c6 02       		.byte	0x2
+ 1521 01c7 09       		.uleb128 0x9
+ 1522 01c8 CC030000 		.4byte	.LASF42
+ 1523 01cc 01       		.byte	0x1
+ 1524 01cd 4D       		.byte	0x4d
+ 1525 01ce E8000000 		.4byte	0xe8
+ 1526 01d2 03       		.byte	0x3
+ 1527 01d3 09       		.uleb128 0x9
+ 1528 01d4 10050000 		.4byte	.LASF43
+ 1529 01d8 01       		.byte	0x1
+ 1530 01d9 4E       		.byte	0x4e
+ 1531 01da 6B000000 		.4byte	0x6b
+ 1532 01de 04       		.byte	0x4
+ 1533 01df 00       		.byte	0
+ 1534 01e0 0B       		.uleb128 0xb
+ 1535 01e1 5C020000 		.4byte	.LASF44
+ 1536 01e5 01       		.byte	0x1
+ 1537 01e6 4F       		.byte	0x4f
+ 1538 01e7 9B010000 		.4byte	0x19b
+ 1539 01eb 0C       		.uleb128 0xc
+ 1540 01ec 25000000 		.4byte	.LASF76
+ 1541 01f0 01       		.byte	0x1
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 38
+
+
+ 1542 01f1 69       		.byte	0x69
+ 1543 01f2 00000000 		.4byte	.LFB34
+ 1544 01f6 2C000000 		.4byte	.LFE34-.LFB34
+ 1545 01fa 01       		.uleb128 0x1
+ 1546 01fb 9C       		.byte	0x9c
+ 1547 01fc 12020000 		.4byte	0x212
+ 1548 0200 0D       		.uleb128 0xd
+ 1549 0201 13000000 		.4byte	.LASF59
+ 1550 0205 01       		.byte	0x1
+ 1551 0206 6B       		.byte	0x6b
+ 1552 0207 6B000000 		.4byte	0x6b
+ 1553 020b 05       		.uleb128 0x5
+ 1554 020c 03       		.byte	0x3
+ 1555 020d 00000000 		.4byte	bLED_On.6197
+ 1556 0211 00       		.byte	0
+ 1557 0212 0E       		.uleb128 0xe
+ 1558 0213 2F000000 		.4byte	.LASF49
+ 1559 0217 01       		.byte	0x1
+ 1560 0218 81       		.byte	0x81
+ 1561 0219 6B000000 		.4byte	0x6b
+ 1562 021d 00000000 		.4byte	.LFB35
+ 1563 0221 14000000 		.4byte	.LFE35-.LFB35
+ 1564 0225 01       		.uleb128 0x1
+ 1565 0226 9C       		.byte	0x9c
+ 1566 0227 0F       		.uleb128 0xf
+ 1567 0228 2A010000 		.4byte	.LASF45
+ 1568 022c 01       		.byte	0x1
+ 1569 022d 95       		.byte	0x95
+ 1570 022e 6B000000 		.4byte	0x6b
+ 1571 0232 00000000 		.4byte	.LFB36
+ 1572 0236 38000000 		.4byte	.LFE36-.LFB36
+ 1573 023a 01       		.uleb128 0x1
+ 1574 023b 9C       		.byte	0x9c
+ 1575 023c 4F020000 		.4byte	0x24f
+ 1576 0240 10       		.uleb128 0x10
+ 1577 0241 E5040000 		.4byte	.LASF47
+ 1578 0245 01       		.byte	0x1
+ 1579 0246 95       		.byte	0x95
+ 1580 0247 6B000000 		.4byte	0x6b
+ 1581 024b 02       		.uleb128 0x2
+ 1582 024c 91       		.byte	0x91
+ 1583 024d 77       		.sleb128 -9
+ 1584 024e 00       		.byte	0
+ 1585 024f 0F       		.uleb128 0xf
+ 1586 0250 D6010000 		.4byte	.LASF46
+ 1587 0254 01       		.byte	0x1
+ 1588 0255 AD       		.byte	0xad
+ 1589 0256 6B000000 		.4byte	0x6b
+ 1590 025a 00000000 		.4byte	.LFB37
+ 1591 025e 38000000 		.4byte	.LFE37-.LFB37
+ 1592 0262 01       		.uleb128 0x1
+ 1593 0263 9C       		.byte	0x9c
+ 1594 0264 77020000 		.4byte	0x277
+ 1595 0268 10       		.uleb128 0x10
+ 1596 0269 A7000000 		.4byte	.LASF48
+ 1597 026d 01       		.byte	0x1
+ 1598 026e AD       		.byte	0xad
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 39
+
+
+ 1599 026f 6B000000 		.4byte	0x6b
+ 1600 0273 02       		.uleb128 0x2
+ 1601 0274 91       		.byte	0x91
+ 1602 0275 77       		.sleb128 -9
+ 1603 0276 00       		.byte	0
+ 1604 0277 0E       		.uleb128 0xe
+ 1605 0278 93040000 		.4byte	.LASF50
+ 1606 027c 01       		.byte	0x1
+ 1607 027d C5       		.byte	0xc5
+ 1608 027e 6B000000 		.4byte	0x6b
+ 1609 0282 00000000 		.4byte	.LFB38
+ 1610 0286 14000000 		.4byte	.LFE38-.LFB38
+ 1611 028a 01       		.uleb128 0x1
+ 1612 028b 9C       		.byte	0x9c
+ 1613 028c 11       		.uleb128 0x11
+ 1614 028d 0D040000 		.4byte	.LASF77
+ 1615 0291 01       		.byte	0x1
+ 1616 0292 DA       		.byte	0xda
+ 1617 0293 00000000 		.4byte	.LFB39
+ 1618 0297 14000000 		.4byte	.LFE39-.LFB39
+ 1619 029b 01       		.uleb128 0x1
+ 1620 029c 9C       		.byte	0x9c
+ 1621 029d 12       		.uleb128 0x12
+ 1622 029e 60000000 		.4byte	.LASF51
+ 1623 02a2 01       		.byte	0x1
+ 1624 02a3 EE       		.byte	0xee
+ 1625 02a4 6B000000 		.4byte	0x6b
+ 1626 02a8 00000000 		.4byte	.LFB40
+ 1627 02ac AC000000 		.4byte	.LFE40-.LFB40
+ 1628 02b0 01       		.uleb128 0x1
+ 1629 02b1 9C       		.byte	0x9c
+ 1630 02b2 C5020000 		.4byte	0x2c5
+ 1631 02b6 10       		.uleb128 0x10
+ 1632 02b7 6E020000 		.4byte	.LASF52
+ 1633 02bb 01       		.byte	0x1
+ 1634 02bc EE       		.byte	0xee
+ 1635 02bd 6B000000 		.4byte	0x6b
+ 1636 02c1 02       		.uleb128 0x2
+ 1637 02c2 91       		.byte	0x91
+ 1638 02c3 77       		.sleb128 -9
+ 1639 02c4 00       		.byte	0
+ 1640 02c5 13       		.uleb128 0x13
+ 1641 02c6 67010000 		.4byte	.LASF53
+ 1642 02ca 01       		.byte	0x1
+ 1643 02cb 3201     		.2byte	0x132
+ 1644 02cd 8F000000 		.4byte	0x8f
+ 1645 02d1 00000000 		.4byte	.LFB41
+ 1646 02d5 30000000 		.4byte	.LFE41-.LFB41
+ 1647 02d9 01       		.uleb128 0x1
+ 1648 02da 9C       		.byte	0x9c
+ 1649 02db EF020000 		.4byte	0x2ef
+ 1650 02df 14       		.uleb128 0x14
+ 1651 02e0 FB010000 		.4byte	.LASF54
+ 1652 02e4 01       		.byte	0x1
+ 1653 02e5 3201     		.2byte	0x132
+ 1654 02e7 C3000000 		.4byte	0xc3
+ 1655 02eb 02       		.uleb128 0x2
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 40
+
+
+ 1656 02ec 91       		.byte	0x91
+ 1657 02ed 77       		.sleb128 -9
+ 1658 02ee 00       		.byte	0
+ 1659 02ef 15       		.uleb128 0x15
+ 1660 02f0 F4040000 		.4byte	.LASF55
+ 1661 02f4 01       		.byte	0x1
+ 1662 02f5 4C01     		.2byte	0x14c
+ 1663 02f7 8F000000 		.4byte	0x8f
+ 1664 02fb 00000000 		.4byte	.LFB42
+ 1665 02ff D4010000 		.4byte	.LFE42-.LFB42
+ 1666 0303 01       		.uleb128 0x1
+ 1667 0304 9C       		.byte	0x9c
+ 1668 0305 82030000 		.4byte	0x382
+ 1669 0309 14       		.uleb128 0x14
+ 1670 030a FF030000 		.4byte	.LASF56
+ 1671 030e 01       		.byte	0x1
+ 1672 030f 4C01     		.2byte	0x14c
+ 1673 0311 6B000000 		.4byte	0x6b
+ 1674 0315 02       		.uleb128 0x2
+ 1675 0316 91       		.byte	0x91
+ 1676 0317 5F       		.sleb128 -33
+ 1677 0318 14       		.uleb128 0x14
+ 1678 0319 FB010000 		.4byte	.LASF54
+ 1679 031d 01       		.byte	0x1
+ 1680 031e 4C01     		.2byte	0x14c
+ 1681 0320 C3000000 		.4byte	0xc3
+ 1682 0324 02       		.uleb128 0x2
+ 1683 0325 91       		.byte	0x91
+ 1684 0326 5E       		.sleb128 -34
+ 1685 0327 14       		.uleb128 0x14
+ 1686 0328 B8040000 		.4byte	.LASF57
+ 1687 032c 01       		.byte	0x1
+ 1688 032d 4D01     		.2byte	0x14d
+ 1689 032f 82030000 		.4byte	0x382
+ 1690 0333 02       		.uleb128 0x2
+ 1691 0334 91       		.byte	0x91
+ 1692 0335 58       		.sleb128 -40
+ 1693 0336 14       		.uleb128 0x14
+ 1694 0337 CF010000 		.4byte	.LASF58
+ 1695 033b 01       		.byte	0x1
+ 1696 033c 4D01     		.2byte	0x14d
+ 1697 033e 6B000000 		.4byte	0x6b
+ 1698 0342 02       		.uleb128 0x2
+ 1699 0343 91       		.byte	0x91
+ 1700 0344 5D       		.sleb128 -35
+ 1701 0345 16       		.uleb128 0x16
+ 1702 0346 99000000 		.4byte	.LASF60
+ 1703 034a 01       		.byte	0x1
+ 1704 034b 4F01     		.2byte	0x14f
+ 1705 034d 6B000000 		.4byte	0x6b
+ 1706 0351 02       		.uleb128 0x2
+ 1707 0352 91       		.byte	0x91
+ 1708 0353 6F       		.sleb128 -17
+ 1709 0354 16       		.uleb128 0x16
+ 1710 0355 64040000 		.4byte	.LASF61
+ 1711 0359 01       		.byte	0x1
+ 1712 035a 5001     		.2byte	0x150
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 41
+
+
+ 1713 035c 8F000000 		.4byte	0x8f
+ 1714 0360 02       		.uleb128 0x2
+ 1715 0361 91       		.byte	0x91
+ 1716 0362 6C       		.sleb128 -20
+ 1717 0363 16       		.uleb128 0x16
+ 1718 0364 12010000 		.4byte	.LASF62
+ 1719 0368 01       		.byte	0x1
+ 1720 0369 5101     		.2byte	0x151
+ 1721 036b A7000000 		.4byte	0xa7
+ 1722 036f 02       		.uleb128 0x2
+ 1723 0370 91       		.byte	0x91
+ 1724 0371 64       		.sleb128 -28
+ 1725 0372 16       		.uleb128 0x16
+ 1726 0373 F2030000 		.4byte	.LASF63
+ 1727 0377 01       		.byte	0x1
+ 1728 0378 5201     		.2byte	0x152
+ 1729 037a 83000000 		.4byte	0x83
+ 1730 037e 02       		.uleb128 0x2
+ 1731 037f 91       		.byte	0x91
+ 1732 0380 68       		.sleb128 -24
+ 1733 0381 00       		.byte	0
+ 1734 0382 17       		.uleb128 0x17
+ 1735 0383 04       		.byte	0x4
+ 1736 0384 8F000000 		.4byte	0x8f
+ 1737 0388 15       		.uleb128 0x15
+ 1738 0389 00000000 		.4byte	.LASF64
+ 1739 038d 01       		.byte	0x1
+ 1740 038e 9801     		.2byte	0x198
+ 1741 0390 6B000000 		.4byte	0x6b
+ 1742 0394 00000000 		.4byte	.LFB43
+ 1743 0398 CC010000 		.4byte	.LFE43-.LFB43
+ 1744 039c 01       		.uleb128 0x1
+ 1745 039d 9C       		.byte	0x9c
+ 1746 039e E2030000 		.4byte	0x3e2
+ 1747 03a2 14       		.uleb128 0x14
+ 1748 03a3 C2000000 		.4byte	.LASF65
+ 1749 03a7 01       		.byte	0x1
+ 1750 03a8 9801     		.2byte	0x198
+ 1751 03aa 82030000 		.4byte	0x382
+ 1752 03ae 02       		.uleb128 0x2
+ 1753 03af 91       		.byte	0x91
+ 1754 03b0 64       		.sleb128 -28
+ 1755 03b1 14       		.uleb128 0x14
+ 1756 03b2 CF010000 		.4byte	.LASF58
+ 1757 03b6 01       		.byte	0x1
+ 1758 03b7 9801     		.2byte	0x198
+ 1759 03b9 6B000000 		.4byte	0x6b
+ 1760 03bd 02       		.uleb128 0x2
+ 1761 03be 91       		.byte	0x91
+ 1762 03bf 63       		.sleb128 -29
+ 1763 03c0 16       		.uleb128 0x16
+ 1764 03c1 A5020000 		.4byte	.LASF66
+ 1765 03c5 01       		.byte	0x1
+ 1766 03c6 9A01     		.2byte	0x19a
+ 1767 03c8 6B000000 		.4byte	0x6b
+ 1768 03cc 05       		.uleb128 0x5
+ 1769 03cd 03       		.byte	0x3
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 42
+
+
+ 1770 03ce 01000000 		.4byte	timerCount.6239
+ 1771 03d2 16       		.uleb128 0x16
+ 1772 03d3 3B000000 		.4byte	.LASF67
+ 1773 03d7 01       		.byte	0x1
+ 1774 03d8 9B01     		.2byte	0x19b
+ 1775 03da 0D010000 		.4byte	0x10d
+ 1776 03de 02       		.uleb128 0x2
+ 1777 03df 91       		.byte	0x91
+ 1778 03e0 6F       		.sleb128 -17
+ 1779 03e1 00       		.byte	0
+ 1780 03e2 18       		.uleb128 0x18
+ 1781 03e3 B0010000 		.4byte	.LASF78
+ 1782 03e7 01       		.byte	0x1
+ 1783 03e8 0402     		.2byte	0x204
+ 1784 03ea 0D010000 		.4byte	0x10d
+ 1785 03ee 00000000 		.4byte	.LFB44
+ 1786 03f2 20010000 		.4byte	.LFE44-.LFB44
+ 1787 03f6 01       		.uleb128 0x1
+ 1788 03f7 9C       		.byte	0x9c
+ 1789 03f8 39040000 		.4byte	0x439
+ 1790 03fc 14       		.uleb128 0x14
+ 1791 03fd C2000000 		.4byte	.LASF65
+ 1792 0401 01       		.byte	0x1
+ 1793 0402 0402     		.2byte	0x204
+ 1794 0404 82030000 		.4byte	0x382
+ 1795 0408 02       		.uleb128 0x2
+ 1796 0409 91       		.byte	0x91
+ 1797 040a 6C       		.sleb128 -20
+ 1798 040b 14       		.uleb128 0x14
+ 1799 040c CF010000 		.4byte	.LASF58
+ 1800 0410 01       		.byte	0x1
+ 1801 0411 0502     		.2byte	0x205
+ 1802 0413 6B000000 		.4byte	0x6b
+ 1803 0417 02       		.uleb128 0x2
+ 1804 0418 91       		.byte	0x91
+ 1805 0419 6B       		.sleb128 -21
+ 1806 041a 14       		.uleb128 0x14
+ 1807 041b 1B000000 		.4byte	.LASF68
+ 1808 041f 01       		.byte	0x1
+ 1809 0420 0502     		.2byte	0x205
+ 1810 0422 8F000000 		.4byte	0x8f
+ 1811 0426 02       		.uleb128 0x2
+ 1812 0427 91       		.byte	0x91
+ 1813 0428 68       		.sleb128 -24
+ 1814 0429 16       		.uleb128 0x16
+ 1815 042a 79040000 		.4byte	.LASF69
+ 1816 042e 01       		.byte	0x1
+ 1817 042f 0702     		.2byte	0x207
+ 1818 0431 C3000000 		.4byte	0xc3
+ 1819 0435 02       		.uleb128 0x2
+ 1820 0436 91       		.byte	0x91
+ 1821 0437 77       		.sleb128 -9
+ 1822 0438 00       		.byte	0
+ 1823 0439 19       		.uleb128 0x19
+ 1824 043a 58010000 		.4byte	0x158
+ 1825 043e 49040000 		.4byte	0x449
+ 1826 0442 1A       		.uleb128 0x1a
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 43
+
+
+ 1827 0443 BC000000 		.4byte	0xbc
+ 1828 0447 03       		.byte	0x3
+ 1829 0448 00       		.byte	0
+ 1830 0449 0D       		.uleb128 0xd
+ 1831 044a 52040000 		.4byte	.LASF70
+ 1832 044e 01       		.byte	0x1
+ 1833 044f 36       		.byte	0x36
+ 1834 0450 39040000 		.4byte	0x439
+ 1835 0454 05       		.uleb128 0x5
+ 1836 0455 03       		.byte	0x3
+ 1837 0456 00000000 		.4byte	ThermalLimitArray
+ 1838 045a 0D       		.uleb128 0xd
+ 1839 045b E5030000 		.4byte	.LASF71
+ 1840 045f 01       		.byte	0x1
+ 1841 0460 46       		.byte	0x46
+ 1842 0461 90010000 		.4byte	0x190
+ 1843 0465 05       		.uleb128 0x5
+ 1844 0466 03       		.byte	0x3
+ 1845 0467 10000000 		.4byte	PositionData
+ 1846 046b 0D       		.uleb128 0xd
+ 1847 046c B6000000 		.4byte	.LASF72
+ 1848 0470 01       		.byte	0x1
+ 1849 0471 51       		.byte	0x51
+ 1850 0472 E0010000 		.4byte	0x1e0
+ 1851 0476 05       		.uleb128 0x5
+ 1852 0477 03       		.byte	0x3
+ 1853 0478 14000000 		.4byte	ThermalData
+ 1854 047c 00       		.byte	0
+ 1855              		.section	.debug_abbrev,"",%progbits
+ 1856              	.Ldebug_abbrev0:
+ 1857 0000 01       		.uleb128 0x1
+ 1858 0001 11       		.uleb128 0x11
+ 1859 0002 01       		.byte	0x1
+ 1860 0003 25       		.uleb128 0x25
+ 1861 0004 0E       		.uleb128 0xe
+ 1862 0005 13       		.uleb128 0x13
+ 1863 0006 0B       		.uleb128 0xb
+ 1864 0007 03       		.uleb128 0x3
+ 1865 0008 0E       		.uleb128 0xe
+ 1866 0009 1B       		.uleb128 0x1b
+ 1867 000a 0E       		.uleb128 0xe
+ 1868 000b 55       		.uleb128 0x55
+ 1869 000c 17       		.uleb128 0x17
+ 1870 000d 11       		.uleb128 0x11
+ 1871 000e 01       		.uleb128 0x1
+ 1872 000f 10       		.uleb128 0x10
+ 1873 0010 17       		.uleb128 0x17
+ 1874 0011 00       		.byte	0
+ 1875 0012 00       		.byte	0
+ 1876 0013 02       		.uleb128 0x2
+ 1877 0014 24       		.uleb128 0x24
+ 1878 0015 00       		.byte	0
+ 1879 0016 0B       		.uleb128 0xb
+ 1880 0017 0B       		.uleb128 0xb
+ 1881 0018 3E       		.uleb128 0x3e
+ 1882 0019 0B       		.uleb128 0xb
+ 1883 001a 03       		.uleb128 0x3
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 44
+
+
+ 1884 001b 0E       		.uleb128 0xe
+ 1885 001c 00       		.byte	0
+ 1886 001d 00       		.byte	0
+ 1887 001e 03       		.uleb128 0x3
+ 1888 001f 24       		.uleb128 0x24
+ 1889 0020 00       		.byte	0
+ 1890 0021 0B       		.uleb128 0xb
+ 1891 0022 0B       		.uleb128 0xb
+ 1892 0023 3E       		.uleb128 0x3e
+ 1893 0024 0B       		.uleb128 0xb
+ 1894 0025 03       		.uleb128 0x3
+ 1895 0026 08       		.uleb128 0x8
+ 1896 0027 00       		.byte	0
+ 1897 0028 00       		.byte	0
+ 1898 0029 04       		.uleb128 0x4
+ 1899 002a 16       		.uleb128 0x16
+ 1900 002b 00       		.byte	0
+ 1901 002c 03       		.uleb128 0x3
+ 1902 002d 0E       		.uleb128 0xe
+ 1903 002e 3A       		.uleb128 0x3a
+ 1904 002f 0B       		.uleb128 0xb
+ 1905 0030 3B       		.uleb128 0x3b
+ 1906 0031 05       		.uleb128 0x5
+ 1907 0032 49       		.uleb128 0x49
+ 1908 0033 13       		.uleb128 0x13
+ 1909 0034 00       		.byte	0
+ 1910 0035 00       		.byte	0
+ 1911 0036 05       		.uleb128 0x5
+ 1912 0037 04       		.uleb128 0x4
+ 1913 0038 01       		.byte	0x1
+ 1914 0039 03       		.uleb128 0x3
+ 1915 003a 0E       		.uleb128 0xe
+ 1916 003b 0B       		.uleb128 0xb
+ 1917 003c 0B       		.uleb128 0xb
+ 1918 003d 3A       		.uleb128 0x3a
+ 1919 003e 0B       		.uleb128 0xb
+ 1920 003f 3B       		.uleb128 0x3b
+ 1921 0040 0B       		.uleb128 0xb
+ 1922 0041 01       		.uleb128 0x1
+ 1923 0042 13       		.uleb128 0x13
+ 1924 0043 00       		.byte	0
+ 1925 0044 00       		.byte	0
+ 1926 0045 06       		.uleb128 0x6
+ 1927 0046 28       		.uleb128 0x28
+ 1928 0047 00       		.byte	0
+ 1929 0048 03       		.uleb128 0x3
+ 1930 0049 08       		.uleb128 0x8
+ 1931 004a 1C       		.uleb128 0x1c
+ 1932 004b 0D       		.uleb128 0xd
+ 1933 004c 00       		.byte	0
+ 1934 004d 00       		.byte	0
+ 1935 004e 07       		.uleb128 0x7
+ 1936 004f 28       		.uleb128 0x28
+ 1937 0050 00       		.byte	0
+ 1938 0051 03       		.uleb128 0x3
+ 1939 0052 0E       		.uleb128 0xe
+ 1940 0053 1C       		.uleb128 0x1c
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 45
+
+
+ 1941 0054 0D       		.uleb128 0xd
+ 1942 0055 00       		.byte	0
+ 1943 0056 00       		.byte	0
+ 1944 0057 08       		.uleb128 0x8
+ 1945 0058 13       		.uleb128 0x13
+ 1946 0059 01       		.byte	0x1
+ 1947 005a 0B       		.uleb128 0xb
+ 1948 005b 0B       		.uleb128 0xb
+ 1949 005c 3A       		.uleb128 0x3a
+ 1950 005d 0B       		.uleb128 0xb
+ 1951 005e 3B       		.uleb128 0x3b
+ 1952 005f 0B       		.uleb128 0xb
+ 1953 0060 01       		.uleb128 0x1
+ 1954 0061 13       		.uleb128 0x13
+ 1955 0062 00       		.byte	0
+ 1956 0063 00       		.byte	0
+ 1957 0064 09       		.uleb128 0x9
+ 1958 0065 0D       		.uleb128 0xd
+ 1959 0066 00       		.byte	0
+ 1960 0067 03       		.uleb128 0x3
+ 1961 0068 0E       		.uleb128 0xe
+ 1962 0069 3A       		.uleb128 0x3a
+ 1963 006a 0B       		.uleb128 0xb
+ 1964 006b 3B       		.uleb128 0x3b
+ 1965 006c 0B       		.uleb128 0xb
+ 1966 006d 49       		.uleb128 0x49
+ 1967 006e 13       		.uleb128 0x13
+ 1968 006f 38       		.uleb128 0x38
+ 1969 0070 0B       		.uleb128 0xb
+ 1970 0071 00       		.byte	0
+ 1971 0072 00       		.byte	0
+ 1972 0073 0A       		.uleb128 0xa
+ 1973 0074 26       		.uleb128 0x26
+ 1974 0075 00       		.byte	0
+ 1975 0076 49       		.uleb128 0x49
+ 1976 0077 13       		.uleb128 0x13
+ 1977 0078 00       		.byte	0
+ 1978 0079 00       		.byte	0
+ 1979 007a 0B       		.uleb128 0xb
+ 1980 007b 16       		.uleb128 0x16
+ 1981 007c 00       		.byte	0
+ 1982 007d 03       		.uleb128 0x3
+ 1983 007e 0E       		.uleb128 0xe
+ 1984 007f 3A       		.uleb128 0x3a
+ 1985 0080 0B       		.uleb128 0xb
+ 1986 0081 3B       		.uleb128 0x3b
+ 1987 0082 0B       		.uleb128 0xb
+ 1988 0083 49       		.uleb128 0x49
+ 1989 0084 13       		.uleb128 0x13
+ 1990 0085 00       		.byte	0
+ 1991 0086 00       		.byte	0
+ 1992 0087 0C       		.uleb128 0xc
+ 1993 0088 2E       		.uleb128 0x2e
+ 1994 0089 01       		.byte	0x1
+ 1995 008a 3F       		.uleb128 0x3f
+ 1996 008b 19       		.uleb128 0x19
+ 1997 008c 03       		.uleb128 0x3
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 46
+
+
+ 1998 008d 0E       		.uleb128 0xe
+ 1999 008e 3A       		.uleb128 0x3a
+ 2000 008f 0B       		.uleb128 0xb
+ 2001 0090 3B       		.uleb128 0x3b
+ 2002 0091 0B       		.uleb128 0xb
+ 2003 0092 27       		.uleb128 0x27
+ 2004 0093 19       		.uleb128 0x19
+ 2005 0094 11       		.uleb128 0x11
+ 2006 0095 01       		.uleb128 0x1
+ 2007 0096 12       		.uleb128 0x12
+ 2008 0097 06       		.uleb128 0x6
+ 2009 0098 40       		.uleb128 0x40
+ 2010 0099 18       		.uleb128 0x18
+ 2011 009a 9642     		.uleb128 0x2116
+ 2012 009c 19       		.uleb128 0x19
+ 2013 009d 01       		.uleb128 0x1
+ 2014 009e 13       		.uleb128 0x13
+ 2015 009f 00       		.byte	0
+ 2016 00a0 00       		.byte	0
+ 2017 00a1 0D       		.uleb128 0xd
+ 2018 00a2 34       		.uleb128 0x34
+ 2019 00a3 00       		.byte	0
+ 2020 00a4 03       		.uleb128 0x3
+ 2021 00a5 0E       		.uleb128 0xe
+ 2022 00a6 3A       		.uleb128 0x3a
+ 2023 00a7 0B       		.uleb128 0xb
+ 2024 00a8 3B       		.uleb128 0x3b
+ 2025 00a9 0B       		.uleb128 0xb
+ 2026 00aa 49       		.uleb128 0x49
+ 2027 00ab 13       		.uleb128 0x13
+ 2028 00ac 02       		.uleb128 0x2
+ 2029 00ad 18       		.uleb128 0x18
+ 2030 00ae 00       		.byte	0
+ 2031 00af 00       		.byte	0
+ 2032 00b0 0E       		.uleb128 0xe
+ 2033 00b1 2E       		.uleb128 0x2e
+ 2034 00b2 00       		.byte	0
+ 2035 00b3 3F       		.uleb128 0x3f
+ 2036 00b4 19       		.uleb128 0x19
+ 2037 00b5 03       		.uleb128 0x3
+ 2038 00b6 0E       		.uleb128 0xe
+ 2039 00b7 3A       		.uleb128 0x3a
+ 2040 00b8 0B       		.uleb128 0xb
+ 2041 00b9 3B       		.uleb128 0x3b
+ 2042 00ba 0B       		.uleb128 0xb
+ 2043 00bb 27       		.uleb128 0x27
+ 2044 00bc 19       		.uleb128 0x19
+ 2045 00bd 49       		.uleb128 0x49
+ 2046 00be 13       		.uleb128 0x13
+ 2047 00bf 11       		.uleb128 0x11
+ 2048 00c0 01       		.uleb128 0x1
+ 2049 00c1 12       		.uleb128 0x12
+ 2050 00c2 06       		.uleb128 0x6
+ 2051 00c3 40       		.uleb128 0x40
+ 2052 00c4 18       		.uleb128 0x18
+ 2053 00c5 9742     		.uleb128 0x2117
+ 2054 00c7 19       		.uleb128 0x19
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 47
+
+
+ 2055 00c8 00       		.byte	0
+ 2056 00c9 00       		.byte	0
+ 2057 00ca 0F       		.uleb128 0xf
+ 2058 00cb 2E       		.uleb128 0x2e
+ 2059 00cc 01       		.byte	0x1
+ 2060 00cd 3F       		.uleb128 0x3f
+ 2061 00ce 19       		.uleb128 0x19
+ 2062 00cf 03       		.uleb128 0x3
+ 2063 00d0 0E       		.uleb128 0xe
+ 2064 00d1 3A       		.uleb128 0x3a
+ 2065 00d2 0B       		.uleb128 0xb
+ 2066 00d3 3B       		.uleb128 0x3b
+ 2067 00d4 0B       		.uleb128 0xb
+ 2068 00d5 27       		.uleb128 0x27
+ 2069 00d6 19       		.uleb128 0x19
+ 2070 00d7 49       		.uleb128 0x49
+ 2071 00d8 13       		.uleb128 0x13
+ 2072 00d9 11       		.uleb128 0x11
+ 2073 00da 01       		.uleb128 0x1
+ 2074 00db 12       		.uleb128 0x12
+ 2075 00dc 06       		.uleb128 0x6
+ 2076 00dd 40       		.uleb128 0x40
+ 2077 00de 18       		.uleb128 0x18
+ 2078 00df 9742     		.uleb128 0x2117
+ 2079 00e1 19       		.uleb128 0x19
+ 2080 00e2 01       		.uleb128 0x1
+ 2081 00e3 13       		.uleb128 0x13
+ 2082 00e4 00       		.byte	0
+ 2083 00e5 00       		.byte	0
+ 2084 00e6 10       		.uleb128 0x10
+ 2085 00e7 05       		.uleb128 0x5
+ 2086 00e8 00       		.byte	0
+ 2087 00e9 03       		.uleb128 0x3
+ 2088 00ea 0E       		.uleb128 0xe
+ 2089 00eb 3A       		.uleb128 0x3a
+ 2090 00ec 0B       		.uleb128 0xb
+ 2091 00ed 3B       		.uleb128 0x3b
+ 2092 00ee 0B       		.uleb128 0xb
+ 2093 00ef 49       		.uleb128 0x49
+ 2094 00f0 13       		.uleb128 0x13
+ 2095 00f1 02       		.uleb128 0x2
+ 2096 00f2 18       		.uleb128 0x18
+ 2097 00f3 00       		.byte	0
+ 2098 00f4 00       		.byte	0
+ 2099 00f5 11       		.uleb128 0x11
+ 2100 00f6 2E       		.uleb128 0x2e
+ 2101 00f7 00       		.byte	0
+ 2102 00f8 3F       		.uleb128 0x3f
+ 2103 00f9 19       		.uleb128 0x19
+ 2104 00fa 03       		.uleb128 0x3
+ 2105 00fb 0E       		.uleb128 0xe
+ 2106 00fc 3A       		.uleb128 0x3a
+ 2107 00fd 0B       		.uleb128 0xb
+ 2108 00fe 3B       		.uleb128 0x3b
+ 2109 00ff 0B       		.uleb128 0xb
+ 2110 0100 27       		.uleb128 0x27
+ 2111 0101 19       		.uleb128 0x19
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 48
+
+
+ 2112 0102 11       		.uleb128 0x11
+ 2113 0103 01       		.uleb128 0x1
+ 2114 0104 12       		.uleb128 0x12
+ 2115 0105 06       		.uleb128 0x6
+ 2116 0106 40       		.uleb128 0x40
+ 2117 0107 18       		.uleb128 0x18
+ 2118 0108 9742     		.uleb128 0x2117
+ 2119 010a 19       		.uleb128 0x19
+ 2120 010b 00       		.byte	0
+ 2121 010c 00       		.byte	0
+ 2122 010d 12       		.uleb128 0x12
+ 2123 010e 2E       		.uleb128 0x2e
+ 2124 010f 01       		.byte	0x1
+ 2125 0110 3F       		.uleb128 0x3f
+ 2126 0111 19       		.uleb128 0x19
+ 2127 0112 03       		.uleb128 0x3
+ 2128 0113 0E       		.uleb128 0xe
+ 2129 0114 3A       		.uleb128 0x3a
+ 2130 0115 0B       		.uleb128 0xb
+ 2131 0116 3B       		.uleb128 0x3b
+ 2132 0117 0B       		.uleb128 0xb
+ 2133 0118 27       		.uleb128 0x27
+ 2134 0119 19       		.uleb128 0x19
+ 2135 011a 49       		.uleb128 0x49
+ 2136 011b 13       		.uleb128 0x13
+ 2137 011c 11       		.uleb128 0x11
+ 2138 011d 01       		.uleb128 0x1
+ 2139 011e 12       		.uleb128 0x12
+ 2140 011f 06       		.uleb128 0x6
+ 2141 0120 40       		.uleb128 0x40
+ 2142 0121 18       		.uleb128 0x18
+ 2143 0122 9642     		.uleb128 0x2116
+ 2144 0124 19       		.uleb128 0x19
+ 2145 0125 01       		.uleb128 0x1
+ 2146 0126 13       		.uleb128 0x13
+ 2147 0127 00       		.byte	0
+ 2148 0128 00       		.byte	0
+ 2149 0129 13       		.uleb128 0x13
+ 2150 012a 2E       		.uleb128 0x2e
+ 2151 012b 01       		.byte	0x1
+ 2152 012c 3F       		.uleb128 0x3f
+ 2153 012d 19       		.uleb128 0x19
+ 2154 012e 03       		.uleb128 0x3
+ 2155 012f 0E       		.uleb128 0xe
+ 2156 0130 3A       		.uleb128 0x3a
+ 2157 0131 0B       		.uleb128 0xb
+ 2158 0132 3B       		.uleb128 0x3b
+ 2159 0133 05       		.uleb128 0x5
+ 2160 0134 27       		.uleb128 0x27
+ 2161 0135 19       		.uleb128 0x19
+ 2162 0136 49       		.uleb128 0x49
+ 2163 0137 13       		.uleb128 0x13
+ 2164 0138 11       		.uleb128 0x11
+ 2165 0139 01       		.uleb128 0x1
+ 2166 013a 12       		.uleb128 0x12
+ 2167 013b 06       		.uleb128 0x6
+ 2168 013c 40       		.uleb128 0x40
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 49
+
+
+ 2169 013d 18       		.uleb128 0x18
+ 2170 013e 9742     		.uleb128 0x2117
+ 2171 0140 19       		.uleb128 0x19
+ 2172 0141 01       		.uleb128 0x1
+ 2173 0142 13       		.uleb128 0x13
+ 2174 0143 00       		.byte	0
+ 2175 0144 00       		.byte	0
+ 2176 0145 14       		.uleb128 0x14
+ 2177 0146 05       		.uleb128 0x5
+ 2178 0147 00       		.byte	0
+ 2179 0148 03       		.uleb128 0x3
+ 2180 0149 0E       		.uleb128 0xe
+ 2181 014a 3A       		.uleb128 0x3a
+ 2182 014b 0B       		.uleb128 0xb
+ 2183 014c 3B       		.uleb128 0x3b
+ 2184 014d 05       		.uleb128 0x5
+ 2185 014e 49       		.uleb128 0x49
+ 2186 014f 13       		.uleb128 0x13
+ 2187 0150 02       		.uleb128 0x2
+ 2188 0151 18       		.uleb128 0x18
+ 2189 0152 00       		.byte	0
+ 2190 0153 00       		.byte	0
+ 2191 0154 15       		.uleb128 0x15
+ 2192 0155 2E       		.uleb128 0x2e
+ 2193 0156 01       		.byte	0x1
+ 2194 0157 3F       		.uleb128 0x3f
+ 2195 0158 19       		.uleb128 0x19
+ 2196 0159 03       		.uleb128 0x3
+ 2197 015a 0E       		.uleb128 0xe
+ 2198 015b 3A       		.uleb128 0x3a
+ 2199 015c 0B       		.uleb128 0xb
+ 2200 015d 3B       		.uleb128 0x3b
+ 2201 015e 05       		.uleb128 0x5
+ 2202 015f 27       		.uleb128 0x27
+ 2203 0160 19       		.uleb128 0x19
+ 2204 0161 49       		.uleb128 0x49
+ 2205 0162 13       		.uleb128 0x13
+ 2206 0163 11       		.uleb128 0x11
+ 2207 0164 01       		.uleb128 0x1
+ 2208 0165 12       		.uleb128 0x12
+ 2209 0166 06       		.uleb128 0x6
+ 2210 0167 40       		.uleb128 0x40
+ 2211 0168 18       		.uleb128 0x18
+ 2212 0169 9642     		.uleb128 0x2116
+ 2213 016b 19       		.uleb128 0x19
+ 2214 016c 01       		.uleb128 0x1
+ 2215 016d 13       		.uleb128 0x13
+ 2216 016e 00       		.byte	0
+ 2217 016f 00       		.byte	0
+ 2218 0170 16       		.uleb128 0x16
+ 2219 0171 34       		.uleb128 0x34
+ 2220 0172 00       		.byte	0
+ 2221 0173 03       		.uleb128 0x3
+ 2222 0174 0E       		.uleb128 0xe
+ 2223 0175 3A       		.uleb128 0x3a
+ 2224 0176 0B       		.uleb128 0xb
+ 2225 0177 3B       		.uleb128 0x3b
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 50
+
+
+ 2226 0178 05       		.uleb128 0x5
+ 2227 0179 49       		.uleb128 0x49
+ 2228 017a 13       		.uleb128 0x13
+ 2229 017b 02       		.uleb128 0x2
+ 2230 017c 18       		.uleb128 0x18
+ 2231 017d 00       		.byte	0
+ 2232 017e 00       		.byte	0
+ 2233 017f 17       		.uleb128 0x17
+ 2234 0180 0F       		.uleb128 0xf
+ 2235 0181 00       		.byte	0
+ 2236 0182 0B       		.uleb128 0xb
+ 2237 0183 0B       		.uleb128 0xb
+ 2238 0184 49       		.uleb128 0x49
+ 2239 0185 13       		.uleb128 0x13
+ 2240 0186 00       		.byte	0
+ 2241 0187 00       		.byte	0
+ 2242 0188 18       		.uleb128 0x18
+ 2243 0189 2E       		.uleb128 0x2e
+ 2244 018a 01       		.byte	0x1
+ 2245 018b 03       		.uleb128 0x3
+ 2246 018c 0E       		.uleb128 0xe
+ 2247 018d 3A       		.uleb128 0x3a
+ 2248 018e 0B       		.uleb128 0xb
+ 2249 018f 3B       		.uleb128 0x3b
+ 2250 0190 05       		.uleb128 0x5
+ 2251 0191 27       		.uleb128 0x27
+ 2252 0192 19       		.uleb128 0x19
+ 2253 0193 49       		.uleb128 0x49
+ 2254 0194 13       		.uleb128 0x13
+ 2255 0195 11       		.uleb128 0x11
+ 2256 0196 01       		.uleb128 0x1
+ 2257 0197 12       		.uleb128 0x12
+ 2258 0198 06       		.uleb128 0x6
+ 2259 0199 40       		.uleb128 0x40
+ 2260 019a 18       		.uleb128 0x18
+ 2261 019b 9742     		.uleb128 0x2117
+ 2262 019d 19       		.uleb128 0x19
+ 2263 019e 01       		.uleb128 0x1
+ 2264 019f 13       		.uleb128 0x13
+ 2265 01a0 00       		.byte	0
+ 2266 01a1 00       		.byte	0
+ 2267 01a2 19       		.uleb128 0x19
+ 2268 01a3 01       		.uleb128 0x1
+ 2269 01a4 01       		.byte	0x1
+ 2270 01a5 49       		.uleb128 0x49
+ 2271 01a6 13       		.uleb128 0x13
+ 2272 01a7 01       		.uleb128 0x1
+ 2273 01a8 13       		.uleb128 0x13
+ 2274 01a9 00       		.byte	0
+ 2275 01aa 00       		.byte	0
+ 2276 01ab 1A       		.uleb128 0x1a
+ 2277 01ac 21       		.uleb128 0x21
+ 2278 01ad 00       		.byte	0
+ 2279 01ae 49       		.uleb128 0x49
+ 2280 01af 13       		.uleb128 0x13
+ 2281 01b0 2F       		.uleb128 0x2f
+ 2282 01b1 0B       		.uleb128 0xb
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 51
+
+
+ 2283 01b2 00       		.byte	0
+ 2284 01b3 00       		.byte	0
+ 2285 01b4 00       		.byte	0
+ 2286              		.section	.debug_aranges,"",%progbits
+ 2287 0000 6C000000 		.4byte	0x6c
+ 2288 0004 0200     		.2byte	0x2
+ 2289 0006 00000000 		.4byte	.Ldebug_info0
+ 2290 000a 04       		.byte	0x4
+ 2291 000b 00       		.byte	0
+ 2292 000c 0000     		.2byte	0
+ 2293 000e 0000     		.2byte	0
+ 2294 0010 00000000 		.4byte	.LFB34
+ 2295 0014 2C000000 		.4byte	.LFE34-.LFB34
+ 2296 0018 00000000 		.4byte	.LFB35
+ 2297 001c 14000000 		.4byte	.LFE35-.LFB35
+ 2298 0020 00000000 		.4byte	.LFB36
+ 2299 0024 38000000 		.4byte	.LFE36-.LFB36
+ 2300 0028 00000000 		.4byte	.LFB37
+ 2301 002c 38000000 		.4byte	.LFE37-.LFB37
+ 2302 0030 00000000 		.4byte	.LFB38
+ 2303 0034 14000000 		.4byte	.LFE38-.LFB38
+ 2304 0038 00000000 		.4byte	.LFB39
+ 2305 003c 14000000 		.4byte	.LFE39-.LFB39
+ 2306 0040 00000000 		.4byte	.LFB40
+ 2307 0044 AC000000 		.4byte	.LFE40-.LFB40
+ 2308 0048 00000000 		.4byte	.LFB41
+ 2309 004c 30000000 		.4byte	.LFE41-.LFB41
+ 2310 0050 00000000 		.4byte	.LFB42
+ 2311 0054 D4010000 		.4byte	.LFE42-.LFB42
+ 2312 0058 00000000 		.4byte	.LFB43
+ 2313 005c CC010000 		.4byte	.LFE43-.LFB43
+ 2314 0060 00000000 		.4byte	.LFB44
+ 2315 0064 20010000 		.4byte	.LFE44-.LFB44
+ 2316 0068 00000000 		.4byte	0
+ 2317 006c 00000000 		.4byte	0
+ 2318              		.section	.debug_ranges,"",%progbits
+ 2319              	.Ldebug_ranges0:
+ 2320 0000 00000000 		.4byte	.LFB34
+ 2321 0004 2C000000 		.4byte	.LFE34
+ 2322 0008 00000000 		.4byte	.LFB35
+ 2323 000c 14000000 		.4byte	.LFE35
+ 2324 0010 00000000 		.4byte	.LFB36
+ 2325 0014 38000000 		.4byte	.LFE36
+ 2326 0018 00000000 		.4byte	.LFB37
+ 2327 001c 38000000 		.4byte	.LFE37
+ 2328 0020 00000000 		.4byte	.LFB38
+ 2329 0024 14000000 		.4byte	.LFE38
+ 2330 0028 00000000 		.4byte	.LFB39
+ 2331 002c 14000000 		.4byte	.LFE39
+ 2332 0030 00000000 		.4byte	.LFB40
+ 2333 0034 AC000000 		.4byte	.LFE40
+ 2334 0038 00000000 		.4byte	.LFB41
+ 2335 003c 30000000 		.4byte	.LFE41
+ 2336 0040 00000000 		.4byte	.LFB42
+ 2337 0044 D4010000 		.4byte	.LFE42
+ 2338 0048 00000000 		.4byte	.LFB43
+ 2339 004c CC010000 		.4byte	.LFE43
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 52
+
+
+ 2340 0050 00000000 		.4byte	.LFB44
+ 2341 0054 20010000 		.4byte	.LFE44
+ 2342 0058 00000000 		.4byte	0
+ 2343 005c 00000000 		.4byte	0
+ 2344              		.section	.debug_line,"",%progbits
+ 2345              	.Ldebug_line0:
+ 2346 0000 03020000 		.section	.debug_str,"MS",%progbits,1
+ 2346      02005B00 
+ 2346      00000201 
+ 2346      FB0E0D00 
+ 2346      01010101 
+ 2347              	.LASF64:
+ 2348 0000 72656775 		.ascii	"regulateBrightness\000"
+ 2348      6C617465 
+ 2348      42726967 
+ 2348      68746E65 
+ 2348      737300
+ 2349              	.LASF59:
+ 2350 0013 624C4544 		.ascii	"bLED_On\000"
+ 2350      5F4F6E00 
+ 2351              	.LASF68:
+ 2352 001b 746F6C65 		.ascii	"tolerance\000"
+ 2352      72616E63 
+ 2352      6500
+ 2353              	.LASF76:
+ 2354 0025 746F6767 		.ascii	"toggleLED\000"
+ 2354      6C654C45 
+ 2354      4400
+ 2355              	.LASF49:
+ 2356 002f 67657444 		.ascii	"getDriverID\000"
+ 2356      72697665 
+ 2356      72494400 
+ 2357              	.LASF67:
+ 2358 003b 74656D70 		.ascii	"temperatureStatus\000"
+ 2358      65726174 
+ 2358      75726553 
+ 2358      74617475 
+ 2358      7300
+ 2359              	.LASF2:
+ 2360 004d 73686F72 		.ascii	"short int\000"
+ 2360      7420696E 
+ 2360      7400
+ 2361              	.LASF17:
+ 2362 0057 73697A65 		.ascii	"sizetype\000"
+ 2362      74797065 
+ 2362      00
+ 2363              	.LASF51:
+ 2364 0060 75706461 		.ascii	"updateBrightnessLevel\000"
+ 2364      74654272 
+ 2364      69676874 
+ 2364      6E657373 
+ 2364      4C657665 
+ 2365              	.LASF27:
+ 2366 0076 54656D70 		.ascii	"TemperatureStatus\000"
+ 2366      65726174 
+ 2366      75726553 
+ 2366      74617475 
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 53
+
+
+ 2366      7300
+ 2367              	.LASF38:
+ 2368 0088 44726976 		.ascii	"DriverProperties\000"
+ 2368      65725072 
+ 2368      6F706572 
+ 2368      74696573 
+ 2368      00
+ 2369              	.LASF60:
+ 2370 0099 4144435F 		.ascii	"ADC_WaitCount\000"
+ 2370      57616974 
+ 2370      436F756E 
+ 2370      7400
+ 2371              	.LASF48:
+ 2372 00a7 6E657744 		.ascii	"newDriverCount\000"
+ 2372      72697665 
+ 2372      72436F75 
+ 2372      6E7400
+ 2373              	.LASF72:
+ 2374 00b6 54686572 		.ascii	"ThermalData\000"
+ 2374      6D616C44 
+ 2374      61746100 
+ 2375              	.LASF65:
+ 2376 00c2 54656D70 		.ascii	"TemperatureData\000"
+ 2376      65726174 
+ 2376      75726544 
+ 2376      61746100 
+ 2377              	.LASF10:
+ 2378 00d2 75696E74 		.ascii	"uint16\000"
+ 2378      313600
+ 2379              	.LASF41:
+ 2380 00d9 70726576 		.ascii	"previousRegulatedBrightness\000"
+ 2380      696F7573 
+ 2380      52656775 
+ 2380      6C617465 
+ 2380      64427269 
+ 2381              	.LASF12:
+ 2382 00f5 696E7431 		.ascii	"int16\000"
+ 2382      3600
+ 2383              	.LASF33:
+ 2384 00fb 53414645 		.ascii	"SAFE_TEMPERATURE\000"
+ 2384      5F54454D 
+ 2384      50455241 
+ 2384      54555245 
+ 2384      00
+ 2385              	.LASF9:
+ 2386 010c 75696E74 		.ascii	"uint8\000"
+ 2386      3800
+ 2387              	.LASF62:
+ 2388 0112 74656D70 		.ascii	"temperatureSample_float\000"
+ 2388      65726174 
+ 2388      75726553 
+ 2388      616D706C 
+ 2388      655F666C 
+ 2389              	.LASF45:
+ 2390 012a 73657449 		.ascii	"setIdentityByComm\000"
+ 2390      64656E74 
+ 2390      69747942 
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 54
+
+
+ 2390      79436F6D 
+ 2390      6D00
+ 2391              	.LASF23:
+ 2392 013c 53544152 		.ascii	"STARTUP\000"
+ 2392      54555000 
+ 2393              	.LASF14:
+ 2394 0144 666C6F61 		.ascii	"float\000"
+ 2394      7400
+ 2395              	.LASF74:
+ 2396 014a 2E5C494F 		.ascii	".\\IO_Control.c\000"
+ 2396      5F436F6E 
+ 2396      74726F6C 
+ 2396      2E6300
+ 2397              	.LASF6:
+ 2398 0159 6C6F6E67 		.ascii	"long long int\000"
+ 2398      206C6F6E 
+ 2398      6720696E 
+ 2398      7400
+ 2399              	.LASF53:
+ 2400 0167 6765744D 		.ascii	"getMaxTemperature\000"
+ 2400      61785465 
+ 2400      6D706572 
+ 2400      61747572 
+ 2400      6500
+ 2401              	.LASF34:
+ 2402 0179 54686572 		.ascii	"ThermalLimit\000"
+ 2402      6D616C4C 
+ 2402      696D6974 
+ 2402      00
+ 2403              	.LASF4:
+ 2404 0186 6C6F6E67 		.ascii	"long int\000"
+ 2404      20696E74 
+ 2404      00
+ 2405              	.LASF30:
+ 2406 018f 45584345 		.ascii	"EXCEEDED_LOWER_BOUND\000"
+ 2406      45444544 
+ 2406      5F4C4F57 
+ 2406      45525F42 
+ 2406      4F554E44 
+ 2407              	.LASF20:
+ 2408 01a4 4D494352 		.ascii	"MICRO\000"
+ 2408      4F00
+ 2409              	.LASF31:
+ 2410 01aa 4552524F 		.ascii	"ERROR\000"
+ 2410      5200
+ 2411              	.LASF78:
+ 2412 01b0 67657454 		.ascii	"getTemperatureStatus\000"
+ 2412      656D7065 
+ 2412      72617475 
+ 2412      72655374 
+ 2412      61747573 
+ 2413              	.LASF26:
+ 2414 01c5 4E4F5F43 		.ascii	"NO_CHANGE\000"
+ 2414      48414E47 
+ 2414      4500
+ 2415              	.LASF58:
+ 2416 01cf 6C656E67 		.ascii	"length\000"
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 55
+
+
+ 2416      746800
+ 2417              	.LASF46:
+ 2418 01d6 73657444 		.ascii	"setDriverCount\000"
+ 2418      72697665 
+ 2418      72436F75 
+ 2418      6E7400
+ 2419              	.LASF1:
+ 2420 01e5 756E7369 		.ascii	"unsigned char\000"
+ 2420      676E6564 
+ 2420      20636861 
+ 2420      7200
+ 2421              	.LASF19:
+ 2422 01f3 414D4249 		.ascii	"AMBIENT\000"
+ 2422      454E5400 
+ 2423              	.LASF54:
+ 2424 01fb 6368616E 		.ascii	"channelNumber\000"
+ 2424      6E656C4E 
+ 2424      756D6265 
+ 2424      7200
+ 2425              	.LASF22:
+ 2426 0209 52656775 		.ascii	"RegulationState\000"
+ 2426      6C617469 
+ 2426      6F6E5374 
+ 2426      61746500 
+ 2427              	.LASF0:
+ 2428 0219 7369676E 		.ascii	"signed char\000"
+ 2428      65642063 
+ 2428      68617200 
+ 2429              	.LASF7:
+ 2430 0225 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 2430      206C6F6E 
+ 2430      6720756E 
+ 2430      7369676E 
+ 2430      65642069 
+ 2431              	.LASF8:
+ 2432 023c 756E7369 		.ascii	"unsigned int\000"
+ 2432      676E6564 
+ 2432      20696E74 
+ 2432      00
+ 2433              	.LASF37:
+ 2434 0249 624C6173 		.ascii	"bLastDriverInChain\000"
+ 2434      74447269 
+ 2434      76657249 
+ 2434      6E436861 
+ 2434      696E00
+ 2435              	.LASF44:
+ 2436 025c 54686572 		.ascii	"ThermalProperties\000"
+ 2436      6D616C50 
+ 2436      726F7065 
+ 2436      72746965 
+ 2436      7300
+ 2437              	.LASF52:
+ 2438 026e 62726967 		.ascii	"brightnessLevel\000"
+ 2438      68746E65 
+ 2438      73734C65 
+ 2438      76656C00 
+ 2439              	.LASF40:
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 56
+
+
+ 2440 027e 72656775 		.ascii	"regulatedBrightness\000"
+ 2440      6C617465 
+ 2440      64427269 
+ 2440      6768746E 
+ 2440      65737300 
+ 2441              	.LASF3:
+ 2442 0292 73686F72 		.ascii	"short unsigned int\000"
+ 2442      7420756E 
+ 2442      7369676E 
+ 2442      65642069 
+ 2442      6E7400
+ 2443              	.LASF66:
+ 2444 02a5 74696D65 		.ascii	"timerCount\000"
+ 2444      72436F75 
+ 2444      6E7400
+ 2445              	.LASF39:
+ 2446 02b0 72657175 		.ascii	"requestedBrightness\000"
+ 2446      65737465 
+ 2446      64427269 
+ 2446      6768746E 
+ 2446      65737300 
+ 2447              	.LASF75:
+ 2448 02c4 433A5C55 		.ascii	"C:\\Users\\faithc\\Box Sync\\Feniex Firmware Files\\"
+ 2448      73657273 
+ 2448      5C666169 
+ 2448      7468635C 
+ 2448      426F7820 
+ 2449 02f3 414C425C 		.ascii	"ALB\\81-00022-01 ALB LED Driver\\81-00022-01.cydsn\000"
+ 2449      38312D30 
+ 2449      30303232 
+ 2449      2D303120 
+ 2449      414C4220 
+ 2450              	.LASF16:
+ 2451 0324 63686172 		.ascii	"char\000"
+ 2451      00
+ 2452              	.LASF29:
+ 2453 0329 45584345 		.ascii	"EXCEEDED_UPPER_BOUND\000"
+ 2453      45444544 
+ 2453      5F555050 
+ 2453      45525F42 
+ 2453      4F554E44 
+ 2454              	.LASF73:
+ 2455 033e 474E5520 		.ascii	"GNU C 4.9.3 20150303 (release) [ARM/embedded-4_9-br"
+ 2455      4320342E 
+ 2455      392E3320 
+ 2455      32303135 
+ 2455      30333033 
+ 2456 0371 616E6368 		.ascii	"anch revision 221220] -mcpu=cortex-m0 -mthumb -g -O"
+ 2456      20726576 
+ 2456      6973696F 
+ 2456      6E203232 
+ 2456      31323230 
+ 2457 03a4 30202D66 		.ascii	"0 -ffunction-sections -ffat-lto-objects\000"
+ 2457      66756E63 
+ 2457      74696F6E 
+ 2457      2D736563 
+ 2457      74696F6E 
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 57
+
+
+ 2458              	.LASF42:
+ 2459 03cc 63757272 		.ascii	"currentState\000"
+ 2459      656E7453 
+ 2459      74617465 
+ 2459      00
+ 2460              	.LASF36:
+ 2461 03d9 64726976 		.ascii	"driverCount\000"
+ 2461      6572436F 
+ 2461      756E7400 
+ 2462              	.LASF71:
+ 2463 03e5 506F7369 		.ascii	"PositionData\000"
+ 2463      74696F6E 
+ 2463      44617461 
+ 2463      00
+ 2464              	.LASF63:
+ 2465 03f2 6368616E 		.ascii	"channelIndex\000"
+ 2465      6E656C49 
+ 2465      6E646578 
+ 2465      00
+ 2466              	.LASF56:
+ 2467 03ff 6253696E 		.ascii	"bSingleSample\000"
+ 2467      676C6553 
+ 2467      616D706C 
+ 2467      6500
+ 2468              	.LASF77:
+ 2469 040d 73657441 		.ascii	"setAsNotLastDriverInChain\000"
+ 2469      734E6F74 
+ 2469      4C617374 
+ 2469      44726976 
+ 2469      6572496E 
+ 2470              	.LASF18:
+ 2471 0427 53574954 		.ascii	"SWITCH_NODE\000"
+ 2471      43485F4E 
+ 2471      4F444500 
+ 2472              	.LASF11:
+ 2473 0433 75696E74 		.ascii	"uint32\000"
+ 2473      333200
+ 2474              	.LASF5:
+ 2475 043a 6C6F6E67 		.ascii	"long unsigned int\000"
+ 2475      20756E73 
+ 2475      69676E65 
+ 2475      6420696E 
+ 2475      7400
+ 2476              	.LASF13:
+ 2477 044c 696E7433 		.ascii	"int32\000"
+ 2477      3200
+ 2478              	.LASF70:
+ 2479 0452 54686572 		.ascii	"ThermalLimitArray\000"
+ 2479      6D616C4C 
+ 2479      696D6974 
+ 2479      41727261 
+ 2479      7900
+ 2480              	.LASF61:
+ 2481 0464 74656D70 		.ascii	"temperatureSample_16\000"
+ 2481      65726174 
+ 2481      75726553 
+ 2481      616D706C 
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 58
+
+
+ 2481      655F3136 
+ 2482              	.LASF69:
+ 2483 0479 64617461 		.ascii	"dataIndex\000"
+ 2483      496E6465 
+ 2483      7800
+ 2484              	.LASF32:
+ 2485 0483 4D41585F 		.ascii	"MAX_TEMPERATURE\000"
+ 2485      54454D50 
+ 2485      45524154 
+ 2485      55524500 
+ 2486              	.LASF50:
+ 2487 0493 69734C61 		.ascii	"isLastDriverInChain\000"
+ 2487      73744472 
+ 2487      69766572 
+ 2487      496E4368 
+ 2487      61696E00 
+ 2488              	.LASF28:
+ 2489 04a7 57495448 		.ascii	"WITHIN_TOLERANCE\000"
+ 2489      494E5F54 
+ 2489      4F4C4552 
+ 2489      414E4345 
+ 2489      00
+ 2490              	.LASF57:
+ 2491 04b8 73616D70 		.ascii	"sampleArray\000"
+ 2491      6C654172 
+ 2491      72617900 
+ 2492              	.LASF25:
+ 2493 04c4 53544541 		.ascii	"STEADY_DECREASE\000"
+ 2493      44595F44 
+ 2493      45435245 
+ 2493      41534500 
+ 2494              	.LASF21:
+ 2495 04d4 54656D70 		.ascii	"TemperaturePoint\000"
+ 2495      65726174 
+ 2495      75726550 
+ 2495      6F696E74 
+ 2495      00
+ 2496              	.LASF47:
+ 2497 04e5 706F7369 		.ascii	"positionNumber\000"
+ 2497      74696F6E 
+ 2497      4E756D62 
+ 2497      657200
+ 2498              	.LASF55:
+ 2499 04f4 67657454 		.ascii	"getTemperatureSample\000"
+ 2499      656D7065 
+ 2499      72617475 
+ 2499      72655361 
+ 2499      6D706C65 
+ 2500              	.LASF15:
+ 2501 0509 646F7562 		.ascii	"double\000"
+ 2501      6C6500
+ 2502              	.LASF43:
+ 2503 0510 7363616C 		.ascii	"scalingFactor\000"
+ 2503      696E6746 
+ 2503      6163746F 
+ 2503      7200
+ 2504              	.LASF24:
+ARM GAS  C:\Users\faithc\AppData\Local\Temp\ccM21fnc.s 			page 59
+
+
+ 2505 051e 53544541 		.ascii	"STEADY_INCREASE\000"
+ 2505      44595F49 
+ 2505      4E435245 
+ 2505      41534500 
+ 2506              	.LASF35:
+ 2507 052e 49445F4E 		.ascii	"ID_Number\000"
+ 2507      756D6265 
+ 2507      7200
+ 2508              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 4.9.3 20150303 (release) [ARM/embedded-4_9-br
