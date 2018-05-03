@@ -134,9 +134,10 @@ void timeOutStateMachine(const uint8 * nonVolatileMemoryArray)
                 stateOfLightBar = IS_TIME_OUT_TRUE;
                 //WakeupISR_Stop();
             }
+            takeInputValues();
             if(isReadyToSendNextBrightnessPacket() == TRUE)
             {
-                timeoutDefaultBrightness(getNonVolatileBarStateMemory());
+                //timeoutDefaultBrightness(getNonVolatileBarStateMemory());
                 clearIsReadyToSendNextBrightnessPacket();
             }
             break;

@@ -81,6 +81,9 @@ CY_ISR(OVER_CURRENT_ISR)
     {
         pMotor->motorCurrentSamplesIterator = 0;
     }
+    
+    timerForInputs = 1;
+    
     overCurrentTimerISR_ClearPending();
     overCurrentTimer_ReadStatusRegister();
     //overCurrentTimer_ClearInterrupt(overCurrentTimer_INTR_MASK_TC);
@@ -239,11 +242,11 @@ MotorIO * motorControlLoop(int16 manualDesiredPostion)
         }
         else
         {
-            if(getStateOfBar() == 1)
-            {
-                pMotor->desiredPot = (int16)getDegaultPosition();
-            }
-            else if(pMotor->desiredPot != rxPacketLocal->Payload.endMotorPosition && getStateOfBar() == 0)
+            //if(getStateOfBar() == 1)
+            //{
+            //    pMotor->desiredPot = (int16)getDegaultPosition();
+            //}
+            if(pMotor->desiredPot != rxPacketLocal->Payload.endMotorPosition) //&& getStateOfBar() == 0)
             {
                 pMotor->desiredPot = rxPacketLocal->Payload.endMotorPosition;
                 pMotor->calculatePercentageOfRange = pMotor->forwardLimitCS;
@@ -352,6 +355,11 @@ MotorIO * motorControlLoop(int16 manualDesiredPostion)
     }
     
     return pMotor;
+}
+
+void setMotorPosition(uint8 localMotorPosition)
+{
+    rxPacketLocal->Payload.endMotorPosition = localMotorPosition;
 }
 
 uint16 checkMotorCurrent(void)

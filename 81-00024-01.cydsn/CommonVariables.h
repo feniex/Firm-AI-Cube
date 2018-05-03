@@ -28,8 +28,13 @@
 #define HEAD_MODULE_ID      1
 #define MAX_DRIVER_COUNT    8
     
-/**********DEFINED CONSTANTS**********/
+#define ZOOM_PLUS   0x04
+#define ZOOM_MINUS  0x01
+#define DIM_PLUS    0x02
+#define DIM_MINUS   0x08
     
+/**********DEFINED CONSTANTS**********/
+extern volatile uint8 timerForInputs;    
 
 /**********DATA STRUCTURES**********/
     
@@ -41,6 +46,7 @@
 void clearInitializeAlreadyEEPROM(void);
 const uint8 * getNonVolatileBarStateMemory(void);
 uint8 * getVolatileBarStateMemory(void);
+void takeInputValues(void);
 #endif
 
 /* [] END OF FILE */

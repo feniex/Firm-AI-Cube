@@ -110,5 +110,6 @@ void setMotorOutputs(Direction direction, Speed speed);
 MotorIO * motorControlLoop(int16 manualDesiredPostion);
 int16 calibrateMotor(void);
 void loadLimitSwitchValue(void);
+void setMotorPosition(uint8 localMotorPosition);
 
 /* [] END OF FILE */

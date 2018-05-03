@@ -27,7 +27,7 @@
 *  Place your includes, defines and code here 
 ********************************************************************************/
 /* `#START overCurrentTimerISR_intc` */
-
+#include "CommonVariables.h"
 /* `#END` */
 
 extern cyisraddress CyRamVectors[CYINT_IRQ_BASE + CY_NUM_INTERRUPTS];
@@ -164,7 +164,7 @@ CY_ISR(overCurrentTimerISR_Interrupt)
 
     /*  Place your Interrupt code here. */
     /* `#START overCurrentTimerISR_Interrupt` */
-
+    
     /* `#END` */
 }
 

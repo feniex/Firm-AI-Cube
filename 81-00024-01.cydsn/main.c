@@ -32,8 +32,11 @@ static const uint8 bSetInitializedAlready = 1;
 static uint8 beepromCountAlreadyReset = 0;
 static const uint8 *peepromMemory;
 extern MotorIO *pMotor;
+
+volatile uint8 timerForInputs;
 /**********LOCAL FUNCTION PROTOTYPES**********/
 static void initializePeripherals(void);
+
 /**********DEFINED GLOBAL FUNCTIONS**********/
 
 /*******************************************************************************
@@ -55,6 +58,9 @@ int main()
     {
     CyGlobalIntEnable;
     initializePeripherals();
+    modeChangeISR_Start();
+    //inputIncrease_Start();
+    //inputTimerISR_Start();
     
      if(*(volatile uint8 *) &eepromBrightnessMotorPosition[3] == 0)
     {
@@ -70,64 +76,17 @@ int main()
         loadLimitSwitchValue();
     }
     
-    //#if(HEAD_BOARD)
-    //        CyDelay(200);
-    //    #else
-    //        CyDelay(50);  
-    //#endif
-    /*
-    if(*(volatile uint8 *) &eepromBrightnessMotorPosition[3] == 0)
+    
     {
-        
-        UART_LED_Control_Write(TRUE);
-        
-        #if(HEAD_BOARD)
-            CyDelay(2000);
-        #else
-            CyDelay(50);  
-        #endif
-
-        #if(HEAD_BOARD)
-            setIdentityByComm(HEAD_MODULE_ID);
-            assignDriverIDs();
-            setDriverCountReceived();
-        #endif
-        
-        while(!isDriverCountReceived())
-        {
-        } 
-        
-        ramBrightnessMotorPosition[3] = 1;
-        ramBrightnessMotorPosition[2] = getDriverID();
-        EmEEPROM_Write(&ramBrightnessMotorPosition[2],&eepromBrightnessMotorPosition[2],2);
-    }
-    */
-    //else
-    {
-        //peepromMemory = &eepromBrightnessMotorPosition[2];
         setIdentityByComm(HEAD_MODULE_ID);
-        if(getDriverID()==HEAD_MODULE_ID)
-        {
-            //UART_LED_Control_Write(TRUE);
-        }
-        else
-        {
-            //UART_LED_Control_Write(FALSE);
-        }
     }
     }    
 
     for(;;)
     {
-       //PWM_Enable_Write(TRUE);
-       //PWM_WriteCompare(0xFF);
-        
-        //setMotorOutputs(FORWARD,0xFF);
-        //CyDelay(5000);
-        //setMotorOutputs(BACKWARDS,0xFF);
-        //CyDelay(5000);
         timeOutStateMachine(&eepromBrightnessMotorPosition[0]);
         motorControlLoop(0);
+        
     }
 }
 
@@ -147,6 +106,61 @@ int main()
 *  None.
 *
 *******************************************************************************/
+
+void takeInputValues(void)
+{
+    volatile uint8 readInputValues = 0;
+    uint8 test = 0;
+    static uint16 trackBrightness = 0;
+    static uint16 trackMotor = 0;
+    
+    readInputValues = inputs_Read();
+    if(timerForInputs == 1)
+    {
+        
+    if((readInputValues&ZOOM_PLUS) == ZOOM_PLUS)
+    {
+        if(trackMotor>=253)
+        {
+            trackMotor = 253;
+        }
+        trackMotor+=2;
+        setMotorPosition(trackMotor);
+        test = 0;
+    }
+    else if((readInputValues&ZOOM_MINUS) == ZOOM_MINUS)  //DIMPLUS
+    {
+        if(trackMotor<=2)
+        {
+            trackMotor = 2;
+        }
+        trackMotor-=2;
+        setMotorPosition(trackMotor);
+        test = 1;
+    }
+    if((readInputValues&DIM_PLUS) == DIM_PLUS)
+    {
+        if(trackBrightness>=247)
+        {
+            trackBrightness = 247;
+        }
+        trackBrightness+=8;
+        setBrightness(trackBrightness);
+        test = 2;
+    }
+    else if((readInputValues&DIM_MINUS) == DIM_MINUS)    //DIMMINUS
+    {
+        if(trackBrightness<=8)
+        {
+            trackBrightness = 8;
+        }
+        trackBrightness-=8;
+        setBrightness(trackBrightness);
+        test = 3;
+    }
+    timerForInputs = 0;
+    }
+}
 
 void clearInitializeAlreadyEEPROM(void)
 {

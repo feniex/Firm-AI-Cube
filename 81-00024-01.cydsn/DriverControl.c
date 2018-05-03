@@ -600,4 +600,10 @@ static enum TemperatureStatus getTemperatureStatus(int16* TemperatureData,
     return WITHIN_TOLERANCE;
 }
 
+void setBrightness(unsigned char localBrightness)
+{
+    RegulationData.requestedBrightness = localBrightness;
+    updateBrightnessLevel(RegulationData.requestedBrightness, TRUE);
+}
+
 /* [] END OF FILE */
