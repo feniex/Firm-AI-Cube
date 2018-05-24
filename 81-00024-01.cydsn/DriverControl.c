@@ -502,7 +502,7 @@ uint8 regulateBrightness(int16* TemperatureData, uint8 length)
             }
             if((timerCountLocal % (SAMPLE_COUNT_PER_CYCLE * BRIGHTNESS_CHANGE_PER_SAMPLE)) == 0)
             {
-                temperatureStatus = getTemperatureStatus(TemperatureData, length,
+                            temperatureStatus = getTemperatureStatus(TemperatureData, length,
                     SAFE_TEMPERATURE_TOLERANCE);
                 
                 if(temperatureStatus == WITHIN_TOLERANCE)

@@ -1,0 +1,1009 @@
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc551DZ5.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"Clock_5.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.Clock_5_Start,"ax",%progbits
+  20              		.align	2
+  21              		.global	Clock_5_Start
+  22              		.code	16
+  23              		.thumb_func
+  24              		.type	Clock_5_Start, %function
+  25              	Clock_5_Start:
+  26              	.LFB0:
+  27              		.file 1 "Generated_Source\\PSoC4\\Clock_5.c"
+   1:Generated_Source\PSoC4/Clock_5.c **** /*******************************************************************************
+   2:Generated_Source\PSoC4/Clock_5.c **** * File Name: Clock_5.c
+   3:Generated_Source\PSoC4/Clock_5.c **** * Version 2.20
+   4:Generated_Source\PSoC4/Clock_5.c **** *
+   5:Generated_Source\PSoC4/Clock_5.c **** *  Description:
+   6:Generated_Source\PSoC4/Clock_5.c **** *   Provides system API for the clocking, interrupts and watchdog timer.
+   7:Generated_Source\PSoC4/Clock_5.c **** *
+   8:Generated_Source\PSoC4/Clock_5.c **** *  Note:
+   9:Generated_Source\PSoC4/Clock_5.c **** *   Documentation of the API's in this file is located in the
+  10:Generated_Source\PSoC4/Clock_5.c **** *   System Reference Guide provided with PSoC Creator.
+  11:Generated_Source\PSoC4/Clock_5.c **** *
+  12:Generated_Source\PSoC4/Clock_5.c **** ********************************************************************************
+  13:Generated_Source\PSoC4/Clock_5.c **** * Copyright 2008-2012, Cypress Semiconductor Corporation.  All rights reserved.
+  14:Generated_Source\PSoC4/Clock_5.c **** * You may use this file only in accordance with the license, terms, conditions,
+  15:Generated_Source\PSoC4/Clock_5.c **** * disclaimers, and limitations in the end user license agreement accompanying
+  16:Generated_Source\PSoC4/Clock_5.c **** * the software package with which this file was provided.
+  17:Generated_Source\PSoC4/Clock_5.c **** *******************************************************************************/
+  18:Generated_Source\PSoC4/Clock_5.c **** 
+  19:Generated_Source\PSoC4/Clock_5.c **** #include <cydevice_trm.h>
+  20:Generated_Source\PSoC4/Clock_5.c **** #include "Clock_5.h"
+  21:Generated_Source\PSoC4/Clock_5.c **** 
+  22:Generated_Source\PSoC4/Clock_5.c **** #if defined CYREG_PERI_DIV_CMD
+  23:Generated_Source\PSoC4/Clock_5.c **** 
+  24:Generated_Source\PSoC4/Clock_5.c **** /*******************************************************************************
+  25:Generated_Source\PSoC4/Clock_5.c **** * Function Name: Clock_5_StartEx
+  26:Generated_Source\PSoC4/Clock_5.c **** ********************************************************************************
+  27:Generated_Source\PSoC4/Clock_5.c **** *
+  28:Generated_Source\PSoC4/Clock_5.c **** * Summary:
+  29:Generated_Source\PSoC4/Clock_5.c **** *  Starts the clock, aligned to the specified running clock.
+  30:Generated_Source\PSoC4/Clock_5.c **** *
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc551DZ5.s 			page 2
+
+
+  31:Generated_Source\PSoC4/Clock_5.c **** * Parameters:
+  32:Generated_Source\PSoC4/Clock_5.c **** *  alignClkDiv:  The divider to which phase alignment is performed when the
+  33:Generated_Source\PSoC4/Clock_5.c **** *    clock is started.
+  34:Generated_Source\PSoC4/Clock_5.c **** *
+  35:Generated_Source\PSoC4/Clock_5.c **** * Returns:
+  36:Generated_Source\PSoC4/Clock_5.c **** *  None
+  37:Generated_Source\PSoC4/Clock_5.c **** *
+  38:Generated_Source\PSoC4/Clock_5.c **** *******************************************************************************/
+  39:Generated_Source\PSoC4/Clock_5.c **** void Clock_5_StartEx(uint32 alignClkDiv)
+  40:Generated_Source\PSoC4/Clock_5.c **** {
+  41:Generated_Source\PSoC4/Clock_5.c ****     /* Make sure any previous start command has finished. */
+  42:Generated_Source\PSoC4/Clock_5.c ****     while((Clock_5_CMD_REG & Clock_5_CMD_ENABLE_MASK) != 0u)
+  43:Generated_Source\PSoC4/Clock_5.c ****     {
+  44:Generated_Source\PSoC4/Clock_5.c ****     }
+  45:Generated_Source\PSoC4/Clock_5.c ****     
+  46:Generated_Source\PSoC4/Clock_5.c ****     /* Specify the target divider and it's alignment divider, and enable. */
+  47:Generated_Source\PSoC4/Clock_5.c ****     Clock_5_CMD_REG =
+  48:Generated_Source\PSoC4/Clock_5.c ****         ((uint32)Clock_5__DIV_ID << Clock_5_CMD_DIV_SHIFT)|
+  49:Generated_Source\PSoC4/Clock_5.c ****         (alignClkDiv << Clock_5_CMD_PA_DIV_SHIFT) |
+  50:Generated_Source\PSoC4/Clock_5.c ****         (uint32)Clock_5_CMD_ENABLE_MASK;
+  51:Generated_Source\PSoC4/Clock_5.c **** }
+  52:Generated_Source\PSoC4/Clock_5.c **** 
+  53:Generated_Source\PSoC4/Clock_5.c **** #else
+  54:Generated_Source\PSoC4/Clock_5.c **** 
+  55:Generated_Source\PSoC4/Clock_5.c **** /*******************************************************************************
+  56:Generated_Source\PSoC4/Clock_5.c **** * Function Name: Clock_5_Start
+  57:Generated_Source\PSoC4/Clock_5.c **** ********************************************************************************
+  58:Generated_Source\PSoC4/Clock_5.c **** *
+  59:Generated_Source\PSoC4/Clock_5.c **** * Summary:
+  60:Generated_Source\PSoC4/Clock_5.c **** *  Starts the clock.
+  61:Generated_Source\PSoC4/Clock_5.c **** *
+  62:Generated_Source\PSoC4/Clock_5.c **** * Parameters:
+  63:Generated_Source\PSoC4/Clock_5.c **** *  None
+  64:Generated_Source\PSoC4/Clock_5.c **** *
+  65:Generated_Source\PSoC4/Clock_5.c **** * Returns:
+  66:Generated_Source\PSoC4/Clock_5.c **** *  None
+  67:Generated_Source\PSoC4/Clock_5.c **** *
+  68:Generated_Source\PSoC4/Clock_5.c **** *******************************************************************************/
+  69:Generated_Source\PSoC4/Clock_5.c **** 
+  70:Generated_Source\PSoC4/Clock_5.c **** void Clock_5_Start(void)
+  71:Generated_Source\PSoC4/Clock_5.c **** {
+  28              		.loc 1 71 0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32              		@ link register save eliminated.
+  72:Generated_Source\PSoC4/Clock_5.c ****     /* Set the bit to enable the clock. */
+  73:Generated_Source\PSoC4/Clock_5.c ****     Clock_5_ENABLE_REG |= Clock_5__ENABLE_MASK;
+  33              		.loc 1 73 0
+  34 0000 034A     		ldr	r2, .L2
+  35 0002 1368     		ldr	r3, [r2]
+  36 0004 8021     		movs	r1, #128
+  37 0006 0906     		lsls	r1, r1, #24
+  38 0008 0B43     		orrs	r3, r1
+  39 000a 1360     		str	r3, [r2]
+  74:Generated_Source\PSoC4/Clock_5.c **** }
+  40              		.loc 1 74 0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc551DZ5.s 			page 3
+
+
+  41              		@ sp needed
+  42 000c 7047     		bx	lr
+  43              	.L3:
+  44 000e C046     		.align	2
+  45              	.L2:
+  46 0010 80010240 		.word	1073873280
+  47              		.cfi_endproc
+  48              	.LFE0:
+  49              		.size	Clock_5_Start, .-Clock_5_Start
+  50              		.section	.text.Clock_5_Stop,"ax",%progbits
+  51              		.align	2
+  52              		.global	Clock_5_Stop
+  53              		.code	16
+  54              		.thumb_func
+  55              		.type	Clock_5_Stop, %function
+  56              	Clock_5_Stop:
+  57              	.LFB1:
+  75:Generated_Source\PSoC4/Clock_5.c **** 
+  76:Generated_Source\PSoC4/Clock_5.c **** #endif /* CYREG_PERI_DIV_CMD */
+  77:Generated_Source\PSoC4/Clock_5.c **** 
+  78:Generated_Source\PSoC4/Clock_5.c **** 
+  79:Generated_Source\PSoC4/Clock_5.c **** /*******************************************************************************
+  80:Generated_Source\PSoC4/Clock_5.c **** * Function Name: Clock_5_Stop
+  81:Generated_Source\PSoC4/Clock_5.c **** ********************************************************************************
+  82:Generated_Source\PSoC4/Clock_5.c **** *
+  83:Generated_Source\PSoC4/Clock_5.c **** * Summary:
+  84:Generated_Source\PSoC4/Clock_5.c **** *  Stops the clock and returns immediately. This API does not require the
+  85:Generated_Source\PSoC4/Clock_5.c **** *  source clock to be running but may return before the hardware is actually
+  86:Generated_Source\PSoC4/Clock_5.c **** *  disabled.
+  87:Generated_Source\PSoC4/Clock_5.c **** *
+  88:Generated_Source\PSoC4/Clock_5.c **** * Parameters:
+  89:Generated_Source\PSoC4/Clock_5.c **** *  None
+  90:Generated_Source\PSoC4/Clock_5.c **** *
+  91:Generated_Source\PSoC4/Clock_5.c **** * Returns:
+  92:Generated_Source\PSoC4/Clock_5.c **** *  None
+  93:Generated_Source\PSoC4/Clock_5.c **** *
+  94:Generated_Source\PSoC4/Clock_5.c **** *******************************************************************************/
+  95:Generated_Source\PSoC4/Clock_5.c **** void Clock_5_Stop(void)
+  96:Generated_Source\PSoC4/Clock_5.c **** {
+  58              		.loc 1 96 0
+  59              		.cfi_startproc
+  60              		@ args = 0, pretend = 0, frame = 0
+  61              		@ frame_needed = 0, uses_anonymous_args = 0
+  62              		@ link register save eliminated.
+  97:Generated_Source\PSoC4/Clock_5.c **** #if defined CYREG_PERI_DIV_CMD
+  98:Generated_Source\PSoC4/Clock_5.c **** 
+  99:Generated_Source\PSoC4/Clock_5.c ****     /* Make sure any previous start command has finished. */
+ 100:Generated_Source\PSoC4/Clock_5.c ****     while((Clock_5_CMD_REG & Clock_5_CMD_ENABLE_MASK) != 0u)
+ 101:Generated_Source\PSoC4/Clock_5.c ****     {
+ 102:Generated_Source\PSoC4/Clock_5.c ****     }
+ 103:Generated_Source\PSoC4/Clock_5.c ****     
+ 104:Generated_Source\PSoC4/Clock_5.c ****     /* Specify the target divider and it's alignment divider, and disable. */
+ 105:Generated_Source\PSoC4/Clock_5.c ****     Clock_5_CMD_REG =
+ 106:Generated_Source\PSoC4/Clock_5.c ****         ((uint32)Clock_5__DIV_ID << Clock_5_CMD_DIV_SHIFT)|
+ 107:Generated_Source\PSoC4/Clock_5.c ****         ((uint32)Clock_5_CMD_DISABLE_MASK);
+ 108:Generated_Source\PSoC4/Clock_5.c **** 
+ 109:Generated_Source\PSoC4/Clock_5.c **** #else
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc551DZ5.s 			page 4
+
+
+ 110:Generated_Source\PSoC4/Clock_5.c **** 
+ 111:Generated_Source\PSoC4/Clock_5.c ****     /* Clear the bit to disable the clock. */
+ 112:Generated_Source\PSoC4/Clock_5.c ****     Clock_5_ENABLE_REG &= (uint32)(~Clock_5__ENABLE_MASK);
+  63              		.loc 1 112 0
+  64 0000 024A     		ldr	r2, .L5
+  65 0002 1368     		ldr	r3, [r2]
+  66 0004 5B00     		lsls	r3, r3, #1
+  67 0006 5B08     		lsrs	r3, r3, #1
+  68 0008 1360     		str	r3, [r2]
+ 113:Generated_Source\PSoC4/Clock_5.c ****     
+ 114:Generated_Source\PSoC4/Clock_5.c **** #endif /* CYREG_PERI_DIV_CMD */
+ 115:Generated_Source\PSoC4/Clock_5.c **** }
+  69              		.loc 1 115 0
+  70              		@ sp needed
+  71 000a 7047     		bx	lr
+  72              	.L6:
+  73              		.align	2
+  74              	.L5:
+  75 000c 80010240 		.word	1073873280
+  76              		.cfi_endproc
+  77              	.LFE1:
+  78              		.size	Clock_5_Stop, .-Clock_5_Stop
+  79              		.section	.text.Clock_5_SetFractionalDividerRegister,"ax",%progbits
+  80              		.align	2
+  81              		.global	Clock_5_SetFractionalDividerRegister
+  82              		.code	16
+  83              		.thumb_func
+  84              		.type	Clock_5_SetFractionalDividerRegister, %function
+  85              	Clock_5_SetFractionalDividerRegister:
+  86              	.LFB2:
+ 116:Generated_Source\PSoC4/Clock_5.c **** 
+ 117:Generated_Source\PSoC4/Clock_5.c **** 
+ 118:Generated_Source\PSoC4/Clock_5.c **** /*******************************************************************************
+ 119:Generated_Source\PSoC4/Clock_5.c **** * Function Name: Clock_5_SetFractionalDividerRegister
+ 120:Generated_Source\PSoC4/Clock_5.c **** ********************************************************************************
+ 121:Generated_Source\PSoC4/Clock_5.c **** *
+ 122:Generated_Source\PSoC4/Clock_5.c **** * Summary:
+ 123:Generated_Source\PSoC4/Clock_5.c **** *  Modifies the clock divider and the fractional divider.
+ 124:Generated_Source\PSoC4/Clock_5.c **** *
+ 125:Generated_Source\PSoC4/Clock_5.c **** * Parameters:
+ 126:Generated_Source\PSoC4/Clock_5.c **** *  clkDivider:  Divider register value (0-65535). This value is NOT the
+ 127:Generated_Source\PSoC4/Clock_5.c **** *    divider; the clock hardware divides by clkDivider plus one. For example,
+ 128:Generated_Source\PSoC4/Clock_5.c **** *    to divide the clock by 2, this parameter should be set to 1.
+ 129:Generated_Source\PSoC4/Clock_5.c **** *  fracDivider:  Fractional Divider register value (0-31).
+ 130:Generated_Source\PSoC4/Clock_5.c **** * Returns:
+ 131:Generated_Source\PSoC4/Clock_5.c **** *  None
+ 132:Generated_Source\PSoC4/Clock_5.c **** *
+ 133:Generated_Source\PSoC4/Clock_5.c **** *******************************************************************************/
+ 134:Generated_Source\PSoC4/Clock_5.c **** void Clock_5_SetFractionalDividerRegister(uint16 clkDivider, uint8 clkFractional)
+ 135:Generated_Source\PSoC4/Clock_5.c **** {
+  87              		.loc 1 135 0
+  88              		.cfi_startproc
+  89              		@ args = 0, pretend = 0, frame = 0
+  90              		@ frame_needed = 0, uses_anonymous_args = 0
+  91              		@ link register save eliminated.
+  92              	.LVL0:
+ 136:Generated_Source\PSoC4/Clock_5.c ****     uint32 maskVal;
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc551DZ5.s 			page 5
+
+
+ 137:Generated_Source\PSoC4/Clock_5.c ****     uint32 regVal;
+ 138:Generated_Source\PSoC4/Clock_5.c ****     
+ 139:Generated_Source\PSoC4/Clock_5.c **** #if defined (Clock_5__FRAC_MASK) || defined (CYREG_PERI_DIV_CMD)
+ 140:Generated_Source\PSoC4/Clock_5.c ****     
+ 141:Generated_Source\PSoC4/Clock_5.c **** 	/* get all but divider bits */
+ 142:Generated_Source\PSoC4/Clock_5.c ****     maskVal = Clock_5_DIV_REG & 
+  93              		.loc 1 142 0
+  94 0000 054A     		ldr	r2, .L8
+  95 0002 1368     		ldr	r3, [r2]
+  96 0004 5B0D     		lsrs	r3, r3, #21
+  97 0006 5B05     		lsls	r3, r3, #21
+  98              	.LVL1:
+ 143:Generated_Source\PSoC4/Clock_5.c ****                     (uint32)(~(uint32)(Clock_5_DIV_INT_MASK | Clock_5_DIV_FRAC_MASK)); 
+ 144:Generated_Source\PSoC4/Clock_5.c **** 	/* combine mask and new divider vals into 32-bit value */
+ 145:Generated_Source\PSoC4/Clock_5.c ****     regVal = maskVal |
+  99              		.loc 1 145 0
+ 100 0008 1843     		orrs	r0, r3
+ 101              	.LVL2:
+ 146:Generated_Source\PSoC4/Clock_5.c ****         ((uint32)((uint32)clkDivider <<  Clock_5_DIV_INT_SHIFT) & Clock_5_DIV_INT_MASK) |
+ 147:Generated_Source\PSoC4/Clock_5.c ****         ((uint32)((uint32)clkFractional << Clock_5_DIV_FRAC_SHIFT) & Clock_5_DIV_FRAC_MASK);
+ 102              		.loc 1 147 0
+ 103 000a 0904     		lsls	r1, r1, #16
+ 104              	.LVL3:
+ 105 000c F823     		movs	r3, #248
+ 106              	.LVL4:
+ 107 000e 5B03     		lsls	r3, r3, #13
+ 108 0010 1940     		ands	r1, r3
+ 145:Generated_Source\PSoC4/Clock_5.c ****         ((uint32)((uint32)clkDivider <<  Clock_5_DIV_INT_SHIFT) & Clock_5_DIV_INT_MASK) |
+ 109              		.loc 1 145 0
+ 110 0012 0843     		orrs	r0, r1
+ 111              	.LVL5:
+ 148:Generated_Source\PSoC4/Clock_5.c ****     
+ 149:Generated_Source\PSoC4/Clock_5.c **** #else
+ 150:Generated_Source\PSoC4/Clock_5.c ****     /* get all but integer divider bits */
+ 151:Generated_Source\PSoC4/Clock_5.c ****     maskVal = Clock_5_DIV_REG & (uint32)(~(uint32)Clock_5__DIVIDER_MASK);
+ 152:Generated_Source\PSoC4/Clock_5.c ****     /* combine mask and new divider val into 32-bit value */
+ 153:Generated_Source\PSoC4/Clock_5.c ****     regVal = clkDivider | maskVal;
+ 154:Generated_Source\PSoC4/Clock_5.c ****     
+ 155:Generated_Source\PSoC4/Clock_5.c **** #endif /* Clock_5__FRAC_MASK || CYREG_PERI_DIV_CMD */
+ 156:Generated_Source\PSoC4/Clock_5.c **** 
+ 157:Generated_Source\PSoC4/Clock_5.c ****     Clock_5_DIV_REG = regVal;
+ 112              		.loc 1 157 0
+ 113 0014 1060     		str	r0, [r2]
+ 158:Generated_Source\PSoC4/Clock_5.c **** }
+ 114              		.loc 1 158 0
+ 115              		@ sp needed
+ 116 0016 7047     		bx	lr
+ 117              	.L9:
+ 118              		.align	2
+ 119              	.L8:
+ 120 0018 80010240 		.word	1073873280
+ 121              		.cfi_endproc
+ 122              	.LFE2:
+ 123              		.size	Clock_5_SetFractionalDividerRegister, .-Clock_5_SetFractionalDividerRegister
+ 124              		.section	.text.Clock_5_GetDividerRegister,"ax",%progbits
+ 125              		.align	2
+ 126              		.global	Clock_5_GetDividerRegister
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc551DZ5.s 			page 6
+
+
+ 127              		.code	16
+ 128              		.thumb_func
+ 129              		.type	Clock_5_GetDividerRegister, %function
+ 130              	Clock_5_GetDividerRegister:
+ 131              	.LFB3:
+ 159:Generated_Source\PSoC4/Clock_5.c **** 
+ 160:Generated_Source\PSoC4/Clock_5.c **** 
+ 161:Generated_Source\PSoC4/Clock_5.c **** /*******************************************************************************
+ 162:Generated_Source\PSoC4/Clock_5.c **** * Function Name: Clock_5_GetDividerRegister
+ 163:Generated_Source\PSoC4/Clock_5.c **** ********************************************************************************
+ 164:Generated_Source\PSoC4/Clock_5.c **** *
+ 165:Generated_Source\PSoC4/Clock_5.c **** * Summary:
+ 166:Generated_Source\PSoC4/Clock_5.c **** *  Gets the clock divider register value.
+ 167:Generated_Source\PSoC4/Clock_5.c **** *
+ 168:Generated_Source\PSoC4/Clock_5.c **** * Parameters:
+ 169:Generated_Source\PSoC4/Clock_5.c **** *  None
+ 170:Generated_Source\PSoC4/Clock_5.c **** *
+ 171:Generated_Source\PSoC4/Clock_5.c **** * Returns:
+ 172:Generated_Source\PSoC4/Clock_5.c **** *  Divide value of the clock minus 1. For example, if the clock is set to
+ 173:Generated_Source\PSoC4/Clock_5.c **** *  divide by 2, the return value will be 1.
+ 174:Generated_Source\PSoC4/Clock_5.c **** *
+ 175:Generated_Source\PSoC4/Clock_5.c **** *******************************************************************************/
+ 176:Generated_Source\PSoC4/Clock_5.c **** uint16 Clock_5_GetDividerRegister(void)
+ 177:Generated_Source\PSoC4/Clock_5.c **** {
+ 132              		.loc 1 177 0
+ 133              		.cfi_startproc
+ 134              		@ args = 0, pretend = 0, frame = 0
+ 135              		@ frame_needed = 0, uses_anonymous_args = 0
+ 136              		@ link register save eliminated.
+ 178:Generated_Source\PSoC4/Clock_5.c ****     return (uint16)((Clock_5_DIV_REG & Clock_5_DIV_INT_MASK)
+ 137              		.loc 1 178 0
+ 138 0000 014B     		ldr	r3, .L11
+ 139 0002 1868     		ldr	r0, [r3]
+ 140 0004 80B2     		uxth	r0, r0
+ 179:Generated_Source\PSoC4/Clock_5.c ****         >> Clock_5_DIV_INT_SHIFT);
+ 180:Generated_Source\PSoC4/Clock_5.c **** }
+ 141              		.loc 1 180 0
+ 142              		@ sp needed
+ 143 0006 7047     		bx	lr
+ 144              	.L12:
+ 145              		.align	2
+ 146              	.L11:
+ 147 0008 80010240 		.word	1073873280
+ 148              		.cfi_endproc
+ 149              	.LFE3:
+ 150              		.size	Clock_5_GetDividerRegister, .-Clock_5_GetDividerRegister
+ 151              		.section	.text.Clock_5_GetFractionalDividerRegister,"ax",%progbits
+ 152              		.align	2
+ 153              		.global	Clock_5_GetFractionalDividerRegister
+ 154              		.code	16
+ 155              		.thumb_func
+ 156              		.type	Clock_5_GetFractionalDividerRegister, %function
+ 157              	Clock_5_GetFractionalDividerRegister:
+ 158              	.LFB4:
+ 181:Generated_Source\PSoC4/Clock_5.c **** 
+ 182:Generated_Source\PSoC4/Clock_5.c **** 
+ 183:Generated_Source\PSoC4/Clock_5.c **** /*******************************************************************************
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc551DZ5.s 			page 7
+
+
+ 184:Generated_Source\PSoC4/Clock_5.c **** * Function Name: Clock_5_GetFractionalDividerRegister
+ 185:Generated_Source\PSoC4/Clock_5.c **** ********************************************************************************
+ 186:Generated_Source\PSoC4/Clock_5.c **** *
+ 187:Generated_Source\PSoC4/Clock_5.c **** * Summary:
+ 188:Generated_Source\PSoC4/Clock_5.c **** *  Gets the clock fractional divider register value.
+ 189:Generated_Source\PSoC4/Clock_5.c **** *
+ 190:Generated_Source\PSoC4/Clock_5.c **** * Parameters:
+ 191:Generated_Source\PSoC4/Clock_5.c **** *  None
+ 192:Generated_Source\PSoC4/Clock_5.c **** *
+ 193:Generated_Source\PSoC4/Clock_5.c **** * Returns:
+ 194:Generated_Source\PSoC4/Clock_5.c **** *  Fractional Divide value of the clock
+ 195:Generated_Source\PSoC4/Clock_5.c **** *  0 if the fractional divider is not in use.
+ 196:Generated_Source\PSoC4/Clock_5.c **** *
+ 197:Generated_Source\PSoC4/Clock_5.c **** *******************************************************************************/
+ 198:Generated_Source\PSoC4/Clock_5.c **** uint8 Clock_5_GetFractionalDividerRegister(void)
+ 199:Generated_Source\PSoC4/Clock_5.c **** {
+ 159              		.loc 1 199 0
+ 160              		.cfi_startproc
+ 161              		@ args = 0, pretend = 0, frame = 0
+ 162              		@ frame_needed = 0, uses_anonymous_args = 0
+ 163              		@ link register save eliminated.
+ 200:Generated_Source\PSoC4/Clock_5.c **** #if defined (Clock_5__FRAC_MASK)
+ 201:Generated_Source\PSoC4/Clock_5.c ****     /* return fractional divider bits */
+ 202:Generated_Source\PSoC4/Clock_5.c ****     return (uint8)((Clock_5_DIV_REG & Clock_5_DIV_FRAC_MASK)
+ 164              		.loc 1 202 0
+ 165 0000 024B     		ldr	r3, .L14
+ 166 0002 1868     		ldr	r0, [r3]
+ 203:Generated_Source\PSoC4/Clock_5.c ****         >> Clock_5_DIV_FRAC_SHIFT);
+ 167              		.loc 1 203 0
+ 168 0004 000C     		lsrs	r0, r0, #16
+ 202:Generated_Source\PSoC4/Clock_5.c ****         >> Clock_5_DIV_FRAC_SHIFT);
+ 169              		.loc 1 202 0
+ 170 0006 1F23     		movs	r3, #31
+ 171 0008 1840     		ands	r0, r3
+ 204:Generated_Source\PSoC4/Clock_5.c **** #else
+ 205:Generated_Source\PSoC4/Clock_5.c ****     return 0u;
+ 206:Generated_Source\PSoC4/Clock_5.c **** #endif /* Clock_5__FRAC_MASK */
+ 207:Generated_Source\PSoC4/Clock_5.c **** }
+ 172              		.loc 1 207 0
+ 173              		@ sp needed
+ 174 000a 7047     		bx	lr
+ 175              	.L15:
+ 176              		.align	2
+ 177              	.L14:
+ 178 000c 80010240 		.word	1073873280
+ 179              		.cfi_endproc
+ 180              	.LFE4:
+ 181              		.size	Clock_5_GetFractionalDividerRegister, .-Clock_5_GetFractionalDividerRegister
+ 182              		.text
+ 183              	.Letext0:
+ 184              		.file 2 "Generated_Source\\PSoC4/cytypes.h"
+ 185              		.section	.debug_info,"",%progbits
+ 186              	.Ldebug_info0:
+ 187 0000 4E010000 		.4byte	0x14e
+ 188 0004 0400     		.2byte	0x4
+ 189 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 190 000a 04       		.byte	0x4
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc551DZ5.s 			page 8
+
+
+ 191 000b 01       		.uleb128 0x1
+ 192 000c 0E010000 		.4byte	.LASF24
+ 193 0010 0C       		.byte	0xc
+ 194 0011 21000000 		.4byte	.LASF25
+ 195 0015 07020000 		.4byte	.LASF26
+ 196 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 197 001d 00000000 		.4byte	0
+ 198 0021 00000000 		.4byte	.Ldebug_line0
+ 199 0025 02       		.uleb128 0x2
+ 200 0026 01       		.byte	0x1
+ 201 0027 06       		.byte	0x6
+ 202 0028 FB010000 		.4byte	.LASF0
+ 203 002c 02       		.uleb128 0x2
+ 204 002d 01       		.byte	0x1
+ 205 002e 08       		.byte	0x8
+ 206 002f 42000000 		.4byte	.LASF1
+ 207 0033 02       		.uleb128 0x2
+ 208 0034 02       		.byte	0x2
+ 209 0035 05       		.byte	0x5
+ 210 0036 E2010000 		.4byte	.LASF2
+ 211 003a 02       		.uleb128 0x2
+ 212 003b 02       		.byte	0x2
+ 213 003c 07       		.byte	0x7
+ 214 003d 62000000 		.4byte	.LASF3
+ 215 0041 02       		.uleb128 0x2
+ 216 0042 04       		.byte	0x4
+ 217 0043 05       		.byte	0x5
+ 218 0044 F2010000 		.4byte	.LASF4
+ 219 0048 02       		.uleb128 0x2
+ 220 0049 04       		.byte	0x4
+ 221 004a 07       		.byte	0x7
+ 222 004b 50000000 		.4byte	.LASF5
+ 223 004f 02       		.uleb128 0x2
+ 224 0050 08       		.byte	0x8
+ 225 0051 05       		.byte	0x5
+ 226 0052 CF010000 		.4byte	.LASF6
+ 227 0056 02       		.uleb128 0x2
+ 228 0057 08       		.byte	0x8
+ 229 0058 07       		.byte	0x7
+ 230 0059 DC000000 		.4byte	.LASF7
+ 231 005d 03       		.uleb128 0x3
+ 232 005e 04       		.byte	0x4
+ 233 005f 05       		.byte	0x5
+ 234 0060 696E7400 		.ascii	"int\000"
+ 235 0064 02       		.uleb128 0x2
+ 236 0065 04       		.byte	0x4
+ 237 0066 07       		.byte	0x7
+ 238 0067 CF000000 		.4byte	.LASF8
+ 239 006b 04       		.uleb128 0x4
+ 240 006c EC010000 		.4byte	.LASF9
+ 241 0070 02       		.byte	0x2
+ 242 0071 D201     		.2byte	0x1d2
+ 243 0073 2C000000 		.4byte	0x2c
+ 244 0077 04       		.uleb128 0x4
+ 245 0078 9C000000 		.4byte	.LASF10
+ 246 007c 02       		.byte	0x2
+ 247 007d D301     		.2byte	0x1d3
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc551DZ5.s 			page 9
+
+
+ 248 007f 3A000000 		.4byte	0x3a
+ 249 0083 04       		.uleb128 0x4
+ 250 0084 C8000000 		.4byte	.LASF11
+ 251 0088 02       		.byte	0x2
+ 252 0089 D401     		.2byte	0x1d4
+ 253 008b 48000000 		.4byte	0x48
+ 254 008f 02       		.uleb128 0x2
+ 255 0090 04       		.byte	0x4
+ 256 0091 04       		.byte	0x4
+ 257 0092 1B000000 		.4byte	.LASF12
+ 258 0096 02       		.uleb128 0x2
+ 259 0097 08       		.byte	0x8
+ 260 0098 04       		.byte	0x4
+ 261 0099 80000000 		.4byte	.LASF13
+ 262 009d 02       		.uleb128 0x2
+ 263 009e 01       		.byte	0x1
+ 264 009f 08       		.byte	0x8
+ 265 00a0 DD010000 		.4byte	.LASF14
+ 266 00a4 04       		.uleb128 0x4
+ 267 00a5 00000000 		.4byte	.LASF15
+ 268 00a9 02       		.byte	0x2
+ 269 00aa 7E02     		.2byte	0x27e
+ 270 00ac B0000000 		.4byte	0xb0
+ 271 00b0 05       		.uleb128 0x5
+ 272 00b1 83000000 		.4byte	0x83
+ 273 00b5 06       		.uleb128 0x6
+ 274 00b6 C1010000 		.4byte	.LASF16
+ 275 00ba 01       		.byte	0x1
+ 276 00bb 46       		.byte	0x46
+ 277 00bc 00000000 		.4byte	.LFB0
+ 278 00c0 14000000 		.4byte	.LFE0-.LFB0
+ 279 00c4 01       		.uleb128 0x1
+ 280 00c5 9C       		.byte	0x9c
+ 281 00c6 06       		.uleb128 0x6
+ 282 00c7 0E000000 		.4byte	.LASF17
+ 283 00cb 01       		.byte	0x1
+ 284 00cc 5F       		.byte	0x5f
+ 285 00cd 00000000 		.4byte	.LFB1
+ 286 00d1 10000000 		.4byte	.LFE1-.LFB1
+ 287 00d5 01       		.uleb128 0x1
+ 288 00d6 9C       		.byte	0x9c
+ 289 00d7 07       		.uleb128 0x7
+ 290 00d8 9C010000 		.4byte	.LASF27
+ 291 00dc 01       		.byte	0x1
+ 292 00dd 86       		.byte	0x86
+ 293 00de 00000000 		.4byte	.LFB2
+ 294 00e2 1C000000 		.4byte	.LFE2-.LFB2
+ 295 00e6 01       		.uleb128 0x1
+ 296 00e7 9C       		.byte	0x9c
+ 297 00e8 27010000 		.4byte	0x127
+ 298 00ec 08       		.uleb128 0x8
+ 299 00ed 75000000 		.4byte	.LASF18
+ 300 00f1 01       		.byte	0x1
+ 301 00f2 86       		.byte	0x86
+ 302 00f3 77000000 		.4byte	0x77
+ 303 00f7 00000000 		.4byte	.LLST0
+ 304 00fb 08       		.uleb128 0x8
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc551DZ5.s 			page 10
+
+
+ 305 00fc 8E000000 		.4byte	.LASF19
+ 306 0100 01       		.byte	0x1
+ 307 0101 86       		.byte	0x86
+ 308 0102 6B000000 		.4byte	0x6b
+ 309 0106 21000000 		.4byte	.LLST1
+ 310 010a 09       		.uleb128 0x9
+ 311 010b 06000000 		.4byte	.LASF20
+ 312 010f 01       		.byte	0x1
+ 313 0110 88       		.byte	0x88
+ 314 0111 83000000 		.4byte	0x83
+ 315 0115 42000000 		.4byte	.LLST2
+ 316 0119 0A       		.uleb128 0xa
+ 317 011a 87000000 		.4byte	.LASF21
+ 318 011e 01       		.byte	0x1
+ 319 011f 89       		.byte	0x89
+ 320 0120 83000000 		.4byte	0x83
+ 321 0124 01       		.uleb128 0x1
+ 322 0125 50       		.byte	0x50
+ 323 0126 00       		.byte	0
+ 324 0127 0B       		.uleb128 0xb
+ 325 0128 F3000000 		.4byte	.LASF22
+ 326 012c 01       		.byte	0x1
+ 327 012d B0       		.byte	0xb0
+ 328 012e 77000000 		.4byte	0x77
+ 329 0132 00000000 		.4byte	.LFB3
+ 330 0136 0C000000 		.4byte	.LFE3-.LFB3
+ 331 013a 01       		.uleb128 0x1
+ 332 013b 9C       		.byte	0x9c
+ 333 013c 0B       		.uleb128 0xb
+ 334 013d A3000000 		.4byte	.LASF23
+ 335 0141 01       		.byte	0x1
+ 336 0142 C6       		.byte	0xc6
+ 337 0143 6B000000 		.4byte	0x6b
+ 338 0147 00000000 		.4byte	.LFB4
+ 339 014b 10000000 		.4byte	.LFE4-.LFB4
+ 340 014f 01       		.uleb128 0x1
+ 341 0150 9C       		.byte	0x9c
+ 342 0151 00       		.byte	0
+ 343              		.section	.debug_abbrev,"",%progbits
+ 344              	.Ldebug_abbrev0:
+ 345 0000 01       		.uleb128 0x1
+ 346 0001 11       		.uleb128 0x11
+ 347 0002 01       		.byte	0x1
+ 348 0003 25       		.uleb128 0x25
+ 349 0004 0E       		.uleb128 0xe
+ 350 0005 13       		.uleb128 0x13
+ 351 0006 0B       		.uleb128 0xb
+ 352 0007 03       		.uleb128 0x3
+ 353 0008 0E       		.uleb128 0xe
+ 354 0009 1B       		.uleb128 0x1b
+ 355 000a 0E       		.uleb128 0xe
+ 356 000b 55       		.uleb128 0x55
+ 357 000c 17       		.uleb128 0x17
+ 358 000d 11       		.uleb128 0x11
+ 359 000e 01       		.uleb128 0x1
+ 360 000f 10       		.uleb128 0x10
+ 361 0010 17       		.uleb128 0x17
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc551DZ5.s 			page 11
+
+
+ 362 0011 00       		.byte	0
+ 363 0012 00       		.byte	0
+ 364 0013 02       		.uleb128 0x2
+ 365 0014 24       		.uleb128 0x24
+ 366 0015 00       		.byte	0
+ 367 0016 0B       		.uleb128 0xb
+ 368 0017 0B       		.uleb128 0xb
+ 369 0018 3E       		.uleb128 0x3e
+ 370 0019 0B       		.uleb128 0xb
+ 371 001a 03       		.uleb128 0x3
+ 372 001b 0E       		.uleb128 0xe
+ 373 001c 00       		.byte	0
+ 374 001d 00       		.byte	0
+ 375 001e 03       		.uleb128 0x3
+ 376 001f 24       		.uleb128 0x24
+ 377 0020 00       		.byte	0
+ 378 0021 0B       		.uleb128 0xb
+ 379 0022 0B       		.uleb128 0xb
+ 380 0023 3E       		.uleb128 0x3e
+ 381 0024 0B       		.uleb128 0xb
+ 382 0025 03       		.uleb128 0x3
+ 383 0026 08       		.uleb128 0x8
+ 384 0027 00       		.byte	0
+ 385 0028 00       		.byte	0
+ 386 0029 04       		.uleb128 0x4
+ 387 002a 16       		.uleb128 0x16
+ 388 002b 00       		.byte	0
+ 389 002c 03       		.uleb128 0x3
+ 390 002d 0E       		.uleb128 0xe
+ 391 002e 3A       		.uleb128 0x3a
+ 392 002f 0B       		.uleb128 0xb
+ 393 0030 3B       		.uleb128 0x3b
+ 394 0031 05       		.uleb128 0x5
+ 395 0032 49       		.uleb128 0x49
+ 396 0033 13       		.uleb128 0x13
+ 397 0034 00       		.byte	0
+ 398 0035 00       		.byte	0
+ 399 0036 05       		.uleb128 0x5
+ 400 0037 35       		.uleb128 0x35
+ 401 0038 00       		.byte	0
+ 402 0039 49       		.uleb128 0x49
+ 403 003a 13       		.uleb128 0x13
+ 404 003b 00       		.byte	0
+ 405 003c 00       		.byte	0
+ 406 003d 06       		.uleb128 0x6
+ 407 003e 2E       		.uleb128 0x2e
+ 408 003f 00       		.byte	0
+ 409 0040 3F       		.uleb128 0x3f
+ 410 0041 19       		.uleb128 0x19
+ 411 0042 03       		.uleb128 0x3
+ 412 0043 0E       		.uleb128 0xe
+ 413 0044 3A       		.uleb128 0x3a
+ 414 0045 0B       		.uleb128 0xb
+ 415 0046 3B       		.uleb128 0x3b
+ 416 0047 0B       		.uleb128 0xb
+ 417 0048 27       		.uleb128 0x27
+ 418 0049 19       		.uleb128 0x19
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc551DZ5.s 			page 12
+
+
+ 419 004a 11       		.uleb128 0x11
+ 420 004b 01       		.uleb128 0x1
+ 421 004c 12       		.uleb128 0x12
+ 422 004d 06       		.uleb128 0x6
+ 423 004e 40       		.uleb128 0x40
+ 424 004f 18       		.uleb128 0x18
+ 425 0050 9742     		.uleb128 0x2117
+ 426 0052 19       		.uleb128 0x19
+ 427 0053 00       		.byte	0
+ 428 0054 00       		.byte	0
+ 429 0055 07       		.uleb128 0x7
+ 430 0056 2E       		.uleb128 0x2e
+ 431 0057 01       		.byte	0x1
+ 432 0058 3F       		.uleb128 0x3f
+ 433 0059 19       		.uleb128 0x19
+ 434 005a 03       		.uleb128 0x3
+ 435 005b 0E       		.uleb128 0xe
+ 436 005c 3A       		.uleb128 0x3a
+ 437 005d 0B       		.uleb128 0xb
+ 438 005e 3B       		.uleb128 0x3b
+ 439 005f 0B       		.uleb128 0xb
+ 440 0060 27       		.uleb128 0x27
+ 441 0061 19       		.uleb128 0x19
+ 442 0062 11       		.uleb128 0x11
+ 443 0063 01       		.uleb128 0x1
+ 444 0064 12       		.uleb128 0x12
+ 445 0065 06       		.uleb128 0x6
+ 446 0066 40       		.uleb128 0x40
+ 447 0067 18       		.uleb128 0x18
+ 448 0068 9742     		.uleb128 0x2117
+ 449 006a 19       		.uleb128 0x19
+ 450 006b 01       		.uleb128 0x1
+ 451 006c 13       		.uleb128 0x13
+ 452 006d 00       		.byte	0
+ 453 006e 00       		.byte	0
+ 454 006f 08       		.uleb128 0x8
+ 455 0070 05       		.uleb128 0x5
+ 456 0071 00       		.byte	0
+ 457 0072 03       		.uleb128 0x3
+ 458 0073 0E       		.uleb128 0xe
+ 459 0074 3A       		.uleb128 0x3a
+ 460 0075 0B       		.uleb128 0xb
+ 461 0076 3B       		.uleb128 0x3b
+ 462 0077 0B       		.uleb128 0xb
+ 463 0078 49       		.uleb128 0x49
+ 464 0079 13       		.uleb128 0x13
+ 465 007a 02       		.uleb128 0x2
+ 466 007b 17       		.uleb128 0x17
+ 467 007c 00       		.byte	0
+ 468 007d 00       		.byte	0
+ 469 007e 09       		.uleb128 0x9
+ 470 007f 34       		.uleb128 0x34
+ 471 0080 00       		.byte	0
+ 472 0081 03       		.uleb128 0x3
+ 473 0082 0E       		.uleb128 0xe
+ 474 0083 3A       		.uleb128 0x3a
+ 475 0084 0B       		.uleb128 0xb
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc551DZ5.s 			page 13
+
+
+ 476 0085 3B       		.uleb128 0x3b
+ 477 0086 0B       		.uleb128 0xb
+ 478 0087 49       		.uleb128 0x49
+ 479 0088 13       		.uleb128 0x13
+ 480 0089 02       		.uleb128 0x2
+ 481 008a 17       		.uleb128 0x17
+ 482 008b 00       		.byte	0
+ 483 008c 00       		.byte	0
+ 484 008d 0A       		.uleb128 0xa
+ 485 008e 34       		.uleb128 0x34
+ 486 008f 00       		.byte	0
+ 487 0090 03       		.uleb128 0x3
+ 488 0091 0E       		.uleb128 0xe
+ 489 0092 3A       		.uleb128 0x3a
+ 490 0093 0B       		.uleb128 0xb
+ 491 0094 3B       		.uleb128 0x3b
+ 492 0095 0B       		.uleb128 0xb
+ 493 0096 49       		.uleb128 0x49
+ 494 0097 13       		.uleb128 0x13
+ 495 0098 02       		.uleb128 0x2
+ 496 0099 18       		.uleb128 0x18
+ 497 009a 00       		.byte	0
+ 498 009b 00       		.byte	0
+ 499 009c 0B       		.uleb128 0xb
+ 500 009d 2E       		.uleb128 0x2e
+ 501 009e 00       		.byte	0
+ 502 009f 3F       		.uleb128 0x3f
+ 503 00a0 19       		.uleb128 0x19
+ 504 00a1 03       		.uleb128 0x3
+ 505 00a2 0E       		.uleb128 0xe
+ 506 00a3 3A       		.uleb128 0x3a
+ 507 00a4 0B       		.uleb128 0xb
+ 508 00a5 3B       		.uleb128 0x3b
+ 509 00a6 0B       		.uleb128 0xb
+ 510 00a7 27       		.uleb128 0x27
+ 511 00a8 19       		.uleb128 0x19
+ 512 00a9 49       		.uleb128 0x49
+ 513 00aa 13       		.uleb128 0x13
+ 514 00ab 11       		.uleb128 0x11
+ 515 00ac 01       		.uleb128 0x1
+ 516 00ad 12       		.uleb128 0x12
+ 517 00ae 06       		.uleb128 0x6
+ 518 00af 40       		.uleb128 0x40
+ 519 00b0 18       		.uleb128 0x18
+ 520 00b1 9742     		.uleb128 0x2117
+ 521 00b3 19       		.uleb128 0x19
+ 522 00b4 00       		.byte	0
+ 523 00b5 00       		.byte	0
+ 524 00b6 00       		.byte	0
+ 525              		.section	.debug_loc,"",%progbits
+ 526              	.Ldebug_loc0:
+ 527              	.LLST0:
+ 528 0000 00000000 		.4byte	.LVL0
+ 529 0004 0A000000 		.4byte	.LVL2
+ 530 0008 0100     		.2byte	0x1
+ 531 000a 50       		.byte	0x50
+ 532 000b 0A000000 		.4byte	.LVL2
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc551DZ5.s 			page 14
+
+
+ 533 000f 1C000000 		.4byte	.LFE2
+ 534 0013 0400     		.2byte	0x4
+ 535 0015 F3       		.byte	0xf3
+ 536 0016 01       		.uleb128 0x1
+ 537 0017 50       		.byte	0x50
+ 538 0018 9F       		.byte	0x9f
+ 539 0019 00000000 		.4byte	0
+ 540 001d 00000000 		.4byte	0
+ 541              	.LLST1:
+ 542 0021 00000000 		.4byte	.LVL0
+ 543 0025 0C000000 		.4byte	.LVL3
+ 544 0029 0100     		.2byte	0x1
+ 545 002b 51       		.byte	0x51
+ 546 002c 0C000000 		.4byte	.LVL3
+ 547 0030 1C000000 		.4byte	.LFE2
+ 548 0034 0400     		.2byte	0x4
+ 549 0036 F3       		.byte	0xf3
+ 550 0037 01       		.uleb128 0x1
+ 551 0038 51       		.byte	0x51
+ 552 0039 9F       		.byte	0x9f
+ 553 003a 00000000 		.4byte	0
+ 554 003e 00000000 		.4byte	0
+ 555              	.LLST2:
+ 556 0042 08000000 		.4byte	.LVL1
+ 557 0046 0E000000 		.4byte	.LVL4
+ 558 004a 0100     		.2byte	0x1
+ 559 004c 53       		.byte	0x53
+ 560 004d 00000000 		.4byte	0
+ 561 0051 00000000 		.4byte	0
+ 562              		.section	.debug_aranges,"",%progbits
+ 563 0000 3C000000 		.4byte	0x3c
+ 564 0004 0200     		.2byte	0x2
+ 565 0006 00000000 		.4byte	.Ldebug_info0
+ 566 000a 04       		.byte	0x4
+ 567 000b 00       		.byte	0
+ 568 000c 0000     		.2byte	0
+ 569 000e 0000     		.2byte	0
+ 570 0010 00000000 		.4byte	.LFB0
+ 571 0014 14000000 		.4byte	.LFE0-.LFB0
+ 572 0018 00000000 		.4byte	.LFB1
+ 573 001c 10000000 		.4byte	.LFE1-.LFB1
+ 574 0020 00000000 		.4byte	.LFB2
+ 575 0024 1C000000 		.4byte	.LFE2-.LFB2
+ 576 0028 00000000 		.4byte	.LFB3
+ 577 002c 0C000000 		.4byte	.LFE3-.LFB3
+ 578 0030 00000000 		.4byte	.LFB4
+ 579 0034 10000000 		.4byte	.LFE4-.LFB4
+ 580 0038 00000000 		.4byte	0
+ 581 003c 00000000 		.4byte	0
+ 582              		.section	.debug_ranges,"",%progbits
+ 583              	.Ldebug_ranges0:
+ 584 0000 00000000 		.4byte	.LFB0
+ 585 0004 14000000 		.4byte	.LFE0
+ 586 0008 00000000 		.4byte	.LFB1
+ 587 000c 10000000 		.4byte	.LFE1
+ 588 0010 00000000 		.4byte	.LFB2
+ 589 0014 1C000000 		.4byte	.LFE2
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc551DZ5.s 			page 15
+
+
+ 590 0018 00000000 		.4byte	.LFB3
+ 591 001c 0C000000 		.4byte	.LFE3
+ 592 0020 00000000 		.4byte	.LFB4
+ 593 0024 10000000 		.4byte	.LFE4
+ 594 0028 00000000 		.4byte	0
+ 595 002c 00000000 		.4byte	0
+ 596              		.section	.debug_line,"",%progbits
+ 597              	.Ldebug_line0:
+ 598 0000 AE000000 		.section	.debug_str,"MS",%progbits,1
+ 598      02004400 
+ 598      00000201 
+ 598      FB0E0D00 
+ 598      01010101 
+ 599              	.LASF15:
+ 600 0000 72656733 		.ascii	"reg32\000"
+ 600      3200
+ 601              	.LASF20:
+ 602 0006 6D61736B 		.ascii	"maskVal\000"
+ 602      56616C00 
+ 603              	.LASF17:
+ 604 000e 436C6F63 		.ascii	"Clock_5_Stop\000"
+ 604      6B5F355F 
+ 604      53746F70 
+ 604      00
+ 605              	.LASF12:
+ 606 001b 666C6F61 		.ascii	"float\000"
+ 606      7400
+ 607              	.LASF25:
+ 608 0021 47656E65 		.ascii	"Generated_Source\\PSoC4\\Clock_5.c\000"
+ 608      72617465 
+ 608      645F536F 
+ 608      75726365 
+ 608      5C50536F 
+ 609              	.LASF1:
+ 610 0042 756E7369 		.ascii	"unsigned char\000"
+ 610      676E6564 
+ 610      20636861 
+ 610      7200
+ 611              	.LASF5:
+ 612 0050 6C6F6E67 		.ascii	"long unsigned int\000"
+ 612      20756E73 
+ 612      69676E65 
+ 612      6420696E 
+ 612      7400
+ 613              	.LASF3:
+ 614 0062 73686F72 		.ascii	"short unsigned int\000"
+ 614      7420756E 
+ 614      7369676E 
+ 614      65642069 
+ 614      6E7400
+ 615              	.LASF18:
+ 616 0075 636C6B44 		.ascii	"clkDivider\000"
+ 616      69766964 
+ 616      657200
+ 617              	.LASF13:
+ 618 0080 646F7562 		.ascii	"double\000"
+ 618      6C6500
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc551DZ5.s 			page 16
+
+
+ 619              	.LASF21:
+ 620 0087 72656756 		.ascii	"regVal\000"
+ 620      616C00
+ 621              	.LASF19:
+ 622 008e 636C6B46 		.ascii	"clkFractional\000"
+ 622      72616374 
+ 622      696F6E61 
+ 622      6C00
+ 623              	.LASF10:
+ 624 009c 75696E74 		.ascii	"uint16\000"
+ 624      313600
+ 625              	.LASF23:
+ 626 00a3 436C6F63 		.ascii	"Clock_5_GetFractionalDividerRegister\000"
+ 626      6B5F355F 
+ 626      47657446 
+ 626      72616374 
+ 626      696F6E61 
+ 627              	.LASF11:
+ 628 00c8 75696E74 		.ascii	"uint32\000"
+ 628      333200
+ 629              	.LASF8:
+ 630 00cf 756E7369 		.ascii	"unsigned int\000"
+ 630      676E6564 
+ 630      20696E74 
+ 630      00
+ 631              	.LASF7:
+ 632 00dc 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 632      206C6F6E 
+ 632      6720756E 
+ 632      7369676E 
+ 632      65642069 
+ 633              	.LASF22:
+ 634 00f3 436C6F63 		.ascii	"Clock_5_GetDividerRegister\000"
+ 634      6B5F355F 
+ 634      47657444 
+ 634      69766964 
+ 634      65725265 
+ 635              	.LASF24:
+ 636 010e 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 636      43313120 
+ 636      352E342E 
+ 636      31203230 
+ 636      31363036 
+ 637 0141 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m0 -mthumb -g -O"
+ 637      20726576 
+ 637      6973696F 
+ 637      6E203233 
+ 637      37373135 
+ 638 0174 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 638      66756E63 
+ 638      74696F6E 
+ 638      2D736563 
+ 638      74696F6E 
+ 639              	.LASF27:
+ 640 019c 436C6F63 		.ascii	"Clock_5_SetFractionalDividerRegister\000"
+ 640      6B5F355F 
+ 640      53657446 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc551DZ5.s 			page 17
+
+
+ 640      72616374 
+ 640      696F6E61 
+ 641              	.LASF16:
+ 642 01c1 436C6F63 		.ascii	"Clock_5_Start\000"
+ 642      6B5F355F 
+ 642      53746172 
+ 642      7400
+ 643              	.LASF6:
+ 644 01cf 6C6F6E67 		.ascii	"long long int\000"
+ 644      206C6F6E 
+ 644      6720696E 
+ 644      7400
+ 645              	.LASF14:
+ 646 01dd 63686172 		.ascii	"char\000"
+ 646      00
+ 647              	.LASF2:
+ 648 01e2 73686F72 		.ascii	"short int\000"
+ 648      7420696E 
+ 648      7400
+ 649              	.LASF9:
+ 650 01ec 75696E74 		.ascii	"uint8\000"
+ 650      3800
+ 651              	.LASF4:
+ 652 01f2 6C6F6E67 		.ascii	"long int\000"
+ 652      20696E74 
+ 652      00
+ 653              	.LASF0:
+ 654 01fb 7369676E 		.ascii	"signed char\000"
+ 654      65642063 
+ 654      68617200 
+ 655              	.LASF26:
+ 656 0207 433A5C55 		.ascii	"C:\\Users\\kylep\\Box Sync\\Box Sync\\Feniex Electr"
+ 656      73657273 
+ 656      5C6B796C 
+ 656      65705C42 
+ 656      6F782053 
+ 657 0235 6963616C 		.ascii	"ical Files\\WorkingFolder-Kyle\\Firm-AI-Cube\\81-00"
+ 657      2046696C 
+ 657      65735C57 
+ 657      6F726B69 
+ 657      6E67466F 
+ 658 0265 3032342D 		.ascii	"024-01.cydsn\000"
+ 658      30312E63 
+ 658      7964736E 
+ 658      00
+ 659              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

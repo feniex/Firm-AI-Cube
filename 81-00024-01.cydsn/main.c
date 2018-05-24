@@ -158,6 +158,8 @@ void takeInputValues(void)
         setBrightness(trackBrightness);
         test = 3;
     }
+    
+    setBrightness(trackBrightness);
     timerForInputs = 0;
     }
 }

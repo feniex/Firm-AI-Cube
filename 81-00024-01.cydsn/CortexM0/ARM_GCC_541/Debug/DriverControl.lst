@@ -1,0 +1,4874 @@
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"DriverControl.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.getTemperatureStatus,"ax",%progbits
+  20              		.align	2
+  21              		.code	16
+  22              		.thumb_func
+  23              		.type	getTemperatureStatus, %function
+  24              	getTemperatureStatus:
+  25              	.LFB45:
+  26              		.file 1 "DriverControl.c"
+   1:DriverControl.c **** /* ========================================
+   2:DriverControl.c ****  *
+   3:DriverControl.c ****  * Copyright YOUR COMPANY, THE YEAR
+   4:DriverControl.c ****  * All Rights Reserved
+   5:DriverControl.c ****  * UNPUBLISHED, LICENSED SOFTWARE.
+   6:DriverControl.c ****  *
+   7:DriverControl.c ****  * CONFIDENTIAL AND PROPRIETARY INFORMATION
+   8:DriverControl.c ****  * WHICH IS THE PROPERTY OF your company.
+   9:DriverControl.c ****  *
+  10:DriverControl.c ****  * ========================================
+  11:DriverControl.c **** */
+  12:DriverControl.c **** /**********CHANGE LOG**********/
+  13:DriverControl.c **** 
+  14:DriverControl.c **** 
+  15:DriverControl.c **** /**********PREPROCESSOR DIRECTIVES**********/
+  16:DriverControl.c **** #include "CommonVariables.h"
+  17:DriverControl.c **** #include "DriverControl.h"
+  18:DriverControl.c **** #include "BrightnessCommManager.h"
+  19:DriverControl.c **** 
+  20:DriverControl.c **** #define MAX_ADC_CONVERSION_WAIT_LIMIT   5
+  21:DriverControl.c **** #define SAMPLE_COUNT_PER_CYCLE          1
+  22:DriverControl.c **** #define BRIGHTNESS_CHANGE_PER_SAMPLE    1
+  23:DriverControl.c **** 
+  24:DriverControl.c **** #define RAMP_DOWN_RATE                  1
+  25:DriverControl.c **** #define STEADY_INCREASE_RATE            1
+  26:DriverControl.c **** #define STEADY_DECREASE_RATE            1
+  27:DriverControl.c **** 
+  28:DriverControl.c **** #define MAX_SCALING_FACTOR              0xFF
+  29:DriverControl.c **** #define SAFE_TEMPERATURE_TOLERANCE      0
+  30:DriverControl.c **** 
+  31:DriverControl.c **** #define VOLTAGE_SENSE_LOWER_BOUND       670
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 2
+
+
+  32:DriverControl.c **** #define VOLTAGE_SENSE_UPPER_BOUND       870
+  33:DriverControl.c ****     
+  34:DriverControl.c **** /**********DEFINED CONSTANTS**********/
+  35:DriverControl.c **** enum RegulationState
+  36:DriverControl.c **** {
+  37:DriverControl.c ****     STARTUP,
+  38:DriverControl.c ****     STEADY_INCREASE,
+  39:DriverControl.c ****     STEADY_DECREASE,
+  40:DriverControl.c ****     NO_CHANGE
+  41:DriverControl.c **** };
+  42:DriverControl.c **** 
+  43:DriverControl.c **** enum TemperatureStatus
+  44:DriverControl.c **** {
+  45:DriverControl.c ****     WITHIN_TOLERANCE,
+  46:DriverControl.c ****     EXCEEDED_UPPER_BOUND,
+  47:DriverControl.c ****     EXCEEDED_LOWER_BOUND,
+  48:DriverControl.c ****     ERROR
+  49:DriverControl.c **** };
+  50:DriverControl.c **** 
+  51:DriverControl.c **** typedef struct
+  52:DriverControl.c **** {
+  53:DriverControl.c ****     const int16 MAX_TEMPERATURE;
+  54:DriverControl.c ****     const int16 SAFE_TEMPERATURE;
+  55:DriverControl.c **** }ThermalLimit;
+  56:DriverControl.c **** 
+  57:DriverControl.c **** static ThermalLimit ThermalLimitArray[ADC_SAMPLE_COUNT] = 
+  58:DriverControl.c **** {
+  59:DriverControl.c ****     {450, 100}, //LED
+  60:DriverControl.c ****     {400, 100}, //SwitchNode    
+  61:DriverControl.c ****     {100,  80}, //Micro
+  62:DriverControl.c ****     {300, 100}  //Ambient
+  63:DriverControl.c **** };
+  64:DriverControl.c **** 
+  65:DriverControl.c **** /**********DATA STRUCTURES**********/
+  66:DriverControl.c **** typedef struct
+  67:DriverControl.c **** {
+  68:DriverControl.c ****     uint8 ID_Number;
+  69:DriverControl.c ****     uint8 driverCount;
+  70:DriverControl.c ****     uint8 bLastDriverInChain;
+  71:DriverControl.c **** }DriverProperties;
+  72:DriverControl.c **** 
+  73:DriverControl.c **** static DriverProperties PositionData = {0, 0, TRUE};
+  74:DriverControl.c **** 
+  75:DriverControl.c **** typedef struct
+  76:DriverControl.c **** {
+  77:DriverControl.c ****     uint8 requestedBrightness;
+  78:DriverControl.c ****     uint8 regulatedBrightness;
+  79:DriverControl.c ****     uint8 previousBrightness;
+  80:DriverControl.c ****     enum RegulationState currentState;
+  81:DriverControl.c ****     uint8 scalingFactor;
+  82:DriverControl.c **** }RegulationProperties;
+  83:DriverControl.c **** 
+  84:DriverControl.c **** static RegulationProperties RegulationData = {0, 0, 0, STARTUP, 0xFF};
+  85:DriverControl.c **** 
+  86:DriverControl.c **** typedef struct
+  87:DriverControl.c **** {
+  88:DriverControl.c ****     uint8 bEnable;
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 3
+
+
+  89:DriverControl.c ****     uint8 scalingFactor;
+  90:DriverControl.c **** }VoltageSenseProperties;
+  91:DriverControl.c **** 
+  92:DriverControl.c **** static VoltageSenseProperties VoltageSenseData = {TRUE, 0xFF};
+  93:DriverControl.c **** 
+  94:DriverControl.c **** /**********GLOBAL VARIABLES**********/
+  95:DriverControl.c **** 
+  96:DriverControl.c **** 
+  97:DriverControl.c **** /**********LOCAL FUNCTION PROTOTYPES**********/
+  98:DriverControl.c **** static enum TemperatureStatus getTemperatureStatus(int16* TemperatureData,
+  99:DriverControl.c ****     uint8 length, int16 tolerance);
+ 100:DriverControl.c **** 
+ 101:DriverControl.c **** /**********DEFINED GLOBAL FUNCTIONS**********/
+ 102:DriverControl.c **** uint8 getPreviousBrightness(void)
+ 103:DriverControl.c **** {
+ 104:DriverControl.c ****     return RegulationData.previousBrightness;
+ 105:DriverControl.c **** }
+ 106:DriverControl.c **** 
+ 107:DriverControl.c **** /*******************************************************************************
+ 108:DriverControl.c **** * Function Name: getDriverID
+ 109:DriverControl.c **** ********************************************************************************
+ 110:DriverControl.c **** *
+ 111:DriverControl.c **** * Summary:
+ 112:DriverControl.c **** *  Returns the ID number of this driver.
+ 113:DriverControl.c **** *
+ 114:DriverControl.c **** * Parameters:
+ 115:DriverControl.c **** *  None.
+ 116:DriverControl.c **** *
+ 117:DriverControl.c **** * Return:
+ 118:DriverControl.c **** *  Value 1 for head module, 2 - 8 for trailer module
+ 119:DriverControl.c **** *
+ 120:DriverControl.c **** *******************************************************************************/
+ 121:DriverControl.c **** uint8 getDriverID(void)
+ 122:DriverControl.c **** {
+ 123:DriverControl.c ****     return PositionData.ID_Number;
+ 124:DriverControl.c **** }
+ 125:DriverControl.c **** 
+ 126:DriverControl.c **** /*******************************************************************************
+ 127:DriverControl.c **** * Function Name: setIdentityByComm
+ 128:DriverControl.c **** ********************************************************************************
+ 129:DriverControl.c **** *
+ 130:DriverControl.c **** * Summary:
+ 131:DriverControl.c **** *  Sets the ID number for this driver based on UART communication. The number
+ 132:DriverControl.c **** *  assigned is the driver position away from the controller.
+ 133:DriverControl.c **** *
+ 134:DriverControl.c **** * Parameters:
+ 135:DriverControl.c **** *  positionNumber: The ID number based on position in the chain.
+ 136:DriverControl.c **** *
+ 137:DriverControl.c **** * Return:
+ 138:DriverControl.c **** *  SUCCESS for valid input, FAILURE otherwise
+ 139:DriverControl.c **** *
+ 140:DriverControl.c **** *******************************************************************************/
+ 141:DriverControl.c **** uint8 setIdentityByComm(uint8 positionNumber)
+ 142:DriverControl.c **** {
+ 143:DriverControl.c ****     if(positionNumber < HEAD_MODULE_ID || positionNumber > MAX_DRIVER_COUNT)
+ 144:DriverControl.c ****         return FAILURE;
+ 145:DriverControl.c ****     
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 4
+
+
+ 146:DriverControl.c ****     PositionData.ID_Number = positionNumber;
+ 147:DriverControl.c ****     
+ 148:DriverControl.c ****     return SUCCESS;
+ 149:DriverControl.c **** }
+ 150:DriverControl.c **** 
+ 151:DriverControl.c **** /*******************************************************************************
+ 152:DriverControl.c **** * Function Name: setDriverCount
+ 153:DriverControl.c **** ********************************************************************************
+ 154:DriverControl.c **** *
+ 155:DriverControl.c **** * Summary:
+ 156:DriverControl.c **** *  Sets the number of drivers in the chain.
+ 157:DriverControl.c **** *
+ 158:DriverControl.c **** * Parameters:
+ 159:DriverControl.c **** *  newDriverCount: The updated number of drivers in the chain.
+ 160:DriverControl.c **** *
+ 161:DriverControl.c **** * Return:
+ 162:DriverControl.c **** *  SUCCESS for valid input, FAILURE otherwise
+ 163:DriverControl.c **** *
+ 164:DriverControl.c **** *******************************************************************************/
+ 165:DriverControl.c **** uint8 setDriverCount(uint8 newDriverCount)
+ 166:DriverControl.c **** {
+ 167:DriverControl.c ****     if(newDriverCount < HEAD_MODULE_ID || newDriverCount > MAX_DRIVER_COUNT)
+ 168:DriverControl.c ****         return FAILURE;
+ 169:DriverControl.c ****     
+ 170:DriverControl.c ****     PositionData.driverCount = newDriverCount;
+ 171:DriverControl.c ****     
+ 172:DriverControl.c ****     return SUCCESS;
+ 173:DriverControl.c **** }
+ 174:DriverControl.c **** 
+ 175:DriverControl.c **** /*******************************************************************************
+ 176:DriverControl.c **** * Function Name: isLastDriverInChain
+ 177:DriverControl.c **** ********************************************************************************
+ 178:DriverControl.c **** *
+ 179:DriverControl.c **** * Summary:
+ 180:DriverControl.c **** *  Determines if this driver is at the end of the chain.
+ 181:DriverControl.c **** *
+ 182:DriverControl.c **** * Parameters:
+ 183:DriverControl.c **** *  None.
+ 184:DriverControl.c **** *
+ 185:DriverControl.c **** * Return:
+ 186:DriverControl.c **** *  TRUE if last driver in the chain, FALSE if otherwise
+ 187:DriverControl.c **** *
+ 188:DriverControl.c **** *******************************************************************************/
+ 189:DriverControl.c **** uint8 isLastDriverInChain(void)
+ 190:DriverControl.c **** {
+ 191:DriverControl.c ****     return PositionData.bLastDriverInChain;
+ 192:DriverControl.c **** }
+ 193:DriverControl.c **** 
+ 194:DriverControl.c **** /*******************************************************************************
+ 195:DriverControl.c **** * Function Name: setAsNotLastDriverInChain
+ 196:DriverControl.c **** ********************************************************************************
+ 197:DriverControl.c **** *
+ 198:DriverControl.c **** * Summary:
+ 199:DriverControl.c **** *  At the start of the program, this driver is assumed to the be the last driver
+ 200:DriverControl.c **** *  in the chain. If an ACK packet is received at startup, this function is called
+ 201:DriverControl.c **** *  to update the status for not being in the last driver.
+ 202:DriverControl.c **** *
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 5
+
+
+ 203:DriverControl.c **** * Parameters:
+ 204:DriverControl.c **** *  None.
+ 205:DriverControl.c **** *
+ 206:DriverControl.c **** * Return:
+ 207:DriverControl.c **** *  None.
+ 208:DriverControl.c **** *
+ 209:DriverControl.c **** *******************************************************************************/
+ 210:DriverControl.c **** void setAsNotLastDriverInChain(void)
+ 211:DriverControl.c **** {
+ 212:DriverControl.c ****     PositionData.bLastDriverInChain = FALSE;
+ 213:DriverControl.c **** }
+ 214:DriverControl.c **** 
+ 215:DriverControl.c **** /*******************************************************************************
+ 216:DriverControl.c **** * Function Name: checkForUnderVoltage
+ 217:DriverControl.c **** ********************************************************************************
+ 218:DriverControl.c **** *
+ 219:DriverControl.c **** * Summary:
+ 220:DriverControl.c **** *  Takes in the voltage sense reading and updates the undervoltage status.
+ 221:DriverControl.c **** *
+ 222:DriverControl.c **** * Parameters:
+ 223:DriverControl.c **** *  ADC_Value: The voltage sense reading
+ 224:DriverControl.c **** *
+ 225:DriverControl.c **** * Return:
+ 226:DriverControl.c **** *  None.
+ 227:DriverControl.c **** *
+ 228:DriverControl.c **** *******************************************************************************/
+ 229:DriverControl.c **** void checkForUnderVoltage(uint16 ADC_Value)
+ 230:DriverControl.c **** {
+ 231:DriverControl.c ****     if((VoltageSenseData.bEnable == TRUE) && (ADC_Value < VOLTAGE_SENSE_LOWER_BOUND))
+ 232:DriverControl.c ****     {
+ 233:DriverControl.c ****         VoltageSenseData.bEnable = FALSE;
+ 234:DriverControl.c ****         LED_Timer_Stop();
+ 235:DriverControl.c ****         VoltageSenseData.scalingFactor = 0;
+ 236:DriverControl.c ****     }
+ 237:DriverControl.c ****     else if((VoltageSenseData.bEnable == FALSE) && (ADC_Value > (VOLTAGE_SENSE_UPPER_BOUND)))
+ 238:DriverControl.c ****     {
+ 239:DriverControl.c ****         VoltageSenseData.bEnable = TRUE;
+ 240:DriverControl.c ****         LED_Timer_Start();
+ 241:DriverControl.c ****     }
+ 242:DriverControl.c **** }
+ 243:DriverControl.c **** 
+ 244:DriverControl.c **** /*******************************************************************************
+ 245:DriverControl.c **** * Function Name: processSoftStart
+ 246:DriverControl.c **** ********************************************************************************
+ 247:DriverControl.c **** *
+ 248:DriverControl.c **** * Summary:
+ 249:DriverControl.c **** *  Called in LED_ISR, increases the brightness from full on to full off in 1 second.
+ 250:DriverControl.c **** *
+ 251:DriverControl.c **** * Parameters:
+ 252:DriverControl.c **** *  None.
+ 253:DriverControl.c **** *
+ 254:DriverControl.c **** * Return:
+ 255:DriverControl.c **** *  None.
+ 256:DriverControl.c **** *
+ 257:DriverControl.c **** *******************************************************************************/
+ 258:DriverControl.c **** void processSoftStart(void)
+ 259:DriverControl.c **** {
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 6
+
+
+ 260:DriverControl.c ****     LED_Timer_ClearInterrupt(LED_Timer_INTR_MASK_TC);
+ 261:DriverControl.c ****     
+ 262:DriverControl.c ****     if(VoltageSenseData.scalingFactor < 0xFF)
+ 263:DriverControl.c ****         VoltageSenseData.scalingFactor++;
+ 264:DriverControl.c ****     else
+ 265:DriverControl.c ****         LED_Timer_Stop();
+ 266:DriverControl.c **** }
+ 267:DriverControl.c **** 
+ 268:DriverControl.c **** /*******************************************************************************
+ 269:DriverControl.c **** * Function Name: updateBrightnessLevel
+ 270:DriverControl.c **** ********************************************************************************
+ 271:DriverControl.c **** *
+ 272:DriverControl.c **** * Summary:
+ 273:DriverControl.c **** *  Updates the brightness of the LED. Resulting brightness may not match the
+ 274:DriverControl.c **** *  requested brightness depending on temperature regulation state.
+ 275:DriverControl.c **** *
+ 276:DriverControl.c **** * Parameters:
+ 277:DriverControl.c **** *  brightnessLevel: The desired brightness level for the LED.
+ 278:DriverControl.c **** *
+ 279:DriverControl.c **** * Return:
+ 280:DriverControl.c **** *  The resulting brightness level of the LED
+ 281:DriverControl.c **** *
+ 282:DriverControl.c **** *******************************************************************************/
+ 283:DriverControl.c **** uint8 updateBrightnessLevel(uint8 brightnessLevel, uint8 bRegulated)
+ 284:DriverControl.c **** {
+ 285:DriverControl.c ****     if(bRegulated != TRUE && bRegulated != FALSE)
+ 286:DriverControl.c ****     return 0;
+ 287:DriverControl.c ****     
+ 288:DriverControl.c ****    // brightnessLevel = (uint8)((uint16)(VoltageSenseData.scalingFactor)*
+ 289:DriverControl.c ****    //                     (uint16)(brightnessLevel) / MAX_SCALING_FACTOR);
+ 290:DriverControl.c ****     
+ 291:DriverControl.c ****     if(brightnessLevel != RegulationData.requestedBrightness)
+ 292:DriverControl.c ****         RegulationData.requestedBrightness = brightnessLevel;
+ 293:DriverControl.c ****     
+ 294:DriverControl.c ****     if((PositionData.ID_Number != HEAD_MODULE_ID) || (bRegulated == FALSE))
+ 295:DriverControl.c ****     {   
+ 296:DriverControl.c ****         if(RegulationData.requestedBrightness != RegulationData.previousBrightness)
+ 297:DriverControl.c ****         {
+ 298:DriverControl.c ****             if(RegulationData.requestedBrightness > 0)
+ 299:DriverControl.c ****             {
+ 300:DriverControl.c ****                 PWM_Enable_Write(TRUE);
+ 301:DriverControl.c ****                 PWM_WriteCompare(RegulationData.requestedBrightness);
+ 302:DriverControl.c ****             }
+ 303:DriverControl.c ****             else
+ 304:DriverControl.c ****             {
+ 305:DriverControl.c ****                 PWM_Enable_Write(FALSE);
+ 306:DriverControl.c ****             }
+ 307:DriverControl.c ****         };
+ 308:DriverControl.c ****         
+ 309:DriverControl.c ****         RegulationData.previousBrightness = RegulationData.requestedBrightness;
+ 310:DriverControl.c ****         return RegulationData.requestedBrightness;
+ 311:DriverControl.c ****     }
+ 312:DriverControl.c ****     
+ 313:DriverControl.c ****     if(RegulationData.regulatedBrightness != RegulationData.previousBrightness)
+ 314:DriverControl.c ****     {
+ 315:DriverControl.c ****         if(RegulationData.regulatedBrightness > 0)
+ 316:DriverControl.c ****         {
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 7
+
+
+ 317:DriverControl.c ****             PWM_Enable_Write(TRUE);
+ 318:DriverControl.c ****             PWM_WriteCompare(RegulationData.regulatedBrightness);
+ 319:DriverControl.c ****         }
+ 320:DriverControl.c ****         else
+ 321:DriverControl.c ****             PWM_Enable_Write(FALSE);
+ 322:DriverControl.c ****     }
+ 323:DriverControl.c ****     
+ 324:DriverControl.c ****     RegulationData.previousBrightness = RegulationData.regulatedBrightness;    
+ 325:DriverControl.c ****     return RegulationData.regulatedBrightness;
+ 326:DriverControl.c **** }
+ 327:DriverControl.c **** 
+ 328:DriverControl.c **** /*******************************************************************************
+ 329:DriverControl.c **** * Function Name: getMaxTemperature
+ 330:DriverControl.c **** ********************************************************************************
+ 331:DriverControl.c **** *
+ 332:DriverControl.c **** * Summary:
+ 333:DriverControl.c **** *  Obtains the next temperature sample from ADC.
+ 334:DriverControl.c **** *
+ 335:DriverControl.c **** * Parameters:
+ 336:DriverControl.c **** *  None.
+ 337:DriverControl.c **** *
+ 338:DriverControl.c **** * Return:
+ 339:DriverControl.c **** *  The next temperature sample from ADC
+ 340:DriverControl.c **** *
+ 341:DriverControl.c **** *******************************************************************************/
+ 342:DriverControl.c **** int16 getMaxTemperature(enum TemperaturePoint channelNumber)
+ 343:DriverControl.c **** {
+ 344:DriverControl.c ****     if(channelNumber < LED || channelNumber > MICRO)
+ 345:DriverControl.c ****         return 0;
+ 346:DriverControl.c ****     
+ 347:DriverControl.c ****     return ThermalLimitArray[channelNumber].MAX_TEMPERATURE;
+ 348:DriverControl.c **** }
+ 349:DriverControl.c **** 
+ 350:DriverControl.c **** /*******************************************************************************
+ 351:DriverControl.c **** * Function Name: getTemperatureSample
+ 352:DriverControl.c **** ********************************************************************************
+ 353:DriverControl.c **** *
+ 354:DriverControl.c **** * Summary:
+ 355:DriverControl.c **** *  Obtains the next temperature sample(s) from ADC. This function can return a
+ 356:DriverControl.c **** *  single sample or multiple samples in one call.
+ 357:DriverControl.c **** *
+ 358:DriverControl.c **** * Parameters:
+ 359:DriverControl.c **** *  bSingleSample: TRUE for single sample, FALSE for multiple samples
+ 360:DriverControl.c **** *  channelNumber: Channel selection for single sample: LED, SWITCH_NODE, AMBIENT, or MICRO
+ 361:DriverControl.c **** *  sampleArray: Reference to the array that contains 4 temperature samples
+ 362:DriverControl.c **** *  length: Size of the array in # of temperature points
+ 363:DriverControl.c **** *
+ 364:DriverControl.c **** * Return:
+ 365:DriverControl.c **** *  Single temperature value or Reference to array of 4 temperature samples
+ 366:DriverControl.c **** *
+ 367:DriverControl.c **** *******************************************************************************/
+ 368:DriverControl.c **** int16 getTemperatureSample(uint8 bSingleSample, enum TemperaturePoint channelNumber, 
+ 369:DriverControl.c ****     int16* sampleArray, uint8 length)
+ 370:DriverControl.c **** {  
+ 371:DriverControl.c ****     uint8 ADC_WaitCount = 0;
+ 372:DriverControl.c ****     int16 temperatureSample_16 = 0;
+ 373:DriverControl.c ****     float temperatureSample_float = 0;
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 8
+
+
+ 374:DriverControl.c ****     uint32 channelIndex = 0;    
+ 375:DriverControl.c ****     
+ 376:DriverControl.c ****     if((bSingleSample != TRUE) && (bSingleSample != FALSE))
+ 377:DriverControl.c ****         return 0;
+ 378:DriverControl.c ****     
+ 379:DriverControl.c ****     if(bSingleSample)
+ 380:DriverControl.c ****     {   //Input check for single sample
+ 381:DriverControl.c ****         if(channelNumber < LED || channelNumber > VOLTAGE_SENSE)
+ 382:DriverControl.c ****             return 0;
+ 383:DriverControl.c ****     }
+ 384:DriverControl.c ****     else
+ 385:DriverControl.c ****     {   //Input check for multiple samples
+ 386:DriverControl.c ****         if(sampleArray == NULL || length > ADC_SAMPLE_COUNT)
+ 387:DriverControl.c ****             return 0;
+ 388:DriverControl.c ****     }
+ 389:DriverControl.c ****     
+ 390:DriverControl.c ****     while(!ADC_SAR_Seq_IsEndConversion(ADC_SAR_Seq_RETURN_STATUS) 
+ 391:DriverControl.c ****         && (ADC_WaitCount < MAX_ADC_CONVERSION_WAIT_LIMIT))
+ 392:DriverControl.c ****     {   //Wait for ADC conversion to complete
+ 393:DriverControl.c ****         ADC_WaitCount++;
+ 394:DriverControl.c ****         CyDelayUs(8);
+ 395:DriverControl.c ****     }
+ 396:DriverControl.c ****     
+ 397:DriverControl.c ****     if(ADC_WaitCount > MAX_ADC_CONVERSION_WAIT_LIMIT)
+ 398:DriverControl.c ****         return 0;   //For case when conversion doesn't complete
+ 399:DriverControl.c ****     
+ 400:DriverControl.c ****     if(bSingleSample)
+ 401:DriverControl.c ****     {   //Get single sample
+ 402:DriverControl.c ****         if(channelNumber == MICRO)
+ 403:DriverControl.c ****         {
+ 404:DriverControl.c ****             //temperatureSample_float = (float)(ADC_SAR_Seq_GetResult16(VOLTAGE_SENSE));
+ 405:DriverControl.c ****             temperatureSample_float = temperatureSample_float * 5 / 1.024;
+ 406:DriverControl.c ****             temperatureSample_16 = (int16)(DieTemp_CountsTo_Celsius((int32)(temperatureSample_float
+ 407:DriverControl.c ****         }
+ 408:DriverControl.c ****         else
+ 409:DriverControl.c ****         {
+ 410:DriverControl.c ****             if(channelNumber == VOLTAGE_SENSE)
+ 411:DriverControl.c ****                 temperatureSample_16 = ADC_SAR_Seq_GetResult16((uint32)(MICRO));
+ 412:DriverControl.c ****             else
+ 413:DriverControl.c ****                 temperatureSample_16 = ADC_SAR_Seq_GetResult16((uint32)(channelNumber));
+ 414:DriverControl.c ****         }
+ 415:DriverControl.c ****     }
+ 416:DriverControl.c ****     else
+ 417:DriverControl.c ****     {   //Get 4 temperature samples
+ 418:DriverControl.c ****         for(channelIndex = 0; channelIndex < (ADC_SAMPLE_COUNT - 2); channelIndex++)
+ 419:DriverControl.c ****         {
+ 420:DriverControl.c ****             temperatureSample_16 = ADC_SAR_Seq_GetResult16(channelIndex);
+ 421:DriverControl.c ****             sampleArray[channelIndex] = temperatureSample_16;
+ 422:DriverControl.c ****         }
+ 423:DriverControl.c ****             
+ 424:DriverControl.c ****         //temperatureSample_float = (float)(ADC_SAR_Seq_GetResult16(MICRO));
+ 425:DriverControl.c ****         //temperatureSample_float = temperatureSample_float * 5 / 1.024;
+ 426:DriverControl.c ****         //sampleArray[ADC_SAMPLE_COUNT - 2]
+ 427:DriverControl.c ****         //    = (int16)(DieTemp_CountsTo_Celsius((int32)(temperatureSample_float)));
+ 428:DriverControl.c ****             
+ 429:DriverControl.c ****         //temperatureSample_16 = ADC_SAR_Seq_GetResult16(MICRO);
+ 430:DriverControl.c ****         //    sampleArray[ADC_SAMPLE_COUNT - 1] = temperatureSample_16;
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 9
+
+
+ 431:DriverControl.c ****     }
+ 432:DriverControl.c ****     
+ 433:DriverControl.c ****     return temperatureSample_16;
+ 434:DriverControl.c **** }
+ 435:DriverControl.c **** 
+ 436:DriverControl.c **** /*******************************************************************************
+ 437:DriverControl.c **** * Function Name: getNewMaxBrightness
+ 438:DriverControl.c **** ********************************************************************************
+ 439:DriverControl.c **** *
+ 440:DriverControl.c **** * Summary:
+ 441:DriverControl.c **** *  Returns the new max brightness that was adjusted during regulation.
+ 442:DriverControl.c **** *
+ 443:DriverControl.c **** * Parameters:
+ 444:DriverControl.c **** *  None
+ 445:DriverControl.c **** *
+ 446:DriverControl.c **** * Return:
+ 447:DriverControl.c **** *  Adjusted max brightness
+ 448:DriverControl.c **** *
+ 449:DriverControl.c **** *******************************************************************************/
+ 450:DriverControl.c **** uint8 getNewMaxBrightness(void)
+ 451:DriverControl.c **** {
+ 452:DriverControl.c ****     return RegulationData.scalingFactor;
+ 453:DriverControl.c **** }
+ 454:DriverControl.c **** 
+ 455:DriverControl.c **** /*******************************************************************************
+ 456:DriverControl.c **** * Function Name: regulateBrightness
+ 457:DriverControl.c **** ********************************************************************************
+ 458:DriverControl.c **** *
+ 459:DriverControl.c **** * Summary:
+ 460:DriverControl.c **** *  Adjusts the brightness of the LED based on 4 temperature readings
+ 461:DriverControl.c **** *  and the current regulation state.
+ 462:DriverControl.c **** *
+ 463:DriverControl.c **** * Parameters:
+ 464:DriverControl.c **** *  TemperatureData: Reference to the 4 temperature points
+ 465:DriverControl.c **** *  length: Size of array in # of temperature points
+ 466:DriverControl.c **** *
+ 467:DriverControl.c **** * Return:
+ 468:DriverControl.c **** *  The updated brightness based on regulation
+ 469:DriverControl.c **** *
+ 470:DriverControl.c **** *******************************************************************************/
+ 471:DriverControl.c **** uint8 regulateBrightness(int16* TemperatureData, uint8 length)
+ 472:DriverControl.c **** {
+ 473:DriverControl.c ****     static uint8 timerCountLocal = 0;
+ 474:DriverControl.c ****     enum TemperatureStatus temperatureStatus = WITHIN_TOLERANCE;
+ 475:DriverControl.c ****     
+ 476:DriverControl.c ****     if(TemperatureData == NULL || length > ADC_SAMPLE_COUNT || PositionData.ID_Number != 1)
+ 477:DriverControl.c ****         return 0;
+ 478:DriverControl.c ****     
+ 479:DriverControl.c ****     switch(RegulationData.currentState)
+ 480:DriverControl.c ****     {
+ 481:DriverControl.c ****         case STARTUP:
+ 482:DriverControl.c ****             if((timerCountLocal % SAMPLE_COUNT_PER_CYCLE) == 0)
+ 483:DriverControl.c ****             {
+ 484:DriverControl.c ****                 RegulationData.scalingFactor = MAX_SCALING_FACTOR;
+ 485:DriverControl.c ****                 RegulationData.regulatedBrightness = RegulationData.requestedBrightness;
+ 486:DriverControl.c ****             }
+ 487:DriverControl.c ****             if((timerCountLocal % (SAMPLE_COUNT_PER_CYCLE * BRIGHTNESS_CHANGE_PER_SAMPLE)) == 0)
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 10
+
+
+ 488:DriverControl.c ****             {
+ 489:DriverControl.c ****                 temperatureStatus = getTemperatureStatus(TemperatureData, length, 0);
+ 490:DriverControl.c ****                 if(temperatureStatus == EXCEEDED_UPPER_BOUND)
+ 491:DriverControl.c ****                     RegulationData.currentState = STEADY_DECREASE;
+ 492:DriverControl.c ****             }
+ 493:DriverControl.c ****             break;            
+ 494:DriverControl.c ****         case STEADY_DECREASE:  
+ 495:DriverControl.c ****             if((timerCountLocal % SAMPLE_COUNT_PER_CYCLE) == 0)
+ 496:DriverControl.c ****             {
+ 497:DriverControl.c ****                 if(RegulationData.scalingFactor > 0)
+ 498:DriverControl.c ****                     RegulationData.scalingFactor--;
+ 499:DriverControl.c ****             
+ 500:DriverControl.c ****                 RegulationData.regulatedBrightness = (uint8)((uint16)(RegulationData.requestedBrigh
+ 501:DriverControl.c ****                     (uint16)(RegulationData.scalingFactor) / MAX_SCALING_FACTOR);
+ 502:DriverControl.c ****             }
+ 503:DriverControl.c ****             if((timerCountLocal % (SAMPLE_COUNT_PER_CYCLE * BRIGHTNESS_CHANGE_PER_SAMPLE)) == 0)
+ 504:DriverControl.c ****             {
+ 505:DriverControl.c ****                 temperatureStatus = getTemperatureStatus(TemperatureData, length,
+ 506:DriverControl.c ****                     SAFE_TEMPERATURE_TOLERANCE);
+ 507:DriverControl.c ****                 
+ 508:DriverControl.c ****                 if(temperatureStatus == WITHIN_TOLERANCE)
+ 509:DriverControl.c ****                     RegulationData.currentState = NO_CHANGE;
+ 510:DriverControl.c ****                 else if(temperatureStatus == EXCEEDED_LOWER_BOUND)
+ 511:DriverControl.c ****                     RegulationData.currentState = STEADY_INCREASE;
+ 512:DriverControl.c ****             }
+ 513:DriverControl.c ****             break;
+ 514:DriverControl.c ****         case STEADY_INCREASE:
+ 515:DriverControl.c ****             if((timerCountLocal % SAMPLE_COUNT_PER_CYCLE) == 0)
+ 516:DriverControl.c ****             {
+ 517:DriverControl.c ****                 if(RegulationData.scalingFactor < MAX_SCALING_FACTOR)
+ 518:DriverControl.c ****                     RegulationData.scalingFactor++;
+ 519:DriverControl.c ****             
+ 520:DriverControl.c ****                 RegulationData.regulatedBrightness = (uint8)((uint16)(RegulationData.requestedBrigh
+ 521:DriverControl.c ****                     (uint16)(RegulationData.scalingFactor) / MAX_SCALING_FACTOR);
+ 522:DriverControl.c ****             }
+ 523:DriverControl.c ****             if((timerCountLocal % (SAMPLE_COUNT_PER_CYCLE * BRIGHTNESS_CHANGE_PER_SAMPLE)) == 0)
+ 524:DriverControl.c ****             {
+ 525:DriverControl.c ****                 temperatureStatus = getTemperatureStatus(TemperatureData, length,
+ 526:DriverControl.c ****                     SAFE_TEMPERATURE_TOLERANCE);
+ 527:DriverControl.c ****                 
+ 528:DriverControl.c ****                 if(temperatureStatus == EXCEEDED_UPPER_BOUND)
+ 529:DriverControl.c ****                     RegulationData.currentState = STEADY_DECREASE;
+ 530:DriverControl.c ****                 else if(temperatureStatus == WITHIN_TOLERANCE)
+ 531:DriverControl.c ****                     RegulationData.currentState = NO_CHANGE;
+ 532:DriverControl.c ****             }
+ 533:DriverControl.c ****             break;
+ 534:DriverControl.c ****         case NO_CHANGE:
+ 535:DriverControl.c ****             if((timerCountLocal % SAMPLE_COUNT_PER_CYCLE) == 0)
+ 536:DriverControl.c ****             {
+ 537:DriverControl.c ****                 RegulationData.regulatedBrightness = (uint8)((uint16)(RegulationData.requestedBrigh
+ 538:DriverControl.c ****                     (uint16)(RegulationData.scalingFactor) / MAX_SCALING_FACTOR);
+ 539:DriverControl.c ****             }
+ 540:DriverControl.c ****             if((timerCountLocal % (SAMPLE_COUNT_PER_CYCLE * BRIGHTNESS_CHANGE_PER_SAMPLE)) == 0)
+ 541:DriverControl.c ****             {
+ 542:DriverControl.c ****                 temperatureStatus = getTemperatureStatus(TemperatureData, length,
+ 543:DriverControl.c ****                     SAFE_TEMPERATURE_TOLERANCE);
+ 544:DriverControl.c ****                 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 11
+
+
+ 545:DriverControl.c ****                 if(temperatureStatus == EXCEEDED_UPPER_BOUND)
+ 546:DriverControl.c ****                     RegulationData.currentState = STEADY_DECREASE;
+ 547:DriverControl.c ****                 else if(temperatureStatus == EXCEEDED_LOWER_BOUND)
+ 548:DriverControl.c ****                     RegulationData.currentState = STEADY_INCREASE;
+ 549:DriverControl.c ****             }
+ 550:DriverControl.c ****             break;
+ 551:DriverControl.c ****     }
+ 552:DriverControl.c ****     
+ 553:DriverControl.c ****     timerCountLocal = (timerCountLocal + 1) % (SAMPLE_COUNT_PER_CYCLE * BRIGHTNESS_CHANGE_PER_SAMPL
+ 554:DriverControl.c ****     return RegulationData.regulatedBrightness;    
+ 555:DriverControl.c **** }
+ 556:DriverControl.c **** 
+ 557:DriverControl.c **** /**********DEFINED LOCAL FUNCTIONS**********/
+ 558:DriverControl.c **** /*******************************************************************************
+ 559:DriverControl.c **** * Function Name: getTemperatureStatus
+ 560:DriverControl.c **** ********************************************************************************
+ 561:DriverControl.c **** *
+ 562:DriverControl.c **** * Summary:
+ 563:DriverControl.c **** *  Returns temperature status based on 4 temperature points
+ 564:DriverControl.c **** *
+ 565:DriverControl.c **** * Parameters:
+ 566:DriverControl.c **** *  TemperatureData: Reference to the 4 temperature samples to check
+ 567:DriverControl.c **** *  length: Size of int16 array
+ 568:DriverControl.c **** *  tolerance: Tolerance amount for regulation (Range: temperature +/- tolerance)
+ 569:DriverControl.c **** *
+ 570:DriverControl.c **** * Return:
+ 571:DriverControl.c **** *  EXCEEDED_UPPER_BOUND, EXCEEDED_LOWER_BOUND, or WITHIN_TOLERANCE as valid inputs,
+ 572:DriverControl.c **** *  ERROR otherwise
+ 573:DriverControl.c **** *
+ 574:DriverControl.c **** *******************************************************************************/
+ 575:DriverControl.c **** static enum TemperatureStatus getTemperatureStatus(int16* TemperatureData,
+ 576:DriverControl.c ****     uint8 length, int16 tolerance)
+ 577:DriverControl.c **** {
+  27              		.loc 1 577 0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 0
+  30              		@ frame_needed = 0, uses_anonymous_args = 0
+  31              	.LVL0:
+  32 0000 70B5     		push	{r4, r5, r6, lr}
+  33              		.cfi_def_cfa_offset 16
+  34              		.cfi_offset 4, -16
+  35              		.cfi_offset 5, -12
+  36              		.cfi_offset 6, -8
+  37              		.cfi_offset 14, -4
+  38              	.LVL1:
+ 578:DriverControl.c ****     enum TemperaturePoint dataIndex = LED;
+ 579:DriverControl.c ****     
+ 580:DriverControl.c ****     if(TemperatureData == NULL)
+  39              		.loc 1 580 0
+  40 0002 0028     		cmp	r0, #0
+  41 0004 1FD0     		beq	.L7
+ 581:DriverControl.c ****         return ERROR;
+ 582:DriverControl.c ****     
+ 583:DriverControl.c ****     if(length > ADC_SAMPLE_COUNT)
+  42              		.loc 1 583 0
+  43 0006 0429     		cmp	r1, #4
+  44 0008 1FD8     		bhi	.L8
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 12
+
+
+  45 000a 0023     		movs	r3, #0
+  46 000c 09E0     		b	.L3
+  47              	.LVL2:
+  48              	.L4:
+ 584:DriverControl.c ****         return ERROR;
+ 585:DriverControl.c ****     
+ 586:DriverControl.c ****     for(dataIndex = LED; dataIndex < length; dataIndex++)
+ 587:DriverControl.c ****     {
+ 588:DriverControl.c ****         if(TemperatureData[dataIndex] > 
+  49              		.loc 1 588 0
+  50 000e 5C00     		lsls	r4, r3, #1
+  51 0010 255E     		ldrsh	r5, [r4, r0]
+ 589:DriverControl.c ****             (ThermalLimitArray[dataIndex].MAX_TEMPERATURE + tolerance))
+  52              		.loc 1 589 0
+  53 0012 9C00     		lsls	r4, r3, #2
+  54 0014 104E     		ldr	r6, .L11
+  55 0016 A45F     		ldrsh	r4, [r4, r6]
+  56 0018 A418     		adds	r4, r4, r2
+ 588:DriverControl.c ****             (ThermalLimitArray[dataIndex].MAX_TEMPERATURE + tolerance))
+  57              		.loc 1 588 0
+  58 001a A542     		cmp	r5, r4
+  59 001c 17DC     		bgt	.L9
+ 586:DriverControl.c ****     {
+  60              		.loc 1 586 0 discriminator 2
+  61 001e 0133     		adds	r3, r3, #1
+  62              	.LVL3:
+  63 0020 DBB2     		uxtb	r3, r3
+  64              	.LVL4:
+  65              	.L3:
+ 586:DriverControl.c ****     {
+  66              		.loc 1 586 0 is_stmt 0 discriminator 1
+  67 0022 8B42     		cmp	r3, r1
+  68 0024 F3D3     		bcc	.L4
+  69 0026 0023     		movs	r3, #0
+  70              	.LVL5:
+  71 0028 09E0     		b	.L5
+  72              	.LVL6:
+  73              	.L6:
+ 590:DriverControl.c ****             return EXCEEDED_UPPER_BOUND;
+ 591:DriverControl.c ****     }
+ 592:DriverControl.c ****     
+ 593:DriverControl.c ****     for(dataIndex = LED; dataIndex < length; dataIndex++)
+ 594:DriverControl.c ****     {
+ 595:DriverControl.c ****         if(TemperatureData[dataIndex] < 
+  74              		.loc 1 595 0 is_stmt 1
+  75 002a 5C00     		lsls	r4, r3, #1
+  76 002c 255E     		ldrsh	r5, [r4, r0]
+ 596:DriverControl.c ****             (ThermalLimitArray[dataIndex].MAX_TEMPERATURE - tolerance))
+  77              		.loc 1 596 0
+  78 002e 9C00     		lsls	r4, r3, #2
+  79 0030 094E     		ldr	r6, .L11
+  80 0032 A45F     		ldrsh	r4, [r4, r6]
+  81 0034 A41A     		subs	r4, r4, r2
+ 595:DriverControl.c ****             (ThermalLimitArray[dataIndex].MAX_TEMPERATURE - tolerance))
+  82              		.loc 1 595 0
+  83 0036 A542     		cmp	r5, r4
+  84 0038 0BDB     		blt	.L10
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 13
+
+
+ 593:DriverControl.c ****     {
+  85              		.loc 1 593 0 discriminator 2
+  86 003a 0133     		adds	r3, r3, #1
+  87              	.LVL7:
+  88 003c DBB2     		uxtb	r3, r3
+  89              	.LVL8:
+  90              	.L5:
+ 593:DriverControl.c ****     {
+  91              		.loc 1 593 0 is_stmt 0 discriminator 1
+  92 003e 8B42     		cmp	r3, r1
+  93 0040 F3D3     		bcc	.L6
+ 597:DriverControl.c ****             return EXCEEDED_LOWER_BOUND;
+ 598:DriverControl.c ****     }
+ 599:DriverControl.c ****     
+ 600:DriverControl.c ****     return WITHIN_TOLERANCE;
+  94              		.loc 1 600 0 is_stmt 1
+  95 0042 0020     		movs	r0, #0
+  96              	.LVL9:
+  97 0044 06E0     		b	.L2
+  98              	.LVL10:
+  99              	.L7:
+ 581:DriverControl.c ****     
+ 100              		.loc 1 581 0
+ 101 0046 0320     		movs	r0, #3
+ 102              	.LVL11:
+ 103 0048 04E0     		b	.L2
+ 104              	.LVL12:
+ 105              	.L8:
+ 584:DriverControl.c ****     
+ 106              		.loc 1 584 0
+ 107 004a 0320     		movs	r0, #3
+ 108              	.LVL13:
+ 109 004c 02E0     		b	.L2
+ 110              	.LVL14:
+ 111              	.L9:
+ 590:DriverControl.c ****     }
+ 112              		.loc 1 590 0
+ 113 004e 0120     		movs	r0, #1
+ 114              	.LVL15:
+ 115 0050 00E0     		b	.L2
+ 116              	.LVL16:
+ 117              	.L10:
+ 597:DriverControl.c ****     }
+ 118              		.loc 1 597 0
+ 119 0052 0220     		movs	r0, #2
+ 120              	.LVL17:
+ 121              	.L2:
+ 601:DriverControl.c **** }
+ 122              		.loc 1 601 0
+ 123              		@ sp needed
+ 124 0054 70BD     		pop	{r4, r5, r6, pc}
+ 125              	.L12:
+ 126 0056 C046     		.align	2
+ 127              	.L11:
+ 128 0058 00000000 		.word	.LANCHOR0
+ 129              		.cfi_endproc
+ 130              	.LFE45:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 14
+
+
+ 131              		.size	getTemperatureStatus, .-getTemperatureStatus
+ 132              		.section	.text.getPreviousBrightness,"ax",%progbits
+ 133              		.align	2
+ 134              		.global	getPreviousBrightness
+ 135              		.code	16
+ 136              		.thumb_func
+ 137              		.type	getPreviousBrightness, %function
+ 138              	getPreviousBrightness:
+ 139              	.LFB32:
+ 103:DriverControl.c ****     return RegulationData.previousBrightness;
+ 140              		.loc 1 103 0
+ 141              		.cfi_startproc
+ 142              		@ args = 0, pretend = 0, frame = 0
+ 143              		@ frame_needed = 0, uses_anonymous_args = 0
+ 144              		@ link register save eliminated.
+ 104:DriverControl.c **** }
+ 145              		.loc 1 104 0
+ 146 0000 014B     		ldr	r3, .L14
+ 147 0002 9878     		ldrb	r0, [r3, #2]
+ 105:DriverControl.c **** 
+ 148              		.loc 1 105 0
+ 149              		@ sp needed
+ 150 0004 7047     		bx	lr
+ 151              	.L15:
+ 152 0006 C046     		.align	2
+ 153              	.L14:
+ 154 0008 00000000 		.word	.LANCHOR1
+ 155              		.cfi_endproc
+ 156              	.LFE32:
+ 157              		.size	getPreviousBrightness, .-getPreviousBrightness
+ 158              		.section	.text.getDriverID,"ax",%progbits
+ 159              		.align	2
+ 160              		.global	getDriverID
+ 161              		.code	16
+ 162              		.thumb_func
+ 163              		.type	getDriverID, %function
+ 164              	getDriverID:
+ 165              	.LFB33:
+ 122:DriverControl.c ****     return PositionData.ID_Number;
+ 166              		.loc 1 122 0
+ 167              		.cfi_startproc
+ 168              		@ args = 0, pretend = 0, frame = 0
+ 169              		@ frame_needed = 0, uses_anonymous_args = 0
+ 170              		@ link register save eliminated.
+ 123:DriverControl.c **** }
+ 171              		.loc 1 123 0
+ 172 0000 014B     		ldr	r3, .L17
+ 173 0002 187A     		ldrb	r0, [r3, #8]
+ 124:DriverControl.c **** 
+ 174              		.loc 1 124 0
+ 175              		@ sp needed
+ 176 0004 7047     		bx	lr
+ 177              	.L18:
+ 178 0006 C046     		.align	2
+ 179              	.L17:
+ 180 0008 00000000 		.word	.LANCHOR1
+ 181              		.cfi_endproc
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 15
+
+
+ 182              	.LFE33:
+ 183              		.size	getDriverID, .-getDriverID
+ 184              		.section	.text.setIdentityByComm,"ax",%progbits
+ 185              		.align	2
+ 186              		.global	setIdentityByComm
+ 187              		.code	16
+ 188              		.thumb_func
+ 189              		.type	setIdentityByComm, %function
+ 190              	setIdentityByComm:
+ 191              	.LFB34:
+ 142:DriverControl.c ****     if(positionNumber < HEAD_MODULE_ID || positionNumber > MAX_DRIVER_COUNT)
+ 192              		.loc 1 142 0
+ 193              		.cfi_startproc
+ 194              		@ args = 0, pretend = 0, frame = 0
+ 195              		@ frame_needed = 0, uses_anonymous_args = 0
+ 196              		@ link register save eliminated.
+ 197              	.LVL18:
+ 143:DriverControl.c ****         return FAILURE;
+ 198              		.loc 1 143 0
+ 199 0000 431E     		subs	r3, r0, #1
+ 200 0002 DBB2     		uxtb	r3, r3
+ 201 0004 072B     		cmp	r3, #7
+ 202 0006 03D8     		bhi	.L21
+ 146:DriverControl.c ****     
+ 203              		.loc 1 146 0
+ 204 0008 024B     		ldr	r3, .L22
+ 205 000a 1872     		strb	r0, [r3, #8]
+ 148:DriverControl.c **** }
+ 206              		.loc 1 148 0
+ 207 000c 0020     		movs	r0, #0
+ 208              	.LVL19:
+ 209 000e 00E0     		b	.L20
+ 210              	.LVL20:
+ 211              	.L21:
+ 144:DriverControl.c ****     
+ 212              		.loc 1 144 0
+ 213 0010 0120     		movs	r0, #1
+ 214              	.LVL21:
+ 215              	.L20:
+ 149:DriverControl.c **** 
+ 216              		.loc 1 149 0
+ 217              		@ sp needed
+ 218 0012 7047     		bx	lr
+ 219              	.L23:
+ 220              		.align	2
+ 221              	.L22:
+ 222 0014 00000000 		.word	.LANCHOR1
+ 223              		.cfi_endproc
+ 224              	.LFE34:
+ 225              		.size	setIdentityByComm, .-setIdentityByComm
+ 226              		.section	.text.setDriverCount,"ax",%progbits
+ 227              		.align	2
+ 228              		.global	setDriverCount
+ 229              		.code	16
+ 230              		.thumb_func
+ 231              		.type	setDriverCount, %function
+ 232              	setDriverCount:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 16
+
+
+ 233              	.LFB35:
+ 166:DriverControl.c ****     if(newDriverCount < HEAD_MODULE_ID || newDriverCount > MAX_DRIVER_COUNT)
+ 234              		.loc 1 166 0
+ 235              		.cfi_startproc
+ 236              		@ args = 0, pretend = 0, frame = 0
+ 237              		@ frame_needed = 0, uses_anonymous_args = 0
+ 238              		@ link register save eliminated.
+ 239              	.LVL22:
+ 167:DriverControl.c ****         return FAILURE;
+ 240              		.loc 1 167 0
+ 241 0000 431E     		subs	r3, r0, #1
+ 242 0002 DBB2     		uxtb	r3, r3
+ 243 0004 072B     		cmp	r3, #7
+ 244 0006 03D8     		bhi	.L26
+ 170:DriverControl.c ****     
+ 245              		.loc 1 170 0
+ 246 0008 024B     		ldr	r3, .L27
+ 247 000a 5872     		strb	r0, [r3, #9]
+ 172:DriverControl.c **** }
+ 248              		.loc 1 172 0
+ 249 000c 0020     		movs	r0, #0
+ 250              	.LVL23:
+ 251 000e 00E0     		b	.L25
+ 252              	.LVL24:
+ 253              	.L26:
+ 168:DriverControl.c ****     
+ 254              		.loc 1 168 0
+ 255 0010 0120     		movs	r0, #1
+ 256              	.LVL25:
+ 257              	.L25:
+ 173:DriverControl.c **** 
+ 258              		.loc 1 173 0
+ 259              		@ sp needed
+ 260 0012 7047     		bx	lr
+ 261              	.L28:
+ 262              		.align	2
+ 263              	.L27:
+ 264 0014 00000000 		.word	.LANCHOR1
+ 265              		.cfi_endproc
+ 266              	.LFE35:
+ 267              		.size	setDriverCount, .-setDriverCount
+ 268              		.section	.text.isLastDriverInChain,"ax",%progbits
+ 269              		.align	2
+ 270              		.global	isLastDriverInChain
+ 271              		.code	16
+ 272              		.thumb_func
+ 273              		.type	isLastDriverInChain, %function
+ 274              	isLastDriverInChain:
+ 275              	.LFB36:
+ 190:DriverControl.c ****     return PositionData.bLastDriverInChain;
+ 276              		.loc 1 190 0
+ 277              		.cfi_startproc
+ 278              		@ args = 0, pretend = 0, frame = 0
+ 279              		@ frame_needed = 0, uses_anonymous_args = 0
+ 280              		@ link register save eliminated.
+ 191:DriverControl.c **** }
+ 281              		.loc 1 191 0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 17
+
+
+ 282 0000 014B     		ldr	r3, .L30
+ 283 0002 987A     		ldrb	r0, [r3, #10]
+ 192:DriverControl.c **** 
+ 284              		.loc 1 192 0
+ 285              		@ sp needed
+ 286 0004 7047     		bx	lr
+ 287              	.L31:
+ 288 0006 C046     		.align	2
+ 289              	.L30:
+ 290 0008 00000000 		.word	.LANCHOR1
+ 291              		.cfi_endproc
+ 292              	.LFE36:
+ 293              		.size	isLastDriverInChain, .-isLastDriverInChain
+ 294              		.section	.text.setAsNotLastDriverInChain,"ax",%progbits
+ 295              		.align	2
+ 296              		.global	setAsNotLastDriverInChain
+ 297              		.code	16
+ 298              		.thumb_func
+ 299              		.type	setAsNotLastDriverInChain, %function
+ 300              	setAsNotLastDriverInChain:
+ 301              	.LFB37:
+ 211:DriverControl.c ****     PositionData.bLastDriverInChain = FALSE;
+ 302              		.loc 1 211 0
+ 303              		.cfi_startproc
+ 304              		@ args = 0, pretend = 0, frame = 0
+ 305              		@ frame_needed = 0, uses_anonymous_args = 0
+ 306              		@ link register save eliminated.
+ 212:DriverControl.c **** }
+ 307              		.loc 1 212 0
+ 308 0000 0022     		movs	r2, #0
+ 309 0002 014B     		ldr	r3, .L33
+ 310 0004 9A72     		strb	r2, [r3, #10]
+ 213:DriverControl.c **** 
+ 311              		.loc 1 213 0
+ 312              		@ sp needed
+ 313 0006 7047     		bx	lr
+ 314              	.L34:
+ 315              		.align	2
+ 316              	.L33:
+ 317 0008 00000000 		.word	.LANCHOR1
+ 318              		.cfi_endproc
+ 319              	.LFE37:
+ 320              		.size	setAsNotLastDriverInChain, .-setAsNotLastDriverInChain
+ 321              		.section	.text.checkForUnderVoltage,"ax",%progbits
+ 322              		.align	2
+ 323              		.global	checkForUnderVoltage
+ 324              		.code	16
+ 325              		.thumb_func
+ 326              		.type	checkForUnderVoltage, %function
+ 327              	checkForUnderVoltage:
+ 328              	.LFB38:
+ 230:DriverControl.c ****     if((VoltageSenseData.bEnable == TRUE) && (ADC_Value < VOLTAGE_SENSE_LOWER_BOUND))
+ 329              		.loc 1 230 0
+ 330              		.cfi_startproc
+ 331              		@ args = 0, pretend = 0, frame = 0
+ 332              		@ frame_needed = 0, uses_anonymous_args = 0
+ 333              	.LVL26:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 18
+
+
+ 334 0000 70B5     		push	{r4, r5, r6, lr}
+ 335              		.cfi_def_cfa_offset 16
+ 336              		.cfi_offset 4, -16
+ 337              		.cfi_offset 5, -12
+ 338              		.cfi_offset 6, -8
+ 339              		.cfi_offset 14, -4
+ 231:DriverControl.c ****     {
+ 340              		.loc 1 231 0
+ 341 0002 0C4B     		ldr	r3, .L38
+ 342 0004 1B7B     		ldrb	r3, [r3, #12]
+ 343 0006 012B     		cmp	r3, #1
+ 344 0008 09D1     		bne	.L36
+ 231:DriverControl.c ****     {
+ 345              		.loc 1 231 0 is_stmt 0 discriminator 1
+ 346 000a 0B4A     		ldr	r2, .L38+4
+ 347 000c 9042     		cmp	r0, r2
+ 348 000e 06D8     		bhi	.L36
+ 233:DriverControl.c ****         LED_Timer_Stop();
+ 349              		.loc 1 233 0 is_stmt 1
+ 350 0010 084C     		ldr	r4, .L38
+ 351 0012 0025     		movs	r5, #0
+ 352 0014 2573     		strb	r5, [r4, #12]
+ 234:DriverControl.c ****         VoltageSenseData.scalingFactor = 0;
+ 353              		.loc 1 234 0
+ 354 0016 FFF7FEFF 		bl	LED_Timer_Stop
+ 355              	.LVL27:
+ 235:DriverControl.c ****     }
+ 356              		.loc 1 235 0
+ 357 001a 6573     		strb	r5, [r4, #13]
+ 358 001c 09E0     		b	.L35
+ 359              	.LVL28:
+ 360              	.L36:
+ 237:DriverControl.c ****     {
+ 361              		.loc 1 237 0
+ 362 001e 002B     		cmp	r3, #0
+ 363 0020 07D1     		bne	.L35
+ 237:DriverControl.c ****     {
+ 364              		.loc 1 237 0 is_stmt 0 discriminator 1
+ 365 0022 064B     		ldr	r3, .L38+8
+ 366 0024 9842     		cmp	r0, r3
+ 367 0026 04D9     		bls	.L35
+ 239:DriverControl.c ****         LED_Timer_Start();
+ 368              		.loc 1 239 0 is_stmt 1
+ 369 0028 0122     		movs	r2, #1
+ 370 002a 024B     		ldr	r3, .L38
+ 371 002c 1A73     		strb	r2, [r3, #12]
+ 240:DriverControl.c ****     }
+ 372              		.loc 1 240 0
+ 373 002e FFF7FEFF 		bl	LED_Timer_Start
+ 374              	.LVL29:
+ 375              	.L35:
+ 242:DriverControl.c **** 
+ 376              		.loc 1 242 0
+ 377              		@ sp needed
+ 378 0032 70BD     		pop	{r4, r5, r6, pc}
+ 379              	.L39:
+ 380              		.align	2
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 19
+
+
+ 381              	.L38:
+ 382 0034 00000000 		.word	.LANCHOR1
+ 383 0038 9D020000 		.word	669
+ 384 003c 66030000 		.word	870
+ 385              		.cfi_endproc
+ 386              	.LFE38:
+ 387              		.size	checkForUnderVoltage, .-checkForUnderVoltage
+ 388              		.section	.text.processSoftStart,"ax",%progbits
+ 389              		.align	2
+ 390              		.global	processSoftStart
+ 391              		.code	16
+ 392              		.thumb_func
+ 393              		.type	processSoftStart, %function
+ 394              	processSoftStart:
+ 395              	.LFB39:
+ 259:DriverControl.c ****     LED_Timer_ClearInterrupt(LED_Timer_INTR_MASK_TC);
+ 396              		.loc 1 259 0
+ 397              		.cfi_startproc
+ 398              		@ args = 0, pretend = 0, frame = 0
+ 399              		@ frame_needed = 0, uses_anonymous_args = 0
+ 400 0000 10B5     		push	{r4, lr}
+ 401              		.cfi_def_cfa_offset 8
+ 402              		.cfi_offset 4, -8
+ 403              		.cfi_offset 14, -4
+ 260:DriverControl.c ****     
+ 404              		.loc 1 260 0
+ 405 0002 0120     		movs	r0, #1
+ 406 0004 FFF7FEFF 		bl	LED_Timer_ClearInterrupt
+ 407              	.LVL30:
+ 262:DriverControl.c ****         VoltageSenseData.scalingFactor++;
+ 408              		.loc 1 262 0
+ 409 0008 054B     		ldr	r3, .L43
+ 410 000a 5B7B     		ldrb	r3, [r3, #13]
+ 411 000c FF2B     		cmp	r3, #255
+ 412 000e 03D0     		beq	.L41
+ 263:DriverControl.c ****     else
+ 413              		.loc 1 263 0
+ 414 0010 0133     		adds	r3, r3, #1
+ 415 0012 034A     		ldr	r2, .L43
+ 416 0014 5373     		strb	r3, [r2, #13]
+ 417 0016 01E0     		b	.L40
+ 418              	.L41:
+ 265:DriverControl.c **** }
+ 419              		.loc 1 265 0
+ 420 0018 FFF7FEFF 		bl	LED_Timer_Stop
+ 421              	.LVL31:
+ 422              	.L40:
+ 266:DriverControl.c **** 
+ 423              		.loc 1 266 0
+ 424              		@ sp needed
+ 425 001c 10BD     		pop	{r4, pc}
+ 426              	.L44:
+ 427 001e C046     		.align	2
+ 428              	.L43:
+ 429 0020 00000000 		.word	.LANCHOR1
+ 430              		.cfi_endproc
+ 431              	.LFE39:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 20
+
+
+ 432              		.size	processSoftStart, .-processSoftStart
+ 433              		.section	.text.updateBrightnessLevel,"ax",%progbits
+ 434              		.align	2
+ 435              		.global	updateBrightnessLevel
+ 436              		.code	16
+ 437              		.thumb_func
+ 438              		.type	updateBrightnessLevel, %function
+ 439              	updateBrightnessLevel:
+ 440              	.LFB40:
+ 284:DriverControl.c ****     if(bRegulated != TRUE && bRegulated != FALSE)
+ 441              		.loc 1 284 0
+ 442              		.cfi_startproc
+ 443              		@ args = 0, pretend = 0, frame = 0
+ 444              		@ frame_needed = 0, uses_anonymous_args = 0
+ 445              	.LVL32:
+ 446 0000 10B5     		push	{r4, lr}
+ 447              		.cfi_def_cfa_offset 8
+ 448              		.cfi_offset 4, -8
+ 449              		.cfi_offset 14, -4
+ 285:DriverControl.c ****     return 0;
+ 450              		.loc 1 285 0
+ 451 0002 0129     		cmp	r1, #1
+ 452 0004 37D8     		bhi	.L54
+ 291:DriverControl.c ****         RegulationData.requestedBrightness = brightnessLevel;
+ 453              		.loc 1 291 0
+ 454 0006 1D4B     		ldr	r3, .L55
+ 455 0008 1B78     		ldrb	r3, [r3]
+ 456 000a 8342     		cmp	r3, r0
+ 457 000c 01D0     		beq	.L47
+ 292:DriverControl.c ****     
+ 458              		.loc 1 292 0
+ 459 000e 1B4B     		ldr	r3, .L55
+ 460 0010 1870     		strb	r0, [r3]
+ 461              	.L47:
+ 294:DriverControl.c ****     {   
+ 462              		.loc 1 294 0
+ 463 0012 1A4B     		ldr	r3, .L55
+ 464 0014 1B7A     		ldrb	r3, [r3, #8]
+ 465 0016 012B     		cmp	r3, #1
+ 466 0018 01D1     		bne	.L48
+ 294:DriverControl.c ****     {   
+ 467              		.loc 1 294 0 is_stmt 0 discriminator 1
+ 468 001a 0029     		cmp	r1, #0
+ 469 001c 15D1     		bne	.L49
+ 470              	.L48:
+ 296:DriverControl.c ****         {
+ 471              		.loc 1 296 0 is_stmt 1
+ 472 001e 174B     		ldr	r3, .L55
+ 473 0020 1A78     		ldrb	r2, [r3]
+ 474 0022 9B78     		ldrb	r3, [r3, #2]
+ 475 0024 9A42     		cmp	r2, r3
+ 476 0026 0CD0     		beq	.L50
+ 298:DriverControl.c ****             {
+ 477              		.loc 1 298 0
+ 478 0028 002A     		cmp	r2, #0
+ 479 002a 07D0     		beq	.L51
+ 300:DriverControl.c ****                 PWM_WriteCompare(RegulationData.requestedBrightness);
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 21
+
+
+ 480              		.loc 1 300 0
+ 481 002c 0120     		movs	r0, #1
+ 482              	.LVL33:
+ 483 002e FFF7FEFF 		bl	PWM_Enable_Write
+ 484              	.LVL34:
+ 301:DriverControl.c ****             }
+ 485              		.loc 1 301 0
+ 486 0032 124B     		ldr	r3, .L55
+ 487 0034 1878     		ldrb	r0, [r3]
+ 488 0036 FFF7FEFF 		bl	PWM_WriteCompare
+ 489              	.LVL35:
+ 490 003a 02E0     		b	.L50
+ 491              	.LVL36:
+ 492              	.L51:
+ 305:DriverControl.c ****             }
+ 493              		.loc 1 305 0
+ 494 003c 0020     		movs	r0, #0
+ 495              	.LVL37:
+ 496 003e FFF7FEFF 		bl	PWM_Enable_Write
+ 497              	.LVL38:
+ 498              	.L50:
+ 309:DriverControl.c ****         return RegulationData.requestedBrightness;
+ 499              		.loc 1 309 0
+ 500 0042 0E4B     		ldr	r3, .L55
+ 501 0044 1878     		ldrb	r0, [r3]
+ 502 0046 9870     		strb	r0, [r3, #2]
+ 310:DriverControl.c ****     }
+ 503              		.loc 1 310 0
+ 504 0048 16E0     		b	.L46
+ 505              	.LVL39:
+ 506              	.L49:
+ 313:DriverControl.c ****     {
+ 507              		.loc 1 313 0
+ 508 004a 0C4B     		ldr	r3, .L55
+ 509 004c 5A78     		ldrb	r2, [r3, #1]
+ 510 004e 9B78     		ldrb	r3, [r3, #2]
+ 511 0050 9A42     		cmp	r2, r3
+ 512 0052 0CD0     		beq	.L52
+ 315:DriverControl.c ****         {
+ 513              		.loc 1 315 0
+ 514 0054 002A     		cmp	r2, #0
+ 515 0056 07D0     		beq	.L53
+ 317:DriverControl.c ****             PWM_WriteCompare(RegulationData.regulatedBrightness);
+ 516              		.loc 1 317 0
+ 517 0058 0120     		movs	r0, #1
+ 518              	.LVL40:
+ 519 005a FFF7FEFF 		bl	PWM_Enable_Write
+ 520              	.LVL41:
+ 318:DriverControl.c ****         }
+ 521              		.loc 1 318 0
+ 522 005e 074B     		ldr	r3, .L55
+ 523 0060 5878     		ldrb	r0, [r3, #1]
+ 524 0062 FFF7FEFF 		bl	PWM_WriteCompare
+ 525              	.LVL42:
+ 526 0066 02E0     		b	.L52
+ 527              	.LVL43:
+ 528              	.L53:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 22
+
+
+ 321:DriverControl.c ****     }
+ 529              		.loc 1 321 0
+ 530 0068 0020     		movs	r0, #0
+ 531              	.LVL44:
+ 532 006a FFF7FEFF 		bl	PWM_Enable_Write
+ 533              	.LVL45:
+ 534              	.L52:
+ 324:DriverControl.c ****     return RegulationData.regulatedBrightness;
+ 535              		.loc 1 324 0
+ 536 006e 034B     		ldr	r3, .L55
+ 537 0070 5878     		ldrb	r0, [r3, #1]
+ 538 0072 9870     		strb	r0, [r3, #2]
+ 325:DriverControl.c **** }
+ 539              		.loc 1 325 0
+ 540 0074 00E0     		b	.L46
+ 541              	.LVL46:
+ 542              	.L54:
+ 286:DriverControl.c ****     
+ 543              		.loc 1 286 0
+ 544 0076 0020     		movs	r0, #0
+ 545              	.LVL47:
+ 546              	.L46:
+ 326:DriverControl.c **** 
+ 547              		.loc 1 326 0
+ 548              		@ sp needed
+ 549 0078 10BD     		pop	{r4, pc}
+ 550              	.L56:
+ 551 007a C046     		.align	2
+ 552              	.L55:
+ 553 007c 00000000 		.word	.LANCHOR1
+ 554              		.cfi_endproc
+ 555              	.LFE40:
+ 556              		.size	updateBrightnessLevel, .-updateBrightnessLevel
+ 557              		.section	.text.getMaxTemperature,"ax",%progbits
+ 558              		.align	2
+ 559              		.global	getMaxTemperature
+ 560              		.code	16
+ 561              		.thumb_func
+ 562              		.type	getMaxTemperature, %function
+ 563              	getMaxTemperature:
+ 564              	.LFB41:
+ 343:DriverControl.c ****     if(channelNumber < LED || channelNumber > MICRO)
+ 565              		.loc 1 343 0
+ 566              		.cfi_startproc
+ 567              		@ args = 0, pretend = 0, frame = 0
+ 568              		@ frame_needed = 0, uses_anonymous_args = 0
+ 569              		@ link register save eliminated.
+ 570              	.LVL48:
+ 344:DriverControl.c ****         return 0;
+ 571              		.loc 1 344 0
+ 572 0000 0428     		cmp	r0, #4
+ 573 0002 03D8     		bhi	.L59
+ 347:DriverControl.c **** }
+ 574              		.loc 1 347 0
+ 575 0004 8000     		lsls	r0, r0, #2
+ 576              	.LVL49:
+ 577 0006 024B     		ldr	r3, .L60
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 23
+
+
+ 578 0008 C05E     		ldrsh	r0, [r0, r3]
+ 579 000a 00E0     		b	.L58
+ 580              	.LVL50:
+ 581              	.L59:
+ 345:DriverControl.c ****     
+ 582              		.loc 1 345 0
+ 583 000c 0020     		movs	r0, #0
+ 584              	.LVL51:
+ 585              	.L58:
+ 348:DriverControl.c **** 
+ 586              		.loc 1 348 0
+ 587              		@ sp needed
+ 588 000e 7047     		bx	lr
+ 589              	.L61:
+ 590              		.align	2
+ 591              	.L60:
+ 592 0010 00000000 		.word	.LANCHOR0
+ 593              		.cfi_endproc
+ 594              	.LFE41:
+ 595              		.size	getMaxTemperature, .-getMaxTemperature
+ 596              		.section	.text.getTemperatureSample,"ax",%progbits
+ 597              		.align	2
+ 598              		.global	getTemperatureSample
+ 599              		.code	16
+ 600              		.thumb_func
+ 601              		.type	getTemperatureSample, %function
+ 602              	getTemperatureSample:
+ 603              	.LFB42:
+ 370:DriverControl.c ****     uint8 ADC_WaitCount = 0;
+ 604              		.loc 1 370 0
+ 605              		.cfi_startproc
+ 606              		@ args = 0, pretend = 0, frame = 0
+ 607              		@ frame_needed = 0, uses_anonymous_args = 0
+ 608              	.LVL52:
+ 609 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 610              		.cfi_def_cfa_offset 24
+ 611              		.cfi_offset 3, -24
+ 612              		.cfi_offset 4, -20
+ 613              		.cfi_offset 5, -16
+ 614              		.cfi_offset 6, -12
+ 615              		.cfi_offset 7, -8
+ 616              		.cfi_offset 14, -4
+ 617 0002 0700     		movs	r7, r0
+ 618 0004 0D00     		movs	r5, r1
+ 619 0006 1600     		movs	r6, r2
+ 620              	.LVL53:
+ 376:DriverControl.c ****         return 0;
+ 621              		.loc 1 376 0
+ 622 0008 0128     		cmp	r0, #1
+ 623 000a 3AD8     		bhi	.L72
+ 379:DriverControl.c ****     {   //Input check for single sample
+ 624              		.loc 1 379 0
+ 625 000c 0028     		cmp	r0, #0
+ 626 000e 03D0     		beq	.L64
+ 381:DriverControl.c ****             return 0;
+ 627              		.loc 1 381 0
+ 628 0010 0229     		cmp	r1, #2
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 24
+
+
+ 629 0012 38D8     		bhi	.L73
+ 630 0014 0024     		movs	r4, #0
+ 631 0016 0AE0     		b	.L65
+ 632              	.L64:
+ 386:DriverControl.c ****             return 0;
+ 633              		.loc 1 386 0
+ 634 0018 002A     		cmp	r2, #0
+ 635 001a 36D0     		beq	.L74
+ 386:DriverControl.c ****             return 0;
+ 636              		.loc 1 386 0 is_stmt 0 discriminator 1
+ 637 001c 042B     		cmp	r3, #4
+ 638 001e 36D8     		bhi	.L75
+ 639 0020 0024     		movs	r4, #0
+ 640 0022 04E0     		b	.L65
+ 641              	.LVL54:
+ 642              	.L67:
+ 393:DriverControl.c ****         CyDelayUs(8);
+ 643              		.loc 1 393 0 is_stmt 1
+ 644 0024 0134     		adds	r4, r4, #1
+ 645              	.LVL55:
+ 646 0026 E4B2     		uxtb	r4, r4
+ 647              	.LVL56:
+ 394:DriverControl.c ****     }
+ 648              		.loc 1 394 0
+ 649 0028 0820     		movs	r0, #8
+ 650 002a FFF7FEFF 		bl	CyDelayUs
+ 651              	.LVL57:
+ 652              	.L65:
+ 390:DriverControl.c ****         && (ADC_WaitCount < MAX_ADC_CONVERSION_WAIT_LIMIT))
+ 653              		.loc 1 390 0
+ 654 002e 0120     		movs	r0, #1
+ 655 0030 FFF7FEFF 		bl	ADC_SAR_Seq_IsEndConversion
+ 656              	.LVL58:
+ 657 0034 0028     		cmp	r0, #0
+ 658 0036 01D1     		bne	.L66
+ 391:DriverControl.c ****     {   //Wait for ADC conversion to complete
+ 659              		.loc 1 391 0
+ 660 0038 042C     		cmp	r4, #4
+ 661 003a F3D9     		bls	.L67
+ 662              	.L66:
+ 397:DriverControl.c ****         return 0;   //For case when conversion doesn't complete
+ 663              		.loc 1 397 0
+ 664 003c 052C     		cmp	r4, #5
+ 665 003e 28D8     		bhi	.L76
+ 400:DriverControl.c ****     {   //Get single sample
+ 666              		.loc 1 400 0
+ 667 0040 002F     		cmp	r7, #0
+ 668 0042 18D0     		beq	.L77
+ 402:DriverControl.c ****         {
+ 669              		.loc 1 402 0
+ 670 0044 042D     		cmp	r5, #4
+ 671 0046 04D1     		bne	.L69
+ 406:DriverControl.c ****         }
+ 672              		.loc 1 406 0
+ 673 0048 0020     		movs	r0, #0
+ 674 004a FFF7FEFF 		bl	DieTemp_CountsTo_Celsius
+ 675              	.LVL59:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 25
+
+
+ 676 004e 00B2     		sxth	r0, r0
+ 677 0050 20E0     		b	.L63
+ 678              	.LVL60:
+ 679              	.L69:
+ 410:DriverControl.c ****                 temperatureSample_16 = ADC_SAR_Seq_GetResult16((uint32)(MICRO));
+ 680              		.loc 1 410 0
+ 681 0052 022D     		cmp	r5, #2
+ 682 0054 03D1     		bne	.L70
+ 411:DriverControl.c ****             else
+ 683              		.loc 1 411 0
+ 684 0056 0420     		movs	r0, #4
+ 685 0058 FFF7FEFF 		bl	ADC_SAR_Seq_GetResult16
+ 686              	.LVL61:
+ 687 005c 1AE0     		b	.L63
+ 688              	.LVL62:
+ 689              	.L70:
+ 413:DriverControl.c ****         }
+ 690              		.loc 1 413 0
+ 691 005e 2800     		movs	r0, r5
+ 692 0060 FFF7FEFF 		bl	ADC_SAR_Seq_GetResult16
+ 693              	.LVL63:
+ 694 0064 16E0     		b	.L63
+ 695              	.LVL64:
+ 696              	.L71:
+ 420:DriverControl.c ****             sampleArray[channelIndex] = temperatureSample_16;
+ 697              		.loc 1 420 0 discriminator 3
+ 698 0066 2000     		movs	r0, r4
+ 699 0068 FFF7FEFF 		bl	ADC_SAR_Seq_GetResult16
+ 700              	.LVL65:
+ 701 006c 0300     		movs	r3, r0
+ 702              	.LVL66:
+ 421:DriverControl.c ****         }
+ 703              		.loc 1 421 0 discriminator 3
+ 704 006e 6200     		lsls	r2, r4, #1
+ 705 0070 B052     		strh	r0, [r6, r2]
+ 418:DriverControl.c ****         {
+ 706              		.loc 1 418 0 discriminator 3
+ 707 0072 0134     		adds	r4, r4, #1
+ 708              	.LVL67:
+ 709 0074 01E0     		b	.L68
+ 710              	.LVL68:
+ 711              	.L77:
+ 712 0076 0024     		movs	r4, #0
+ 713              	.LVL69:
+ 714 0078 0023     		movs	r3, #0
+ 715              	.LVL70:
+ 716              	.L68:
+ 418:DriverControl.c ****         {
+ 717              		.loc 1 418 0 is_stmt 0 discriminator 1
+ 718 007a 012C     		cmp	r4, #1
+ 719 007c F3D9     		bls	.L71
+ 720 007e 1800     		movs	r0, r3
+ 721 0080 08E0     		b	.L63
+ 722              	.LVL71:
+ 723              	.L72:
+ 377:DriverControl.c ****     
+ 724              		.loc 1 377 0 is_stmt 1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 26
+
+
+ 725 0082 0020     		movs	r0, #0
+ 726              	.LVL72:
+ 727 0084 06E0     		b	.L63
+ 728              	.LVL73:
+ 729              	.L73:
+ 382:DriverControl.c ****     }
+ 730              		.loc 1 382 0
+ 731 0086 0020     		movs	r0, #0
+ 732              	.LVL74:
+ 733 0088 04E0     		b	.L63
+ 734              	.LVL75:
+ 735              	.L74:
+ 387:DriverControl.c ****     }
+ 736              		.loc 1 387 0
+ 737 008a 0020     		movs	r0, #0
+ 738              	.LVL76:
+ 739 008c 02E0     		b	.L63
+ 740              	.LVL77:
+ 741              	.L75:
+ 742 008e 0020     		movs	r0, #0
+ 743              	.LVL78:
+ 744 0090 00E0     		b	.L63
+ 745              	.LVL79:
+ 746              	.L76:
+ 398:DriverControl.c ****     
+ 747              		.loc 1 398 0
+ 748 0092 0020     		movs	r0, #0
+ 749              	.LVL80:
+ 750              	.L63:
+ 434:DriverControl.c **** 
+ 751              		.loc 1 434 0
+ 752              		@ sp needed
+ 753              	.LVL81:
+ 754 0094 F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 755              		.cfi_endproc
+ 756              	.LFE42:
+ 757              		.size	getTemperatureSample, .-getTemperatureSample
+ 758 0096 C046     		.section	.text.getNewMaxBrightness,"ax",%progbits
+ 759              		.align	2
+ 760              		.global	getNewMaxBrightness
+ 761              		.code	16
+ 762              		.thumb_func
+ 763              		.type	getNewMaxBrightness, %function
+ 764              	getNewMaxBrightness:
+ 765              	.LFB43:
+ 451:DriverControl.c ****     return RegulationData.scalingFactor;
+ 766              		.loc 1 451 0
+ 767              		.cfi_startproc
+ 768              		@ args = 0, pretend = 0, frame = 0
+ 769              		@ frame_needed = 0, uses_anonymous_args = 0
+ 770              		@ link register save eliminated.
+ 452:DriverControl.c **** }
+ 771              		.loc 1 452 0
+ 772 0000 014B     		ldr	r3, .L79
+ 773 0002 1879     		ldrb	r0, [r3, #4]
+ 453:DriverControl.c **** 
+ 774              		.loc 1 453 0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 27
+
+
+ 775              		@ sp needed
+ 776 0004 7047     		bx	lr
+ 777              	.L80:
+ 778 0006 C046     		.align	2
+ 779              	.L79:
+ 780 0008 00000000 		.word	.LANCHOR1
+ 781              		.cfi_endproc
+ 782              	.LFE43:
+ 783              		.size	getNewMaxBrightness, .-getNewMaxBrightness
+ 784              		.global	__aeabi_idiv
+ 785              		.section	.text.regulateBrightness,"ax",%progbits
+ 786              		.align	2
+ 787              		.global	regulateBrightness
+ 788              		.code	16
+ 789              		.thumb_func
+ 790              		.type	regulateBrightness, %function
+ 791              	regulateBrightness:
+ 792              	.LFB44:
+ 472:DriverControl.c ****     static uint8 timerCountLocal = 0;
+ 793              		.loc 1 472 0
+ 794              		.cfi_startproc
+ 795              		@ args = 0, pretend = 0, frame = 0
+ 796              		@ frame_needed = 0, uses_anonymous_args = 0
+ 797              	.LVL82:
+ 798 0000 70B5     		push	{r4, r5, r6, lr}
+ 799              		.cfi_def_cfa_offset 16
+ 800              		.cfi_offset 4, -16
+ 801              		.cfi_offset 5, -12
+ 802              		.cfi_offset 6, -8
+ 803              		.cfi_offset 14, -4
+ 804 0002 0400     		movs	r4, r0
+ 805 0004 0D00     		movs	r5, r1
+ 806              	.LVL83:
+ 476:DriverControl.c ****         return 0;
+ 807              		.loc 1 476 0
+ 808 0006 0028     		cmp	r0, #0
+ 809 0008 79D0     		beq	.L93
+ 476:DriverControl.c ****         return 0;
+ 810              		.loc 1 476 0 is_stmt 0 discriminator 1
+ 811 000a 0429     		cmp	r1, #4
+ 812 000c 79D8     		bhi	.L94
+ 476:DriverControl.c ****         return 0;
+ 813              		.loc 1 476 0 discriminator 2
+ 814 000e 3F4B     		ldr	r3, .L96
+ 815 0010 1B7A     		ldrb	r3, [r3, #8]
+ 816 0012 012B     		cmp	r3, #1
+ 817 0014 77D1     		bne	.L95
+ 479:DriverControl.c ****     {
+ 818              		.loc 1 479 0 is_stmt 1
+ 819 0016 3D4B     		ldr	r3, .L96
+ 820 0018 DB78     		ldrb	r3, [r3, #3]
+ 821 001a 012B     		cmp	r3, #1
+ 822 001c 34D0     		beq	.L84
+ 823 001e 002B     		cmp	r3, #0
+ 824 0020 04D0     		beq	.L85
+ 825 0022 022B     		cmp	r3, #2
+ 826 0024 10D0     		beq	.L86
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 28
+
+
+ 827 0026 032B     		cmp	r3, #3
+ 828 0028 4ED0     		beq	.L87
+ 829 002a 65E0     		b	.L83
+ 830              	.L85:
+ 484:DriverControl.c ****                 RegulationData.regulatedBrightness = RegulationData.requestedBrightness;
+ 831              		.loc 1 484 0
+ 832 002c 374B     		ldr	r3, .L96
+ 833 002e FF22     		movs	r2, #255
+ 834 0030 1A71     		strb	r2, [r3, #4]
+ 485:DriverControl.c ****             }
+ 835              		.loc 1 485 0
+ 836 0032 1A78     		ldrb	r2, [r3]
+ 837 0034 5A70     		strb	r2, [r3, #1]
+ 489:DriverControl.c ****                 if(temperatureStatus == EXCEEDED_UPPER_BOUND)
+ 838              		.loc 1 489 0
+ 839 0036 0022     		movs	r2, #0
+ 840 0038 FFF7FEFF 		bl	getTemperatureStatus
+ 841              	.LVL84:
+ 490:DriverControl.c ****                     RegulationData.currentState = STEADY_DECREASE;
+ 842              		.loc 1 490 0
+ 843 003c 0128     		cmp	r0, #1
+ 844 003e 5BD1     		bne	.L83
+ 491:DriverControl.c ****             }
+ 845              		.loc 1 491 0
+ 846 0040 0222     		movs	r2, #2
+ 847 0042 324B     		ldr	r3, .L96
+ 848 0044 DA70     		strb	r2, [r3, #3]
+ 849 0046 57E0     		b	.L83
+ 850              	.LVL85:
+ 851              	.L86:
+ 497:DriverControl.c ****                     RegulationData.scalingFactor--;
+ 852              		.loc 1 497 0
+ 853 0048 304B     		ldr	r3, .L96
+ 854 004a 1B79     		ldrb	r3, [r3, #4]
+ 855 004c 002B     		cmp	r3, #0
+ 856 004e 02D0     		beq	.L88
+ 498:DriverControl.c ****             
+ 857              		.loc 1 498 0
+ 858 0050 013B     		subs	r3, r3, #1
+ 859 0052 2E4A     		ldr	r2, .L96
+ 860 0054 1371     		strb	r3, [r2, #4]
+ 861              	.L88:
+ 500:DriverControl.c ****                     (uint16)(RegulationData.scalingFactor) / MAX_SCALING_FACTOR);
+ 862              		.loc 1 500 0
+ 863 0056 2D4E     		ldr	r6, .L96
+ 864 0058 3078     		ldrb	r0, [r6]
+ 865              	.LVL86:
+ 501:DriverControl.c ****             }
+ 866              		.loc 1 501 0
+ 867 005a 3379     		ldrb	r3, [r6, #4]
+ 500:DriverControl.c ****                     (uint16)(RegulationData.scalingFactor) / MAX_SCALING_FACTOR);
+ 868              		.loc 1 500 0
+ 869 005c 5843     		muls	r0, r3
+ 501:DriverControl.c ****             }
+ 870              		.loc 1 501 0
+ 871 005e FF21     		movs	r1, #255
+ 872              	.LVL87:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 29
+
+
+ 873 0060 FFF7FEFF 		bl	__aeabi_idiv
+ 874              	.LVL88:
+ 500:DriverControl.c ****                     (uint16)(RegulationData.scalingFactor) / MAX_SCALING_FACTOR);
+ 875              		.loc 1 500 0
+ 876 0064 7070     		strb	r0, [r6, #1]
+ 505:DriverControl.c ****                     SAFE_TEMPERATURE_TOLERANCE);
+ 877              		.loc 1 505 0
+ 878 0066 0022     		movs	r2, #0
+ 879 0068 2900     		movs	r1, r5
+ 880 006a 2000     		movs	r0, r4
+ 881 006c FFF7FEFF 		bl	getTemperatureStatus
+ 882              	.LVL89:
+ 508:DriverControl.c ****                     RegulationData.currentState = NO_CHANGE;
+ 883              		.loc 1 508 0
+ 884 0070 0028     		cmp	r0, #0
+ 885 0072 03D1     		bne	.L89
+ 509:DriverControl.c ****                 else if(temperatureStatus == EXCEEDED_LOWER_BOUND)
+ 886              		.loc 1 509 0
+ 887 0074 0322     		movs	r2, #3
+ 888 0076 254B     		ldr	r3, .L96
+ 889 0078 DA70     		strb	r2, [r3, #3]
+ 890 007a 3DE0     		b	.L83
+ 891              	.L89:
+ 510:DriverControl.c ****                     RegulationData.currentState = STEADY_INCREASE;
+ 892              		.loc 1 510 0
+ 893 007c 0228     		cmp	r0, #2
+ 894 007e 3BD1     		bne	.L83
+ 511:DriverControl.c ****             }
+ 895              		.loc 1 511 0
+ 896 0080 0122     		movs	r2, #1
+ 897 0082 224B     		ldr	r3, .L96
+ 898 0084 DA70     		strb	r2, [r3, #3]
+ 899 0086 37E0     		b	.L83
+ 900              	.LVL90:
+ 901              	.L84:
+ 517:DriverControl.c ****                     RegulationData.scalingFactor++;
+ 902              		.loc 1 517 0
+ 903 0088 204B     		ldr	r3, .L96
+ 904 008a 1B79     		ldrb	r3, [r3, #4]
+ 905 008c FF2B     		cmp	r3, #255
+ 906 008e 02D0     		beq	.L90
+ 518:DriverControl.c ****             
+ 907              		.loc 1 518 0
+ 908 0090 0133     		adds	r3, r3, #1
+ 909 0092 1E4A     		ldr	r2, .L96
+ 910 0094 1371     		strb	r3, [r2, #4]
+ 911              	.L90:
+ 520:DriverControl.c ****                     (uint16)(RegulationData.scalingFactor) / MAX_SCALING_FACTOR);
+ 912              		.loc 1 520 0
+ 913 0096 1D4E     		ldr	r6, .L96
+ 914 0098 3078     		ldrb	r0, [r6]
+ 915              	.LVL91:
+ 521:DriverControl.c ****             }
+ 916              		.loc 1 521 0
+ 917 009a 3379     		ldrb	r3, [r6, #4]
+ 520:DriverControl.c ****                     (uint16)(RegulationData.scalingFactor) / MAX_SCALING_FACTOR);
+ 918              		.loc 1 520 0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 30
+
+
+ 919 009c 5843     		muls	r0, r3
+ 521:DriverControl.c ****             }
+ 920              		.loc 1 521 0
+ 921 009e FF21     		movs	r1, #255
+ 922              	.LVL92:
+ 923 00a0 FFF7FEFF 		bl	__aeabi_idiv
+ 924              	.LVL93:
+ 520:DriverControl.c ****                     (uint16)(RegulationData.scalingFactor) / MAX_SCALING_FACTOR);
+ 925              		.loc 1 520 0
+ 926 00a4 7070     		strb	r0, [r6, #1]
+ 525:DriverControl.c ****                     SAFE_TEMPERATURE_TOLERANCE);
+ 927              		.loc 1 525 0
+ 928 00a6 0022     		movs	r2, #0
+ 929 00a8 2900     		movs	r1, r5
+ 930 00aa 2000     		movs	r0, r4
+ 931 00ac FFF7FEFF 		bl	getTemperatureStatus
+ 932              	.LVL94:
+ 528:DriverControl.c ****                     RegulationData.currentState = STEADY_DECREASE;
+ 933              		.loc 1 528 0
+ 934 00b0 0128     		cmp	r0, #1
+ 935 00b2 03D1     		bne	.L91
+ 529:DriverControl.c ****                 else if(temperatureStatus == WITHIN_TOLERANCE)
+ 936              		.loc 1 529 0
+ 937 00b4 0222     		movs	r2, #2
+ 938 00b6 154B     		ldr	r3, .L96
+ 939 00b8 DA70     		strb	r2, [r3, #3]
+ 940 00ba 1DE0     		b	.L83
+ 941              	.L91:
+ 530:DriverControl.c ****                     RegulationData.currentState = NO_CHANGE;
+ 942              		.loc 1 530 0
+ 943 00bc 0028     		cmp	r0, #0
+ 944 00be 1BD1     		bne	.L83
+ 531:DriverControl.c ****             }
+ 945              		.loc 1 531 0
+ 946 00c0 0322     		movs	r2, #3
+ 947 00c2 124B     		ldr	r3, .L96
+ 948 00c4 DA70     		strb	r2, [r3, #3]
+ 949 00c6 17E0     		b	.L83
+ 950              	.LVL95:
+ 951              	.L87:
+ 537:DriverControl.c ****                     (uint16)(RegulationData.scalingFactor) / MAX_SCALING_FACTOR);
+ 952              		.loc 1 537 0
+ 953 00c8 104E     		ldr	r6, .L96
+ 954 00ca 3078     		ldrb	r0, [r6]
+ 955              	.LVL96:
+ 538:DriverControl.c ****             }
+ 956              		.loc 1 538 0
+ 957 00cc 3379     		ldrb	r3, [r6, #4]
+ 537:DriverControl.c ****                     (uint16)(RegulationData.scalingFactor) / MAX_SCALING_FACTOR);
+ 958              		.loc 1 537 0
+ 959 00ce 5843     		muls	r0, r3
+ 538:DriverControl.c ****             }
+ 960              		.loc 1 538 0
+ 961 00d0 FF21     		movs	r1, #255
+ 962              	.LVL97:
+ 963 00d2 FFF7FEFF 		bl	__aeabi_idiv
+ 964              	.LVL98:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 31
+
+
+ 537:DriverControl.c ****                     (uint16)(RegulationData.scalingFactor) / MAX_SCALING_FACTOR);
+ 965              		.loc 1 537 0
+ 966 00d6 7070     		strb	r0, [r6, #1]
+ 542:DriverControl.c ****                     SAFE_TEMPERATURE_TOLERANCE);
+ 967              		.loc 1 542 0
+ 968 00d8 0022     		movs	r2, #0
+ 969 00da 2900     		movs	r1, r5
+ 970 00dc 2000     		movs	r0, r4
+ 971 00de FFF7FEFF 		bl	getTemperatureStatus
+ 972              	.LVL99:
+ 545:DriverControl.c ****                     RegulationData.currentState = STEADY_DECREASE;
+ 973              		.loc 1 545 0
+ 974 00e2 0128     		cmp	r0, #1
+ 975 00e4 03D1     		bne	.L92
+ 546:DriverControl.c ****                 else if(temperatureStatus == EXCEEDED_LOWER_BOUND)
+ 976              		.loc 1 546 0
+ 977 00e6 0222     		movs	r2, #2
+ 978 00e8 084B     		ldr	r3, .L96
+ 979 00ea DA70     		strb	r2, [r3, #3]
+ 980 00ec 04E0     		b	.L83
+ 981              	.L92:
+ 547:DriverControl.c ****                     RegulationData.currentState = STEADY_INCREASE;
+ 982              		.loc 1 547 0
+ 983 00ee 0228     		cmp	r0, #2
+ 984 00f0 02D1     		bne	.L83
+ 548:DriverControl.c ****             }
+ 985              		.loc 1 548 0
+ 986 00f2 0122     		movs	r2, #1
+ 987 00f4 054B     		ldr	r3, .L96
+ 988 00f6 DA70     		strb	r2, [r3, #3]
+ 989              	.LVL100:
+ 990              	.L83:
+ 554:DriverControl.c **** }
+ 991              		.loc 1 554 0
+ 992 00f8 044B     		ldr	r3, .L96
+ 993 00fa 5878     		ldrb	r0, [r3, #1]
+ 994 00fc 04E0     		b	.L82
+ 995              	.LVL101:
+ 996              	.L93:
+ 477:DriverControl.c ****     
+ 997              		.loc 1 477 0
+ 998 00fe 0020     		movs	r0, #0
+ 999              	.LVL102:
+ 1000 0100 02E0     		b	.L82
+ 1001              	.LVL103:
+ 1002              	.L94:
+ 1003 0102 0020     		movs	r0, #0
+ 1004              	.LVL104:
+ 1005 0104 00E0     		b	.L82
+ 1006              	.LVL105:
+ 1007              	.L95:
+ 1008 0106 0020     		movs	r0, #0
+ 1009              	.LVL106:
+ 1010              	.L82:
+ 555:DriverControl.c **** 
+ 1011              		.loc 1 555 0
+ 1012              		@ sp needed
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 32
+
+
+ 1013              	.LVL107:
+ 1014 0108 70BD     		pop	{r4, r5, r6, pc}
+ 1015              	.L97:
+ 1016 010a C046     		.align	2
+ 1017              	.L96:
+ 1018 010c 00000000 		.word	.LANCHOR1
+ 1019              		.cfi_endproc
+ 1020              	.LFE44:
+ 1021              		.size	regulateBrightness, .-regulateBrightness
+ 1022              		.section	.text.setBrightness,"ax",%progbits
+ 1023              		.align	2
+ 1024              		.global	setBrightness
+ 1025              		.code	16
+ 1026              		.thumb_func
+ 1027              		.type	setBrightness, %function
+ 1028              	setBrightness:
+ 1029              	.LFB46:
+ 602:DriverControl.c **** 
+ 603:DriverControl.c **** void setBrightness(unsigned char localBrightness)
+ 604:DriverControl.c **** {
+ 1030              		.loc 1 604 0
+ 1031              		.cfi_startproc
+ 1032              		@ args = 0, pretend = 0, frame = 0
+ 1033              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1034              	.LVL108:
+ 1035 0000 10B5     		push	{r4, lr}
+ 1036              		.cfi_def_cfa_offset 8
+ 1037              		.cfi_offset 4, -8
+ 1038              		.cfi_offset 14, -4
+ 605:DriverControl.c ****     RegulationData.requestedBrightness = localBrightness;
+ 1039              		.loc 1 605 0
+ 1040 0002 034B     		ldr	r3, .L99
+ 1041 0004 1870     		strb	r0, [r3]
+ 606:DriverControl.c ****     updateBrightnessLevel(RegulationData.requestedBrightness, TRUE);
+ 1042              		.loc 1 606 0
+ 1043 0006 0121     		movs	r1, #1
+ 1044 0008 FFF7FEFF 		bl	updateBrightnessLevel
+ 1045              	.LVL109:
+ 607:DriverControl.c **** }
+ 1046              		.loc 1 607 0
+ 1047              		@ sp needed
+ 1048 000c 10BD     		pop	{r4, pc}
+ 1049              	.L100:
+ 1050 000e C046     		.align	2
+ 1051              	.L99:
+ 1052 0010 00000000 		.word	.LANCHOR1
+ 1053              		.cfi_endproc
+ 1054              	.LFE46:
+ 1055              		.size	setBrightness, .-setBrightness
+ 1056              		.section	.rodata
+ 1057              		.align	2
+ 1058              		.set	.LANCHOR0,. + 0
+ 1059              		.type	ThermalLimitArray, %object
+ 1060              		.size	ThermalLimitArray, 16
+ 1061              	ThermalLimitArray:
+ 1062 0000 C201     		.short	450
+ 1063 0002 6400     		.short	100
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 33
+
+
+ 1064 0004 9001     		.short	400
+ 1065 0006 6400     		.short	100
+ 1066 0008 6400     		.short	100
+ 1067 000a 5000     		.short	80
+ 1068 000c 2C01     		.short	300
+ 1069 000e 6400     		.short	100
+ 1070              		.data
+ 1071              		.align	2
+ 1072              		.set	.LANCHOR1,. + 0
+ 1073              		.type	RegulationData, %object
+ 1074              		.size	RegulationData, 5
+ 1075              	RegulationData:
+ 1076 0000 00       		.byte	0
+ 1077 0001 00       		.byte	0
+ 1078 0002 00       		.byte	0
+ 1079 0003 00       		.byte	0
+ 1080 0004 FF       		.byte	-1
+ 1081 0005 000000   		.space	3
+ 1082              		.type	PositionData, %object
+ 1083              		.size	PositionData, 3
+ 1084              	PositionData:
+ 1085 0008 00       		.byte	0
+ 1086 0009 00       		.byte	0
+ 1087 000a 01       		.byte	1
+ 1088 000b 00       		.space	1
+ 1089              		.type	VoltageSenseData, %object
+ 1090              		.size	VoltageSenseData, 2
+ 1091              	VoltageSenseData:
+ 1092 000c 01       		.byte	1
+ 1093 000d FF       		.byte	-1
+ 1094              		.text
+ 1095              	.Letext0:
+ 1096              		.file 2 "Generated_Source\\PSoC4/cytypes.h"
+ 1097              		.file 3 "DriverControl.h"
+ 1098              		.file 4 "Generated_Source\\PSoC4/LED_Timer.h"
+ 1099              		.file 5 "Generated_Source\\PSoC4/PWM_Enable.h"
+ 1100              		.file 6 "Generated_Source\\PSoC4/PWM.h"
+ 1101              		.file 7 "Generated_Source\\PSoC4/CyLib.h"
+ 1102              		.file 8 "Generated_Source\\PSoC4/ADC_SAR_Seq.h"
+ 1103              		.file 9 "Generated_Source\\PSoC4/DieTemp.h"
+ 1104              		.section	.debug_info,"",%progbits
+ 1105              	.Ldebug_info0:
+ 1106 0000 30070000 		.4byte	0x730
+ 1107 0004 0400     		.2byte	0x4
+ 1108 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 1109 000a 04       		.byte	0x4
+ 1110 000b 01       		.uleb128 0x1
+ 1111 000c 84010000 		.4byte	.LASF93
+ 1112 0010 0C       		.byte	0xc
+ 1113 0011 E3000000 		.4byte	.LASF94
+ 1114 0015 58030000 		.4byte	.LASF95
+ 1115 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 1116 001d 00000000 		.4byte	0
+ 1117 0021 00000000 		.4byte	.Ldebug_line0
+ 1118 0025 02       		.uleb128 0x2
+ 1119 0026 01       		.byte	0x1
+ 1120 0027 06       		.byte	0x6
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 34
+
+
+ 1121 0028 D3030000 		.4byte	.LASF0
+ 1122 002c 02       		.uleb128 0x2
+ 1123 002d 01       		.byte	0x1
+ 1124 002e 08       		.byte	0x8
+ 1125 002f 3C030000 		.4byte	.LASF1
+ 1126 0033 02       		.uleb128 0x2
+ 1127 0034 02       		.byte	0x2
+ 1128 0035 05       		.byte	0x5
+ 1129 0036 BD000000 		.4byte	.LASF2
+ 1130 003a 02       		.uleb128 0x2
+ 1131 003b 02       		.byte	0x2
+ 1132 003c 07       		.byte	0x7
+ 1133 003d 7A040000 		.4byte	.LASF3
+ 1134 0041 02       		.uleb128 0x2
+ 1135 0042 04       		.byte	0x4
+ 1136 0043 05       		.byte	0x5
+ 1137 0044 94020000 		.4byte	.LASF4
+ 1138 0048 02       		.uleb128 0x2
+ 1139 0049 04       		.byte	0x4
+ 1140 004a 07       		.byte	0x7
+ 1141 004b 65050000 		.4byte	.LASF5
+ 1142 004f 02       		.uleb128 0x2
+ 1143 0050 08       		.byte	0x8
+ 1144 0051 05       		.byte	0x5
+ 1145 0052 67020000 		.4byte	.LASF6
+ 1146 0056 02       		.uleb128 0x2
+ 1147 0057 08       		.byte	0x8
+ 1148 0058 07       		.byte	0x7
+ 1149 0059 DF030000 		.4byte	.LASF7
+ 1150 005d 03       		.uleb128 0x3
+ 1151 005e 04       		.byte	0x4
+ 1152 005f 05       		.byte	0x5
+ 1153 0060 696E7400 		.ascii	"int\000"
+ 1154 0064 02       		.uleb128 0x2
+ 1155 0065 04       		.byte	0x4
+ 1156 0066 07       		.byte	0x7
+ 1157 0067 F6030000 		.4byte	.LASF8
+ 1158 006b 04       		.uleb128 0x4
+ 1159 006c 29020000 		.4byte	.LASF9
+ 1160 0070 02       		.byte	0x2
+ 1161 0071 D201     		.2byte	0x1d2
+ 1162 0073 2C000000 		.4byte	0x2c
+ 1163 0077 04       		.uleb128 0x4
+ 1164 0078 31050000 		.4byte	.LASF10
+ 1165 007c 02       		.byte	0x2
+ 1166 007d D301     		.2byte	0x1d3
+ 1167 007f 3A000000 		.4byte	0x3a
+ 1168 0083 04       		.uleb128 0x4
+ 1169 0084 5E050000 		.4byte	.LASF11
+ 1170 0088 02       		.byte	0x2
+ 1171 0089 D401     		.2byte	0x1d4
+ 1172 008b 48000000 		.4byte	0x48
+ 1173 008f 04       		.uleb128 0x4
+ 1174 0090 12020000 		.4byte	.LASF12
+ 1175 0094 02       		.byte	0x2
+ 1176 0095 D601     		.2byte	0x1d6
+ 1177 0097 33000000 		.4byte	0x33
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 35
+
+
+ 1178 009b 04       		.uleb128 0x4
+ 1179 009c 77050000 		.4byte	.LASF13
+ 1180 00a0 02       		.byte	0x2
+ 1181 00a1 D701     		.2byte	0x1d7
+ 1182 00a3 41000000 		.4byte	0x41
+ 1183 00a7 02       		.uleb128 0x2
+ 1184 00a8 04       		.byte	0x4
+ 1185 00a9 04       		.byte	0x4
+ 1186 00aa 61020000 		.4byte	.LASF14
+ 1187 00ae 02       		.uleb128 0x2
+ 1188 00af 08       		.byte	0x8
+ 1189 00b0 04       		.byte	0x4
+ 1190 00b1 6B060000 		.4byte	.LASF15
+ 1191 00b5 02       		.uleb128 0x2
+ 1192 00b6 01       		.byte	0x1
+ 1193 00b7 08       		.byte	0x8
+ 1194 00b8 C7040000 		.4byte	.LASF16
+ 1195 00bc 02       		.uleb128 0x2
+ 1196 00bd 08       		.byte	0x8
+ 1197 00be 04       		.byte	0x4
+ 1198 00bf 12030000 		.4byte	.LASF17
+ 1199 00c3 02       		.uleb128 0x2
+ 1200 00c4 04       		.byte	0x4
+ 1201 00c5 07       		.byte	0x7
+ 1202 00c6 DA000000 		.4byte	.LASF18
+ 1203 00ca 05       		.uleb128 0x5
+ 1204 00cb 36060000 		.4byte	.LASF23
+ 1205 00cf 01       		.byte	0x1
+ 1206 00d0 2C000000 		.4byte	0x2c
+ 1207 00d4 03       		.byte	0x3
+ 1208 00d5 17       		.byte	0x17
+ 1209 00d6 F9000000 		.4byte	0xf9
+ 1210 00da 06       		.uleb128 0x6
+ 1211 00db 4C454400 		.ascii	"LED\000"
+ 1212 00df 00       		.byte	0
+ 1213 00e0 07       		.uleb128 0x7
+ 1214 00e1 52050000 		.4byte	.LASF19
+ 1215 00e5 01       		.byte	0x1
+ 1216 00e6 07       		.uleb128 0x7
+ 1217 00e7 8D040000 		.4byte	.LASF20
+ 1218 00eb 02       		.byte	0x2
+ 1219 00ec 07       		.uleb128 0x7
+ 1220 00ed 90060000 		.4byte	.LASF21
+ 1221 00f1 03       		.byte	0x3
+ 1222 00f2 07       		.uleb128 0x7
+ 1223 00f3 E7020000 		.4byte	.LASF22
+ 1224 00f7 04       		.byte	0x4
+ 1225 00f8 00       		.byte	0
+ 1226 00f9 05       		.uleb128 0x5
+ 1227 00fa C3030000 		.4byte	.LASF24
+ 1228 00fe 01       		.byte	0x1
+ 1229 00ff 2C000000 		.4byte	0x2c
+ 1230 0103 01       		.byte	0x1
+ 1231 0104 23       		.byte	0x23
+ 1232 0105 22010000 		.4byte	0x122
+ 1233 0109 07       		.uleb128 0x7
+ 1234 010a 59020000 		.4byte	.LASF25
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 36
+
+
+ 1235 010e 00       		.byte	0
+ 1236 010f 07       		.uleb128 0x7
+ 1237 0110 80060000 		.4byte	.LASF26
+ 1238 0114 01       		.byte	0x1
+ 1239 0115 07       		.uleb128 0x7
+ 1240 0116 26060000 		.4byte	.LASF27
+ 1241 011a 02       		.byte	0x2
+ 1242 011b 07       		.uleb128 0x7
+ 1243 011c 08030000 		.4byte	.LASF28
+ 1244 0120 03       		.byte	0x3
+ 1245 0121 00       		.byte	0
+ 1246 0122 05       		.uleb128 0x5
+ 1247 0123 19010000 		.4byte	.LASF29
+ 1248 0127 01       		.byte	0x1
+ 1249 0128 2C000000 		.4byte	0x2c
+ 1250 012c 01       		.byte	0x1
+ 1251 012d 2B       		.byte	0x2b
+ 1252 012e 4B010000 		.4byte	0x14b
+ 1253 0132 07       		.uleb128 0x7
+ 1254 0133 09060000 		.4byte	.LASF30
+ 1255 0137 00       		.byte	0
+ 1256 0138 07       		.uleb128 0x7
+ 1257 0139 CC040000 		.4byte	.LASF31
+ 1258 013d 01       		.byte	0x1
+ 1259 013e 07       		.uleb128 0x7
+ 1260 013f 9D020000 		.4byte	.LASF32
+ 1261 0143 02       		.byte	0x2
+ 1262 0144 07       		.uleb128 0x7
+ 1263 0145 ED020000 		.4byte	.LASF33
+ 1264 0149 03       		.byte	0x3
+ 1265 014a 00       		.byte	0
+ 1266 014b 08       		.uleb128 0x8
+ 1267 014c 04       		.byte	0x4
+ 1268 014d 01       		.byte	0x1
+ 1269 014e 33       		.byte	0x33
+ 1270 014f 6C010000 		.4byte	0x16c
+ 1271 0153 09       		.uleb128 0x9
+ 1272 0154 C4050000 		.4byte	.LASF34
+ 1273 0158 01       		.byte	0x1
+ 1274 0159 35       		.byte	0x35
+ 1275 015a 6C010000 		.4byte	0x16c
+ 1276 015e 00       		.byte	0
+ 1277 015f 09       		.uleb128 0x9
+ 1278 0160 18020000 		.4byte	.LASF35
+ 1279 0164 01       		.byte	0x1
+ 1280 0165 36       		.byte	0x36
+ 1281 0166 6C010000 		.4byte	0x16c
+ 1282 016a 02       		.byte	0x2
+ 1283 016b 00       		.byte	0
+ 1284 016c 0A       		.uleb128 0xa
+ 1285 016d 8F000000 		.4byte	0x8f
+ 1286 0171 0B       		.uleb128 0xb
+ 1287 0172 87020000 		.4byte	.LASF36
+ 1288 0176 01       		.byte	0x1
+ 1289 0177 37       		.byte	0x37
+ 1290 0178 4B010000 		.4byte	0x14b
+ 1291 017c 08       		.uleb128 0x8
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 37
+
+
+ 1292 017d 03       		.byte	0x3
+ 1293 017e 01       		.byte	0x1
+ 1294 017f 42       		.byte	0x42
+ 1295 0180 A9010000 		.4byte	0x1a9
+ 1296 0184 09       		.uleb128 0x9
+ 1297 0185 9D060000 		.4byte	.LASF37
+ 1298 0189 01       		.byte	0x1
+ 1299 018a 44       		.byte	0x44
+ 1300 018b 6B000000 		.4byte	0x6b
+ 1301 018f 00       		.byte	0
+ 1302 0190 09       		.uleb128 0x9
+ 1303 0191 EE040000 		.4byte	.LASF38
+ 1304 0195 01       		.byte	0x1
+ 1305 0196 45       		.byte	0x45
+ 1306 0197 6B000000 		.4byte	0x6b
+ 1307 019b 01       		.byte	0x1
+ 1308 019c 09       		.uleb128 0x9
+ 1309 019d 03040000 		.4byte	.LASF39
+ 1310 01a1 01       		.byte	0x1
+ 1311 01a2 46       		.byte	0x46
+ 1312 01a3 6B000000 		.4byte	0x6b
+ 1313 01a7 02       		.byte	0x2
+ 1314 01a8 00       		.byte	0
+ 1315 01a9 0B       		.uleb128 0xb
+ 1316 01aa 2B010000 		.4byte	.LASF40
+ 1317 01ae 01       		.byte	0x1
+ 1318 01af 47       		.byte	0x47
+ 1319 01b0 7C010000 		.4byte	0x17c
+ 1320 01b4 08       		.uleb128 0x8
+ 1321 01b5 05       		.byte	0x5
+ 1322 01b6 01       		.byte	0x1
+ 1323 01b7 4B       		.byte	0x4b
+ 1324 01b8 F9010000 		.4byte	0x1f9
+ 1325 01bc 09       		.uleb128 0x9
+ 1326 01bd B3040000 		.4byte	.LASF41
+ 1327 01c1 01       		.byte	0x1
+ 1328 01c2 4D       		.byte	0x4d
+ 1329 01c3 6B000000 		.4byte	0x6b
+ 1330 01c7 00       		.byte	0
+ 1331 01c8 09       		.uleb128 0x9
+ 1332 01c9 66040000 		.4byte	.LASF42
+ 1333 01cd 01       		.byte	0x1
+ 1334 01ce 4E       		.byte	0x4e
+ 1335 01cf 6B000000 		.4byte	0x6b
+ 1336 01d3 01       		.byte	0x1
+ 1337 01d4 09       		.uleb128 0x9
+ 1338 01d5 C7000000 		.4byte	.LASF43
+ 1339 01d9 01       		.byte	0x1
+ 1340 01da 4F       		.byte	0x4f
+ 1341 01db 6B000000 		.4byte	0x6b
+ 1342 01df 02       		.byte	0x2
+ 1343 01e0 09       		.uleb128 0x9
+ 1344 01e1 E1040000 		.4byte	.LASF44
+ 1345 01e5 01       		.byte	0x1
+ 1346 01e6 50       		.byte	0x50
+ 1347 01e7 F9000000 		.4byte	0xf9
+ 1348 01eb 03       		.byte	0x3
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 38
+
+
+ 1349 01ec 09       		.uleb128 0x9
+ 1350 01ed 72060000 		.4byte	.LASF45
+ 1351 01f1 01       		.byte	0x1
+ 1352 01f2 51       		.byte	0x51
+ 1353 01f3 6B000000 		.4byte	0x6b
+ 1354 01f7 04       		.byte	0x4
+ 1355 01f8 00       		.byte	0
+ 1356 01f9 0B       		.uleb128 0xb
+ 1357 01fa AF050000 		.4byte	.LASF46
+ 1358 01fe 01       		.byte	0x1
+ 1359 01ff 52       		.byte	0x52
+ 1360 0200 B4010000 		.4byte	0x1b4
+ 1361 0204 08       		.uleb128 0x8
+ 1362 0205 02       		.byte	0x2
+ 1363 0206 01       		.byte	0x1
+ 1364 0207 56       		.byte	0x56
+ 1365 0208 25020000 		.4byte	0x225
+ 1366 020c 09       		.uleb128 0x9
+ 1367 020d 01060000 		.4byte	.LASF47
+ 1368 0211 01       		.byte	0x1
+ 1369 0212 58       		.byte	0x58
+ 1370 0213 6B000000 		.4byte	0x6b
+ 1371 0217 00       		.byte	0
+ 1372 0218 09       		.uleb128 0x9
+ 1373 0219 72060000 		.4byte	.LASF45
+ 1374 021d 01       		.byte	0x1
+ 1375 021e 59       		.byte	0x59
+ 1376 021f 6B000000 		.4byte	0x6b
+ 1377 0223 01       		.byte	0x1
+ 1378 0224 00       		.byte	0
+ 1379 0225 0B       		.uleb128 0xb
+ 1380 0226 2D000000 		.4byte	.LASF48
+ 1381 022a 01       		.byte	0x1
+ 1382 022b 5A       		.byte	0x5a
+ 1383 022c 04020000 		.4byte	0x204
+ 1384 0230 0C       		.uleb128 0xc
+ 1385 0231 F3020000 		.4byte	.LASF96
+ 1386 0235 01       		.byte	0x1
+ 1387 0236 3F02     		.2byte	0x23f
+ 1388 0238 22010000 		.4byte	0x122
+ 1389 023c 00000000 		.4byte	.LFB45
+ 1390 0240 5C000000 		.4byte	.LFE45-.LFB45
+ 1391 0244 01       		.uleb128 0x1
+ 1392 0245 9C       		.byte	0x9c
+ 1393 0246 87020000 		.4byte	0x287
+ 1394 024a 0D       		.uleb128 0xd
+ 1395 024b 64010000 		.4byte	.LASF49
+ 1396 024f 01       		.byte	0x1
+ 1397 0250 3F02     		.2byte	0x23f
+ 1398 0252 87020000 		.4byte	0x287
+ 1399 0256 00000000 		.4byte	.LLST0
+ 1400 025a 0E       		.uleb128 0xe
+ 1401 025b F3000000 		.4byte	.LASF50
+ 1402 025f 01       		.byte	0x1
+ 1403 0260 4002     		.2byte	0x240
+ 1404 0262 6B000000 		.4byte	0x6b
+ 1405 0266 01       		.uleb128 0x1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 39
+
+
+ 1406 0267 51       		.byte	0x51
+ 1407 0268 0E       		.uleb128 0xe
+ 1408 0269 60000000 		.4byte	.LASF51
+ 1409 026d 01       		.byte	0x1
+ 1410 026e 4002     		.2byte	0x240
+ 1411 0270 8F000000 		.4byte	0x8f
+ 1412 0274 01       		.uleb128 0x1
+ 1413 0275 52       		.byte	0x52
+ 1414 0276 0F       		.uleb128 0xf
+ 1415 0277 23000000 		.4byte	.LASF70
+ 1416 027b 01       		.byte	0x1
+ 1417 027c 4202     		.2byte	0x242
+ 1418 027e CA000000 		.4byte	0xca
+ 1419 0282 85000000 		.4byte	.LLST1
+ 1420 0286 00       		.byte	0
+ 1421 0287 10       		.uleb128 0x10
+ 1422 0288 04       		.byte	0x4
+ 1423 0289 8F000000 		.4byte	0x8f
+ 1424 028d 11       		.uleb128 0x11
+ 1425 028e C3020000 		.4byte	.LASF52
+ 1426 0292 01       		.byte	0x1
+ 1427 0293 66       		.byte	0x66
+ 1428 0294 6B000000 		.4byte	0x6b
+ 1429 0298 00000000 		.4byte	.LFB32
+ 1430 029c 0C000000 		.4byte	.LFE32-.LFB32
+ 1431 02a0 01       		.uleb128 0x1
+ 1432 02a1 9C       		.byte	0x9c
+ 1433 02a2 11       		.uleb128 0x11
+ 1434 02a3 80000000 		.4byte	.LASF53
+ 1435 02a7 01       		.byte	0x1
+ 1436 02a8 79       		.byte	0x79
+ 1437 02a9 6B000000 		.4byte	0x6b
+ 1438 02ad 00000000 		.4byte	.LFB33
+ 1439 02b1 0C000000 		.4byte	.LFE33-.LFB33
+ 1440 02b5 01       		.uleb128 0x1
+ 1441 02b6 9C       		.byte	0x9c
+ 1442 02b7 12       		.uleb128 0x12
+ 1443 02b8 47020000 		.4byte	.LASF55
+ 1444 02bc 01       		.byte	0x1
+ 1445 02bd 8D       		.byte	0x8d
+ 1446 02be 6B000000 		.4byte	0x6b
+ 1447 02c2 00000000 		.4byte	.LFB34
+ 1448 02c6 18000000 		.4byte	.LFE34-.LFB34
+ 1449 02ca 01       		.uleb128 0x1
+ 1450 02cb 9C       		.byte	0x9c
+ 1451 02cc E0020000 		.4byte	0x2e0
+ 1452 02d0 13       		.uleb128 0x13
+ 1453 02d1 47060000 		.4byte	.LASF54
+ 1454 02d5 01       		.byte	0x1
+ 1455 02d6 8D       		.byte	0x8d
+ 1456 02d7 6B000000 		.4byte	0x6b
+ 1457 02db DC000000 		.4byte	.LLST2
+ 1458 02df 00       		.byte	0
+ 1459 02e0 12       		.uleb128 0x12
+ 1460 02e1 22050000 		.4byte	.LASF56
+ 1461 02e5 01       		.byte	0x1
+ 1462 02e6 A5       		.byte	0xa5
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 40
+
+
+ 1463 02e7 6B000000 		.4byte	0x6b
+ 1464 02eb 00000000 		.4byte	.LFB35
+ 1465 02ef 18000000 		.4byte	.LFE35-.LFB35
+ 1466 02f3 01       		.uleb128 0x1
+ 1467 02f4 9C       		.byte	0x9c
+ 1468 02f5 09030000 		.4byte	0x309
+ 1469 02f9 13       		.uleb128 0x13
+ 1470 02fa 55010000 		.4byte	.LASF57
+ 1471 02fe 01       		.byte	0x1
+ 1472 02ff A5       		.byte	0xa5
+ 1473 0300 6B000000 		.4byte	0x6b
+ 1474 0304 17010000 		.4byte	.LLST3
+ 1475 0308 00       		.byte	0
+ 1476 0309 11       		.uleb128 0x11
+ 1477 030a ED050000 		.4byte	.LASF58
+ 1478 030e 01       		.byte	0x1
+ 1479 030f BD       		.byte	0xbd
+ 1480 0310 6B000000 		.4byte	0x6b
+ 1481 0314 00000000 		.4byte	.LFB36
+ 1482 0318 0C000000 		.4byte	.LFE36-.LFB36
+ 1483 031c 01       		.uleb128 0x1
+ 1484 031d 9C       		.byte	0x9c
+ 1485 031e 14       		.uleb128 0x14
+ 1486 031f 38050000 		.4byte	.LASF97
+ 1487 0323 01       		.byte	0x1
+ 1488 0324 D2       		.byte	0xd2
+ 1489 0325 00000000 		.4byte	.LFB37
+ 1490 0329 0C000000 		.4byte	.LFE37-.LFB37
+ 1491 032d 01       		.uleb128 0x1
+ 1492 032e 9C       		.byte	0x9c
+ 1493 032f 15       		.uleb128 0x15
+ 1494 0330 04010000 		.4byte	.LASF60
+ 1495 0334 01       		.byte	0x1
+ 1496 0335 E5       		.byte	0xe5
+ 1497 0336 00000000 		.4byte	.LFB38
+ 1498 033a 40000000 		.4byte	.LFE38-.LFB38
+ 1499 033e 01       		.uleb128 0x1
+ 1500 033f 9C       		.byte	0x9c
+ 1501 0340 66030000 		.4byte	0x366
+ 1502 0344 13       		.uleb128 0x13
+ 1503 0345 FA000000 		.4byte	.LASF59
+ 1504 0349 01       		.byte	0x1
+ 1505 034a E5       		.byte	0xe5
+ 1506 034b 77000000 		.4byte	0x77
+ 1507 034f 52010000 		.4byte	.LLST4
+ 1508 0353 16       		.uleb128 0x16
+ 1509 0354 1A000000 		.4byte	.LVL27
+ 1510 0358 CD060000 		.4byte	0x6cd
+ 1511 035c 16       		.uleb128 0x16
+ 1512 035d 32000000 		.4byte	.LVL29
+ 1513 0361 D9060000 		.4byte	0x6d9
+ 1514 0365 00       		.byte	0
+ 1515 0366 17       		.uleb128 0x17
+ 1516 0367 16040000 		.4byte	.LASF61
+ 1517 036b 01       		.byte	0x1
+ 1518 036c 0201     		.2byte	0x102
+ 1519 036e 00000000 		.4byte	.LFB39
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 41
+
+
+ 1520 0372 24000000 		.4byte	.LFE39-.LFB39
+ 1521 0376 01       		.uleb128 0x1
+ 1522 0377 9C       		.byte	0x9c
+ 1523 0378 99030000 		.4byte	0x399
+ 1524 037c 18       		.uleb128 0x18
+ 1525 037d 08000000 		.4byte	.LVL30
+ 1526 0381 E5060000 		.4byte	0x6e5
+ 1527 0385 8F030000 		.4byte	0x38f
+ 1528 0389 19       		.uleb128 0x19
+ 1529 038a 01       		.uleb128 0x1
+ 1530 038b 50       		.byte	0x50
+ 1531 038c 01       		.uleb128 0x1
+ 1532 038d 31       		.byte	0x31
+ 1533 038e 00       		.byte	0
+ 1534 038f 16       		.uleb128 0x16
+ 1535 0390 1C000000 		.4byte	.LVL31
+ 1536 0394 CD060000 		.4byte	0x6cd
+ 1537 0398 00       		.byte	0
+ 1538 0399 1A       		.uleb128 0x1a
+ 1539 039a 6A000000 		.4byte	.LASF62
+ 1540 039e 01       		.byte	0x1
+ 1541 039f 1B01     		.2byte	0x11b
+ 1542 03a1 6B000000 		.4byte	0x6b
+ 1543 03a5 00000000 		.4byte	.LFB40
+ 1544 03a9 80000000 		.4byte	.LFE40-.LFB40
+ 1545 03ad 01       		.uleb128 0x1
+ 1546 03ae 9C       		.byte	0x9c
+ 1547 03af 2E040000 		.4byte	0x42e
+ 1548 03b3 0D       		.uleb128 0xd
+ 1549 03b4 36040000 		.4byte	.LASF63
+ 1550 03b8 01       		.byte	0x1
+ 1551 03b9 1B01     		.2byte	0x11b
+ 1552 03bb 6B000000 		.4byte	0x6b
+ 1553 03bf 8C010000 		.4byte	.LLST5
+ 1554 03c3 0D       		.uleb128 0xd
+ 1555 03c4 A4050000 		.4byte	.LASF64
+ 1556 03c8 01       		.byte	0x1
+ 1557 03c9 1B01     		.2byte	0x11b
+ 1558 03cb 6B000000 		.4byte	0x6b
+ 1559 03cf 11020000 		.4byte	.LLST6
+ 1560 03d3 18       		.uleb128 0x18
+ 1561 03d4 32000000 		.4byte	.LVL34
+ 1562 03d8 F1060000 		.4byte	0x6f1
+ 1563 03dc E6030000 		.4byte	0x3e6
+ 1564 03e0 19       		.uleb128 0x19
+ 1565 03e1 01       		.uleb128 0x1
+ 1566 03e2 50       		.byte	0x50
+ 1567 03e3 01       		.uleb128 0x1
+ 1568 03e4 31       		.byte	0x31
+ 1569 03e5 00       		.byte	0
+ 1570 03e6 16       		.uleb128 0x16
+ 1571 03e7 3A000000 		.4byte	.LVL35
+ 1572 03eb FC060000 		.4byte	0x6fc
+ 1573 03ef 18       		.uleb128 0x18
+ 1574 03f0 42000000 		.4byte	.LVL38
+ 1575 03f4 F1060000 		.4byte	0x6f1
+ 1576 03f8 02040000 		.4byte	0x402
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 42
+
+
+ 1577 03fc 19       		.uleb128 0x19
+ 1578 03fd 01       		.uleb128 0x1
+ 1579 03fe 50       		.byte	0x50
+ 1580 03ff 01       		.uleb128 0x1
+ 1581 0400 30       		.byte	0x30
+ 1582 0401 00       		.byte	0
+ 1583 0402 18       		.uleb128 0x18
+ 1584 0403 5E000000 		.4byte	.LVL41
+ 1585 0407 F1060000 		.4byte	0x6f1
+ 1586 040b 15040000 		.4byte	0x415
+ 1587 040f 19       		.uleb128 0x19
+ 1588 0410 01       		.uleb128 0x1
+ 1589 0411 50       		.byte	0x50
+ 1590 0412 01       		.uleb128 0x1
+ 1591 0413 31       		.byte	0x31
+ 1592 0414 00       		.byte	0
+ 1593 0415 16       		.uleb128 0x16
+ 1594 0416 66000000 		.4byte	.LVL42
+ 1595 041a FC060000 		.4byte	0x6fc
+ 1596 041e 1B       		.uleb128 0x1b
+ 1597 041f 6E000000 		.4byte	.LVL45
+ 1598 0423 F1060000 		.4byte	0x6f1
+ 1599 0427 19       		.uleb128 0x19
+ 1600 0428 01       		.uleb128 0x1
+ 1601 0429 50       		.byte	0x50
+ 1602 042a 01       		.uleb128 0x1
+ 1603 042b 30       		.byte	0x30
+ 1604 042c 00       		.byte	0
+ 1605 042d 00       		.byte	0
+ 1606 042e 1A       		.uleb128 0x1a
+ 1607 042f 75020000 		.4byte	.LASF65
+ 1608 0433 01       		.byte	0x1
+ 1609 0434 5601     		.2byte	0x156
+ 1610 0436 8F000000 		.4byte	0x8f
+ 1611 043a 00000000 		.4byte	.LFB41
+ 1612 043e 14000000 		.4byte	.LFE41-.LFB41
+ 1613 0442 01       		.uleb128 0x1
+ 1614 0443 9C       		.byte	0x9c
+ 1615 0444 59040000 		.4byte	0x459
+ 1616 0448 0D       		.uleb128 0xd
+ 1617 0449 4A030000 		.4byte	.LASF66
+ 1618 044d 01       		.byte	0x1
+ 1619 044e 5601     		.2byte	0x156
+ 1620 0450 CA000000 		.4byte	0xca
+ 1621 0454 96020000 		.4byte	.LLST7
+ 1622 0458 00       		.byte	0
+ 1623 0459 1A       		.uleb128 0x1a
+ 1624 045a 56060000 		.4byte	.LASF67
+ 1625 045e 01       		.byte	0x1
+ 1626 045f 7001     		.2byte	0x170
+ 1627 0461 8F000000 		.4byte	0x8f
+ 1628 0465 00000000 		.4byte	.LFB42
+ 1629 0469 96000000 		.4byte	.LFE42-.LFB42
+ 1630 046d 01       		.uleb128 0x1
+ 1631 046e 9C       		.byte	0x9c
+ 1632 046f 65050000 		.4byte	0x565
+ 1633 0473 0D       		.uleb128 0xd
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 43
+
+
+ 1634 0474 14050000 		.4byte	.LASF68
+ 1635 0478 01       		.byte	0x1
+ 1636 0479 7001     		.2byte	0x170
+ 1637 047b 6B000000 		.4byte	0x6b
+ 1638 047f D0020000 		.4byte	.LLST8
+ 1639 0483 0D       		.uleb128 0xd
+ 1640 0484 4A030000 		.4byte	.LASF66
+ 1641 0488 01       		.byte	0x1
+ 1642 0489 7001     		.2byte	0x170
+ 1643 048b CA000000 		.4byte	0xca
+ 1644 048f 55030000 		.4byte	.LLST9
+ 1645 0493 0D       		.uleb128 0xd
+ 1646 0494 1A060000 		.4byte	.LASF69
+ 1647 0498 01       		.byte	0x1
+ 1648 0499 7101     		.2byte	0x171
+ 1649 049b 87020000 		.4byte	0x287
+ 1650 049f 8F030000 		.4byte	.LLST10
+ 1651 04a3 0D       		.uleb128 0xd
+ 1652 04a4 F3000000 		.4byte	.LASF50
+ 1653 04a8 01       		.byte	0x1
+ 1654 04a9 7101     		.2byte	0x171
+ 1655 04ab 6B000000 		.4byte	0x6b
+ 1656 04af D1030000 		.4byte	.LLST11
+ 1657 04b3 0F       		.uleb128 0xf
+ 1658 04b4 D9020000 		.4byte	.LASF71
+ 1659 04b8 01       		.byte	0x1
+ 1660 04b9 7301     		.2byte	0x173
+ 1661 04bb 6B000000 		.4byte	0x6b
+ 1662 04bf 0B040000 		.4byte	.LLST12
+ 1663 04c3 0F       		.uleb128 0xf
+ 1664 04c4 8F050000 		.4byte	.LASF72
+ 1665 04c8 01       		.byte	0x1
+ 1666 04c9 7401     		.2byte	0x174
+ 1667 04cb 8F000000 		.4byte	0x8f
+ 1668 04cf 57040000 		.4byte	.LLST13
+ 1669 04d3 1C       		.uleb128 0x1c
+ 1670 04d4 2F020000 		.4byte	.LASF73
+ 1671 04d8 01       		.byte	0x1
+ 1672 04d9 7501     		.2byte	0x175
+ 1673 04db A7000000 		.4byte	0xa7
+ 1674 04df 04       		.byte	0x4
+ 1675 04e0 00000000 		.4byte	0
+ 1676 04e4 0F       		.uleb128 0xf
+ 1677 04e5 07050000 		.4byte	.LASF74
+ 1678 04e9 01       		.byte	0x1
+ 1679 04ea 7601     		.2byte	0x176
+ 1680 04ec 83000000 		.4byte	0x83
+ 1681 04f0 DD040000 		.4byte	.LLST14
+ 1682 04f4 18       		.uleb128 0x18
+ 1683 04f5 2E000000 		.4byte	.LVL57
+ 1684 04f9 07070000 		.4byte	0x707
+ 1685 04fd 07050000 		.4byte	0x507
+ 1686 0501 19       		.uleb128 0x19
+ 1687 0502 01       		.uleb128 0x1
+ 1688 0503 50       		.byte	0x50
+ 1689 0504 01       		.uleb128 0x1
+ 1690 0505 38       		.byte	0x38
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 44
+
+
+ 1691 0506 00       		.byte	0
+ 1692 0507 18       		.uleb128 0x18
+ 1693 0508 34000000 		.4byte	.LVL58
+ 1694 050c 12070000 		.4byte	0x712
+ 1695 0510 1A050000 		.4byte	0x51a
+ 1696 0514 19       		.uleb128 0x19
+ 1697 0515 01       		.uleb128 0x1
+ 1698 0516 50       		.byte	0x50
+ 1699 0517 01       		.uleb128 0x1
+ 1700 0518 31       		.byte	0x31
+ 1701 0519 00       		.byte	0
+ 1702 051a 18       		.uleb128 0x18
+ 1703 051b 4E000000 		.4byte	.LVL59
+ 1704 051f 1D070000 		.4byte	0x71d
+ 1705 0523 2D050000 		.4byte	0x52d
+ 1706 0527 19       		.uleb128 0x19
+ 1707 0528 01       		.uleb128 0x1
+ 1708 0529 50       		.byte	0x50
+ 1709 052a 01       		.uleb128 0x1
+ 1710 052b 30       		.byte	0x30
+ 1711 052c 00       		.byte	0
+ 1712 052d 18       		.uleb128 0x18
+ 1713 052e 5C000000 		.4byte	.LVL61
+ 1714 0532 28070000 		.4byte	0x728
+ 1715 0536 40050000 		.4byte	0x540
+ 1716 053a 19       		.uleb128 0x19
+ 1717 053b 01       		.uleb128 0x1
+ 1718 053c 50       		.byte	0x50
+ 1719 053d 01       		.uleb128 0x1
+ 1720 053e 34       		.byte	0x34
+ 1721 053f 00       		.byte	0
+ 1722 0540 18       		.uleb128 0x18
+ 1723 0541 64000000 		.4byte	.LVL63
+ 1724 0545 28070000 		.4byte	0x728
+ 1725 0549 54050000 		.4byte	0x554
+ 1726 054d 19       		.uleb128 0x19
+ 1727 054e 01       		.uleb128 0x1
+ 1728 054f 50       		.byte	0x50
+ 1729 0550 02       		.uleb128 0x2
+ 1730 0551 75       		.byte	0x75
+ 1731 0552 00       		.sleb128 0
+ 1732 0553 00       		.byte	0
+ 1733 0554 1B       		.uleb128 0x1b
+ 1734 0555 6C000000 		.4byte	.LVL65
+ 1735 0559 28070000 		.4byte	0x728
+ 1736 055d 19       		.uleb128 0x19
+ 1737 055e 01       		.uleb128 0x1
+ 1738 055f 50       		.byte	0x50
+ 1739 0560 02       		.uleb128 0x2
+ 1740 0561 74       		.byte	0x74
+ 1741 0562 00       		.sleb128 0
+ 1742 0563 00       		.byte	0
+ 1743 0564 00       		.byte	0
+ 1744 0565 1D       		.uleb128 0x1d
+ 1745 0566 1E030000 		.4byte	.LASF75
+ 1746 056a 01       		.byte	0x1
+ 1747 056b C201     		.2byte	0x1c2
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 45
+
+
+ 1748 056d 6B000000 		.4byte	0x6b
+ 1749 0571 00000000 		.4byte	.LFB43
+ 1750 0575 0C000000 		.4byte	.LFE43-.LFB43
+ 1751 0579 01       		.uleb128 0x1
+ 1752 057a 9C       		.byte	0x9c
+ 1753 057b 1E       		.uleb128 0x1e
+ 1754 057c 00000000 		.4byte	.LASF76
+ 1755 0580 01       		.byte	0x1
+ 1756 0581 D701     		.2byte	0x1d7
+ 1757 0583 6B000000 		.4byte	0x6b
+ 1758 0587 00000000 		.4byte	.LFB44
+ 1759 058b 10010000 		.4byte	.LFE44-.LFB44
+ 1760 058f 01       		.uleb128 0x1
+ 1761 0590 9C       		.byte	0x9c
+ 1762 0591 3E060000 		.4byte	0x63e
+ 1763 0595 0D       		.uleb128 0xd
+ 1764 0596 64010000 		.4byte	.LASF49
+ 1765 059a 01       		.byte	0x1
+ 1766 059b D701     		.2byte	0x1d7
+ 1767 059d 87020000 		.4byte	0x287
+ 1768 05a1 1F050000 		.4byte	.LLST15
+ 1769 05a5 0D       		.uleb128 0xd
+ 1770 05a6 F3000000 		.4byte	.LASF50
+ 1771 05aa 01       		.byte	0x1
+ 1772 05ab D701     		.2byte	0x1d7
+ 1773 05ad 6B000000 		.4byte	0x6b
+ 1774 05b1 CF050000 		.4byte	.LLST16
+ 1775 05b5 1F       		.uleb128 0x1f
+ 1776 05b6 13000000 		.4byte	.LASF98
+ 1777 05ba 01       		.byte	0x1
+ 1778 05bb D901     		.2byte	0x1d9
+ 1779 05bd 6B000000 		.4byte	0x6b
+ 1780 05c1 0F       		.uleb128 0xf
+ 1781 05c2 8C000000 		.4byte	.LASF77
+ 1782 05c6 01       		.byte	0x1
+ 1783 05c7 DA01     		.2byte	0x1da
+ 1784 05c9 22010000 		.4byte	0x122
+ 1785 05cd 54060000 		.4byte	.LLST17
+ 1786 05d1 18       		.uleb128 0x18
+ 1787 05d2 3C000000 		.4byte	.LVL84
+ 1788 05d6 30020000 		.4byte	0x230
+ 1789 05da E4050000 		.4byte	0x5e4
+ 1790 05de 19       		.uleb128 0x19
+ 1791 05df 01       		.uleb128 0x1
+ 1792 05e0 52       		.byte	0x52
+ 1793 05e1 01       		.uleb128 0x1
+ 1794 05e2 30       		.byte	0x30
+ 1795 05e3 00       		.byte	0
+ 1796 05e4 18       		.uleb128 0x18
+ 1797 05e5 70000000 		.4byte	.LVL89
+ 1798 05e9 30020000 		.4byte	0x230
+ 1799 05ed 03060000 		.4byte	0x603
+ 1800 05f1 19       		.uleb128 0x19
+ 1801 05f2 01       		.uleb128 0x1
+ 1802 05f3 50       		.byte	0x50
+ 1803 05f4 02       		.uleb128 0x2
+ 1804 05f5 74       		.byte	0x74
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 46
+
+
+ 1805 05f6 00       		.sleb128 0
+ 1806 05f7 19       		.uleb128 0x19
+ 1807 05f8 01       		.uleb128 0x1
+ 1808 05f9 51       		.byte	0x51
+ 1809 05fa 02       		.uleb128 0x2
+ 1810 05fb 75       		.byte	0x75
+ 1811 05fc 00       		.sleb128 0
+ 1812 05fd 19       		.uleb128 0x19
+ 1813 05fe 01       		.uleb128 0x1
+ 1814 05ff 52       		.byte	0x52
+ 1815 0600 01       		.uleb128 0x1
+ 1816 0601 30       		.byte	0x30
+ 1817 0602 00       		.byte	0
+ 1818 0603 18       		.uleb128 0x18
+ 1819 0604 B0000000 		.4byte	.LVL94
+ 1820 0608 30020000 		.4byte	0x230
+ 1821 060c 22060000 		.4byte	0x622
+ 1822 0610 19       		.uleb128 0x19
+ 1823 0611 01       		.uleb128 0x1
+ 1824 0612 50       		.byte	0x50
+ 1825 0613 02       		.uleb128 0x2
+ 1826 0614 74       		.byte	0x74
+ 1827 0615 00       		.sleb128 0
+ 1828 0616 19       		.uleb128 0x19
+ 1829 0617 01       		.uleb128 0x1
+ 1830 0618 51       		.byte	0x51
+ 1831 0619 02       		.uleb128 0x2
+ 1832 061a 75       		.byte	0x75
+ 1833 061b 00       		.sleb128 0
+ 1834 061c 19       		.uleb128 0x19
+ 1835 061d 01       		.uleb128 0x1
+ 1836 061e 52       		.byte	0x52
+ 1837 061f 01       		.uleb128 0x1
+ 1838 0620 30       		.byte	0x30
+ 1839 0621 00       		.byte	0
+ 1840 0622 1B       		.uleb128 0x1b
+ 1841 0623 E2000000 		.4byte	.LVL99
+ 1842 0627 30020000 		.4byte	0x230
+ 1843 062b 19       		.uleb128 0x19
+ 1844 062c 01       		.uleb128 0x1
+ 1845 062d 50       		.byte	0x50
+ 1846 062e 02       		.uleb128 0x2
+ 1847 062f 74       		.byte	0x74
+ 1848 0630 00       		.sleb128 0
+ 1849 0631 19       		.uleb128 0x19
+ 1850 0632 01       		.uleb128 0x1
+ 1851 0633 51       		.byte	0x51
+ 1852 0634 02       		.uleb128 0x2
+ 1853 0635 75       		.byte	0x75
+ 1854 0636 00       		.sleb128 0
+ 1855 0637 19       		.uleb128 0x19
+ 1856 0638 01       		.uleb128 0x1
+ 1857 0639 52       		.byte	0x52
+ 1858 063a 01       		.uleb128 0x1
+ 1859 063b 30       		.byte	0x30
+ 1860 063c 00       		.byte	0
+ 1861 063d 00       		.byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 47
+
+
+ 1862 063e 17       		.uleb128 0x17
+ 1863 063f AF000000 		.4byte	.LASF78
+ 1864 0643 01       		.byte	0x1
+ 1865 0644 5B02     		.2byte	0x25b
+ 1866 0646 00000000 		.4byte	.LFB46
+ 1867 064a 14000000 		.4byte	.LFE46-.LFB46
+ 1868 064e 01       		.uleb128 0x1
+ 1869 064f 9C       		.byte	0x9c
+ 1870 0650 74060000 		.4byte	0x674
+ 1871 0654 0D       		.uleb128 0xd
+ 1872 0655 A7060000 		.4byte	.LASF79
+ 1873 0659 01       		.byte	0x1
+ 1874 065a 5B02     		.2byte	0x25b
+ 1875 065c 2C000000 		.4byte	0x2c
+ 1876 0660 C4060000 		.4byte	.LLST18
+ 1877 0664 1B       		.uleb128 0x1b
+ 1878 0665 0C000000 		.4byte	.LVL109
+ 1879 0669 99030000 		.4byte	0x399
+ 1880 066d 19       		.uleb128 0x19
+ 1881 066e 01       		.uleb128 0x1
+ 1882 066f 51       		.byte	0x51
+ 1883 0670 01       		.uleb128 0x1
+ 1884 0671 31       		.byte	0x31
+ 1885 0672 00       		.byte	0
+ 1886 0673 00       		.byte	0
+ 1887 0674 20       		.uleb128 0x20
+ 1888 0675 71010000 		.4byte	0x171
+ 1889 0679 84060000 		.4byte	0x684
+ 1890 067d 21       		.uleb128 0x21
+ 1891 067e C3000000 		.4byte	0xc3
+ 1892 0682 03       		.byte	0x3
+ 1893 0683 00       		.byte	0
+ 1894 0684 22       		.uleb128 0x22
+ 1895 0685 7D050000 		.4byte	.LASF80
+ 1896 0689 01       		.byte	0x1
+ 1897 068a 39       		.byte	0x39
+ 1898 068b 95060000 		.4byte	0x695
+ 1899 068f 05       		.uleb128 0x5
+ 1900 0690 03       		.byte	0x3
+ 1901 0691 00000000 		.4byte	ThermalLimitArray
+ 1902 0695 0A       		.uleb128 0xa
+ 1903 0696 74060000 		.4byte	0x674
+ 1904 069a 22       		.uleb128 0x22
+ 1905 069b FA040000 		.4byte	.LASF81
+ 1906 069f 01       		.byte	0x1
+ 1907 06a0 49       		.byte	0x49
+ 1908 06a1 A9010000 		.4byte	0x1a9
+ 1909 06a5 05       		.uleb128 0x5
+ 1910 06a6 03       		.byte	0x3
+ 1911 06a7 08000000 		.4byte	PositionData
+ 1912 06ab 22       		.uleb128 0x22
+ 1913 06ac 46040000 		.4byte	.LASF82
+ 1914 06b0 01       		.byte	0x1
+ 1915 06b1 54       		.byte	0x54
+ 1916 06b2 F9010000 		.4byte	0x1f9
+ 1917 06b6 05       		.uleb128 0x5
+ 1918 06b7 03       		.byte	0x3
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 48
+
+
+ 1919 06b8 00000000 		.4byte	RegulationData
+ 1920 06bc 22       		.uleb128 0x22
+ 1921 06bd 9E000000 		.4byte	.LASF83
+ 1922 06c1 01       		.byte	0x1
+ 1923 06c2 5C       		.byte	0x5c
+ 1924 06c3 25020000 		.4byte	0x225
+ 1925 06c7 05       		.uleb128 0x5
+ 1926 06c8 03       		.byte	0x3
+ 1927 06c9 0C000000 		.4byte	VoltageSenseData
+ 1928 06cd 23       		.uleb128 0x23
+ 1929 06ce 27040000 		.4byte	.LASF84
+ 1930 06d2 27040000 		.4byte	.LASF84
+ 1931 06d6 04       		.byte	0x4
+ 1932 06d7 3301     		.2byte	0x133
+ 1933 06d9 23       		.uleb128 0x23
+ 1934 06da 74010000 		.4byte	.LASF85
+ 1935 06de 74010000 		.4byte	.LASF85
+ 1936 06e2 04       		.byte	0x4
+ 1937 06e3 3201     		.2byte	0x132
+ 1938 06e5 23       		.uleb128 0x23
+ 1939 06e6 D4050000 		.4byte	.LASF86
+ 1940 06ea D4050000 		.4byte	.LASF86
+ 1941 06ee 04       		.byte	0x4
+ 1942 06ef 4701     		.2byte	0x147
+ 1943 06f1 24       		.uleb128 0x24
+ 1944 06f2 B2020000 		.4byte	.LASF87
+ 1945 06f6 B2020000 		.4byte	.LASF87
+ 1946 06fa 05       		.byte	0x5
+ 1947 06fb 2F       		.byte	0x2f
+ 1948 06fc 24       		.uleb128 0x24
+ 1949 06fd 55040000 		.4byte	.LASF88
+ 1950 0701 55040000 		.4byte	.LASF88
+ 1951 0705 06       		.byte	0x6
+ 1952 0706 C3       		.byte	0xc3
+ 1953 0707 24       		.uleb128 0x24
+ 1954 0708 32030000 		.4byte	.LASF89
+ 1955 070c 32030000 		.4byte	.LASF89
+ 1956 0710 07       		.byte	0x7
+ 1957 0711 DA       		.byte	0xda
+ 1958 0712 24       		.uleb128 0x24
+ 1959 0713 44000000 		.4byte	.LASF90
+ 1960 0717 44000000 		.4byte	.LASF90
+ 1961 071b 08       		.byte	0x8
+ 1962 071c 9F       		.byte	0x9f
+ 1963 071d 24       		.uleb128 0x24
+ 1964 071e 3C010000 		.4byte	.LASF91
+ 1965 0722 3C010000 		.4byte	.LASF91
+ 1966 0726 09       		.byte	0x9
+ 1967 0727 38       		.byte	0x38
+ 1968 0728 24       		.uleb128 0x24
+ 1969 0729 9B040000 		.4byte	.LASF92
+ 1970 072d 9B040000 		.4byte	.LASF92
+ 1971 0731 08       		.byte	0x8
+ 1972 0732 A0       		.byte	0xa0
+ 1973 0733 00       		.byte	0
+ 1974              		.section	.debug_abbrev,"",%progbits
+ 1975              	.Ldebug_abbrev0:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 49
+
+
+ 1976 0000 01       		.uleb128 0x1
+ 1977 0001 11       		.uleb128 0x11
+ 1978 0002 01       		.byte	0x1
+ 1979 0003 25       		.uleb128 0x25
+ 1980 0004 0E       		.uleb128 0xe
+ 1981 0005 13       		.uleb128 0x13
+ 1982 0006 0B       		.uleb128 0xb
+ 1983 0007 03       		.uleb128 0x3
+ 1984 0008 0E       		.uleb128 0xe
+ 1985 0009 1B       		.uleb128 0x1b
+ 1986 000a 0E       		.uleb128 0xe
+ 1987 000b 55       		.uleb128 0x55
+ 1988 000c 17       		.uleb128 0x17
+ 1989 000d 11       		.uleb128 0x11
+ 1990 000e 01       		.uleb128 0x1
+ 1991 000f 10       		.uleb128 0x10
+ 1992 0010 17       		.uleb128 0x17
+ 1993 0011 00       		.byte	0
+ 1994 0012 00       		.byte	0
+ 1995 0013 02       		.uleb128 0x2
+ 1996 0014 24       		.uleb128 0x24
+ 1997 0015 00       		.byte	0
+ 1998 0016 0B       		.uleb128 0xb
+ 1999 0017 0B       		.uleb128 0xb
+ 2000 0018 3E       		.uleb128 0x3e
+ 2001 0019 0B       		.uleb128 0xb
+ 2002 001a 03       		.uleb128 0x3
+ 2003 001b 0E       		.uleb128 0xe
+ 2004 001c 00       		.byte	0
+ 2005 001d 00       		.byte	0
+ 2006 001e 03       		.uleb128 0x3
+ 2007 001f 24       		.uleb128 0x24
+ 2008 0020 00       		.byte	0
+ 2009 0021 0B       		.uleb128 0xb
+ 2010 0022 0B       		.uleb128 0xb
+ 2011 0023 3E       		.uleb128 0x3e
+ 2012 0024 0B       		.uleb128 0xb
+ 2013 0025 03       		.uleb128 0x3
+ 2014 0026 08       		.uleb128 0x8
+ 2015 0027 00       		.byte	0
+ 2016 0028 00       		.byte	0
+ 2017 0029 04       		.uleb128 0x4
+ 2018 002a 16       		.uleb128 0x16
+ 2019 002b 00       		.byte	0
+ 2020 002c 03       		.uleb128 0x3
+ 2021 002d 0E       		.uleb128 0xe
+ 2022 002e 3A       		.uleb128 0x3a
+ 2023 002f 0B       		.uleb128 0xb
+ 2024 0030 3B       		.uleb128 0x3b
+ 2025 0031 05       		.uleb128 0x5
+ 2026 0032 49       		.uleb128 0x49
+ 2027 0033 13       		.uleb128 0x13
+ 2028 0034 00       		.byte	0
+ 2029 0035 00       		.byte	0
+ 2030 0036 05       		.uleb128 0x5
+ 2031 0037 04       		.uleb128 0x4
+ 2032 0038 01       		.byte	0x1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 50
+
+
+ 2033 0039 03       		.uleb128 0x3
+ 2034 003a 0E       		.uleb128 0xe
+ 2035 003b 0B       		.uleb128 0xb
+ 2036 003c 0B       		.uleb128 0xb
+ 2037 003d 49       		.uleb128 0x49
+ 2038 003e 13       		.uleb128 0x13
+ 2039 003f 3A       		.uleb128 0x3a
+ 2040 0040 0B       		.uleb128 0xb
+ 2041 0041 3B       		.uleb128 0x3b
+ 2042 0042 0B       		.uleb128 0xb
+ 2043 0043 01       		.uleb128 0x1
+ 2044 0044 13       		.uleb128 0x13
+ 2045 0045 00       		.byte	0
+ 2046 0046 00       		.byte	0
+ 2047 0047 06       		.uleb128 0x6
+ 2048 0048 28       		.uleb128 0x28
+ 2049 0049 00       		.byte	0
+ 2050 004a 03       		.uleb128 0x3
+ 2051 004b 08       		.uleb128 0x8
+ 2052 004c 1C       		.uleb128 0x1c
+ 2053 004d 0B       		.uleb128 0xb
+ 2054 004e 00       		.byte	0
+ 2055 004f 00       		.byte	0
+ 2056 0050 07       		.uleb128 0x7
+ 2057 0051 28       		.uleb128 0x28
+ 2058 0052 00       		.byte	0
+ 2059 0053 03       		.uleb128 0x3
+ 2060 0054 0E       		.uleb128 0xe
+ 2061 0055 1C       		.uleb128 0x1c
+ 2062 0056 0B       		.uleb128 0xb
+ 2063 0057 00       		.byte	0
+ 2064 0058 00       		.byte	0
+ 2065 0059 08       		.uleb128 0x8
+ 2066 005a 13       		.uleb128 0x13
+ 2067 005b 01       		.byte	0x1
+ 2068 005c 0B       		.uleb128 0xb
+ 2069 005d 0B       		.uleb128 0xb
+ 2070 005e 3A       		.uleb128 0x3a
+ 2071 005f 0B       		.uleb128 0xb
+ 2072 0060 3B       		.uleb128 0x3b
+ 2073 0061 0B       		.uleb128 0xb
+ 2074 0062 01       		.uleb128 0x1
+ 2075 0063 13       		.uleb128 0x13
+ 2076 0064 00       		.byte	0
+ 2077 0065 00       		.byte	0
+ 2078 0066 09       		.uleb128 0x9
+ 2079 0067 0D       		.uleb128 0xd
+ 2080 0068 00       		.byte	0
+ 2081 0069 03       		.uleb128 0x3
+ 2082 006a 0E       		.uleb128 0xe
+ 2083 006b 3A       		.uleb128 0x3a
+ 2084 006c 0B       		.uleb128 0xb
+ 2085 006d 3B       		.uleb128 0x3b
+ 2086 006e 0B       		.uleb128 0xb
+ 2087 006f 49       		.uleb128 0x49
+ 2088 0070 13       		.uleb128 0x13
+ 2089 0071 38       		.uleb128 0x38
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 51
+
+
+ 2090 0072 0B       		.uleb128 0xb
+ 2091 0073 00       		.byte	0
+ 2092 0074 00       		.byte	0
+ 2093 0075 0A       		.uleb128 0xa
+ 2094 0076 26       		.uleb128 0x26
+ 2095 0077 00       		.byte	0
+ 2096 0078 49       		.uleb128 0x49
+ 2097 0079 13       		.uleb128 0x13
+ 2098 007a 00       		.byte	0
+ 2099 007b 00       		.byte	0
+ 2100 007c 0B       		.uleb128 0xb
+ 2101 007d 16       		.uleb128 0x16
+ 2102 007e 00       		.byte	0
+ 2103 007f 03       		.uleb128 0x3
+ 2104 0080 0E       		.uleb128 0xe
+ 2105 0081 3A       		.uleb128 0x3a
+ 2106 0082 0B       		.uleb128 0xb
+ 2107 0083 3B       		.uleb128 0x3b
+ 2108 0084 0B       		.uleb128 0xb
+ 2109 0085 49       		.uleb128 0x49
+ 2110 0086 13       		.uleb128 0x13
+ 2111 0087 00       		.byte	0
+ 2112 0088 00       		.byte	0
+ 2113 0089 0C       		.uleb128 0xc
+ 2114 008a 2E       		.uleb128 0x2e
+ 2115 008b 01       		.byte	0x1
+ 2116 008c 03       		.uleb128 0x3
+ 2117 008d 0E       		.uleb128 0xe
+ 2118 008e 3A       		.uleb128 0x3a
+ 2119 008f 0B       		.uleb128 0xb
+ 2120 0090 3B       		.uleb128 0x3b
+ 2121 0091 05       		.uleb128 0x5
+ 2122 0092 27       		.uleb128 0x27
+ 2123 0093 19       		.uleb128 0x19
+ 2124 0094 49       		.uleb128 0x49
+ 2125 0095 13       		.uleb128 0x13
+ 2126 0096 11       		.uleb128 0x11
+ 2127 0097 01       		.uleb128 0x1
+ 2128 0098 12       		.uleb128 0x12
+ 2129 0099 06       		.uleb128 0x6
+ 2130 009a 40       		.uleb128 0x40
+ 2131 009b 18       		.uleb128 0x18
+ 2132 009c 9742     		.uleb128 0x2117
+ 2133 009e 19       		.uleb128 0x19
+ 2134 009f 01       		.uleb128 0x1
+ 2135 00a0 13       		.uleb128 0x13
+ 2136 00a1 00       		.byte	0
+ 2137 00a2 00       		.byte	0
+ 2138 00a3 0D       		.uleb128 0xd
+ 2139 00a4 05       		.uleb128 0x5
+ 2140 00a5 00       		.byte	0
+ 2141 00a6 03       		.uleb128 0x3
+ 2142 00a7 0E       		.uleb128 0xe
+ 2143 00a8 3A       		.uleb128 0x3a
+ 2144 00a9 0B       		.uleb128 0xb
+ 2145 00aa 3B       		.uleb128 0x3b
+ 2146 00ab 05       		.uleb128 0x5
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 52
+
+
+ 2147 00ac 49       		.uleb128 0x49
+ 2148 00ad 13       		.uleb128 0x13
+ 2149 00ae 02       		.uleb128 0x2
+ 2150 00af 17       		.uleb128 0x17
+ 2151 00b0 00       		.byte	0
+ 2152 00b1 00       		.byte	0
+ 2153 00b2 0E       		.uleb128 0xe
+ 2154 00b3 05       		.uleb128 0x5
+ 2155 00b4 00       		.byte	0
+ 2156 00b5 03       		.uleb128 0x3
+ 2157 00b6 0E       		.uleb128 0xe
+ 2158 00b7 3A       		.uleb128 0x3a
+ 2159 00b8 0B       		.uleb128 0xb
+ 2160 00b9 3B       		.uleb128 0x3b
+ 2161 00ba 05       		.uleb128 0x5
+ 2162 00bb 49       		.uleb128 0x49
+ 2163 00bc 13       		.uleb128 0x13
+ 2164 00bd 02       		.uleb128 0x2
+ 2165 00be 18       		.uleb128 0x18
+ 2166 00bf 00       		.byte	0
+ 2167 00c0 00       		.byte	0
+ 2168 00c1 0F       		.uleb128 0xf
+ 2169 00c2 34       		.uleb128 0x34
+ 2170 00c3 00       		.byte	0
+ 2171 00c4 03       		.uleb128 0x3
+ 2172 00c5 0E       		.uleb128 0xe
+ 2173 00c6 3A       		.uleb128 0x3a
+ 2174 00c7 0B       		.uleb128 0xb
+ 2175 00c8 3B       		.uleb128 0x3b
+ 2176 00c9 05       		.uleb128 0x5
+ 2177 00ca 49       		.uleb128 0x49
+ 2178 00cb 13       		.uleb128 0x13
+ 2179 00cc 02       		.uleb128 0x2
+ 2180 00cd 17       		.uleb128 0x17
+ 2181 00ce 00       		.byte	0
+ 2182 00cf 00       		.byte	0
+ 2183 00d0 10       		.uleb128 0x10
+ 2184 00d1 0F       		.uleb128 0xf
+ 2185 00d2 00       		.byte	0
+ 2186 00d3 0B       		.uleb128 0xb
+ 2187 00d4 0B       		.uleb128 0xb
+ 2188 00d5 49       		.uleb128 0x49
+ 2189 00d6 13       		.uleb128 0x13
+ 2190 00d7 00       		.byte	0
+ 2191 00d8 00       		.byte	0
+ 2192 00d9 11       		.uleb128 0x11
+ 2193 00da 2E       		.uleb128 0x2e
+ 2194 00db 00       		.byte	0
+ 2195 00dc 3F       		.uleb128 0x3f
+ 2196 00dd 19       		.uleb128 0x19
+ 2197 00de 03       		.uleb128 0x3
+ 2198 00df 0E       		.uleb128 0xe
+ 2199 00e0 3A       		.uleb128 0x3a
+ 2200 00e1 0B       		.uleb128 0xb
+ 2201 00e2 3B       		.uleb128 0x3b
+ 2202 00e3 0B       		.uleb128 0xb
+ 2203 00e4 27       		.uleb128 0x27
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 53
+
+
+ 2204 00e5 19       		.uleb128 0x19
+ 2205 00e6 49       		.uleb128 0x49
+ 2206 00e7 13       		.uleb128 0x13
+ 2207 00e8 11       		.uleb128 0x11
+ 2208 00e9 01       		.uleb128 0x1
+ 2209 00ea 12       		.uleb128 0x12
+ 2210 00eb 06       		.uleb128 0x6
+ 2211 00ec 40       		.uleb128 0x40
+ 2212 00ed 18       		.uleb128 0x18
+ 2213 00ee 9742     		.uleb128 0x2117
+ 2214 00f0 19       		.uleb128 0x19
+ 2215 00f1 00       		.byte	0
+ 2216 00f2 00       		.byte	0
+ 2217 00f3 12       		.uleb128 0x12
+ 2218 00f4 2E       		.uleb128 0x2e
+ 2219 00f5 01       		.byte	0x1
+ 2220 00f6 3F       		.uleb128 0x3f
+ 2221 00f7 19       		.uleb128 0x19
+ 2222 00f8 03       		.uleb128 0x3
+ 2223 00f9 0E       		.uleb128 0xe
+ 2224 00fa 3A       		.uleb128 0x3a
+ 2225 00fb 0B       		.uleb128 0xb
+ 2226 00fc 3B       		.uleb128 0x3b
+ 2227 00fd 0B       		.uleb128 0xb
+ 2228 00fe 27       		.uleb128 0x27
+ 2229 00ff 19       		.uleb128 0x19
+ 2230 0100 49       		.uleb128 0x49
+ 2231 0101 13       		.uleb128 0x13
+ 2232 0102 11       		.uleb128 0x11
+ 2233 0103 01       		.uleb128 0x1
+ 2234 0104 12       		.uleb128 0x12
+ 2235 0105 06       		.uleb128 0x6
+ 2236 0106 40       		.uleb128 0x40
+ 2237 0107 18       		.uleb128 0x18
+ 2238 0108 9742     		.uleb128 0x2117
+ 2239 010a 19       		.uleb128 0x19
+ 2240 010b 01       		.uleb128 0x1
+ 2241 010c 13       		.uleb128 0x13
+ 2242 010d 00       		.byte	0
+ 2243 010e 00       		.byte	0
+ 2244 010f 13       		.uleb128 0x13
+ 2245 0110 05       		.uleb128 0x5
+ 2246 0111 00       		.byte	0
+ 2247 0112 03       		.uleb128 0x3
+ 2248 0113 0E       		.uleb128 0xe
+ 2249 0114 3A       		.uleb128 0x3a
+ 2250 0115 0B       		.uleb128 0xb
+ 2251 0116 3B       		.uleb128 0x3b
+ 2252 0117 0B       		.uleb128 0xb
+ 2253 0118 49       		.uleb128 0x49
+ 2254 0119 13       		.uleb128 0x13
+ 2255 011a 02       		.uleb128 0x2
+ 2256 011b 17       		.uleb128 0x17
+ 2257 011c 00       		.byte	0
+ 2258 011d 00       		.byte	0
+ 2259 011e 14       		.uleb128 0x14
+ 2260 011f 2E       		.uleb128 0x2e
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 54
+
+
+ 2261 0120 00       		.byte	0
+ 2262 0121 3F       		.uleb128 0x3f
+ 2263 0122 19       		.uleb128 0x19
+ 2264 0123 03       		.uleb128 0x3
+ 2265 0124 0E       		.uleb128 0xe
+ 2266 0125 3A       		.uleb128 0x3a
+ 2267 0126 0B       		.uleb128 0xb
+ 2268 0127 3B       		.uleb128 0x3b
+ 2269 0128 0B       		.uleb128 0xb
+ 2270 0129 27       		.uleb128 0x27
+ 2271 012a 19       		.uleb128 0x19
+ 2272 012b 11       		.uleb128 0x11
+ 2273 012c 01       		.uleb128 0x1
+ 2274 012d 12       		.uleb128 0x12
+ 2275 012e 06       		.uleb128 0x6
+ 2276 012f 40       		.uleb128 0x40
+ 2277 0130 18       		.uleb128 0x18
+ 2278 0131 9742     		.uleb128 0x2117
+ 2279 0133 19       		.uleb128 0x19
+ 2280 0134 00       		.byte	0
+ 2281 0135 00       		.byte	0
+ 2282 0136 15       		.uleb128 0x15
+ 2283 0137 2E       		.uleb128 0x2e
+ 2284 0138 01       		.byte	0x1
+ 2285 0139 3F       		.uleb128 0x3f
+ 2286 013a 19       		.uleb128 0x19
+ 2287 013b 03       		.uleb128 0x3
+ 2288 013c 0E       		.uleb128 0xe
+ 2289 013d 3A       		.uleb128 0x3a
+ 2290 013e 0B       		.uleb128 0xb
+ 2291 013f 3B       		.uleb128 0x3b
+ 2292 0140 0B       		.uleb128 0xb
+ 2293 0141 27       		.uleb128 0x27
+ 2294 0142 19       		.uleb128 0x19
+ 2295 0143 11       		.uleb128 0x11
+ 2296 0144 01       		.uleb128 0x1
+ 2297 0145 12       		.uleb128 0x12
+ 2298 0146 06       		.uleb128 0x6
+ 2299 0147 40       		.uleb128 0x40
+ 2300 0148 18       		.uleb128 0x18
+ 2301 0149 9742     		.uleb128 0x2117
+ 2302 014b 19       		.uleb128 0x19
+ 2303 014c 01       		.uleb128 0x1
+ 2304 014d 13       		.uleb128 0x13
+ 2305 014e 00       		.byte	0
+ 2306 014f 00       		.byte	0
+ 2307 0150 16       		.uleb128 0x16
+ 2308 0151 898201   		.uleb128 0x4109
+ 2309 0154 00       		.byte	0
+ 2310 0155 11       		.uleb128 0x11
+ 2311 0156 01       		.uleb128 0x1
+ 2312 0157 31       		.uleb128 0x31
+ 2313 0158 13       		.uleb128 0x13
+ 2314 0159 00       		.byte	0
+ 2315 015a 00       		.byte	0
+ 2316 015b 17       		.uleb128 0x17
+ 2317 015c 2E       		.uleb128 0x2e
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 55
+
+
+ 2318 015d 01       		.byte	0x1
+ 2319 015e 3F       		.uleb128 0x3f
+ 2320 015f 19       		.uleb128 0x19
+ 2321 0160 03       		.uleb128 0x3
+ 2322 0161 0E       		.uleb128 0xe
+ 2323 0162 3A       		.uleb128 0x3a
+ 2324 0163 0B       		.uleb128 0xb
+ 2325 0164 3B       		.uleb128 0x3b
+ 2326 0165 05       		.uleb128 0x5
+ 2327 0166 27       		.uleb128 0x27
+ 2328 0167 19       		.uleb128 0x19
+ 2329 0168 11       		.uleb128 0x11
+ 2330 0169 01       		.uleb128 0x1
+ 2331 016a 12       		.uleb128 0x12
+ 2332 016b 06       		.uleb128 0x6
+ 2333 016c 40       		.uleb128 0x40
+ 2334 016d 18       		.uleb128 0x18
+ 2335 016e 9742     		.uleb128 0x2117
+ 2336 0170 19       		.uleb128 0x19
+ 2337 0171 01       		.uleb128 0x1
+ 2338 0172 13       		.uleb128 0x13
+ 2339 0173 00       		.byte	0
+ 2340 0174 00       		.byte	0
+ 2341 0175 18       		.uleb128 0x18
+ 2342 0176 898201   		.uleb128 0x4109
+ 2343 0179 01       		.byte	0x1
+ 2344 017a 11       		.uleb128 0x11
+ 2345 017b 01       		.uleb128 0x1
+ 2346 017c 31       		.uleb128 0x31
+ 2347 017d 13       		.uleb128 0x13
+ 2348 017e 01       		.uleb128 0x1
+ 2349 017f 13       		.uleb128 0x13
+ 2350 0180 00       		.byte	0
+ 2351 0181 00       		.byte	0
+ 2352 0182 19       		.uleb128 0x19
+ 2353 0183 8A8201   		.uleb128 0x410a
+ 2354 0186 00       		.byte	0
+ 2355 0187 02       		.uleb128 0x2
+ 2356 0188 18       		.uleb128 0x18
+ 2357 0189 9142     		.uleb128 0x2111
+ 2358 018b 18       		.uleb128 0x18
+ 2359 018c 00       		.byte	0
+ 2360 018d 00       		.byte	0
+ 2361 018e 1A       		.uleb128 0x1a
+ 2362 018f 2E       		.uleb128 0x2e
+ 2363 0190 01       		.byte	0x1
+ 2364 0191 3F       		.uleb128 0x3f
+ 2365 0192 19       		.uleb128 0x19
+ 2366 0193 03       		.uleb128 0x3
+ 2367 0194 0E       		.uleb128 0xe
+ 2368 0195 3A       		.uleb128 0x3a
+ 2369 0196 0B       		.uleb128 0xb
+ 2370 0197 3B       		.uleb128 0x3b
+ 2371 0198 05       		.uleb128 0x5
+ 2372 0199 27       		.uleb128 0x27
+ 2373 019a 19       		.uleb128 0x19
+ 2374 019b 49       		.uleb128 0x49
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 56
+
+
+ 2375 019c 13       		.uleb128 0x13
+ 2376 019d 11       		.uleb128 0x11
+ 2377 019e 01       		.uleb128 0x1
+ 2378 019f 12       		.uleb128 0x12
+ 2379 01a0 06       		.uleb128 0x6
+ 2380 01a1 40       		.uleb128 0x40
+ 2381 01a2 18       		.uleb128 0x18
+ 2382 01a3 9742     		.uleb128 0x2117
+ 2383 01a5 19       		.uleb128 0x19
+ 2384 01a6 01       		.uleb128 0x1
+ 2385 01a7 13       		.uleb128 0x13
+ 2386 01a8 00       		.byte	0
+ 2387 01a9 00       		.byte	0
+ 2388 01aa 1B       		.uleb128 0x1b
+ 2389 01ab 898201   		.uleb128 0x4109
+ 2390 01ae 01       		.byte	0x1
+ 2391 01af 11       		.uleb128 0x11
+ 2392 01b0 01       		.uleb128 0x1
+ 2393 01b1 31       		.uleb128 0x31
+ 2394 01b2 13       		.uleb128 0x13
+ 2395 01b3 00       		.byte	0
+ 2396 01b4 00       		.byte	0
+ 2397 01b5 1C       		.uleb128 0x1c
+ 2398 01b6 34       		.uleb128 0x34
+ 2399 01b7 00       		.byte	0
+ 2400 01b8 03       		.uleb128 0x3
+ 2401 01b9 0E       		.uleb128 0xe
+ 2402 01ba 3A       		.uleb128 0x3a
+ 2403 01bb 0B       		.uleb128 0xb
+ 2404 01bc 3B       		.uleb128 0x3b
+ 2405 01bd 05       		.uleb128 0x5
+ 2406 01be 49       		.uleb128 0x49
+ 2407 01bf 13       		.uleb128 0x13
+ 2408 01c0 1C       		.uleb128 0x1c
+ 2409 01c1 0A       		.uleb128 0xa
+ 2410 01c2 00       		.byte	0
+ 2411 01c3 00       		.byte	0
+ 2412 01c4 1D       		.uleb128 0x1d
+ 2413 01c5 2E       		.uleb128 0x2e
+ 2414 01c6 00       		.byte	0
+ 2415 01c7 3F       		.uleb128 0x3f
+ 2416 01c8 19       		.uleb128 0x19
+ 2417 01c9 03       		.uleb128 0x3
+ 2418 01ca 0E       		.uleb128 0xe
+ 2419 01cb 3A       		.uleb128 0x3a
+ 2420 01cc 0B       		.uleb128 0xb
+ 2421 01cd 3B       		.uleb128 0x3b
+ 2422 01ce 05       		.uleb128 0x5
+ 2423 01cf 27       		.uleb128 0x27
+ 2424 01d0 19       		.uleb128 0x19
+ 2425 01d1 49       		.uleb128 0x49
+ 2426 01d2 13       		.uleb128 0x13
+ 2427 01d3 11       		.uleb128 0x11
+ 2428 01d4 01       		.uleb128 0x1
+ 2429 01d5 12       		.uleb128 0x12
+ 2430 01d6 06       		.uleb128 0x6
+ 2431 01d7 40       		.uleb128 0x40
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 57
+
+
+ 2432 01d8 18       		.uleb128 0x18
+ 2433 01d9 9742     		.uleb128 0x2117
+ 2434 01db 19       		.uleb128 0x19
+ 2435 01dc 00       		.byte	0
+ 2436 01dd 00       		.byte	0
+ 2437 01de 1E       		.uleb128 0x1e
+ 2438 01df 2E       		.uleb128 0x2e
+ 2439 01e0 01       		.byte	0x1
+ 2440 01e1 3F       		.uleb128 0x3f
+ 2441 01e2 19       		.uleb128 0x19
+ 2442 01e3 03       		.uleb128 0x3
+ 2443 01e4 0E       		.uleb128 0xe
+ 2444 01e5 3A       		.uleb128 0x3a
+ 2445 01e6 0B       		.uleb128 0xb
+ 2446 01e7 3B       		.uleb128 0x3b
+ 2447 01e8 05       		.uleb128 0x5
+ 2448 01e9 27       		.uleb128 0x27
+ 2449 01ea 19       		.uleb128 0x19
+ 2450 01eb 49       		.uleb128 0x49
+ 2451 01ec 13       		.uleb128 0x13
+ 2452 01ed 11       		.uleb128 0x11
+ 2453 01ee 01       		.uleb128 0x1
+ 2454 01ef 12       		.uleb128 0x12
+ 2455 01f0 06       		.uleb128 0x6
+ 2456 01f1 40       		.uleb128 0x40
+ 2457 01f2 18       		.uleb128 0x18
+ 2458 01f3 9642     		.uleb128 0x2116
+ 2459 01f5 19       		.uleb128 0x19
+ 2460 01f6 01       		.uleb128 0x1
+ 2461 01f7 13       		.uleb128 0x13
+ 2462 01f8 00       		.byte	0
+ 2463 01f9 00       		.byte	0
+ 2464 01fa 1F       		.uleb128 0x1f
+ 2465 01fb 34       		.uleb128 0x34
+ 2466 01fc 00       		.byte	0
+ 2467 01fd 03       		.uleb128 0x3
+ 2468 01fe 0E       		.uleb128 0xe
+ 2469 01ff 3A       		.uleb128 0x3a
+ 2470 0200 0B       		.uleb128 0xb
+ 2471 0201 3B       		.uleb128 0x3b
+ 2472 0202 05       		.uleb128 0x5
+ 2473 0203 49       		.uleb128 0x49
+ 2474 0204 13       		.uleb128 0x13
+ 2475 0205 00       		.byte	0
+ 2476 0206 00       		.byte	0
+ 2477 0207 20       		.uleb128 0x20
+ 2478 0208 01       		.uleb128 0x1
+ 2479 0209 01       		.byte	0x1
+ 2480 020a 49       		.uleb128 0x49
+ 2481 020b 13       		.uleb128 0x13
+ 2482 020c 01       		.uleb128 0x1
+ 2483 020d 13       		.uleb128 0x13
+ 2484 020e 00       		.byte	0
+ 2485 020f 00       		.byte	0
+ 2486 0210 21       		.uleb128 0x21
+ 2487 0211 21       		.uleb128 0x21
+ 2488 0212 00       		.byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 58
+
+
+ 2489 0213 49       		.uleb128 0x49
+ 2490 0214 13       		.uleb128 0x13
+ 2491 0215 2F       		.uleb128 0x2f
+ 2492 0216 0B       		.uleb128 0xb
+ 2493 0217 00       		.byte	0
+ 2494 0218 00       		.byte	0
+ 2495 0219 22       		.uleb128 0x22
+ 2496 021a 34       		.uleb128 0x34
+ 2497 021b 00       		.byte	0
+ 2498 021c 03       		.uleb128 0x3
+ 2499 021d 0E       		.uleb128 0xe
+ 2500 021e 3A       		.uleb128 0x3a
+ 2501 021f 0B       		.uleb128 0xb
+ 2502 0220 3B       		.uleb128 0x3b
+ 2503 0221 0B       		.uleb128 0xb
+ 2504 0222 49       		.uleb128 0x49
+ 2505 0223 13       		.uleb128 0x13
+ 2506 0224 02       		.uleb128 0x2
+ 2507 0225 18       		.uleb128 0x18
+ 2508 0226 00       		.byte	0
+ 2509 0227 00       		.byte	0
+ 2510 0228 23       		.uleb128 0x23
+ 2511 0229 2E       		.uleb128 0x2e
+ 2512 022a 00       		.byte	0
+ 2513 022b 3F       		.uleb128 0x3f
+ 2514 022c 19       		.uleb128 0x19
+ 2515 022d 3C       		.uleb128 0x3c
+ 2516 022e 19       		.uleb128 0x19
+ 2517 022f 6E       		.uleb128 0x6e
+ 2518 0230 0E       		.uleb128 0xe
+ 2519 0231 03       		.uleb128 0x3
+ 2520 0232 0E       		.uleb128 0xe
+ 2521 0233 3A       		.uleb128 0x3a
+ 2522 0234 0B       		.uleb128 0xb
+ 2523 0235 3B       		.uleb128 0x3b
+ 2524 0236 05       		.uleb128 0x5
+ 2525 0237 00       		.byte	0
+ 2526 0238 00       		.byte	0
+ 2527 0239 24       		.uleb128 0x24
+ 2528 023a 2E       		.uleb128 0x2e
+ 2529 023b 00       		.byte	0
+ 2530 023c 3F       		.uleb128 0x3f
+ 2531 023d 19       		.uleb128 0x19
+ 2532 023e 3C       		.uleb128 0x3c
+ 2533 023f 19       		.uleb128 0x19
+ 2534 0240 6E       		.uleb128 0x6e
+ 2535 0241 0E       		.uleb128 0xe
+ 2536 0242 03       		.uleb128 0x3
+ 2537 0243 0E       		.uleb128 0xe
+ 2538 0244 3A       		.uleb128 0x3a
+ 2539 0245 0B       		.uleb128 0xb
+ 2540 0246 3B       		.uleb128 0x3b
+ 2541 0247 0B       		.uleb128 0xb
+ 2542 0248 00       		.byte	0
+ 2543 0249 00       		.byte	0
+ 2544 024a 00       		.byte	0
+ 2545              		.section	.debug_loc,"",%progbits
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 59
+
+
+ 2546              	.Ldebug_loc0:
+ 2547              	.LLST0:
+ 2548 0000 00000000 		.4byte	.LVL0
+ 2549 0004 44000000 		.4byte	.LVL9
+ 2550 0008 0100     		.2byte	0x1
+ 2551 000a 50       		.byte	0x50
+ 2552 000b 44000000 		.4byte	.LVL9
+ 2553 000f 46000000 		.4byte	.LVL10
+ 2554 0013 0400     		.2byte	0x4
+ 2555 0015 F3       		.byte	0xf3
+ 2556 0016 01       		.uleb128 0x1
+ 2557 0017 50       		.byte	0x50
+ 2558 0018 9F       		.byte	0x9f
+ 2559 0019 46000000 		.4byte	.LVL10
+ 2560 001d 48000000 		.4byte	.LVL11
+ 2561 0021 0100     		.2byte	0x1
+ 2562 0023 50       		.byte	0x50
+ 2563 0024 48000000 		.4byte	.LVL11
+ 2564 0028 4A000000 		.4byte	.LVL12
+ 2565 002c 0400     		.2byte	0x4
+ 2566 002e F3       		.byte	0xf3
+ 2567 002f 01       		.uleb128 0x1
+ 2568 0030 50       		.byte	0x50
+ 2569 0031 9F       		.byte	0x9f
+ 2570 0032 4A000000 		.4byte	.LVL12
+ 2571 0036 4C000000 		.4byte	.LVL13
+ 2572 003a 0100     		.2byte	0x1
+ 2573 003c 50       		.byte	0x50
+ 2574 003d 4C000000 		.4byte	.LVL13
+ 2575 0041 4E000000 		.4byte	.LVL14
+ 2576 0045 0400     		.2byte	0x4
+ 2577 0047 F3       		.byte	0xf3
+ 2578 0048 01       		.uleb128 0x1
+ 2579 0049 50       		.byte	0x50
+ 2580 004a 9F       		.byte	0x9f
+ 2581 004b 4E000000 		.4byte	.LVL14
+ 2582 004f 50000000 		.4byte	.LVL15
+ 2583 0053 0100     		.2byte	0x1
+ 2584 0055 50       		.byte	0x50
+ 2585 0056 50000000 		.4byte	.LVL15
+ 2586 005a 52000000 		.4byte	.LVL16
+ 2587 005e 0400     		.2byte	0x4
+ 2588 0060 F3       		.byte	0xf3
+ 2589 0061 01       		.uleb128 0x1
+ 2590 0062 50       		.byte	0x50
+ 2591 0063 9F       		.byte	0x9f
+ 2592 0064 52000000 		.4byte	.LVL16
+ 2593 0068 54000000 		.4byte	.LVL17
+ 2594 006c 0100     		.2byte	0x1
+ 2595 006e 50       		.byte	0x50
+ 2596 006f 54000000 		.4byte	.LVL17
+ 2597 0073 5C000000 		.4byte	.LFE45
+ 2598 0077 0400     		.2byte	0x4
+ 2599 0079 F3       		.byte	0xf3
+ 2600 007a 01       		.uleb128 0x1
+ 2601 007b 50       		.byte	0x50
+ 2602 007c 9F       		.byte	0x9f
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 60
+
+
+ 2603 007d 00000000 		.4byte	0
+ 2604 0081 00000000 		.4byte	0
+ 2605              	.LLST1:
+ 2606 0085 02000000 		.4byte	.LVL1
+ 2607 0089 0E000000 		.4byte	.LVL2
+ 2608 008d 0200     		.2byte	0x2
+ 2609 008f 30       		.byte	0x30
+ 2610 0090 9F       		.byte	0x9f
+ 2611 0091 0E000000 		.4byte	.LVL2
+ 2612 0095 20000000 		.4byte	.LVL3
+ 2613 0099 0100     		.2byte	0x1
+ 2614 009b 53       		.byte	0x53
+ 2615 009c 22000000 		.4byte	.LVL4
+ 2616 00a0 28000000 		.4byte	.LVL5
+ 2617 00a4 0100     		.2byte	0x1
+ 2618 00a6 53       		.byte	0x53
+ 2619 00a7 2A000000 		.4byte	.LVL6
+ 2620 00ab 3C000000 		.4byte	.LVL7
+ 2621 00af 0100     		.2byte	0x1
+ 2622 00b1 53       		.byte	0x53
+ 2623 00b2 3E000000 		.4byte	.LVL8
+ 2624 00b6 46000000 		.4byte	.LVL10
+ 2625 00ba 0100     		.2byte	0x1
+ 2626 00bc 53       		.byte	0x53
+ 2627 00bd 46000000 		.4byte	.LVL10
+ 2628 00c1 4E000000 		.4byte	.LVL14
+ 2629 00c5 0200     		.2byte	0x2
+ 2630 00c7 30       		.byte	0x30
+ 2631 00c8 9F       		.byte	0x9f
+ 2632 00c9 4E000000 		.4byte	.LVL14
+ 2633 00cd 54000000 		.4byte	.LVL17
+ 2634 00d1 0100     		.2byte	0x1
+ 2635 00d3 53       		.byte	0x53
+ 2636 00d4 00000000 		.4byte	0
+ 2637 00d8 00000000 		.4byte	0
+ 2638              	.LLST2:
+ 2639 00dc 00000000 		.4byte	.LVL18
+ 2640 00e0 0E000000 		.4byte	.LVL19
+ 2641 00e4 0100     		.2byte	0x1
+ 2642 00e6 50       		.byte	0x50
+ 2643 00e7 0E000000 		.4byte	.LVL19
+ 2644 00eb 10000000 		.4byte	.LVL20
+ 2645 00ef 0500     		.2byte	0x5
+ 2646 00f1 03       		.byte	0x3
+ 2647 00f2 08000000 		.4byte	PositionData
+ 2648 00f6 10000000 		.4byte	.LVL20
+ 2649 00fa 12000000 		.4byte	.LVL21
+ 2650 00fe 0100     		.2byte	0x1
+ 2651 0100 50       		.byte	0x50
+ 2652 0101 12000000 		.4byte	.LVL21
+ 2653 0105 18000000 		.4byte	.LFE34
+ 2654 0109 0400     		.2byte	0x4
+ 2655 010b F3       		.byte	0xf3
+ 2656 010c 01       		.uleb128 0x1
+ 2657 010d 50       		.byte	0x50
+ 2658 010e 9F       		.byte	0x9f
+ 2659 010f 00000000 		.4byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 61
+
+
+ 2660 0113 00000000 		.4byte	0
+ 2661              	.LLST3:
+ 2662 0117 00000000 		.4byte	.LVL22
+ 2663 011b 0E000000 		.4byte	.LVL23
+ 2664 011f 0100     		.2byte	0x1
+ 2665 0121 50       		.byte	0x50
+ 2666 0122 0E000000 		.4byte	.LVL23
+ 2667 0126 10000000 		.4byte	.LVL24
+ 2668 012a 0500     		.2byte	0x5
+ 2669 012c 03       		.byte	0x3
+ 2670 012d 09000000 		.4byte	PositionData+1
+ 2671 0131 10000000 		.4byte	.LVL24
+ 2672 0135 12000000 		.4byte	.LVL25
+ 2673 0139 0100     		.2byte	0x1
+ 2674 013b 50       		.byte	0x50
+ 2675 013c 12000000 		.4byte	.LVL25
+ 2676 0140 18000000 		.4byte	.LFE35
+ 2677 0144 0400     		.2byte	0x4
+ 2678 0146 F3       		.byte	0xf3
+ 2679 0147 01       		.uleb128 0x1
+ 2680 0148 50       		.byte	0x50
+ 2681 0149 9F       		.byte	0x9f
+ 2682 014a 00000000 		.4byte	0
+ 2683 014e 00000000 		.4byte	0
+ 2684              	.LLST4:
+ 2685 0152 00000000 		.4byte	.LVL26
+ 2686 0156 19000000 		.4byte	.LVL27-1
+ 2687 015a 0100     		.2byte	0x1
+ 2688 015c 50       		.byte	0x50
+ 2689 015d 19000000 		.4byte	.LVL27-1
+ 2690 0161 1E000000 		.4byte	.LVL28
+ 2691 0165 0400     		.2byte	0x4
+ 2692 0167 F3       		.byte	0xf3
+ 2693 0168 01       		.uleb128 0x1
+ 2694 0169 50       		.byte	0x50
+ 2695 016a 9F       		.byte	0x9f
+ 2696 016b 1E000000 		.4byte	.LVL28
+ 2697 016f 31000000 		.4byte	.LVL29-1
+ 2698 0173 0100     		.2byte	0x1
+ 2699 0175 50       		.byte	0x50
+ 2700 0176 31000000 		.4byte	.LVL29-1
+ 2701 017a 40000000 		.4byte	.LFE38
+ 2702 017e 0400     		.2byte	0x4
+ 2703 0180 F3       		.byte	0xf3
+ 2704 0181 01       		.uleb128 0x1
+ 2705 0182 50       		.byte	0x50
+ 2706 0183 9F       		.byte	0x9f
+ 2707 0184 00000000 		.4byte	0
+ 2708 0188 00000000 		.4byte	0
+ 2709              	.LLST5:
+ 2710 018c 00000000 		.4byte	.LVL32
+ 2711 0190 2E000000 		.4byte	.LVL33
+ 2712 0194 0100     		.2byte	0x1
+ 2713 0196 50       		.byte	0x50
+ 2714 0197 2E000000 		.4byte	.LVL33
+ 2715 019b 3C000000 		.4byte	.LVL36
+ 2716 019f 0400     		.2byte	0x4
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 62
+
+
+ 2717 01a1 F3       		.byte	0xf3
+ 2718 01a2 01       		.uleb128 0x1
+ 2719 01a3 50       		.byte	0x50
+ 2720 01a4 9F       		.byte	0x9f
+ 2721 01a5 3C000000 		.4byte	.LVL36
+ 2722 01a9 3E000000 		.4byte	.LVL37
+ 2723 01ad 0100     		.2byte	0x1
+ 2724 01af 50       		.byte	0x50
+ 2725 01b0 3E000000 		.4byte	.LVL37
+ 2726 01b4 4A000000 		.4byte	.LVL39
+ 2727 01b8 0400     		.2byte	0x4
+ 2728 01ba F3       		.byte	0xf3
+ 2729 01bb 01       		.uleb128 0x1
+ 2730 01bc 50       		.byte	0x50
+ 2731 01bd 9F       		.byte	0x9f
+ 2732 01be 4A000000 		.4byte	.LVL39
+ 2733 01c2 5A000000 		.4byte	.LVL40
+ 2734 01c6 0100     		.2byte	0x1
+ 2735 01c8 50       		.byte	0x50
+ 2736 01c9 5A000000 		.4byte	.LVL40
+ 2737 01cd 68000000 		.4byte	.LVL43
+ 2738 01d1 0400     		.2byte	0x4
+ 2739 01d3 F3       		.byte	0xf3
+ 2740 01d4 01       		.uleb128 0x1
+ 2741 01d5 50       		.byte	0x50
+ 2742 01d6 9F       		.byte	0x9f
+ 2743 01d7 68000000 		.4byte	.LVL43
+ 2744 01db 6A000000 		.4byte	.LVL44
+ 2745 01df 0100     		.2byte	0x1
+ 2746 01e1 50       		.byte	0x50
+ 2747 01e2 6A000000 		.4byte	.LVL44
+ 2748 01e6 76000000 		.4byte	.LVL46
+ 2749 01ea 0400     		.2byte	0x4
+ 2750 01ec F3       		.byte	0xf3
+ 2751 01ed 01       		.uleb128 0x1
+ 2752 01ee 50       		.byte	0x50
+ 2753 01ef 9F       		.byte	0x9f
+ 2754 01f0 76000000 		.4byte	.LVL46
+ 2755 01f4 78000000 		.4byte	.LVL47
+ 2756 01f8 0100     		.2byte	0x1
+ 2757 01fa 50       		.byte	0x50
+ 2758 01fb 78000000 		.4byte	.LVL47
+ 2759 01ff 80000000 		.4byte	.LFE40
+ 2760 0203 0400     		.2byte	0x4
+ 2761 0205 F3       		.byte	0xf3
+ 2762 0206 01       		.uleb128 0x1
+ 2763 0207 50       		.byte	0x50
+ 2764 0208 9F       		.byte	0x9f
+ 2765 0209 00000000 		.4byte	0
+ 2766 020d 00000000 		.4byte	0
+ 2767              	.LLST6:
+ 2768 0211 00000000 		.4byte	.LVL32
+ 2769 0215 31000000 		.4byte	.LVL34-1
+ 2770 0219 0100     		.2byte	0x1
+ 2771 021b 51       		.byte	0x51
+ 2772 021c 31000000 		.4byte	.LVL34-1
+ 2773 0220 3C000000 		.4byte	.LVL36
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 63
+
+
+ 2774 0224 0400     		.2byte	0x4
+ 2775 0226 F3       		.byte	0xf3
+ 2776 0227 01       		.uleb128 0x1
+ 2777 0228 51       		.byte	0x51
+ 2778 0229 9F       		.byte	0x9f
+ 2779 022a 3C000000 		.4byte	.LVL36
+ 2780 022e 41000000 		.4byte	.LVL38-1
+ 2781 0232 0100     		.2byte	0x1
+ 2782 0234 51       		.byte	0x51
+ 2783 0235 41000000 		.4byte	.LVL38-1
+ 2784 0239 4A000000 		.4byte	.LVL39
+ 2785 023d 0400     		.2byte	0x4
+ 2786 023f F3       		.byte	0xf3
+ 2787 0240 01       		.uleb128 0x1
+ 2788 0241 51       		.byte	0x51
+ 2789 0242 9F       		.byte	0x9f
+ 2790 0243 4A000000 		.4byte	.LVL39
+ 2791 0247 5D000000 		.4byte	.LVL41-1
+ 2792 024b 0100     		.2byte	0x1
+ 2793 024d 51       		.byte	0x51
+ 2794 024e 5D000000 		.4byte	.LVL41-1
+ 2795 0252 68000000 		.4byte	.LVL43
+ 2796 0256 0400     		.2byte	0x4
+ 2797 0258 F3       		.byte	0xf3
+ 2798 0259 01       		.uleb128 0x1
+ 2799 025a 51       		.byte	0x51
+ 2800 025b 9F       		.byte	0x9f
+ 2801 025c 68000000 		.4byte	.LVL43
+ 2802 0260 6D000000 		.4byte	.LVL45-1
+ 2803 0264 0100     		.2byte	0x1
+ 2804 0266 51       		.byte	0x51
+ 2805 0267 6D000000 		.4byte	.LVL45-1
+ 2806 026b 76000000 		.4byte	.LVL46
+ 2807 026f 0400     		.2byte	0x4
+ 2808 0271 F3       		.byte	0xf3
+ 2809 0272 01       		.uleb128 0x1
+ 2810 0273 51       		.byte	0x51
+ 2811 0274 9F       		.byte	0x9f
+ 2812 0275 76000000 		.4byte	.LVL46
+ 2813 0279 78000000 		.4byte	.LVL47
+ 2814 027d 0100     		.2byte	0x1
+ 2815 027f 51       		.byte	0x51
+ 2816 0280 78000000 		.4byte	.LVL47
+ 2817 0284 80000000 		.4byte	.LFE40
+ 2818 0288 0400     		.2byte	0x4
+ 2819 028a F3       		.byte	0xf3
+ 2820 028b 01       		.uleb128 0x1
+ 2821 028c 51       		.byte	0x51
+ 2822 028d 9F       		.byte	0x9f
+ 2823 028e 00000000 		.4byte	0
+ 2824 0292 00000000 		.4byte	0
+ 2825              	.LLST7:
+ 2826 0296 00000000 		.4byte	.LVL48
+ 2827 029a 06000000 		.4byte	.LVL49
+ 2828 029e 0100     		.2byte	0x1
+ 2829 02a0 50       		.byte	0x50
+ 2830 02a1 06000000 		.4byte	.LVL49
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 64
+
+
+ 2831 02a5 0C000000 		.4byte	.LVL50
+ 2832 02a9 0400     		.2byte	0x4
+ 2833 02ab F3       		.byte	0xf3
+ 2834 02ac 01       		.uleb128 0x1
+ 2835 02ad 50       		.byte	0x50
+ 2836 02ae 9F       		.byte	0x9f
+ 2837 02af 0C000000 		.4byte	.LVL50
+ 2838 02b3 0E000000 		.4byte	.LVL51
+ 2839 02b7 0100     		.2byte	0x1
+ 2840 02b9 50       		.byte	0x50
+ 2841 02ba 0E000000 		.4byte	.LVL51
+ 2842 02be 14000000 		.4byte	.LFE41
+ 2843 02c2 0400     		.2byte	0x4
+ 2844 02c4 F3       		.byte	0xf3
+ 2845 02c5 01       		.uleb128 0x1
+ 2846 02c6 50       		.byte	0x50
+ 2847 02c7 9F       		.byte	0x9f
+ 2848 02c8 00000000 		.4byte	0
+ 2849 02cc 00000000 		.4byte	0
+ 2850              	.LLST8:
+ 2851 02d0 00000000 		.4byte	.LVL52
+ 2852 02d4 24000000 		.4byte	.LVL54
+ 2853 02d8 0100     		.2byte	0x1
+ 2854 02da 50       		.byte	0x50
+ 2855 02db 24000000 		.4byte	.LVL54
+ 2856 02df 82000000 		.4byte	.LVL71
+ 2857 02e3 0400     		.2byte	0x4
+ 2858 02e5 F3       		.byte	0xf3
+ 2859 02e6 01       		.uleb128 0x1
+ 2860 02e7 50       		.byte	0x50
+ 2861 02e8 9F       		.byte	0x9f
+ 2862 02e9 82000000 		.4byte	.LVL71
+ 2863 02ed 84000000 		.4byte	.LVL72
+ 2864 02f1 0100     		.2byte	0x1
+ 2865 02f3 50       		.byte	0x50
+ 2866 02f4 84000000 		.4byte	.LVL72
+ 2867 02f8 86000000 		.4byte	.LVL73
+ 2868 02fc 0400     		.2byte	0x4
+ 2869 02fe F3       		.byte	0xf3
+ 2870 02ff 01       		.uleb128 0x1
+ 2871 0300 50       		.byte	0x50
+ 2872 0301 9F       		.byte	0x9f
+ 2873 0302 86000000 		.4byte	.LVL73
+ 2874 0306 88000000 		.4byte	.LVL74
+ 2875 030a 0100     		.2byte	0x1
+ 2876 030c 50       		.byte	0x50
+ 2877 030d 88000000 		.4byte	.LVL74
+ 2878 0311 8A000000 		.4byte	.LVL75
+ 2879 0315 0400     		.2byte	0x4
+ 2880 0317 F3       		.byte	0xf3
+ 2881 0318 01       		.uleb128 0x1
+ 2882 0319 50       		.byte	0x50
+ 2883 031a 9F       		.byte	0x9f
+ 2884 031b 8A000000 		.4byte	.LVL75
+ 2885 031f 8C000000 		.4byte	.LVL76
+ 2886 0323 0100     		.2byte	0x1
+ 2887 0325 50       		.byte	0x50
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 65
+
+
+ 2888 0326 8C000000 		.4byte	.LVL76
+ 2889 032a 8E000000 		.4byte	.LVL77
+ 2890 032e 0400     		.2byte	0x4
+ 2891 0330 F3       		.byte	0xf3
+ 2892 0331 01       		.uleb128 0x1
+ 2893 0332 50       		.byte	0x50
+ 2894 0333 9F       		.byte	0x9f
+ 2895 0334 8E000000 		.4byte	.LVL77
+ 2896 0338 90000000 		.4byte	.LVL78
+ 2897 033c 0100     		.2byte	0x1
+ 2898 033e 50       		.byte	0x50
+ 2899 033f 90000000 		.4byte	.LVL78
+ 2900 0343 96000000 		.4byte	.LFE42
+ 2901 0347 0400     		.2byte	0x4
+ 2902 0349 F3       		.byte	0xf3
+ 2903 034a 01       		.uleb128 0x1
+ 2904 034b 50       		.byte	0x50
+ 2905 034c 9F       		.byte	0x9f
+ 2906 034d 00000000 		.4byte	0
+ 2907 0351 00000000 		.4byte	0
+ 2908              	.LLST9:
+ 2909 0355 00000000 		.4byte	.LVL52
+ 2910 0359 24000000 		.4byte	.LVL54
+ 2911 035d 0100     		.2byte	0x1
+ 2912 035f 51       		.byte	0x51
+ 2913 0360 24000000 		.4byte	.LVL54
+ 2914 0364 82000000 		.4byte	.LVL71
+ 2915 0368 0400     		.2byte	0x4
+ 2916 036a F3       		.byte	0xf3
+ 2917 036b 01       		.uleb128 0x1
+ 2918 036c 51       		.byte	0x51
+ 2919 036d 9F       		.byte	0x9f
+ 2920 036e 82000000 		.4byte	.LVL71
+ 2921 0372 92000000 		.4byte	.LVL79
+ 2922 0376 0100     		.2byte	0x1
+ 2923 0378 51       		.byte	0x51
+ 2924 0379 92000000 		.4byte	.LVL79
+ 2925 037d 96000000 		.4byte	.LFE42
+ 2926 0381 0400     		.2byte	0x4
+ 2927 0383 F3       		.byte	0xf3
+ 2928 0384 01       		.uleb128 0x1
+ 2929 0385 51       		.byte	0x51
+ 2930 0386 9F       		.byte	0x9f
+ 2931 0387 00000000 		.4byte	0
+ 2932 038b 00000000 		.4byte	0
+ 2933              	.LLST10:
+ 2934 038f 00000000 		.4byte	.LVL52
+ 2935 0393 24000000 		.4byte	.LVL54
+ 2936 0397 0100     		.2byte	0x1
+ 2937 0399 52       		.byte	0x52
+ 2938 039a 24000000 		.4byte	.LVL54
+ 2939 039e 82000000 		.4byte	.LVL71
+ 2940 03a2 0100     		.2byte	0x1
+ 2941 03a4 56       		.byte	0x56
+ 2942 03a5 82000000 		.4byte	.LVL71
+ 2943 03a9 92000000 		.4byte	.LVL79
+ 2944 03ad 0100     		.2byte	0x1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 66
+
+
+ 2945 03af 52       		.byte	0x52
+ 2946 03b0 92000000 		.4byte	.LVL79
+ 2947 03b4 94000000 		.4byte	.LVL81
+ 2948 03b8 0100     		.2byte	0x1
+ 2949 03ba 56       		.byte	0x56
+ 2950 03bb 94000000 		.4byte	.LVL81
+ 2951 03bf 96000000 		.4byte	.LFE42
+ 2952 03c3 0400     		.2byte	0x4
+ 2953 03c5 F3       		.byte	0xf3
+ 2954 03c6 01       		.uleb128 0x1
+ 2955 03c7 52       		.byte	0x52
+ 2956 03c8 9F       		.byte	0x9f
+ 2957 03c9 00000000 		.4byte	0
+ 2958 03cd 00000000 		.4byte	0
+ 2959              	.LLST11:
+ 2960 03d1 00000000 		.4byte	.LVL52
+ 2961 03d5 24000000 		.4byte	.LVL54
+ 2962 03d9 0100     		.2byte	0x1
+ 2963 03db 53       		.byte	0x53
+ 2964 03dc 24000000 		.4byte	.LVL54
+ 2965 03e0 82000000 		.4byte	.LVL71
+ 2966 03e4 0400     		.2byte	0x4
+ 2967 03e6 F3       		.byte	0xf3
+ 2968 03e7 01       		.uleb128 0x1
+ 2969 03e8 53       		.byte	0x53
+ 2970 03e9 9F       		.byte	0x9f
+ 2971 03ea 82000000 		.4byte	.LVL71
+ 2972 03ee 92000000 		.4byte	.LVL79
+ 2973 03f2 0100     		.2byte	0x1
+ 2974 03f4 53       		.byte	0x53
+ 2975 03f5 92000000 		.4byte	.LVL79
+ 2976 03f9 96000000 		.4byte	.LFE42
+ 2977 03fd 0400     		.2byte	0x4
+ 2978 03ff F3       		.byte	0xf3
+ 2979 0400 01       		.uleb128 0x1
+ 2980 0401 53       		.byte	0x53
+ 2981 0402 9F       		.byte	0x9f
+ 2982 0403 00000000 		.4byte	0
+ 2983 0407 00000000 		.4byte	0
+ 2984              	.LLST12:
+ 2985 040b 08000000 		.4byte	.LVL53
+ 2986 040f 24000000 		.4byte	.LVL54
+ 2987 0413 0200     		.2byte	0x2
+ 2988 0415 30       		.byte	0x30
+ 2989 0416 9F       		.byte	0x9f
+ 2990 0417 24000000 		.4byte	.LVL54
+ 2991 041b 26000000 		.4byte	.LVL55
+ 2992 041f 0100     		.2byte	0x1
+ 2993 0421 54       		.byte	0x54
+ 2994 0422 28000000 		.4byte	.LVL56
+ 2995 0426 66000000 		.4byte	.LVL64
+ 2996 042a 0100     		.2byte	0x1
+ 2997 042c 54       		.byte	0x54
+ 2998 042d 76000000 		.4byte	.LVL68
+ 2999 0431 78000000 		.4byte	.LVL69
+ 3000 0435 0100     		.2byte	0x1
+ 3001 0437 54       		.byte	0x54
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 67
+
+
+ 3002 0438 82000000 		.4byte	.LVL71
+ 3003 043c 92000000 		.4byte	.LVL79
+ 3004 0440 0200     		.2byte	0x2
+ 3005 0442 30       		.byte	0x30
+ 3006 0443 9F       		.byte	0x9f
+ 3007 0444 92000000 		.4byte	.LVL79
+ 3008 0448 94000000 		.4byte	.LVL80
+ 3009 044c 0100     		.2byte	0x1
+ 3010 044e 54       		.byte	0x54
+ 3011 044f 00000000 		.4byte	0
+ 3012 0453 00000000 		.4byte	0
+ 3013              	.LLST13:
+ 3014 0457 08000000 		.4byte	.LVL53
+ 3015 045b 4E000000 		.4byte	.LVL59
+ 3016 045f 0200     		.2byte	0x2
+ 3017 0461 30       		.byte	0x30
+ 3018 0462 9F       		.byte	0x9f
+ 3019 0463 4E000000 		.4byte	.LVL59
+ 3020 0467 52000000 		.4byte	.LVL60
+ 3021 046b 0100     		.2byte	0x1
+ 3022 046d 50       		.byte	0x50
+ 3023 046e 52000000 		.4byte	.LVL60
+ 3024 0472 5C000000 		.4byte	.LVL61
+ 3025 0476 0200     		.2byte	0x2
+ 3026 0478 30       		.byte	0x30
+ 3027 0479 9F       		.byte	0x9f
+ 3028 047a 5C000000 		.4byte	.LVL61
+ 3029 047e 5E000000 		.4byte	.LVL62
+ 3030 0482 0100     		.2byte	0x1
+ 3031 0484 50       		.byte	0x50
+ 3032 0485 5E000000 		.4byte	.LVL62
+ 3033 0489 64000000 		.4byte	.LVL63
+ 3034 048d 0200     		.2byte	0x2
+ 3035 048f 30       		.byte	0x30
+ 3036 0490 9F       		.byte	0x9f
+ 3037 0491 64000000 		.4byte	.LVL63
+ 3038 0495 66000000 		.4byte	.LVL64
+ 3039 0499 0100     		.2byte	0x1
+ 3040 049b 50       		.byte	0x50
+ 3041 049c 66000000 		.4byte	.LVL64
+ 3042 04a0 6B000000 		.4byte	.LVL65-1
+ 3043 04a4 0100     		.2byte	0x1
+ 3044 04a6 53       		.byte	0x53
+ 3045 04a7 6E000000 		.4byte	.LVL66
+ 3046 04ab 76000000 		.4byte	.LVL68
+ 3047 04af 0100     		.2byte	0x1
+ 3048 04b1 50       		.byte	0x50
+ 3049 04b2 76000000 		.4byte	.LVL68
+ 3050 04b6 7A000000 		.4byte	.LVL70
+ 3051 04ba 0200     		.2byte	0x2
+ 3052 04bc 30       		.byte	0x30
+ 3053 04bd 9F       		.byte	0x9f
+ 3054 04be 7A000000 		.4byte	.LVL70
+ 3055 04c2 82000000 		.4byte	.LVL71
+ 3056 04c6 0100     		.2byte	0x1
+ 3057 04c8 53       		.byte	0x53
+ 3058 04c9 82000000 		.4byte	.LVL71
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 68
+
+
+ 3059 04cd 94000000 		.4byte	.LVL80
+ 3060 04d1 0200     		.2byte	0x2
+ 3061 04d3 30       		.byte	0x30
+ 3062 04d4 9F       		.byte	0x9f
+ 3063 04d5 00000000 		.4byte	0
+ 3064 04d9 00000000 		.4byte	0
+ 3065              	.LLST14:
+ 3066 04dd 08000000 		.4byte	.LVL53
+ 3067 04e1 66000000 		.4byte	.LVL64
+ 3068 04e5 0200     		.2byte	0x2
+ 3069 04e7 30       		.byte	0x30
+ 3070 04e8 9F       		.byte	0x9f
+ 3071 04e9 66000000 		.4byte	.LVL64
+ 3072 04ed 76000000 		.4byte	.LVL68
+ 3073 04f1 0100     		.2byte	0x1
+ 3074 04f3 54       		.byte	0x54
+ 3075 04f4 76000000 		.4byte	.LVL68
+ 3076 04f8 7A000000 		.4byte	.LVL70
+ 3077 04fc 0200     		.2byte	0x2
+ 3078 04fe 30       		.byte	0x30
+ 3079 04ff 9F       		.byte	0x9f
+ 3080 0500 7A000000 		.4byte	.LVL70
+ 3081 0504 82000000 		.4byte	.LVL71
+ 3082 0508 0100     		.2byte	0x1
+ 3083 050a 54       		.byte	0x54
+ 3084 050b 82000000 		.4byte	.LVL71
+ 3085 050f 94000000 		.4byte	.LVL80
+ 3086 0513 0200     		.2byte	0x2
+ 3087 0515 30       		.byte	0x30
+ 3088 0516 9F       		.byte	0x9f
+ 3089 0517 00000000 		.4byte	0
+ 3090 051b 00000000 		.4byte	0
+ 3091              	.LLST15:
+ 3092 051f 00000000 		.4byte	.LVL82
+ 3093 0523 3B000000 		.4byte	.LVL84-1
+ 3094 0527 0100     		.2byte	0x1
+ 3095 0529 50       		.byte	0x50
+ 3096 052a 3B000000 		.4byte	.LVL84-1
+ 3097 052e 48000000 		.4byte	.LVL85
+ 3098 0532 0100     		.2byte	0x1
+ 3099 0534 54       		.byte	0x54
+ 3100 0535 48000000 		.4byte	.LVL85
+ 3101 0539 5A000000 		.4byte	.LVL86
+ 3102 053d 0100     		.2byte	0x1
+ 3103 053f 50       		.byte	0x50
+ 3104 0540 5A000000 		.4byte	.LVL86
+ 3105 0544 88000000 		.4byte	.LVL90
+ 3106 0548 0100     		.2byte	0x1
+ 3107 054a 54       		.byte	0x54
+ 3108 054b 88000000 		.4byte	.LVL90
+ 3109 054f 9A000000 		.4byte	.LVL91
+ 3110 0553 0100     		.2byte	0x1
+ 3111 0555 50       		.byte	0x50
+ 3112 0556 9A000000 		.4byte	.LVL91
+ 3113 055a C8000000 		.4byte	.LVL95
+ 3114 055e 0100     		.2byte	0x1
+ 3115 0560 54       		.byte	0x54
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 69
+
+
+ 3116 0561 C8000000 		.4byte	.LVL95
+ 3117 0565 CC000000 		.4byte	.LVL96
+ 3118 0569 0100     		.2byte	0x1
+ 3119 056b 50       		.byte	0x50
+ 3120 056c CC000000 		.4byte	.LVL96
+ 3121 0570 FE000000 		.4byte	.LVL101
+ 3122 0574 0100     		.2byte	0x1
+ 3123 0576 54       		.byte	0x54
+ 3124 0577 FE000000 		.4byte	.LVL101
+ 3125 057b 00010000 		.4byte	.LVL102
+ 3126 057f 0100     		.2byte	0x1
+ 3127 0581 50       		.byte	0x50
+ 3128 0582 00010000 		.4byte	.LVL102
+ 3129 0586 02010000 		.4byte	.LVL103
+ 3130 058a 0100     		.2byte	0x1
+ 3131 058c 54       		.byte	0x54
+ 3132 058d 02010000 		.4byte	.LVL103
+ 3133 0591 04010000 		.4byte	.LVL104
+ 3134 0595 0100     		.2byte	0x1
+ 3135 0597 50       		.byte	0x50
+ 3136 0598 04010000 		.4byte	.LVL104
+ 3137 059c 06010000 		.4byte	.LVL105
+ 3138 05a0 0100     		.2byte	0x1
+ 3139 05a2 54       		.byte	0x54
+ 3140 05a3 06010000 		.4byte	.LVL105
+ 3141 05a7 08010000 		.4byte	.LVL106
+ 3142 05ab 0100     		.2byte	0x1
+ 3143 05ad 50       		.byte	0x50
+ 3144 05ae 08010000 		.4byte	.LVL106
+ 3145 05b2 08010000 		.4byte	.LVL107
+ 3146 05b6 0100     		.2byte	0x1
+ 3147 05b8 54       		.byte	0x54
+ 3148 05b9 08010000 		.4byte	.LVL107
+ 3149 05bd 10010000 		.4byte	.LFE44
+ 3150 05c1 0400     		.2byte	0x4
+ 3151 05c3 F3       		.byte	0xf3
+ 3152 05c4 01       		.uleb128 0x1
+ 3153 05c5 50       		.byte	0x50
+ 3154 05c6 9F       		.byte	0x9f
+ 3155 05c7 00000000 		.4byte	0
+ 3156 05cb 00000000 		.4byte	0
+ 3157              	.LLST16:
+ 3158 05cf 00000000 		.4byte	.LVL82
+ 3159 05d3 3B000000 		.4byte	.LVL84-1
+ 3160 05d7 0100     		.2byte	0x1
+ 3161 05d9 51       		.byte	0x51
+ 3162 05da 3B000000 		.4byte	.LVL84-1
+ 3163 05de 48000000 		.4byte	.LVL85
+ 3164 05e2 0400     		.2byte	0x4
+ 3165 05e4 F3       		.byte	0xf3
+ 3166 05e5 01       		.uleb128 0x1
+ 3167 05e6 51       		.byte	0x51
+ 3168 05e7 9F       		.byte	0x9f
+ 3169 05e8 48000000 		.4byte	.LVL85
+ 3170 05ec 60000000 		.4byte	.LVL87
+ 3171 05f0 0100     		.2byte	0x1
+ 3172 05f2 51       		.byte	0x51
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 70
+
+
+ 3173 05f3 60000000 		.4byte	.LVL87
+ 3174 05f7 88000000 		.4byte	.LVL90
+ 3175 05fb 0400     		.2byte	0x4
+ 3176 05fd F3       		.byte	0xf3
+ 3177 05fe 01       		.uleb128 0x1
+ 3178 05ff 51       		.byte	0x51
+ 3179 0600 9F       		.byte	0x9f
+ 3180 0601 88000000 		.4byte	.LVL90
+ 3181 0605 A0000000 		.4byte	.LVL92
+ 3182 0609 0100     		.2byte	0x1
+ 3183 060b 51       		.byte	0x51
+ 3184 060c A0000000 		.4byte	.LVL92
+ 3185 0610 C8000000 		.4byte	.LVL95
+ 3186 0614 0400     		.2byte	0x4
+ 3187 0616 F3       		.byte	0xf3
+ 3188 0617 01       		.uleb128 0x1
+ 3189 0618 51       		.byte	0x51
+ 3190 0619 9F       		.byte	0x9f
+ 3191 061a C8000000 		.4byte	.LVL95
+ 3192 061e D2000000 		.4byte	.LVL97
+ 3193 0622 0100     		.2byte	0x1
+ 3194 0624 51       		.byte	0x51
+ 3195 0625 D2000000 		.4byte	.LVL97
+ 3196 0629 FE000000 		.4byte	.LVL101
+ 3197 062d 0400     		.2byte	0x4
+ 3198 062f F3       		.byte	0xf3
+ 3199 0630 01       		.uleb128 0x1
+ 3200 0631 51       		.byte	0x51
+ 3201 0632 9F       		.byte	0x9f
+ 3202 0633 FE000000 		.4byte	.LVL101
+ 3203 0637 08010000 		.4byte	.LVL106
+ 3204 063b 0100     		.2byte	0x1
+ 3205 063d 51       		.byte	0x51
+ 3206 063e 08010000 		.4byte	.LVL106
+ 3207 0642 10010000 		.4byte	.LFE44
+ 3208 0646 0400     		.2byte	0x4
+ 3209 0648 F3       		.byte	0xf3
+ 3210 0649 01       		.uleb128 0x1
+ 3211 064a 51       		.byte	0x51
+ 3212 064b 9F       		.byte	0x9f
+ 3213 064c 00000000 		.4byte	0
+ 3214 0650 00000000 		.4byte	0
+ 3215              	.LLST17:
+ 3216 0654 06000000 		.4byte	.LVL83
+ 3217 0658 3C000000 		.4byte	.LVL84
+ 3218 065c 0200     		.2byte	0x2
+ 3219 065e 30       		.byte	0x30
+ 3220 065f 9F       		.byte	0x9f
+ 3221 0660 3C000000 		.4byte	.LVL84
+ 3222 0664 48000000 		.4byte	.LVL85
+ 3223 0668 0100     		.2byte	0x1
+ 3224 066a 50       		.byte	0x50
+ 3225 066b 48000000 		.4byte	.LVL85
+ 3226 066f 70000000 		.4byte	.LVL89
+ 3227 0673 0200     		.2byte	0x2
+ 3228 0675 30       		.byte	0x30
+ 3229 0676 9F       		.byte	0x9f
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 71
+
+
+ 3230 0677 70000000 		.4byte	.LVL89
+ 3231 067b 88000000 		.4byte	.LVL90
+ 3232 067f 0100     		.2byte	0x1
+ 3233 0681 50       		.byte	0x50
+ 3234 0682 88000000 		.4byte	.LVL90
+ 3235 0686 B0000000 		.4byte	.LVL94
+ 3236 068a 0200     		.2byte	0x2
+ 3237 068c 30       		.byte	0x30
+ 3238 068d 9F       		.byte	0x9f
+ 3239 068e B0000000 		.4byte	.LVL94
+ 3240 0692 C8000000 		.4byte	.LVL95
+ 3241 0696 0100     		.2byte	0x1
+ 3242 0698 50       		.byte	0x50
+ 3243 0699 C8000000 		.4byte	.LVL95
+ 3244 069d E2000000 		.4byte	.LVL99
+ 3245 06a1 0200     		.2byte	0x2
+ 3246 06a3 30       		.byte	0x30
+ 3247 06a4 9F       		.byte	0x9f
+ 3248 06a5 E2000000 		.4byte	.LVL99
+ 3249 06a9 F8000000 		.4byte	.LVL100
+ 3250 06ad 0100     		.2byte	0x1
+ 3251 06af 50       		.byte	0x50
+ 3252 06b0 FE000000 		.4byte	.LVL101
+ 3253 06b4 08010000 		.4byte	.LVL106
+ 3254 06b8 0200     		.2byte	0x2
+ 3255 06ba 30       		.byte	0x30
+ 3256 06bb 9F       		.byte	0x9f
+ 3257 06bc 00000000 		.4byte	0
+ 3258 06c0 00000000 		.4byte	0
+ 3259              	.LLST18:
+ 3260 06c4 00000000 		.4byte	.LVL108
+ 3261 06c8 0B000000 		.4byte	.LVL109-1
+ 3262 06cc 0100     		.2byte	0x1
+ 3263 06ce 50       		.byte	0x50
+ 3264 06cf 0B000000 		.4byte	.LVL109-1
+ 3265 06d3 14000000 		.4byte	.LFE46
+ 3266 06d7 0400     		.2byte	0x4
+ 3267 06d9 F3       		.byte	0xf3
+ 3268 06da 01       		.uleb128 0x1
+ 3269 06db 50       		.byte	0x50
+ 3270 06dc 9F       		.byte	0x9f
+ 3271 06dd 00000000 		.4byte	0
+ 3272 06e1 00000000 		.4byte	0
+ 3273              		.section	.debug_aranges,"",%progbits
+ 3274 0000 8C000000 		.4byte	0x8c
+ 3275 0004 0200     		.2byte	0x2
+ 3276 0006 00000000 		.4byte	.Ldebug_info0
+ 3277 000a 04       		.byte	0x4
+ 3278 000b 00       		.byte	0
+ 3279 000c 0000     		.2byte	0
+ 3280 000e 0000     		.2byte	0
+ 3281 0010 00000000 		.4byte	.LFB45
+ 3282 0014 5C000000 		.4byte	.LFE45-.LFB45
+ 3283 0018 00000000 		.4byte	.LFB32
+ 3284 001c 0C000000 		.4byte	.LFE32-.LFB32
+ 3285 0020 00000000 		.4byte	.LFB33
+ 3286 0024 0C000000 		.4byte	.LFE33-.LFB33
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 72
+
+
+ 3287 0028 00000000 		.4byte	.LFB34
+ 3288 002c 18000000 		.4byte	.LFE34-.LFB34
+ 3289 0030 00000000 		.4byte	.LFB35
+ 3290 0034 18000000 		.4byte	.LFE35-.LFB35
+ 3291 0038 00000000 		.4byte	.LFB36
+ 3292 003c 0C000000 		.4byte	.LFE36-.LFB36
+ 3293 0040 00000000 		.4byte	.LFB37
+ 3294 0044 0C000000 		.4byte	.LFE37-.LFB37
+ 3295 0048 00000000 		.4byte	.LFB38
+ 3296 004c 40000000 		.4byte	.LFE38-.LFB38
+ 3297 0050 00000000 		.4byte	.LFB39
+ 3298 0054 24000000 		.4byte	.LFE39-.LFB39
+ 3299 0058 00000000 		.4byte	.LFB40
+ 3300 005c 80000000 		.4byte	.LFE40-.LFB40
+ 3301 0060 00000000 		.4byte	.LFB41
+ 3302 0064 14000000 		.4byte	.LFE41-.LFB41
+ 3303 0068 00000000 		.4byte	.LFB42
+ 3304 006c 96000000 		.4byte	.LFE42-.LFB42
+ 3305 0070 00000000 		.4byte	.LFB43
+ 3306 0074 0C000000 		.4byte	.LFE43-.LFB43
+ 3307 0078 00000000 		.4byte	.LFB44
+ 3308 007c 10010000 		.4byte	.LFE44-.LFB44
+ 3309 0080 00000000 		.4byte	.LFB46
+ 3310 0084 14000000 		.4byte	.LFE46-.LFB46
+ 3311 0088 00000000 		.4byte	0
+ 3312 008c 00000000 		.4byte	0
+ 3313              		.section	.debug_ranges,"",%progbits
+ 3314              	.Ldebug_ranges0:
+ 3315 0000 00000000 		.4byte	.LFB45
+ 3316 0004 5C000000 		.4byte	.LFE45
+ 3317 0008 00000000 		.4byte	.LFB32
+ 3318 000c 0C000000 		.4byte	.LFE32
+ 3319 0010 00000000 		.4byte	.LFB33
+ 3320 0014 0C000000 		.4byte	.LFE33
+ 3321 0018 00000000 		.4byte	.LFB34
+ 3322 001c 18000000 		.4byte	.LFE34
+ 3323 0020 00000000 		.4byte	.LFB35
+ 3324 0024 18000000 		.4byte	.LFE35
+ 3325 0028 00000000 		.4byte	.LFB36
+ 3326 002c 0C000000 		.4byte	.LFE36
+ 3327 0030 00000000 		.4byte	.LFB37
+ 3328 0034 0C000000 		.4byte	.LFE37
+ 3329 0038 00000000 		.4byte	.LFB38
+ 3330 003c 40000000 		.4byte	.LFE38
+ 3331 0040 00000000 		.4byte	.LFB39
+ 3332 0044 24000000 		.4byte	.LFE39
+ 3333 0048 00000000 		.4byte	.LFB40
+ 3334 004c 80000000 		.4byte	.LFE40
+ 3335 0050 00000000 		.4byte	.LFB41
+ 3336 0054 14000000 		.4byte	.LFE41
+ 3337 0058 00000000 		.4byte	.LFB42
+ 3338 005c 96000000 		.4byte	.LFE42
+ 3339 0060 00000000 		.4byte	.LFB43
+ 3340 0064 0C000000 		.4byte	.LFE43
+ 3341 0068 00000000 		.4byte	.LFB44
+ 3342 006c 10010000 		.4byte	.LFE44
+ 3343 0070 00000000 		.4byte	.LFB46
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 73
+
+
+ 3344 0074 14000000 		.4byte	.LFE46
+ 3345 0078 00000000 		.4byte	0
+ 3346 007c 00000000 		.4byte	0
+ 3347              		.section	.debug_line,"",%progbits
+ 3348              	.Ldebug_line0:
+ 3349 0000 98020000 		.section	.debug_str,"MS",%progbits,1
+ 3349      0200AE00 
+ 3349      00000201 
+ 3349      FB0E0D00 
+ 3349      01010101 
+ 3350              	.LASF76:
+ 3351 0000 72656775 		.ascii	"regulateBrightness\000"
+ 3351      6C617465 
+ 3351      42726967 
+ 3351      68746E65 
+ 3351      737300
+ 3352              	.LASF98:
+ 3353 0013 74696D65 		.ascii	"timerCountLocal\000"
+ 3353      72436F75 
+ 3353      6E744C6F 
+ 3353      63616C00 
+ 3354              	.LASF70:
+ 3355 0023 64617461 		.ascii	"dataIndex\000"
+ 3355      496E6465 
+ 3355      7800
+ 3356              	.LASF48:
+ 3357 002d 566F6C74 		.ascii	"VoltageSenseProperties\000"
+ 3357      61676553 
+ 3357      656E7365 
+ 3357      50726F70 
+ 3357      65727469 
+ 3358              	.LASF90:
+ 3359 0044 4144435F 		.ascii	"ADC_SAR_Seq_IsEndConversion\000"
+ 3359      5341525F 
+ 3359      5365715F 
+ 3359      4973456E 
+ 3359      64436F6E 
+ 3360              	.LASF51:
+ 3361 0060 746F6C65 		.ascii	"tolerance\000"
+ 3361      72616E63 
+ 3361      6500
+ 3362              	.LASF62:
+ 3363 006a 75706461 		.ascii	"updateBrightnessLevel\000"
+ 3363      74654272 
+ 3363      69676874 
+ 3363      6E657373 
+ 3363      4C657665 
+ 3364              	.LASF53:
+ 3365 0080 67657444 		.ascii	"getDriverID\000"
+ 3365      72697665 
+ 3365      72494400 
+ 3366              	.LASF77:
+ 3367 008c 74656D70 		.ascii	"temperatureStatus\000"
+ 3367      65726174 
+ 3367      75726553 
+ 3367      74617475 
+ 3367      7300
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 74
+
+
+ 3368              	.LASF83:
+ 3369 009e 566F6C74 		.ascii	"VoltageSenseData\000"
+ 3369      61676553 
+ 3369      656E7365 
+ 3369      44617461 
+ 3369      00
+ 3370              	.LASF78:
+ 3371 00af 73657442 		.ascii	"setBrightness\000"
+ 3371      72696768 
+ 3371      746E6573 
+ 3371      7300
+ 3372              	.LASF2:
+ 3373 00bd 73686F72 		.ascii	"short int\000"
+ 3373      7420696E 
+ 3373      7400
+ 3374              	.LASF43:
+ 3375 00c7 70726576 		.ascii	"previousBrightness\000"
+ 3375      696F7573 
+ 3375      42726967 
+ 3375      68746E65 
+ 3375      737300
+ 3376              	.LASF18:
+ 3377 00da 73697A65 		.ascii	"sizetype\000"
+ 3377      74797065 
+ 3377      00
+ 3378              	.LASF94:
+ 3379 00e3 44726976 		.ascii	"DriverControl.c\000"
+ 3379      6572436F 
+ 3379      6E74726F 
+ 3379      6C2E6300 
+ 3380              	.LASF50:
+ 3381 00f3 6C656E67 		.ascii	"length\000"
+ 3381      746800
+ 3382              	.LASF59:
+ 3383 00fa 4144435F 		.ascii	"ADC_Value\000"
+ 3383      56616C75 
+ 3383      6500
+ 3384              	.LASF60:
+ 3385 0104 63686563 		.ascii	"checkForUnderVoltage\000"
+ 3385      6B466F72 
+ 3385      556E6465 
+ 3385      72566F6C 
+ 3385      74616765 
+ 3386              	.LASF29:
+ 3387 0119 54656D70 		.ascii	"TemperatureStatus\000"
+ 3387      65726174 
+ 3387      75726553 
+ 3387      74617475 
+ 3387      7300
+ 3388              	.LASF40:
+ 3389 012b 44726976 		.ascii	"DriverProperties\000"
+ 3389      65725072 
+ 3389      6F706572 
+ 3389      74696573 
+ 3389      00
+ 3390              	.LASF91:
+ 3391 013c 44696554 		.ascii	"DieTemp_CountsTo_Celsius\000"
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 75
+
+
+ 3391      656D705F 
+ 3391      436F756E 
+ 3391      7473546F 
+ 3391      5F43656C 
+ 3392              	.LASF57:
+ 3393 0155 6E657744 		.ascii	"newDriverCount\000"
+ 3393      72697665 
+ 3393      72436F75 
+ 3393      6E7400
+ 3394              	.LASF49:
+ 3395 0164 54656D70 		.ascii	"TemperatureData\000"
+ 3395      65726174 
+ 3395      75726544 
+ 3395      61746100 
+ 3396              	.LASF85:
+ 3397 0174 4C45445F 		.ascii	"LED_Timer_Start\000"
+ 3397      54696D65 
+ 3397      725F5374 
+ 3397      61727400 
+ 3398              	.LASF93:
+ 3399 0184 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 3399      43313120 
+ 3399      352E342E 
+ 3399      31203230 
+ 3399      31363036 
+ 3400 01b7 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m0 -mthumb -g -O"
+ 3400      20726576 
+ 3400      6973696F 
+ 3400      6E203233 
+ 3400      37373135 
+ 3401 01ea 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 3401      66756E63 
+ 3401      74696F6E 
+ 3401      2D736563 
+ 3401      74696F6E 
+ 3402              	.LASF12:
+ 3403 0212 696E7431 		.ascii	"int16\000"
+ 3403      3600
+ 3404              	.LASF35:
+ 3405 0218 53414645 		.ascii	"SAFE_TEMPERATURE\000"
+ 3405      5F54454D 
+ 3405      50455241 
+ 3405      54555245 
+ 3405      00
+ 3406              	.LASF9:
+ 3407 0229 75696E74 		.ascii	"uint8\000"
+ 3407      3800
+ 3408              	.LASF73:
+ 3409 022f 74656D70 		.ascii	"temperatureSample_float\000"
+ 3409      65726174 
+ 3409      75726553 
+ 3409      616D706C 
+ 3409      655F666C 
+ 3410              	.LASF55:
+ 3411 0247 73657449 		.ascii	"setIdentityByComm\000"
+ 3411      64656E74 
+ 3411      69747942 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 76
+
+
+ 3411      79436F6D 
+ 3411      6D00
+ 3412              	.LASF25:
+ 3413 0259 53544152 		.ascii	"STARTUP\000"
+ 3413      54555000 
+ 3414              	.LASF14:
+ 3415 0261 666C6F61 		.ascii	"float\000"
+ 3415      7400
+ 3416              	.LASF6:
+ 3417 0267 6C6F6E67 		.ascii	"long long int\000"
+ 3417      206C6F6E 
+ 3417      6720696E 
+ 3417      7400
+ 3418              	.LASF65:
+ 3419 0275 6765744D 		.ascii	"getMaxTemperature\000"
+ 3419      61785465 
+ 3419      6D706572 
+ 3419      61747572 
+ 3419      6500
+ 3420              	.LASF36:
+ 3421 0287 54686572 		.ascii	"ThermalLimit\000"
+ 3421      6D616C4C 
+ 3421      696D6974 
+ 3421      00
+ 3422              	.LASF4:
+ 3423 0294 6C6F6E67 		.ascii	"long int\000"
+ 3423      20696E74 
+ 3423      00
+ 3424              	.LASF32:
+ 3425 029d 45584345 		.ascii	"EXCEEDED_LOWER_BOUND\000"
+ 3425      45444544 
+ 3425      5F4C4F57 
+ 3425      45525F42 
+ 3425      4F554E44 
+ 3426              	.LASF87:
+ 3427 02b2 50574D5F 		.ascii	"PWM_Enable_Write\000"
+ 3427      456E6162 
+ 3427      6C655F57 
+ 3427      72697465 
+ 3427      00
+ 3428              	.LASF52:
+ 3429 02c3 67657450 		.ascii	"getPreviousBrightness\000"
+ 3429      72657669 
+ 3429      6F757342 
+ 3429      72696768 
+ 3429      746E6573 
+ 3430              	.LASF71:
+ 3431 02d9 4144435F 		.ascii	"ADC_WaitCount\000"
+ 3431      57616974 
+ 3431      436F756E 
+ 3431      7400
+ 3432              	.LASF22:
+ 3433 02e7 4D494352 		.ascii	"MICRO\000"
+ 3433      4F00
+ 3434              	.LASF33:
+ 3435 02ed 4552524F 		.ascii	"ERROR\000"
+ 3435      5200
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 77
+
+
+ 3436              	.LASF96:
+ 3437 02f3 67657454 		.ascii	"getTemperatureStatus\000"
+ 3437      656D7065 
+ 3437      72617475 
+ 3437      72655374 
+ 3437      61747573 
+ 3438              	.LASF28:
+ 3439 0308 4E4F5F43 		.ascii	"NO_CHANGE\000"
+ 3439      48414E47 
+ 3439      4500
+ 3440              	.LASF17:
+ 3441 0312 6C6F6E67 		.ascii	"long double\000"
+ 3441      20646F75 
+ 3441      626C6500 
+ 3442              	.LASF75:
+ 3443 031e 6765744E 		.ascii	"getNewMaxBrightness\000"
+ 3443      65774D61 
+ 3443      78427269 
+ 3443      6768746E 
+ 3443      65737300 
+ 3444              	.LASF89:
+ 3445 0332 43794465 		.ascii	"CyDelayUs\000"
+ 3445      6C617955 
+ 3445      7300
+ 3446              	.LASF1:
+ 3447 033c 756E7369 		.ascii	"unsigned char\000"
+ 3447      676E6564 
+ 3447      20636861 
+ 3447      7200
+ 3448              	.LASF66:
+ 3449 034a 6368616E 		.ascii	"channelNumber\000"
+ 3449      6E656C4E 
+ 3449      756D6265 
+ 3449      7200
+ 3450              	.LASF95:
+ 3451 0358 433A5C55 		.ascii	"C:\\Users\\kylep\\Box Sync\\Box Sync\\Feniex Electr"
+ 3451      73657273 
+ 3451      5C6B796C 
+ 3451      65705C42 
+ 3451      6F782053 
+ 3452 0386 6963616C 		.ascii	"ical Files\\WorkingFolder-Kyle\\Firm-AI-Cube\\81-00"
+ 3452      2046696C 
+ 3452      65735C57 
+ 3452      6F726B69 
+ 3452      6E67466F 
+ 3453 03b6 3032342D 		.ascii	"024-01.cydsn\000"
+ 3453      30312E63 
+ 3453      7964736E 
+ 3453      00
+ 3454              	.LASF24:
+ 3455 03c3 52656775 		.ascii	"RegulationState\000"
+ 3455      6C617469 
+ 3455      6F6E5374 
+ 3455      61746500 
+ 3456              	.LASF0:
+ 3457 03d3 7369676E 		.ascii	"signed char\000"
+ 3457      65642063 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 78
+
+
+ 3457      68617200 
+ 3458              	.LASF7:
+ 3459 03df 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 3459      206C6F6E 
+ 3459      6720756E 
+ 3459      7369676E 
+ 3459      65642069 
+ 3460              	.LASF8:
+ 3461 03f6 756E7369 		.ascii	"unsigned int\000"
+ 3461      676E6564 
+ 3461      20696E74 
+ 3461      00
+ 3462              	.LASF39:
+ 3463 0403 624C6173 		.ascii	"bLastDriverInChain\000"
+ 3463      74447269 
+ 3463      76657249 
+ 3463      6E436861 
+ 3463      696E00
+ 3464              	.LASF61:
+ 3465 0416 70726F63 		.ascii	"processSoftStart\000"
+ 3465      65737353 
+ 3465      6F667453 
+ 3465      74617274 
+ 3465      00
+ 3466              	.LASF84:
+ 3467 0427 4C45445F 		.ascii	"LED_Timer_Stop\000"
+ 3467      54696D65 
+ 3467      725F5374 
+ 3467      6F7000
+ 3468              	.LASF63:
+ 3469 0436 62726967 		.ascii	"brightnessLevel\000"
+ 3469      68746E65 
+ 3469      73734C65 
+ 3469      76656C00 
+ 3470              	.LASF82:
+ 3471 0446 52656775 		.ascii	"RegulationData\000"
+ 3471      6C617469 
+ 3471      6F6E4461 
+ 3471      746100
+ 3472              	.LASF88:
+ 3473 0455 50574D5F 		.ascii	"PWM_WriteCompare\000"
+ 3473      57726974 
+ 3473      65436F6D 
+ 3473      70617265 
+ 3473      00
+ 3474              	.LASF42:
+ 3475 0466 72656775 		.ascii	"regulatedBrightness\000"
+ 3475      6C617465 
+ 3475      64427269 
+ 3475      6768746E 
+ 3475      65737300 
+ 3476              	.LASF3:
+ 3477 047a 73686F72 		.ascii	"short unsigned int\000"
+ 3477      7420756E 
+ 3477      7369676E 
+ 3477      65642069 
+ 3477      6E7400
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 79
+
+
+ 3478              	.LASF20:
+ 3479 048d 564F4C54 		.ascii	"VOLTAGE_SENSE\000"
+ 3479      4147455F 
+ 3479      53454E53 
+ 3479      4500
+ 3480              	.LASF92:
+ 3481 049b 4144435F 		.ascii	"ADC_SAR_Seq_GetResult16\000"
+ 3481      5341525F 
+ 3481      5365715F 
+ 3481      47657452 
+ 3481      6573756C 
+ 3482              	.LASF41:
+ 3483 04b3 72657175 		.ascii	"requestedBrightness\000"
+ 3483      65737465 
+ 3483      64427269 
+ 3483      6768746E 
+ 3483      65737300 
+ 3484              	.LASF16:
+ 3485 04c7 63686172 		.ascii	"char\000"
+ 3485      00
+ 3486              	.LASF31:
+ 3487 04cc 45584345 		.ascii	"EXCEEDED_UPPER_BOUND\000"
+ 3487      45444544 
+ 3487      5F555050 
+ 3487      45525F42 
+ 3487      4F554E44 
+ 3488              	.LASF44:
+ 3489 04e1 63757272 		.ascii	"currentState\000"
+ 3489      656E7453 
+ 3489      74617465 
+ 3489      00
+ 3490              	.LASF38:
+ 3491 04ee 64726976 		.ascii	"driverCount\000"
+ 3491      6572436F 
+ 3491      756E7400 
+ 3492              	.LASF81:
+ 3493 04fa 506F7369 		.ascii	"PositionData\000"
+ 3493      74696F6E 
+ 3493      44617461 
+ 3493      00
+ 3494              	.LASF74:
+ 3495 0507 6368616E 		.ascii	"channelIndex\000"
+ 3495      6E656C49 
+ 3495      6E646578 
+ 3495      00
+ 3496              	.LASF68:
+ 3497 0514 6253696E 		.ascii	"bSingleSample\000"
+ 3497      676C6553 
+ 3497      616D706C 
+ 3497      6500
+ 3498              	.LASF56:
+ 3499 0522 73657444 		.ascii	"setDriverCount\000"
+ 3499      72697665 
+ 3499      72436F75 
+ 3499      6E7400
+ 3500              	.LASF10:
+ 3501 0531 75696E74 		.ascii	"uint16\000"
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 80
+
+
+ 3501      313600
+ 3502              	.LASF97:
+ 3503 0538 73657441 		.ascii	"setAsNotLastDriverInChain\000"
+ 3503      734E6F74 
+ 3503      4C617374 
+ 3503      44726976 
+ 3503      6572496E 
+ 3504              	.LASF19:
+ 3505 0552 53574954 		.ascii	"SWITCH_NODE\000"
+ 3505      43485F4E 
+ 3505      4F444500 
+ 3506              	.LASF11:
+ 3507 055e 75696E74 		.ascii	"uint32\000"
+ 3507      333200
+ 3508              	.LASF5:
+ 3509 0565 6C6F6E67 		.ascii	"long unsigned int\000"
+ 3509      20756E73 
+ 3509      69676E65 
+ 3509      6420696E 
+ 3509      7400
+ 3510              	.LASF13:
+ 3511 0577 696E7433 		.ascii	"int32\000"
+ 3511      3200
+ 3512              	.LASF80:
+ 3513 057d 54686572 		.ascii	"ThermalLimitArray\000"
+ 3513      6D616C4C 
+ 3513      696D6974 
+ 3513      41727261 
+ 3513      7900
+ 3514              	.LASF72:
+ 3515 058f 74656D70 		.ascii	"temperatureSample_16\000"
+ 3515      65726174 
+ 3515      75726553 
+ 3515      616D706C 
+ 3515      655F3136 
+ 3516              	.LASF64:
+ 3517 05a4 62526567 		.ascii	"bRegulated\000"
+ 3517      756C6174 
+ 3517      656400
+ 3518              	.LASF46:
+ 3519 05af 52656775 		.ascii	"RegulationProperties\000"
+ 3519      6C617469 
+ 3519      6F6E5072 
+ 3519      6F706572 
+ 3519      74696573 
+ 3520              	.LASF34:
+ 3521 05c4 4D41585F 		.ascii	"MAX_TEMPERATURE\000"
+ 3521      54454D50 
+ 3521      45524154 
+ 3521      55524500 
+ 3522              	.LASF86:
+ 3523 05d4 4C45445F 		.ascii	"LED_Timer_ClearInterrupt\000"
+ 3523      54696D65 
+ 3523      725F436C 
+ 3523      65617249 
+ 3523      6E746572 
+ 3524              	.LASF58:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 81
+
+
+ 3525 05ed 69734C61 		.ascii	"isLastDriverInChain\000"
+ 3525      73744472 
+ 3525      69766572 
+ 3525      496E4368 
+ 3525      61696E00 
+ 3526              	.LASF47:
+ 3527 0601 62456E61 		.ascii	"bEnable\000"
+ 3527      626C6500 
+ 3528              	.LASF30:
+ 3529 0609 57495448 		.ascii	"WITHIN_TOLERANCE\000"
+ 3529      494E5F54 
+ 3529      4F4C4552 
+ 3529      414E4345 
+ 3529      00
+ 3530              	.LASF69:
+ 3531 061a 73616D70 		.ascii	"sampleArray\000"
+ 3531      6C654172 
+ 3531      72617900 
+ 3532              	.LASF27:
+ 3533 0626 53544541 		.ascii	"STEADY_DECREASE\000"
+ 3533      44595F44 
+ 3533      45435245 
+ 3533      41534500 
+ 3534              	.LASF23:
+ 3535 0636 54656D70 		.ascii	"TemperaturePoint\000"
+ 3535      65726174 
+ 3535      75726550 
+ 3535      6F696E74 
+ 3535      00
+ 3536              	.LASF54:
+ 3537 0647 706F7369 		.ascii	"positionNumber\000"
+ 3537      74696F6E 
+ 3537      4E756D62 
+ 3537      657200
+ 3538              	.LASF67:
+ 3539 0656 67657454 		.ascii	"getTemperatureSample\000"
+ 3539      656D7065 
+ 3539      72617475 
+ 3539      72655361 
+ 3539      6D706C65 
+ 3540              	.LASF15:
+ 3541 066b 646F7562 		.ascii	"double\000"
+ 3541      6C6500
+ 3542              	.LASF45:
+ 3543 0672 7363616C 		.ascii	"scalingFactor\000"
+ 3543      696E6746 
+ 3543      6163746F 
+ 3543      7200
+ 3544              	.LASF26:
+ 3545 0680 53544541 		.ascii	"STEADY_INCREASE\000"
+ 3545      44595F49 
+ 3545      4E435245 
+ 3545      41534500 
+ 3546              	.LASF21:
+ 3547 0690 53504143 		.ascii	"SPACE_HOLDER\000"
+ 3547      455F484F 
+ 3547      4C444552 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccGf1fBa.s 			page 82
+
+
+ 3547      00
+ 3548              	.LASF37:
+ 3549 069d 49445F4E 		.ascii	"ID_Number\000"
+ 3549      756D6265 
+ 3549      7200
+ 3550              	.LASF79:
+ 3551 06a7 6C6F6361 		.ascii	"localBrightness\000"
+ 3551      6C427269 
+ 3551      6768746E 
+ 3551      65737300 
+ 3552              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

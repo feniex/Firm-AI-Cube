@@ -1,0 +1,4052 @@
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"motorControl.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.loadLimitSwitchValue,"ax",%progbits
+  20              		.align	2
+  21              		.global	loadLimitSwitchValue
+  22              		.code	16
+  23              		.thumb_func
+  24              		.type	loadLimitSwitchValue, %function
+  25              	loadLimitSwitchValue:
+  26              	.LFB36:
+  27              		.file 1 "motorControl.c"
+   1:motorControl.c **** /* ========================================
+   2:motorControl.c ****  *
+   3:motorControl.c ****  * Copyright YOUR COMPANY, THE YEAR
+   4:motorControl.c ****  * All Rights Reserved
+   5:motorControl.c ****  * UNPUBLISHED, LICENSED SOFTWARE.
+   6:motorControl.c ****  *
+   7:motorControl.c ****  * CONFIDENTIAL AND PROPRIETARY INFORMATION
+   8:motorControl.c ****  * WHICH IS THE PROPERTY OF your company.
+   9:motorControl.c ****  *
+  10:motorControl.c ****  * ========================================
+  11:motorControl.c **** */
+  12:motorControl.c **** 
+  13:motorControl.c **** #include "motorControl.h"
+  14:motorControl.c **** #include "BrightnessCommManager.h"
+  15:motorControl.c **** 
+  16:motorControl.c **** MotorIO *pMotor;
+  17:motorControl.c **** RxPacket * rxPacketLocal;
+  18:motorControl.c **** MotorIO motorStatus = 
+  19:motorControl.c **** {0, 0, 0, FALSE, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  20:motorControl.c **** MotorIO *pMotor;
+  21:motorControl.c **** 
+  22:motorControl.c **** uint8 bDoneMovingCalibrate = FALSE;
+  23:motorControl.c **** static uint32 timeOutCalibrate = 0;
+  24:motorControl.c **** uint16 checkMotorCurrent(void);
+  25:motorControl.c **** 
+  26:motorControl.c **** /*******************************************************************************
+  27:motorControl.c **** * ISR Name: HALL_EFFECT_EDGE_DETECT_INTERRUPT
+  28:motorControl.c **** ********************************************************************************
+  29:motorControl.c **** *
+  30:motorControl.c **** * Summary:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 2
+
+
+  31:motorControl.c **** *  Executes whenever an edge is detected from the hall effect sensor.
+  32:motorControl.c **** *
+  33:motorControl.c **** * Parameters:  
+  34:motorControl.c **** *   None
+  35:motorControl.c **** *
+  36:motorControl.c **** * Return:
+  37:motorControl.c **** *   None
+  38:motorControl.c **** *
+  39:motorControl.c **** *******************************************************************************/
+  40:motorControl.c **** CY_ISR(HALL_EFFECT_EDGE_DETECT_INTERRUPT)
+  41:motorControl.c **** {    
+  42:motorControl.c ****     //static uint16 testPotValue = 0;
+  43:motorControl.c ****     pMotor->hallEffectEdgeDetect = TRUE;
+  44:motorControl.c ****     setMotorOutputs(BRAKE,0xFF);
+  45:motorControl.c ****     CyDelay(10);
+  46:motorControl.c ****     pMotor->forwardLimitCS = ADC_SAR_Seq_GetResult16(POT_FEEDBACK);
+  47:motorControl.c ****     pMotor->forwardLimitCS = pMotor->forwardLimitCS>>3;
+  48:motorControl.c ****     pMotor->calibrated = DONE_CALIBRATING;
+  49:motorControl.c ****     limitSwitch_ClearInterrupt();
+  50:motorControl.c **** }
+  51:motorControl.c **** 
+  52:motorControl.c **** CY_ISR(OVER_CURRENT_ISR)
+  53:motorControl.c **** {
+  54:motorControl.c ****     if(ADC_SAR_Seq_IsEndConversion(ADC_SAR_Seq_RETURN_STATUS) !=0)
+  55:motorControl.c ****     {
+  56:motorControl.c ****         pMotor->motorCurrent[pMotor->motorCurrentSamplesIterator] = checkMotorCurrent();
+  57:motorControl.c ****         pMotor->motorCurrentSamplesIterator++;
+  58:motorControl.c ****     }
+  59:motorControl.c ****     
+  60:motorControl.c **** 
+  61:motorControl.c ****     if(pMotor->motorCurrent[0]>= OVER_CURRENT_VALUE && pMotor->motorCurrent[1]>= OVER_CURRENT_VALUE
+  62:motorControl.c ****     {
+  63:motorControl.c ****             setMotorOutputs(BRAKE,0xFF);
+  64:motorControl.c ****             for(pMotor->motorCurrentSamplesIterator = 0; pMotor->motorCurrentSamplesIterator<12; pM
+  65:motorControl.c ****             {
+  66:motorControl.c ****                 pMotor->motorCurrent[pMotor->motorCurrentSamplesIterator] = 0;
+  67:motorControl.c ****             }
+  68:motorControl.c ****             pMotor->motorCurrentSamplesIterator = 0;
+  69:motorControl.c ****             pMotor->bOverCurrentStart = TRUE;
+  70:motorControl.c ****     }
+  71:motorControl.c ****     if( pMotor->bOverCurrentStart == TRUE)
+  72:motorControl.c ****     {
+  73:motorControl.c ****         pMotor->overCurrentTimerOutCounter++;
+  74:motorControl.c ****         if(pMotor->overCurrentTimerOutCounter>=OVER_CURRENT_TIMER_THRESHOLD)
+  75:motorControl.c ****         {
+  76:motorControl.c ****             pMotor->overCurrentTimerOutCounter=0;
+  77:motorControl.c ****             pMotor->bOverCurrentStart = FALSE;
+  78:motorControl.c ****         }
+  79:motorControl.c ****     }
+  80:motorControl.c ****     if(pMotor->motorCurrentSamplesIterator>=12)
+  81:motorControl.c ****     {
+  82:motorControl.c ****         pMotor->motorCurrentSamplesIterator = 0;
+  83:motorControl.c ****     }
+  84:motorControl.c ****     
+  85:motorControl.c ****     timerForInputs = 1;
+  86:motorControl.c ****     
+  87:motorControl.c ****     overCurrentTimerISR_ClearPending();
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 3
+
+
+  88:motorControl.c ****     overCurrentTimer_ReadStatusRegister();
+  89:motorControl.c ****     //overCurrentTimer_ClearInterrupt(overCurrentTimer_INTR_MASK_TC);
+  90:motorControl.c **** }
+  91:motorControl.c **** 
+  92:motorControl.c **** /*******************************************************************************
+  93:motorControl.c **** * Function Name: initializeMotor
+  94:motorControl.c **** ********************************************************************************
+  95:motorControl.c **** *
+  96:motorControl.c **** * Summary:
+  97:motorControl.c **** *  Inititates the motor PWM module
+  98:motorControl.c **** *
+  99:motorControl.c **** * Parameters:  
+ 100:motorControl.c **** *   None
+ 101:motorControl.c **** *
+ 102:motorControl.c **** * Return:
+ 103:motorControl.c **** *   None
+ 104:motorControl.c **** *
+ 105:motorControl.c **** *******************************************************************************/
+ 106:motorControl.c **** void initializeMotor(void)
+ 107:motorControl.c **** {  
+ 108:motorControl.c ****     static const uint8 * pNonVolatileMotorPosition = 0;
+ 109:motorControl.c ****     pwmClock_Enable();
+ 110:motorControl.c ****     motorControlPWM_Start();
+ 111:motorControl.c ****     motorControlPWM_SetCompareMode(motorControlPWM__B_PWM__LESS_THAN);
+ 112:motorControl.c ****     motorControlPWM_WriteCompare(0x00);
+ 113:motorControl.c ****     pMotor = &motorStatus;
+ 114:motorControl.c ****     rxPacketLocal = getRxPacket();
+ 115:motorControl.c ****     pNonVolatileMotorPosition = getNonVolatileBarStateMemory();
+ 116:motorControl.c ****     rxPacketLocal->Payload.endMotorPosition = pNonVolatileMotorPosition[1];
+ 117:motorControl.c ****     pMotor->forwardLimitCS = 255;
+ 118:motorControl.c ****     setMotorOutputs(BRAKE,0xFF);
+ 119:motorControl.c ****     overCurrentTimerISR_StartEx(OVER_CURRENT_ISR);
+ 120:motorControl.c ****     overCurrentTimer_Start();
+ 121:motorControl.c ****     //aMux_Start();
+ 122:motorControl.c **** }
+ 123:motorControl.c **** 
+ 124:motorControl.c **** /*******************************************************************************
+ 125:motorControl.c **** * Function Name: setMotorOutputs
+ 126:motorControl.c **** ********************************************************************************
+ 127:motorControl.c **** *
+ 128:motorControl.c **** * Summary:
+ 129:motorControl.c **** *  Inititates the calibration sequence for the motor
+ 130:motorControl.c **** *
+ 131:motorControl.c **** * Parameters:  
+ 132:motorControl.c **** *   Direction: 00 BRAKE
+ 133:motorControl.c **** *              01 Forward
+ 134:motorControl.c **** *              10 Reverse
+ 135:motorControl.c **** *   Speed:     0-255 Steps of control
+ 136:motorControl.c **** *
+ 137:motorControl.c **** * Return:
+ 138:motorControl.c **** *   None
+ 139:motorControl.c **** *
+ 140:motorControl.c **** *******************************************************************************/
+ 141:motorControl.c **** 
+ 142:motorControl.c **** 
+ 143:motorControl.c **** /*******************************************************************************
+ 144:motorControl.c **** * Function Name: calibrateMotor
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 4
+
+
+ 145:motorControl.c **** ********************************************************************************
+ 146:motorControl.c **** *
+ 147:motorControl.c **** * Summary:
+ 148:motorControl.c **** *  Inititates the calibration sequence for the motor
+ 149:motorControl.c **** *
+ 150:motorControl.c **** * Parameters:  
+ 151:motorControl.c **** *   None
+ 152:motorControl.c **** *
+ 153:motorControl.c **** * Return:
+ 154:motorControl.c **** *   None
+ 155:motorControl.c **** *
+ 156:motorControl.c **** *******************************************************************************/
+ 157:motorControl.c **** 
+ 158:motorControl.c **** int16 calibrateMotor(void)
+ 159:motorControl.c **** {
+ 160:motorControl.c ****     pMotor->calibrated = START_CALIBRATING;
+ 161:motorControl.c ****     
+ 162:motorControl.c ****     while(pMotor->calibrated!=1)
+ 163:motorControl.c ****     {
+ 164:motorControl.c ****        while(bDoneMovingCalibrate == FALSE)
+ 165:motorControl.c ****        {
+ 166:motorControl.c ****             motorControlLoop(1);
+ 167:motorControl.c ****        }
+ 168:motorControl.c ****        hallEffectISR_StartEx(HALL_EFFECT_EDGE_DETECT_INTERRUPT);
+ 169:motorControl.c ****        CyDelay(5000);
+ 170:motorControl.c ****        bDoneMovingCalibrate = FALSE;
+ 171:motorControl.c ****        while(bDoneMovingCalibrate == FALSE)
+ 172:motorControl.c ****        {
+ 173:motorControl.c ****             if(pMotor->calibrated == 1)
+ 174:motorControl.c ****             {
+ 175:motorControl.c ****                 timeOutCalibrate = 0;
+ 176:motorControl.c ****                 CyDelay(1);
+ 177:motorControl.c ****                 break;
+ 178:motorControl.c ****             }
+ 179:motorControl.c ****      
+ 180:motorControl.c ****             motorControlLoop(252);
+ 181:motorControl.c ****        };
+ 182:motorControl.c ****        // CyDelay(5000);
+ 183:motorControl.c ****        //bDoneMovingCalibrate = FALSE;
+ 184:motorControl.c ****        timeOutCalibrate++;
+ 185:motorControl.c ****        if(timeOutCalibrate >= 6)
+ 186:motorControl.c ****        {
+ 187:motorControl.c ****             timeOutCalibrate = 0;
+ 188:motorControl.c ****             break;
+ 189:motorControl.c ****        }
+ 190:motorControl.c ****     }
+ 191:motorControl.c ****     setMotorOutputs(BRAKE,0xFF);
+ 192:motorControl.c ****     hallEffectISR_Stop();
+ 193:motorControl.c ****     CyDelay(10);
+ 194:motorControl.c ****     return pMotor->forwardLimitCS;
+ 195:motorControl.c **** }
+ 196:motorControl.c **** 
+ 197:motorControl.c **** void loadLimitSwitchValue(void)
+ 198:motorControl.c **** {
+  28              		.loc 1 198 0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 5
+
+
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32 0000 10B5     		push	{r4, lr}
+  33              		.cfi_def_cfa_offset 8
+  34              		.cfi_offset 4, -8
+  35              		.cfi_offset 14, -4
+ 199:motorControl.c ****     static const uint8 * pLocalNonVolatileMemory;
+ 200:motorControl.c ****     pLocalNonVolatileMemory = getNonVolatileBarStateMemory();
+  36              		.loc 1 200 0
+  37 0002 FFF7FEFF 		bl	getNonVolatileBarStateMemory
+  38              	.LVL0:
+ 201:motorControl.c ****     pMotor->forwardLimitCS = pLocalNonVolatileMemory[4];
+  39              		.loc 1 201 0
+  40 0006 024B     		ldr	r3, .L2
+  41 0008 1B68     		ldr	r3, [r3]
+  42 000a 0279     		ldrb	r2, [r0, #4]
+  43 000c 5A80     		strh	r2, [r3, #2]
+ 202:motorControl.c **** }
+  44              		.loc 1 202 0
+  45              		@ sp needed
+  46 000e 10BD     		pop	{r4, pc}
+  47              	.L3:
+  48              		.align	2
+  49              	.L2:
+  50 0010 00000000 		.word	pMotor
+  51              		.cfi_endproc
+  52              	.LFE36:
+  53              		.size	loadLimitSwitchValue, .-loadLimitSwitchValue
+  54              		.section	.text.setMotorOutputs,"ax",%progbits
+  55              		.align	2
+  56              		.global	setMotorOutputs
+  57              		.code	16
+  58              		.thumb_func
+  59              		.type	setMotorOutputs, %function
+  60              	setMotorOutputs:
+  61              	.LFB37:
+ 203:motorControl.c **** 
+ 204:motorControl.c **** void setMotorOutputs(Direction direction, Speed speed)
+ 205:motorControl.c **** {
+  62              		.loc 1 205 0
+  63              		.cfi_startproc
+  64              		@ args = 0, pretend = 0, frame = 0
+  65              		@ frame_needed = 0, uses_anonymous_args = 0
+  66              	.LVL1:
+  67 0000 10B5     		push	{r4, lr}
+  68              		.cfi_def_cfa_offset 8
+  69              		.cfi_offset 4, -8
+  70              		.cfi_offset 14, -4
+ 206:motorControl.c ****     if(direction == FORWARD)
+  71              		.loc 1 206 0
+  72 0002 0128     		cmp	r0, #1
+  73 0004 09D1     		bne	.L5
+ 207:motorControl.c ****     {
+ 208:motorControl.c ****         MOTOR_OUTB_LOW;
+  74              		.loc 1 208 0
+  75 0006 184B     		ldr	r3, .L9
+  76 0008 1A68     		ldr	r2, [r3]
+  77 000a 0330     		adds	r0, r0, #3
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 6
+
+
+  78              	.LVL2:
+  79 000c 8243     		bics	r2, r0
+  80 000e 1A60     		str	r2, [r3]
+ 209:motorControl.c ****         MOTOR_OUTA_HIGH;
+  81              		.loc 1 209 0
+  82 0010 1868     		ldr	r0, [r3]
+  83 0012 4022     		movs	r2, #64
+  84 0014 0243     		orrs	r2, r0
+  85 0016 1A60     		str	r2, [r3]
+  86 0018 22E0     		b	.L6
+  87              	.LVL3:
+  88              	.L5:
+ 210:motorControl.c ****     }
+ 211:motorControl.c ****     else if(direction == BACKWARDS)
+  89              		.loc 1 211 0
+  90 001a 0A28     		cmp	r0, #10
+  91 001c 09D1     		bne	.L7
+ 212:motorControl.c ****     {
+ 213:motorControl.c ****         MOTOR_OUTB_HIGH;
+  92              		.loc 1 213 0
+  93 001e 124B     		ldr	r3, .L9
+  94 0020 1868     		ldr	r0, [r3]
+  95              	.LVL4:
+  96 0022 0422     		movs	r2, #4
+  97 0024 0243     		orrs	r2, r0
+  98 0026 1A60     		str	r2, [r3]
+ 214:motorControl.c ****         MOTOR_OUTA_LOW;
+  99              		.loc 1 214 0
+ 100 0028 1A68     		ldr	r2, [r3]
+ 101 002a 4020     		movs	r0, #64
+ 102 002c 8243     		bics	r2, r0
+ 103 002e 1A60     		str	r2, [r3]
+ 104 0030 16E0     		b	.L6
+ 105              	.LVL5:
+ 106              	.L7:
+ 215:motorControl.c ****     }
+ 216:motorControl.c ****     else if(direction == BRAKE)
+ 107              		.loc 1 216 0
+ 108 0032 0028     		cmp	r0, #0
+ 109 0034 09D1     		bne	.L8
+ 217:motorControl.c ****     {
+ 218:motorControl.c ****         MOTOR_OUTB_LOW;
+ 110              		.loc 1 218 0
+ 111 0036 0C4B     		ldr	r3, .L9
+ 112 0038 1A68     		ldr	r2, [r3]
+ 113 003a 0430     		adds	r0, r0, #4
+ 114              	.LVL6:
+ 115 003c 8243     		bics	r2, r0
+ 116 003e 1A60     		str	r2, [r3]
+ 219:motorControl.c ****         MOTOR_OUTA_LOW;
+ 117              		.loc 1 219 0
+ 118 0040 1A68     		ldr	r2, [r3]
+ 119 0042 3C30     		adds	r0, r0, #60
+ 120 0044 8243     		bics	r2, r0
+ 121 0046 1A60     		str	r2, [r3]
+ 122 0048 0AE0     		b	.L6
+ 123              	.LVL7:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 7
+
+
+ 124              	.L8:
+ 220:motorControl.c ****     }
+ 221:motorControl.c ****     else if(direction == OFF_NOTHING)
+ 125              		.loc 1 221 0
+ 126 004a 0328     		cmp	r0, #3
+ 127 004c 08D1     		bne	.L6
+ 222:motorControl.c ****     {
+ 223:motorControl.c ****         MOTOR_OUTB_HIGH;
+ 128              		.loc 1 223 0
+ 129 004e 064B     		ldr	r3, .L9
+ 130 0050 1868     		ldr	r0, [r3]
+ 131              	.LVL8:
+ 132 0052 0422     		movs	r2, #4
+ 133 0054 0243     		orrs	r2, r0
+ 134 0056 1A60     		str	r2, [r3]
+ 224:motorControl.c ****         MOTOR_OUTA_HIGH;
+ 135              		.loc 1 224 0
+ 136 0058 1868     		ldr	r0, [r3]
+ 137 005a 4022     		movs	r2, #64
+ 138 005c 0243     		orrs	r2, r0
+ 139 005e 1A60     		str	r2, [r3]
+ 140              	.L6:
+ 225:motorControl.c ****     }
+ 226:motorControl.c ****     
+ 227:motorControl.c ****     motorControlPWM_WriteCompare(speed);
+ 141              		.loc 1 227 0
+ 142 0060 0800     		movs	r0, r1
+ 143 0062 FFF7FEFF 		bl	motorControlPWM_WriteCompare
+ 144              	.LVL9:
+ 228:motorControl.c **** }
+ 145              		.loc 1 228 0
+ 146              		@ sp needed
+ 147 0066 10BD     		pop	{r4, pc}
+ 148              	.L10:
+ 149              		.align	2
+ 150              	.L9:
+ 151 0068 00000440 		.word	1074003968
+ 152              		.cfi_endproc
+ 153              	.LFE37:
+ 154              		.size	setMotorOutputs, .-setMotorOutputs
+ 155              		.section	.text.HALL_EFFECT_EDGE_DETECT_INTERRUPT,"ax",%progbits
+ 156              		.align	2
+ 157              		.global	HALL_EFFECT_EDGE_DETECT_INTERRUPT
+ 158              		.code	16
+ 159              		.thumb_func
+ 160              		.type	HALL_EFFECT_EDGE_DETECT_INTERRUPT, %function
+ 161              	HALL_EFFECT_EDGE_DETECT_INTERRUPT:
+ 162              	.LFB32:
+  41:motorControl.c ****     //static uint16 testPotValue = 0;
+ 163              		.loc 1 41 0
+ 164              		.cfi_startproc
+ 165              		@ args = 0, pretend = 0, frame = 0
+ 166              		@ frame_needed = 0, uses_anonymous_args = 0
+ 167 0000 70B5     		push	{r4, r5, r6, lr}
+ 168              		.cfi_def_cfa_offset 16
+ 169              		.cfi_offset 4, -16
+ 170              		.cfi_offset 5, -12
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 8
+
+
+ 171              		.cfi_offset 6, -8
+ 172              		.cfi_offset 14, -4
+  43:motorControl.c ****     setMotorOutputs(BRAKE,0xFF);
+ 173              		.loc 1 43 0
+ 174 0002 0D4C     		ldr	r4, .L12
+ 175 0004 0125     		movs	r5, #1
+ 176 0006 2368     		ldr	r3, [r4]
+ 177 0008 5D73     		strb	r5, [r3, #13]
+  44:motorControl.c ****     CyDelay(10);
+ 178              		.loc 1 44 0
+ 179 000a FF21     		movs	r1, #255
+ 180 000c 0020     		movs	r0, #0
+ 181 000e FFF7FEFF 		bl	setMotorOutputs
+ 182              	.LVL10:
+  45:motorControl.c ****     pMotor->forwardLimitCS = ADC_SAR_Seq_GetResult16(POT_FEEDBACK);
+ 183              		.loc 1 45 0
+ 184 0012 0A20     		movs	r0, #10
+ 185 0014 FFF7FEFF 		bl	CyDelay
+ 186              	.LVL11:
+  46:motorControl.c ****     pMotor->forwardLimitCS = pMotor->forwardLimitCS>>3;
+ 187              		.loc 1 46 0
+ 188 0018 2668     		ldr	r6, [r4]
+ 189 001a 0320     		movs	r0, #3
+ 190 001c FFF7FEFF 		bl	ADC_SAR_Seq_GetResult16
+ 191              	.LVL12:
+ 192 0020 7080     		strh	r0, [r6, #2]
+  47:motorControl.c ****     pMotor->calibrated = DONE_CALIBRATING;
+ 193              		.loc 1 47 0
+ 194 0022 2268     		ldr	r2, [r4]
+ 195 0024 5388     		ldrh	r3, [r2, #2]
+ 196 0026 DB08     		lsrs	r3, r3, #3
+ 197 0028 5380     		strh	r3, [r2, #2]
+  48:motorControl.c ****     limitSwitch_ClearInterrupt();
+ 198              		.loc 1 48 0
+ 199 002a 2268     		ldr	r2, [r4]
+ 200 002c 3023     		movs	r3, #48
+ 201 002e D554     		strb	r5, [r2, r3]
+  49:motorControl.c **** }
+ 202              		.loc 1 49 0
+ 203 0030 FFF7FEFF 		bl	limitSwitch_ClearInterrupt
+ 204              	.LVL13:
+  50:motorControl.c **** 
+ 205              		.loc 1 50 0
+ 206              		@ sp needed
+ 207 0034 70BD     		pop	{r4, r5, r6, pc}
+ 208              	.L13:
+ 209 0036 C046     		.align	2
+ 210              	.L12:
+ 211 0038 00000000 		.word	pMotor
+ 212              		.cfi_endproc
+ 213              	.LFE32:
+ 214              		.size	HALL_EFFECT_EDGE_DETECT_INTERRUPT, .-HALL_EFFECT_EDGE_DETECT_INTERRUPT
+ 215              		.section	.text.initializeMotor,"ax",%progbits
+ 216              		.align	2
+ 217              		.global	initializeMotor
+ 218              		.code	16
+ 219              		.thumb_func
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 9
+
+
+ 220              		.type	initializeMotor, %function
+ 221              	initializeMotor:
+ 222              	.LFB34:
+ 107:motorControl.c ****     static const uint8 * pNonVolatileMotorPosition = 0;
+ 223              		.loc 1 107 0
+ 224              		.cfi_startproc
+ 225              		@ args = 0, pretend = 0, frame = 0
+ 226              		@ frame_needed = 0, uses_anonymous_args = 0
+ 227 0000 70B5     		push	{r4, r5, r6, lr}
+ 228              		.cfi_def_cfa_offset 16
+ 229              		.cfi_offset 4, -16
+ 230              		.cfi_offset 5, -12
+ 231              		.cfi_offset 6, -8
+ 232              		.cfi_offset 14, -4
+ 109:motorControl.c ****     motorControlPWM_Start();
+ 233              		.loc 1 109 0
+ 234 0002 FFF7FEFF 		bl	pwmClock_Start
+ 235              	.LVL14:
+ 110:motorControl.c ****     motorControlPWM_SetCompareMode(motorControlPWM__B_PWM__LESS_THAN);
+ 236              		.loc 1 110 0
+ 237 0006 FFF7FEFF 		bl	motorControlPWM_Start
+ 238              	.LVL15:
+ 111:motorControl.c ****     motorControlPWM_WriteCompare(0x00);
+ 239              		.loc 1 111 0
+ 240 000a 0120     		movs	r0, #1
+ 241 000c FFF7FEFF 		bl	motorControlPWM_SetCompareMode
+ 242              	.LVL16:
+ 112:motorControl.c ****     pMotor = &motorStatus;
+ 243              		.loc 1 112 0
+ 244 0010 0020     		movs	r0, #0
+ 245 0012 FFF7FEFF 		bl	motorControlPWM_WriteCompare
+ 246              	.LVL17:
+ 113:motorControl.c ****     rxPacketLocal = getRxPacket();
+ 247              		.loc 1 113 0
+ 248 0016 0C4C     		ldr	r4, .L15
+ 249 0018 0C4B     		ldr	r3, .L15+4
+ 250 001a 2360     		str	r3, [r4]
+ 114:motorControl.c ****     pNonVolatileMotorPosition = getNonVolatileBarStateMemory();
+ 251              		.loc 1 114 0
+ 252 001c FFF7FEFF 		bl	getRxPacket
+ 253              	.LVL18:
+ 254 0020 0B4D     		ldr	r5, .L15+8
+ 255 0022 2860     		str	r0, [r5]
+ 115:motorControl.c ****     rxPacketLocal->Payload.endMotorPosition = pNonVolatileMotorPosition[1];
+ 256              		.loc 1 115 0
+ 257 0024 FFF7FEFF 		bl	getNonVolatileBarStateMemory
+ 258              	.LVL19:
+ 116:motorControl.c ****     pMotor->forwardLimitCS = 255;
+ 259              		.loc 1 116 0
+ 260 0028 2B68     		ldr	r3, [r5]
+ 261 002a 4278     		ldrb	r2, [r0, #1]
+ 262 002c 5A80     		strh	r2, [r3, #2]
+ 117:motorControl.c ****     setMotorOutputs(BRAKE,0xFF);
+ 263              		.loc 1 117 0
+ 264 002e 2368     		ldr	r3, [r4]
+ 265 0030 FF22     		movs	r2, #255
+ 266 0032 5A80     		strh	r2, [r3, #2]
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 10
+
+
+ 118:motorControl.c ****     overCurrentTimerISR_StartEx(OVER_CURRENT_ISR);
+ 267              		.loc 1 118 0
+ 268 0034 FF21     		movs	r1, #255
+ 269 0036 0020     		movs	r0, #0
+ 270 0038 FFF7FEFF 		bl	setMotorOutputs
+ 271              	.LVL20:
+ 119:motorControl.c ****     overCurrentTimer_Start();
+ 272              		.loc 1 119 0
+ 273 003c 0548     		ldr	r0, .L15+12
+ 274 003e FFF7FEFF 		bl	overCurrentTimerISR_StartEx
+ 275              	.LVL21:
+ 120:motorControl.c ****     //aMux_Start();
+ 276              		.loc 1 120 0
+ 277 0042 FFF7FEFF 		bl	overCurrentTimer_Start
+ 278              	.LVL22:
+ 122:motorControl.c **** 
+ 279              		.loc 1 122 0
+ 280              		@ sp needed
+ 281 0046 70BD     		pop	{r4, r5, r6, pc}
+ 282              	.L16:
+ 283              		.align	2
+ 284              	.L15:
+ 285 0048 00000000 		.word	pMotor
+ 286 004c 00000000 		.word	.LANCHOR0
+ 287 0050 00000000 		.word	rxPacketLocal
+ 288 0054 00000000 		.word	OVER_CURRENT_ISR
+ 289              		.cfi_endproc
+ 290              	.LFE34:
+ 291              		.size	initializeMotor, .-initializeMotor
+ 292              		.global	__aeabi_ui2f
+ 293              		.global	__aeabi_fdiv
+ 294              		.global	__aeabi_i2f
+ 295              		.global	__aeabi_fmul
+ 296              		.global	__aeabi_f2iz
+ 297              		.global	__aeabi_i2d
+ 298              		.global	__aeabi_dmul
+ 299              		.global	__aeabi_d2f
+ 300              		.global	__aeabi_f2d
+ 301              		.global	__aeabi_dadd
+ 302              		.global	__aeabi_fadd
+ 303              		.section	.text.motorControlLoop,"ax",%progbits
+ 304              		.align	2
+ 305              		.global	motorControlLoop
+ 306              		.code	16
+ 307              		.thumb_func
+ 308              		.type	motorControlLoop, %function
+ 309              	motorControlLoop:
+ 310              	.LFB38:
+ 229:motorControl.c **** 
+ 230:motorControl.c **** MotorIO * motorControlLoop(int16 manualDesiredPostion)
+ 231:motorControl.c **** {   
+ 311              		.loc 1 231 0
+ 312              		.cfi_startproc
+ 313              		@ args = 0, pretend = 0, frame = 16
+ 314              		@ frame_needed = 0, uses_anonymous_args = 0
+ 315              	.LVL23:
+ 316 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 11
+
+
+ 317              		.cfi_def_cfa_offset 20
+ 318              		.cfi_offset 4, -20
+ 319              		.cfi_offset 5, -16
+ 320              		.cfi_offset 6, -12
+ 321              		.cfi_offset 7, -8
+ 322              		.cfi_offset 14, -4
+ 323 0002 85B0     		sub	sp, sp, #20
+ 324              		.cfi_def_cfa_offset 40
+ 325 0004 0700     		movs	r7, r0
+ 232:motorControl.c ****     if(pMotor->bOverCurrentStart == FALSE)
+ 326              		.loc 1 232 0
+ 327 0006 6D4B     		ldr	r3, .L32
+ 328 0008 1C68     		ldr	r4, [r3]
+ 329 000a 4E23     		movs	r3, #78
+ 330 000c E35C     		ldrb	r3, [r4, r3]
+ 331 000e 002B     		cmp	r3, #0
+ 332 0010 00D0     		beq	.LCB245
+ 333 0012 C3E0     		b	.L18	@long jump
+ 334              	.LCB245:
+ 233:motorControl.c ****     {
+ 234:motorControl.c ****     //pMotor->motorCurrent = checkMotorCurrent();
+ 235:motorControl.c ****     //pMotor->busVoltage = checkBusVoltage();   
+ 236:motorControl.c ****     //setMotorOutputs(BACKWARDS,0xFF);
+ 237:motorControl.c ****     //if(checkMotorCurrent()< MAX_CURRENT || checkBusVoltage() > MIN_VOLTAGE)
+ 238:motorControl.c ****     {
+ 239:motorControl.c ****         if(manualDesiredPostion!=0)
+ 335              		.loc 1 239 0
+ 336 0014 0028     		cmp	r0, #0
+ 337 0016 01D0     		beq	.L19
+ 240:motorControl.c ****         {
+ 241:motorControl.c ****             pMotor->desiredPot = manualDesiredPostion;
+ 338              		.loc 1 241 0
+ 339 0018 2083     		strh	r0, [r4, #24]
+ 340 001a 1CE0     		b	.L20
+ 341              	.L19:
+ 242:motorControl.c ****         }
+ 243:motorControl.c ****         else
+ 244:motorControl.c ****         {
+ 245:motorControl.c ****             //if(getStateOfBar() == 1)
+ 246:motorControl.c ****             //{
+ 247:motorControl.c ****             //    pMotor->desiredPot = (int16)getDegaultPosition();
+ 248:motorControl.c ****             //}
+ 249:motorControl.c ****             if(pMotor->desiredPot != rxPacketLocal->Payload.endMotorPosition) //&& getStateOfBar() 
+ 342              		.loc 1 249 0
+ 343 001c 1822     		movs	r2, #24
+ 344 001e A35E     		ldrsh	r3, [r4, r2]
+ 345 0020 674A     		ldr	r2, .L32+4
+ 346 0022 1268     		ldr	r2, [r2]
+ 347 0024 5088     		ldrh	r0, [r2, #2]
+ 348              	.LVL24:
+ 349 0026 8342     		cmp	r3, r0
+ 350 0028 15D0     		beq	.L20
+ 250:motorControl.c ****             {
+ 251:motorControl.c ****                 pMotor->desiredPot = rxPacketLocal->Payload.endMotorPosition;
+ 351              		.loc 1 251 0
+ 352 002a 05B2     		sxth	r5, r0
+ 353 002c 2583     		strh	r5, [r4, #24]
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 12
+
+
+ 252:motorControl.c ****                 pMotor->calculatePercentageOfRange = pMotor->forwardLimitCS;
+ 354              		.loc 1 252 0
+ 355 002e 6088     		ldrh	r0, [r4, #2]
+ 356 0030 FFF7FEFF 		bl	__aeabi_ui2f
+ 357              	.LVL25:
+ 358 0034 A060     		str	r0, [r4, #8]
+ 253:motorControl.c ****                 pMotor->calculatePercentageOfRange = pMotor->calculatePercentageOfRange/255;
+ 359              		.loc 1 253 0
+ 360 0036 6349     		ldr	r1, .L32+8
+ 361 0038 FFF7FEFF 		bl	__aeabi_fdiv
+ 362              	.LVL26:
+ 363 003c 061C     		adds	r6, r0, #0
+ 364 003e A060     		str	r0, [r4, #8]
+ 254:motorControl.c ****                 pMotor->desiredPotFloat = pMotor->desiredPot;
+ 365              		.loc 1 254 0
+ 366 0040 2800     		movs	r0, r5
+ 367 0042 FFF7FEFF 		bl	__aeabi_i2f
+ 368              	.LVL27:
+ 369 0046 011C     		adds	r1, r0, #0
+ 370 0048 6061     		str	r0, [r4, #20]
+ 255:motorControl.c ****                 pMotor->desiredPot = (int16)pMotor->desiredPotFloat*(pMotor->calculatePercentageOfR
+ 371              		.loc 1 255 0
+ 372 004a 301C     		adds	r0, r6, #0
+ 373 004c FFF7FEFF 		bl	__aeabi_fmul
+ 374              	.LVL28:
+ 375 0050 FFF7FEFF 		bl	__aeabi_f2iz
+ 376              	.LVL29:
+ 377 0054 2083     		strh	r0, [r4, #24]
+ 378              	.L20:
+ 256:motorControl.c ****             }
+ 257:motorControl.c ****         }
+ 258:motorControl.c **** 
+ 259:motorControl.c ****             //Account for endian change from PSOC 5 to PSOC 3 architectures
+ 260:motorControl.c ****         //pMotor->desiredPot = pMotor->desiredPot*2;
+ 261:motorControl.c ****         //pMotor->desiredPot = 0xFF;
+ 262:motorControl.c **** 
+ 263:motorControl.c **** 
+ 264:motorControl.c ****         if(pMotor->desiredPot>=pMotor->forwardLimitCS)//if(pMotor->desiredPot>=255)
+ 379              		.loc 1 264 0
+ 380 0056 1823     		movs	r3, #24
+ 381 0058 E25E     		ldrsh	r2, [r4, r3]
+ 382 005a 6388     		ldrh	r3, [r4, #2]
+ 383 005c 9A42     		cmp	r2, r3
+ 384 005e 00DB     		blt	.L21
+ 265:motorControl.c ****         {
+ 266:motorControl.c ****             pMotor->desiredPot = pMotor->forwardLimitCS;
+ 385              		.loc 1 266 0
+ 386 0060 2383     		strh	r3, [r4, #24]
+ 387              	.L21:
+ 267:motorControl.c **** 
+ 268:motorControl.c ****         }
+ 269:motorControl.c ****         
+ 270:motorControl.c ****         if(pMotor->desiredPot>=HARDWARE_LIMIT_MAX)//if(pMotor->desiredPot>=255)
+ 388              		.loc 1 270 0
+ 389 0062 1822     		movs	r2, #24
+ 390 0064 A35E     		ldrsh	r3, [r4, r2]
+ 391 0066 FE2B     		cmp	r3, #254
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 13
+
+
+ 392 0068 01DD     		ble	.L22
+ 271:motorControl.c ****         {
+ 272:motorControl.c ****             pMotor->desiredPot = HARDWARE_LIMIT_MAX;
+ 393              		.loc 1 272 0
+ 394 006a FF23     		movs	r3, #255
+ 395 006c 2383     		strh	r3, [r4, #24]
+ 396              	.L22:
+ 273:motorControl.c ****             //pMotor->calculatePercentageOfRange = pMotor->forwardLimitCS/255;
+ 274:motorControl.c ****             //pMotor->desiredPot = pMotor->desiredPot*(pMotor->calculatePercentageOfRange);
+ 275:motorControl.c ****             //pMotor->desiredPot = 255;
+ 276:motorControl.c ****         }
+ 277:motorControl.c ****         
+ 278:motorControl.c ****         if(pMotor->desiredPot<=HARDWARE_LIMIT_MIN)
+ 397              		.loc 1 278 0
+ 398 006e 1822     		movs	r2, #24
+ 399 0070 A35E     		ldrsh	r3, [r4, r2]
+ 400 0072 002B     		cmp	r3, #0
+ 401 0074 01DC     		bgt	.L23
+ 279:motorControl.c ****         {
+ 280:motorControl.c ****             pMotor->desiredPot = HARDWARE_LIMIT_MIN;
+ 402              		.loc 1 280 0
+ 403 0076 0023     		movs	r3, #0
+ 404 0078 2383     		strh	r3, [r4, #24]
+ 405              	.L23:
+ 281:motorControl.c ****         }
+ 282:motorControl.c ****        
+ 283:motorControl.c ****         //previous_error = error or 0 if undefined
+ 284:motorControl.c ****         //error = setpoint - actual_position
+ 285:motorControl.c ****         //P = Kp * error
+ 286:motorControl.c ****         //I = I + Ki * error * dt
+ 287:motorControl.c ****         //D = Kd * (error - previous_error) / dt
+ 288:motorControl.c ****         //output = P + I + D
+ 289:motorControl.c ****         //wait(dt) 
+ 290:motorControl.c ****         //aMux_Select(0x01);
+ 291:motorControl.c ****         
+ 292:motorControl.c ****         pMotor->currentPot = ADC_SAR_Seq_GetResult16(POT_FEEDBACK);
+ 406              		.loc 1 292 0
+ 407 007a 0320     		movs	r0, #3
+ 408 007c FFF7FEFF 		bl	ADC_SAR_Seq_GetResult16
+ 409              	.LVL30:
+ 410 0080 6082     		strh	r0, [r4, #18]
+ 293:motorControl.c ****         pMotor->currentPot = pMotor->currentPot>>3;
+ 411              		.loc 1 293 0
+ 412 0082 4E4B     		ldr	r3, .L32
+ 413 0084 1C68     		ldr	r4, [r3]
+ 414 0086 1223     		movs	r3, #18
+ 415 0088 E05E     		ldrsh	r0, [r4, r3]
+ 416 008a C010     		asrs	r0, r0, #3
+ 417 008c 6082     		strh	r0, [r4, #18]
+ 294:motorControl.c ****         
+ 295:motorControl.c ****         pMotor->errorPot = pMotor->desiredPot - pMotor->currentPot;
+ 418              		.loc 1 295 0
+ 419 008e 1822     		movs	r2, #24
+ 420 0090 A35E     		ldrsh	r3, [r4, r2]
+ 421 0092 181A     		subs	r0, r3, r0
+ 422 0094 05B2     		sxth	r5, r0
+ 423 0096 6583     		strh	r5, [r4, #26]
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 14
+
+
+ 296:motorControl.c ****         pMotor->Proportional = Kp * pMotor->errorPot;
+ 424              		.loc 1 296 0
+ 425 0098 2800     		movs	r0, r5
+ 426 009a FFF7FEFF 		bl	__aeabi_i2d
+ 427              	.LVL31:
+ 428 009e 0022     		movs	r2, #0
+ 429 00a0 494B     		ldr	r3, .L32+12
+ 430 00a2 0090     		str	r0, [sp]
+ 431 00a4 0191     		str	r1, [sp, #4]
+ 432 00a6 FFF7FEFF 		bl	__aeabi_dmul
+ 433              	.LVL32:
+ 434 00aa FFF7FEFF 		bl	__aeabi_d2f
+ 435              	.LVL33:
+ 436 00ae 0390     		str	r0, [sp, #12]
+ 437 00b0 2062     		str	r0, [r4, #32]
+ 297:motorControl.c ****         pMotor->Integral =Ki * pMotor->Integral + pMotor->errorPot;
+ 438              		.loc 1 297 0
+ 439 00b2 606A     		ldr	r0, [r4, #36]
+ 440 00b4 FFF7FEFF 		bl	__aeabi_f2d
+ 441              	.LVL34:
+ 442 00b8 444A     		ldr	r2, .L32+16
+ 443 00ba 454B     		ldr	r3, .L32+20
+ 444 00bc FFF7FEFF 		bl	__aeabi_dmul
+ 445              	.LVL35:
+ 446 00c0 0200     		movs	r2, r0
+ 447 00c2 0B00     		movs	r3, r1
+ 448 00c4 0098     		ldr	r0, [sp]
+ 449 00c6 0199     		ldr	r1, [sp, #4]
+ 450 00c8 FFF7FEFF 		bl	__aeabi_dadd
+ 451              	.LVL36:
+ 452 00cc FFF7FEFF 		bl	__aeabi_d2f
+ 453              	.LVL37:
+ 454 00d0 061C     		adds	r6, r0, #0
+ 455 00d2 6062     		str	r0, [r4, #36]
+ 298:motorControl.c ****         pMotor->Derivative = Kd*pMotor->errorPot - pMotor->previousErrorPot;
+ 456              		.loc 1 298 0
+ 457 00d4 A800     		lsls	r0, r5, #2
+ 458 00d6 1C22     		movs	r2, #28
+ 459 00d8 A35E     		ldrsh	r3, [r4, r2]
+ 460 00da C01A     		subs	r0, r0, r3
+ 461 00dc FFF7FEFF 		bl	__aeabi_i2f
+ 462              	.LVL38:
+ 463 00e0 051C     		adds	r5, r0, #0
+ 464 00e2 A062     		str	r0, [r4, #40]
+ 299:motorControl.c ****         pMotor->MotorOutput = pMotor->Proportional + pMotor->Integral + pMotor->Derivative;
+ 465              		.loc 1 299 0
+ 466 00e4 311C     		adds	r1, r6, #0
+ 467 00e6 0398     		ldr	r0, [sp, #12]
+ 468 00e8 FFF7FEFF 		bl	__aeabi_fadd
+ 469              	.LVL39:
+ 470 00ec 011C     		adds	r1, r0, #0
+ 471 00ee 281C     		adds	r0, r5, #0
+ 472 00f0 FFF7FEFF 		bl	__aeabi_fadd
+ 473              	.LVL40:
+ 474 00f4 FFF7FEFF 		bl	__aeabi_f2iz
+ 475              	.LVL41:
+ 476 00f8 00B2     		sxth	r0, r0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 15
+
+
+ 477 00fa A085     		strh	r0, [r4, #44]
+ 300:motorControl.c ****         
+ 301:motorControl.c ****         
+ 302:motorControl.c ****         
+ 303:motorControl.c ****         if(pMotor->MotorOutput>=255)
+ 478              		.loc 1 303 0
+ 479 00fc FE28     		cmp	r0, #254
+ 480 00fe 02DD     		ble	.L24
+ 304:motorControl.c ****         {
+ 305:motorControl.c ****             pMotor->MotorOutput=255;
+ 481              		.loc 1 305 0
+ 482 0100 FF23     		movs	r3, #255
+ 483 0102 A385     		strh	r3, [r4, #44]
+ 484 0104 04E0     		b	.L25
+ 485              	.L24:
+ 306:motorControl.c ****         }
+ 307:motorControl.c ****         else if(pMotor->MotorOutput<=-255)
+ 486              		.loc 1 307 0
+ 487 0106 FE30     		adds	r0, r0, #254
+ 488 0108 02DA     		bge	.L25
+ 308:motorControl.c ****         {
+ 309:motorControl.c ****             pMotor->MotorOutput=-255;
+ 489              		.loc 1 309 0
+ 490 010a FF23     		movs	r3, #255
+ 491 010c 5B42     		rsbs	r3, r3, #0
+ 492 010e A385     		strh	r3, [r4, #44]
+ 493              	.L25:
+ 310:motorControl.c ****         }
+ 311:motorControl.c ****         
+ 312:motorControl.c ****         //pMotor->currentCS = getCurrentSense();
+ 313:motorControl.c ****         
+ 314:motorControl.c ****         
+ 315:motorControl.c ****         if(pMotor->MotorOutput >= DESIRED_POSITION-20 && pMotor->MotorOutput<= DESIRED_POSITION+20)
+ 494              		.loc 1 315 0
+ 495 0110 2C23     		movs	r3, #44
+ 496 0112 E15E     		ldrsh	r1, [r4, r3]
+ 497 0114 0B00     		movs	r3, r1
+ 498 0116 1433     		adds	r3, r3, #20
+ 499 0118 9BB2     		uxth	r3, r3
+ 500 011a 282B     		cmp	r3, #40
+ 501 011c 0BD8     		bhi	.L26
+ 316:motorControl.c ****         {
+ 317:motorControl.c ****             setMotorOutputs(BRAKE,0xFF);
+ 502              		.loc 1 317 0
+ 503 011e FF21     		movs	r1, #255
+ 504 0120 0020     		movs	r0, #0
+ 505 0122 FFF7FEFF 		bl	setMotorOutputs
+ 506              	.LVL42:
+ 318:motorControl.c ****             CyDelay(50);
+ 507              		.loc 1 318 0
+ 508 0126 3220     		movs	r0, #50
+ 509 0128 FFF7FEFF 		bl	CyDelay
+ 510              	.LVL43:
+ 319:motorControl.c ****             bDoneMovingCalibrate = TRUE;
+ 511              		.loc 1 319 0
+ 512 012c 0121     		movs	r1, #1
+ 513 012e 5423     		movs	r3, #84
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 16
+
+
+ 514 0130 284A     		ldr	r2, .L32+24
+ 515 0132 D154     		strb	r1, [r2, r3]
+ 516 0134 2CE0     		b	.L27
+ 517              	.L26:
+ 320:motorControl.c ****         }
+ 321:motorControl.c ****         else if(pMotor->MotorOutput>DESIRED_POSITION+20)
+ 518              		.loc 1 321 0
+ 519 0136 1429     		cmp	r1, #20
+ 520 0138 17DD     		ble	.L28
+ 322:motorControl.c ****         {
+ 323:motorControl.c ****                 bDoneMovingCalibrate = FALSE;
+ 521              		.loc 1 323 0
+ 522 013a 0020     		movs	r0, #0
+ 523 013c 5423     		movs	r3, #84
+ 524 013e 254A     		ldr	r2, .L32+24
+ 525 0140 D054     		strb	r0, [r2, r3]
+ 324:motorControl.c ****                 setMotorOutputs(FORWARD,pMotor->MotorOutput);
+ 526              		.loc 1 324 0
+ 527 0142 C9B2     		uxtb	r1, r1
+ 528 0144 0130     		adds	r0, r0, #1
+ 529 0146 FFF7FEFF 		bl	setMotorOutputs
+ 530              	.LVL44:
+ 325:motorControl.c ****                 if(manualDesiredPostion!=0)
+ 531              		.loc 1 325 0
+ 532 014a 002F     		cmp	r7, #0
+ 533 014c 04D0     		beq	.L29
+ 326:motorControl.c ****                 {
+ 327:motorControl.c ****                     setMotorOutputs(FORWARD,0xFF);
+ 534              		.loc 1 327 0
+ 535 014e FF21     		movs	r1, #255
+ 536 0150 0120     		movs	r0, #1
+ 537 0152 FFF7FEFF 		bl	setMotorOutputs
+ 538              	.LVL45:
+ 539 0156 1BE0     		b	.L27
+ 540              	.L29:
+ 328:motorControl.c ****                 }
+ 329:motorControl.c ****                 else
+ 330:motorControl.c ****                 {
+ 331:motorControl.c ****                     setMotorOutputs(FORWARD,pMotor->MotorOutput);
+ 541              		.loc 1 331 0
+ 542 0158 184B     		ldr	r3, .L32
+ 543 015a 1B68     		ldr	r3, [r3]
+ 544 015c 2C21     		movs	r1, #44
+ 545 015e 595E     		ldrsh	r1, [r3, r1]
+ 546 0160 C9B2     		uxtb	r1, r1
+ 547 0162 0120     		movs	r0, #1
+ 548 0164 FFF7FEFF 		bl	setMotorOutputs
+ 549              	.LVL46:
+ 550 0168 12E0     		b	.L27
+ 551              	.L28:
+ 332:motorControl.c ****                 }
+ 333:motorControl.c ****         }
+ 334:motorControl.c ****         else if(pMotor->MotorOutput<DESIRED_POSITION-20)
+ 552              		.loc 1 334 0
+ 553 016a 0B00     		movs	r3, r1
+ 554 016c 1433     		adds	r3, r3, #20
+ 555 016e 0FDA     		bge	.L27
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 17
+
+
+ 335:motorControl.c ****         {
+ 336:motorControl.c ****             bDoneMovingCalibrate = FALSE;
+ 556              		.loc 1 336 0
+ 557 0170 0020     		movs	r0, #0
+ 558 0172 5423     		movs	r3, #84
+ 559 0174 174A     		ldr	r2, .L32+24
+ 560 0176 D054     		strb	r0, [r2, r3]
+ 337:motorControl.c ****             if(manualDesiredPostion!=0)
+ 561              		.loc 1 337 0
+ 562 0178 002F     		cmp	r7, #0
+ 563 017a 04D0     		beq	.L30
+ 338:motorControl.c ****             {
+ 339:motorControl.c ****                 setMotorOutputs(BACKWARDS,0xFF);
+ 564              		.loc 1 339 0
+ 565 017c FF21     		movs	r1, #255
+ 566 017e 0A30     		adds	r0, r0, #10
+ 567 0180 FFF7FEFF 		bl	setMotorOutputs
+ 568              	.LVL47:
+ 569 0184 04E0     		b	.L27
+ 570              	.L30:
+ 340:motorControl.c ****             }
+ 341:motorControl.c ****             else
+ 342:motorControl.c ****             {
+ 343:motorControl.c ****                 setMotorOutputs(BACKWARDS,-1*pMotor->MotorOutput);
+ 571              		.loc 1 343 0
+ 572 0186 4942     		rsbs	r1, r1, #0
+ 573 0188 C9B2     		uxtb	r1, r1
+ 574 018a 0A20     		movs	r0, #10
+ 575 018c FFF7FEFF 		bl	setMotorOutputs
+ 576              	.LVL48:
+ 577              	.L27:
+ 344:motorControl.c ****             }
+ 345:motorControl.c ****         }
+ 346:motorControl.c ****         
+ 347:motorControl.c ****         pMotor->previousErrorPot = pMotor->errorPot;
+ 578              		.loc 1 347 0
+ 579 0190 0A4B     		ldr	r3, .L32
+ 580 0192 1B68     		ldr	r3, [r3]
+ 581 0194 1A21     		movs	r1, #26
+ 582 0196 5A5E     		ldrsh	r2, [r3, r1]
+ 583 0198 9A83     		strh	r2, [r3, #28]
+ 584 019a 0AE0     		b	.L31
+ 585              	.LVL49:
+ 586              	.L18:
+ 348:motorControl.c ****     }
+ 349:motorControl.c ****     }
+ 350:motorControl.c ****     else
+ 351:motorControl.c ****     {
+ 352:motorControl.c ****         setMotorOutputs(BRAKE,0xFF);
+ 587              		.loc 1 352 0
+ 588 019c FF21     		movs	r1, #255
+ 589 019e 0020     		movs	r0, #0
+ 590              	.LVL50:
+ 591 01a0 FFF7FEFF 		bl	setMotorOutputs
+ 592              	.LVL51:
+ 353:motorControl.c ****         CyDelay(50);
+ 593              		.loc 1 353 0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 18
+
+
+ 594 01a4 3220     		movs	r0, #50
+ 595 01a6 FFF7FEFF 		bl	CyDelay
+ 596              	.LVL52:
+ 354:motorControl.c ****         setMotorOutputs(OFF_NOTHING,0x00);
+ 597              		.loc 1 354 0
+ 598 01aa 0021     		movs	r1, #0
+ 599 01ac 0320     		movs	r0, #3
+ 600 01ae FFF7FEFF 		bl	setMotorOutputs
+ 601              	.LVL53:
+ 602              	.L31:
+ 355:motorControl.c ****     }
+ 356:motorControl.c ****     
+ 357:motorControl.c ****     return pMotor;
+ 603              		.loc 1 357 0
+ 604 01b2 024B     		ldr	r3, .L32
+ 605 01b4 1868     		ldr	r0, [r3]
+ 358:motorControl.c **** }
+ 606              		.loc 1 358 0
+ 607 01b6 05B0     		add	sp, sp, #20
+ 608              		@ sp needed
+ 609 01b8 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 610              	.L33:
+ 611 01ba C046     		.align	2
+ 612              	.L32:
+ 613 01bc 00000000 		.word	pMotor
+ 614 01c0 00000000 		.word	rxPacketLocal
+ 615 01c4 00007F43 		.word	1132396544
+ 616 01c8 0000E83F 		.word	1072168960
+ 617 01cc FCA9F1D2 		.word	-755914244
+ 618 01d0 4D62503F 		.word	1062232653
+ 619 01d4 00000000 		.word	.LANCHOR0
+ 620              		.cfi_endproc
+ 621              	.LFE38:
+ 622              		.size	motorControlLoop, .-motorControlLoop
+ 623              		.section	.text.calibrateMotor,"ax",%progbits
+ 624              		.align	2
+ 625              		.global	calibrateMotor
+ 626              		.code	16
+ 627              		.thumb_func
+ 628              		.type	calibrateMotor, %function
+ 629              	calibrateMotor:
+ 630              	.LFB35:
+ 159:motorControl.c ****     pMotor->calibrated = START_CALIBRATING;
+ 631              		.loc 1 159 0
+ 632              		.cfi_startproc
+ 633              		@ args = 0, pretend = 0, frame = 0
+ 634              		@ frame_needed = 0, uses_anonymous_args = 0
+ 635 0000 10B5     		push	{r4, lr}
+ 636              		.cfi_def_cfa_offset 8
+ 637              		.cfi_offset 4, -8
+ 638              		.cfi_offset 14, -4
+ 160:motorControl.c ****     
+ 639              		.loc 1 160 0
+ 640 0002 264B     		ldr	r3, .L43
+ 641 0004 1A68     		ldr	r2, [r3]
+ 642 0006 0021     		movs	r1, #0
+ 643 0008 3023     		movs	r3, #48
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 19
+
+
+ 644 000a D154     		strb	r1, [r2, r3]
+ 162:motorControl.c ****     {
+ 645              		.loc 1 162 0
+ 646 000c 31E0     		b	.L35
+ 647              	.L36:
+ 166:motorControl.c ****        }
+ 648              		.loc 1 166 0
+ 649 000e 0120     		movs	r0, #1
+ 650 0010 FFF7FEFF 		bl	motorControlLoop
+ 651              	.LVL54:
+ 652              	.L42:
+ 164:motorControl.c ****        {
+ 653              		.loc 1 164 0
+ 654 0014 5423     		movs	r3, #84
+ 655 0016 224A     		ldr	r2, .L43+4
+ 656 0018 D35C     		ldrb	r3, [r2, r3]
+ 657 001a 002B     		cmp	r3, #0
+ 658 001c F7D0     		beq	.L36
+ 168:motorControl.c ****        CyDelay(5000);
+ 659              		.loc 1 168 0
+ 660 001e 2148     		ldr	r0, .L43+8
+ 661 0020 FFF7FEFF 		bl	hallEffectISR_StartEx
+ 662              	.LVL55:
+ 169:motorControl.c ****        bDoneMovingCalibrate = FALSE;
+ 663              		.loc 1 169 0
+ 664 0024 2048     		ldr	r0, .L43+12
+ 665 0026 FFF7FEFF 		bl	CyDelay
+ 666              	.LVL56:
+ 170:motorControl.c ****        while(bDoneMovingCalibrate == FALSE)
+ 667              		.loc 1 170 0
+ 668 002a 0021     		movs	r1, #0
+ 669 002c 5423     		movs	r3, #84
+ 670 002e 1C4A     		ldr	r2, .L43+4
+ 671 0030 D154     		strb	r1, [r2, r3]
+ 171:motorControl.c ****        {
+ 672              		.loc 1 171 0
+ 673 0032 0FE0     		b	.L37
+ 674              	.L40:
+ 173:motorControl.c ****             {
+ 675              		.loc 1 173 0
+ 676 0034 194B     		ldr	r3, .L43
+ 677 0036 1A68     		ldr	r2, [r3]
+ 678 0038 3023     		movs	r3, #48
+ 679 003a D35C     		ldrb	r3, [r2, r3]
+ 680 003c 012B     		cmp	r3, #1
+ 681 003e 06D1     		bne	.L38
+ 175:motorControl.c ****                 CyDelay(1);
+ 682              		.loc 1 175 0
+ 683 0040 0022     		movs	r2, #0
+ 684 0042 174B     		ldr	r3, .L43+4
+ 685 0044 9A65     		str	r2, [r3, #88]
+ 176:motorControl.c ****                 break;
+ 686              		.loc 1 176 0
+ 687 0046 0120     		movs	r0, #1
+ 688 0048 FFF7FEFF 		bl	CyDelay
+ 689              	.LVL57:
+ 177:motorControl.c ****             }
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 20
+
+
+ 690              		.loc 1 177 0
+ 691 004c 07E0     		b	.L39
+ 692              	.L38:
+ 180:motorControl.c ****        };
+ 693              		.loc 1 180 0
+ 694 004e FC20     		movs	r0, #252
+ 695 0050 FFF7FEFF 		bl	motorControlLoop
+ 696              	.LVL58:
+ 697              	.L37:
+ 171:motorControl.c ****        {
+ 698              		.loc 1 171 0
+ 699 0054 5423     		movs	r3, #84
+ 700 0056 124A     		ldr	r2, .L43+4
+ 701 0058 D35C     		ldrb	r3, [r2, r3]
+ 702 005a 002B     		cmp	r3, #0
+ 703 005c EAD0     		beq	.L40
+ 704              	.L39:
+ 184:motorControl.c ****        if(timeOutCalibrate >= 6)
+ 705              		.loc 1 184 0
+ 706 005e 104A     		ldr	r2, .L43+4
+ 707 0060 936D     		ldr	r3, [r2, #88]
+ 708 0062 0133     		adds	r3, r3, #1
+ 709 0064 9365     		str	r3, [r2, #88]
+ 185:motorControl.c ****        {
+ 710              		.loc 1 185 0
+ 711 0066 052B     		cmp	r3, #5
+ 712 0068 03D9     		bls	.L35
+ 187:motorControl.c ****             break;
+ 713              		.loc 1 187 0
+ 714 006a 0022     		movs	r2, #0
+ 715 006c 0C4B     		ldr	r3, .L43+4
+ 716 006e 9A65     		str	r2, [r3, #88]
+ 188:motorControl.c ****        }
+ 717              		.loc 1 188 0
+ 718 0070 05E0     		b	.L41
+ 719              	.L35:
+ 162:motorControl.c ****     {
+ 720              		.loc 1 162 0
+ 721 0072 0A4B     		ldr	r3, .L43
+ 722 0074 1A68     		ldr	r2, [r3]
+ 723 0076 3023     		movs	r3, #48
+ 724 0078 D35C     		ldrb	r3, [r2, r3]
+ 725 007a 012B     		cmp	r3, #1
+ 726 007c CAD1     		bne	.L42
+ 727              	.L41:
+ 191:motorControl.c ****     hallEffectISR_Stop();
+ 728              		.loc 1 191 0
+ 729 007e FF21     		movs	r1, #255
+ 730 0080 0020     		movs	r0, #0
+ 731 0082 FFF7FEFF 		bl	setMotorOutputs
+ 732              	.LVL59:
+ 192:motorControl.c ****     CyDelay(10);
+ 733              		.loc 1 192 0
+ 734 0086 FFF7FEFF 		bl	hallEffectISR_Stop
+ 735              	.LVL60:
+ 193:motorControl.c ****     return pMotor->forwardLimitCS;
+ 736              		.loc 1 193 0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 21
+
+
+ 737 008a 0A20     		movs	r0, #10
+ 738 008c FFF7FEFF 		bl	CyDelay
+ 739              	.LVL61:
+ 194:motorControl.c **** }
+ 740              		.loc 1 194 0
+ 741 0090 024B     		ldr	r3, .L43
+ 742 0092 1B68     		ldr	r3, [r3]
+ 743 0094 0220     		movs	r0, #2
+ 744 0096 185E     		ldrsh	r0, [r3, r0]
+ 195:motorControl.c **** 
+ 745              		.loc 1 195 0
+ 746              		@ sp needed
+ 747 0098 10BD     		pop	{r4, pc}
+ 748              	.L44:
+ 749 009a C046     		.align	2
+ 750              	.L43:
+ 751 009c 00000000 		.word	pMotor
+ 752 00a0 00000000 		.word	.LANCHOR0
+ 753 00a4 00000000 		.word	HALL_EFFECT_EDGE_DETECT_INTERRUPT
+ 754 00a8 88130000 		.word	5000
+ 755              		.cfi_endproc
+ 756              	.LFE35:
+ 757              		.size	calibrateMotor, .-calibrateMotor
+ 758              		.section	.text.setMotorPosition,"ax",%progbits
+ 759              		.align	2
+ 760              		.global	setMotorPosition
+ 761              		.code	16
+ 762              		.thumb_func
+ 763              		.type	setMotorPosition, %function
+ 764              	setMotorPosition:
+ 765              	.LFB39:
+ 359:motorControl.c **** 
+ 360:motorControl.c **** void setMotorPosition(uint8 localMotorPosition)
+ 361:motorControl.c **** {
+ 766              		.loc 1 361 0
+ 767              		.cfi_startproc
+ 768              		@ args = 0, pretend = 0, frame = 0
+ 769              		@ frame_needed = 0, uses_anonymous_args = 0
+ 770              		@ link register save eliminated.
+ 771              	.LVL62:
+ 362:motorControl.c ****     rxPacketLocal->Payload.endMotorPosition = localMotorPosition;
+ 772              		.loc 1 362 0
+ 773 0000 014B     		ldr	r3, .L46
+ 774 0002 1B68     		ldr	r3, [r3]
+ 775 0004 5880     		strh	r0, [r3, #2]
+ 363:motorControl.c **** }
+ 776              		.loc 1 363 0
+ 777              		@ sp needed
+ 778 0006 7047     		bx	lr
+ 779              	.L47:
+ 780              		.align	2
+ 781              	.L46:
+ 782 0008 00000000 		.word	rxPacketLocal
+ 783              		.cfi_endproc
+ 784              	.LFE39:
+ 785              		.size	setMotorPosition, .-setMotorPosition
+ 786              		.section	.text.checkMotorCurrent,"ax",%progbits
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 22
+
+
+ 787              		.align	2
+ 788              		.global	checkMotorCurrent
+ 789              		.code	16
+ 790              		.thumb_func
+ 791              		.type	checkMotorCurrent, %function
+ 792              	checkMotorCurrent:
+ 793              	.LFB40:
+ 364:motorControl.c **** 
+ 365:motorControl.c **** uint16 checkMotorCurrent(void)
+ 366:motorControl.c **** {
+ 794              		.loc 1 366 0
+ 795              		.cfi_startproc
+ 796              		@ args = 0, pretend = 0, frame = 0
+ 797              		@ frame_needed = 0, uses_anonymous_args = 0
+ 798 0000 10B5     		push	{r4, lr}
+ 799              		.cfi_def_cfa_offset 8
+ 800              		.cfi_offset 4, -8
+ 801              		.cfi_offset 14, -4
+ 802              	.LVL63:
+ 367:motorControl.c ****     uint16 motorCurrentValue = 0;
+ 368:motorControl.c ****     motorCurrentValue = ADC_SAR_Seq_GetResult16(HBridge_CS);
+ 803              		.loc 1 368 0
+ 804 0002 0220     		movs	r0, #2
+ 805 0004 FFF7FEFF 		bl	ADC_SAR_Seq_GetResult16
+ 806              	.LVL64:
+ 807 0008 80B2     		uxth	r0, r0
+ 808              	.LVL65:
+ 369:motorControl.c ****     return motorCurrentValue;
+ 370:motorControl.c **** }...
+ 809              		.loc 1 370 0
+ 810              		@ sp needed
+ 811 000a 10BD     		pop	{r4, pc}
+ 812              		.cfi_endproc
+ 813              	.LFE40:
+ 814              		.size	checkMotorCurrent, .-checkMotorCurrent
+ 815              		.section	.text.OVER_CURRENT_ISR,"ax",%progbits
+ 816              		.align	2
+ 817              		.global	OVER_CURRENT_ISR
+ 818              		.code	16
+ 819              		.thumb_func
+ 820              		.type	OVER_CURRENT_ISR, %function
+ 821              	OVER_CURRENT_ISR:
+ 822              	.LFB33:
+  53:motorControl.c **** {
+ 823              		.loc 1 53 0
+ 824              		.cfi_startproc
+ 825              		@ args = 0, pretend = 0, frame = 0
+ 826              		@ frame_needed = 0, uses_anonymous_args = 0
+ 827 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 828              		.cfi_def_cfa_offset 24
+ 829              		.cfi_offset 3, -24
+ 830              		.cfi_offset 4, -20
+ 831              		.cfi_offset 5, -16
+ 832              		.cfi_offset 6, -12
+ 833              		.cfi_offset 7, -8
+ 834              		.cfi_offset 14, -4
+  54:motorControl.c ****     if(ADC_SAR_Seq_IsEndConversion(ADC_SAR_Seq_RETURN_STATUS) !=0)
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 23
+
+
+ 835              		.loc 1 54 0
+ 836 0002 0120     		movs	r0, #1
+ 837 0004 FFF7FEFF 		bl	ADC_SAR_Seq_IsEndConversion
+ 838              	.LVL66:
+ 839 0008 0028     		cmp	r0, #0
+ 840 000a 0DD0     		beq	.L50
+  56:motorControl.c ****         pMotor->motorCurrent[pMotor->motorCurrentSamplesIterator] = checkMotorCurrent();
+ 841              		.loc 1 56 0
+ 842 000c 444E     		ldr	r6, .L56
+ 843 000e 3768     		ldr	r7, [r6]
+ 844 0010 4A25     		movs	r5, #74
+ 845 0012 7C5D     		ldrb	r4, [r7, r5]
+ 846 0014 FFF7FEFF 		bl	checkMotorCurrent
+ 847              	.LVL67:
+ 848 0018 1834     		adds	r4, r4, #24
+ 849 001a 6400     		lsls	r4, r4, #1
+ 850 001c 3C19     		adds	r4, r7, r4
+ 851 001e 6080     		strh	r0, [r4, #2]
+  57:motorControl.c ****         pMotor->motorCurrentSamplesIterator++;
+ 852              		.loc 1 57 0
+ 853 0020 3268     		ldr	r2, [r6]
+ 854 0022 535D     		ldrb	r3, [r2, r5]
+ 855 0024 0133     		adds	r3, r3, #1
+ 856 0026 5355     		strb	r3, [r2, r5]
+ 857              	.L50:
+  61:motorControl.c ****     if(pMotor->motorCurrent[0]>= OVER_CURRENT_VALUE && pMotor->motorCurrent[1]>= OVER_CURRENT_VALUE
+ 858              		.loc 1 61 0
+ 859 0028 3D4B     		ldr	r3, .L56
+ 860 002a 1B68     		ldr	r3, [r3]
+ 861 002c 598E     		ldrh	r1, [r3, #50]
+ 862 002e F422     		movs	r2, #244
+ 863 0030 FF32     		adds	r2, r2, #255
+ 864 0032 9142     		cmp	r1, r2
+ 865 0034 51D9     		bls	.L51
+  61:motorControl.c ****     if(pMotor->motorCurrent[0]>= OVER_CURRENT_VALUE && pMotor->motorCurrent[1]>= OVER_CURRENT_VALUE
+ 866              		.loc 1 61 0 is_stmt 0 discriminator 1
+ 867 0036 998E     		ldrh	r1, [r3, #52]
+ 868 0038 9142     		cmp	r1, r2
+ 869 003a 4ED9     		bls	.L51
+  61:motorControl.c ****     if(pMotor->motorCurrent[0]>= OVER_CURRENT_VALUE && pMotor->motorCurrent[1]>= OVER_CURRENT_VALUE
+ 870              		.loc 1 61 0 discriminator 2
+ 871 003c D98E     		ldrh	r1, [r3, #54]
+ 872 003e 9142     		cmp	r1, r2
+ 873 0040 4BD9     		bls	.L51
+  61:motorControl.c ****     if(pMotor->motorCurrent[0]>= OVER_CURRENT_VALUE && pMotor->motorCurrent[1]>= OVER_CURRENT_VALUE
+ 874              		.loc 1 61 0 discriminator 3
+ 875 0042 198F     		ldrh	r1, [r3, #56]
+ 876 0044 9142     		cmp	r1, r2
+ 877 0046 48D9     		bls	.L51
+  61:motorControl.c ****     if(pMotor->motorCurrent[0]>= OVER_CURRENT_VALUE && pMotor->motorCurrent[1]>= OVER_CURRENT_VALUE
+ 878              		.loc 1 61 0 discriminator 4
+ 879 0048 598F     		ldrh	r1, [r3, #58]
+ 880 004a 9142     		cmp	r1, r2
+ 881 004c 45D9     		bls	.L51
+  61:motorControl.c ****     if(pMotor->motorCurrent[0]>= OVER_CURRENT_VALUE && pMotor->motorCurrent[1]>= OVER_CURRENT_VALUE
+ 882              		.loc 1 61 0 discriminator 5
+ 883 004e 998F     		ldrh	r1, [r3, #60]
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 24
+
+
+ 884 0050 9142     		cmp	r1, r2
+ 885 0052 42D9     		bls	.L51
+  61:motorControl.c ****     if(pMotor->motorCurrent[0]>= OVER_CURRENT_VALUE && pMotor->motorCurrent[1]>= OVER_CURRENT_VALUE
+ 886              		.loc 1 61 0 discriminator 6
+ 887 0054 D98F     		ldrh	r1, [r3, #62]
+ 888 0056 9142     		cmp	r1, r2
+ 889 0058 3FD9     		bls	.L51
+  61:motorControl.c ****     if(pMotor->motorCurrent[0]>= OVER_CURRENT_VALUE && pMotor->motorCurrent[1]>= OVER_CURRENT_VALUE
+ 890              		.loc 1 61 0 discriminator 7
+ 891 005a B43A     		subs	r2, r2, #180
+ 892 005c FF3A     		subs	r2, r2, #255
+ 893 005e 995A     		ldrh	r1, [r3, r2]
+ 894 0060 F422     		movs	r2, #244
+ 895 0062 FF32     		adds	r2, r2, #255
+ 896 0064 9142     		cmp	r1, r2
+ 897 0066 38D9     		bls	.L51
+  61:motorControl.c ****     if(pMotor->motorCurrent[0]>= OVER_CURRENT_VALUE && pMotor->motorCurrent[1]>= OVER_CURRENT_VALUE
+ 898              		.loc 1 61 0 discriminator 8
+ 899 0068 B23A     		subs	r2, r2, #178
+ 900 006a FF3A     		subs	r2, r2, #255
+ 901 006c 995A     		ldrh	r1, [r3, r2]
+ 902 006e F422     		movs	r2, #244
+ 903 0070 FF32     		adds	r2, r2, #255
+ 904 0072 9142     		cmp	r1, r2
+ 905 0074 31D9     		bls	.L51
+  61:motorControl.c ****     if(pMotor->motorCurrent[0]>= OVER_CURRENT_VALUE && pMotor->motorCurrent[1]>= OVER_CURRENT_VALUE
+ 906              		.loc 1 61 0 discriminator 9
+ 907 0076 B03A     		subs	r2, r2, #176
+ 908 0078 FF3A     		subs	r2, r2, #255
+ 909 007a 995A     		ldrh	r1, [r3, r2]
+ 910 007c F422     		movs	r2, #244
+ 911 007e FF32     		adds	r2, r2, #255
+ 912 0080 9142     		cmp	r1, r2
+ 913 0082 2AD9     		bls	.L51
+  61:motorControl.c ****     if(pMotor->motorCurrent[0]>= OVER_CURRENT_VALUE && pMotor->motorCurrent[1]>= OVER_CURRENT_VALUE
+ 914              		.loc 1 61 0 discriminator 10
+ 915 0084 AE3A     		subs	r2, r2, #174
+ 916 0086 FF3A     		subs	r2, r2, #255
+ 917 0088 995A     		ldrh	r1, [r3, r2]
+ 918 008a F422     		movs	r2, #244
+ 919 008c FF32     		adds	r2, r2, #255
+ 920 008e 9142     		cmp	r1, r2
+ 921 0090 23D9     		bls	.L51
+  61:motorControl.c ****     if(pMotor->motorCurrent[0]>= OVER_CURRENT_VALUE && pMotor->motorCurrent[1]>= OVER_CURRENT_VALUE
+ 922              		.loc 1 61 0 discriminator 11
+ 923 0092 AC3A     		subs	r2, r2, #172
+ 924 0094 FF3A     		subs	r2, r2, #255
+ 925 0096 9A5A     		ldrh	r2, [r3, r2]
+ 926 0098 F423     		movs	r3, #244
+ 927 009a FF33     		adds	r3, r3, #255
+ 928 009c 9A42     		cmp	r2, r3
+ 929 009e 1CD9     		bls	.L51
+  63:motorControl.c ****             setMotorOutputs(BRAKE,0xFF);
+ 930              		.loc 1 63 0 is_stmt 1
+ 931 00a0 FF21     		movs	r1, #255
+ 932 00a2 0020     		movs	r0, #0
+ 933 00a4 FFF7FEFF 		bl	setMotorOutputs
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 25
+
+
+ 934              	.LVL68:
+  64:motorControl.c ****             for(pMotor->motorCurrentSamplesIterator = 0; pMotor->motorCurrentSamplesIterator<12; pM
+ 935              		.loc 1 64 0
+ 936 00a8 1D4B     		ldr	r3, .L56
+ 937 00aa 1A68     		ldr	r2, [r3]
+ 938 00ac 0021     		movs	r1, #0
+ 939 00ae 4A23     		movs	r3, #74
+ 940 00b0 D154     		strb	r1, [r2, r3]
+ 941 00b2 08E0     		b	.L52
+ 942              	.L53:
+  66:motorControl.c ****                 pMotor->motorCurrent[pMotor->motorCurrentSamplesIterator] = 0;
+ 943              		.loc 1 66 0 discriminator 3
+ 944 00b4 1833     		adds	r3, r3, #24
+ 945 00b6 5B00     		lsls	r3, r3, #1
+ 946 00b8 D318     		adds	r3, r2, r3
+ 947 00ba 0021     		movs	r1, #0
+ 948 00bc 5980     		strh	r1, [r3, #2]
+  64:motorControl.c ****             for(pMotor->motorCurrentSamplesIterator = 0; pMotor->motorCurrentSamplesIterator<12; pM
+ 949              		.loc 1 64 0 discriminator 3
+ 950 00be 4A31     		adds	r1, r1, #74
+ 951 00c0 535C     		ldrb	r3, [r2, r1]
+ 952 00c2 0133     		adds	r3, r3, #1
+ 953 00c4 5354     		strb	r3, [r2, r1]
+ 954              	.L52:
+  64:motorControl.c ****             for(pMotor->motorCurrentSamplesIterator = 0; pMotor->motorCurrentSamplesIterator<12; pM
+ 955              		.loc 1 64 0 is_stmt 0 discriminator 1
+ 956 00c6 4A23     		movs	r3, #74
+ 957 00c8 D35C     		ldrb	r3, [r2, r3]
+ 958 00ca 0B2B     		cmp	r3, #11
+ 959 00cc F2D9     		bls	.L53
+  68:motorControl.c ****             pMotor->motorCurrentSamplesIterator = 0;
+ 960              		.loc 1 68 0 is_stmt 1
+ 961 00ce 0021     		movs	r1, #0
+ 962 00d0 4A23     		movs	r3, #74
+ 963 00d2 D154     		strb	r1, [r2, r3]
+  69:motorControl.c ****             pMotor->bOverCurrentStart = TRUE;
+ 964              		.loc 1 69 0
+ 965 00d4 0131     		adds	r1, r1, #1
+ 966 00d6 0433     		adds	r3, r3, #4
+ 967 00d8 D154     		strb	r1, [r2, r3]
+ 968              	.L51:
+  71:motorControl.c ****     if( pMotor->bOverCurrentStart == TRUE)
+ 969              		.loc 1 71 0
+ 970 00da 114B     		ldr	r3, .L56
+ 971 00dc 1B68     		ldr	r3, [r3]
+ 972 00de 4E22     		movs	r2, #78
+ 973 00e0 9A5C     		ldrb	r2, [r3, r2]
+ 974 00e2 012A     		cmp	r2, #1
+ 975 00e4 0DD1     		bne	.L54
+  73:motorControl.c ****         pMotor->overCurrentTimerOutCounter++;
+ 976              		.loc 1 73 0
+ 977 00e6 5021     		movs	r1, #80
+ 978 00e8 5A5A     		ldrh	r2, [r3, r1]
+ 979 00ea 0132     		adds	r2, r2, #1
+ 980 00ec 92B2     		uxth	r2, r2
+ 981 00ee 5A52     		strh	r2, [r3, r1]
+  74:motorControl.c ****         if(pMotor->overCurrentTimerOutCounter>=OVER_CURRENT_TIMER_THRESHOLD)
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 26
+
+
+ 982              		.loc 1 74 0
+ 983 00f0 F421     		movs	r1, #244
+ 984 00f2 FF31     		adds	r1, r1, #255
+ 985 00f4 8A42     		cmp	r2, r1
+ 986 00f6 04D9     		bls	.L54
+  76:motorControl.c ****             pMotor->overCurrentTimerOutCounter=0;
+ 987              		.loc 1 76 0
+ 988 00f8 0021     		movs	r1, #0
+ 989 00fa 5022     		movs	r2, #80
+ 990 00fc 9952     		strh	r1, [r3, r2]
+  77:motorControl.c ****             pMotor->bOverCurrentStart = FALSE;
+ 991              		.loc 1 77 0
+ 992 00fe 023A     		subs	r2, r2, #2
+ 993 0100 9954     		strb	r1, [r3, r2]
+ 994              	.L54:
+  80:motorControl.c ****     if(pMotor->motorCurrentSamplesIterator>=12)
+ 995              		.loc 1 80 0
+ 996 0102 4A22     		movs	r2, #74
+ 997 0104 9A5C     		ldrb	r2, [r3, r2]
+ 998 0106 0B2A     		cmp	r2, #11
+ 999 0108 02D9     		bls	.L55
+  82:motorControl.c ****         pMotor->motorCurrentSamplesIterator = 0;
+ 1000              		.loc 1 82 0
+ 1001 010a 0021     		movs	r1, #0
+ 1002 010c 4A22     		movs	r2, #74
+ 1003 010e 9954     		strb	r1, [r3, r2]
+ 1004              	.L55:
+  85:motorControl.c ****     timerForInputs = 1;
+ 1005              		.loc 1 85 0
+ 1006 0110 0122     		movs	r2, #1
+ 1007 0112 044B     		ldr	r3, .L56+4
+ 1008 0114 1A70     		strb	r2, [r3]
+  87:motorControl.c ****     overCurrentTimerISR_ClearPending();
+ 1009              		.loc 1 87 0
+ 1010 0116 FFF7FEFF 		bl	overCurrentTimerISR_ClearPending
+ 1011              	.LVL69:
+  88:motorControl.c ****     overCurrentTimer_ReadStatusRegister();
+ 1012              		.loc 1 88 0
+ 1013 011a FFF7FEFF 		bl	overCurrentTimer_ReadStatusRegister
+ 1014              	.LVL70:
+  90:motorControl.c **** }
+ 1015              		.loc 1 90 0
+ 1016              		@ sp needed
+ 1017 011e F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 1018              	.L57:
+ 1019              		.align	2
+ 1020              	.L56:
+ 1021 0120 00000000 		.word	pMotor
+ 1022 0124 00000000 		.word	timerForInputs
+ 1023              		.cfi_endproc
+ 1024              	.LFE33:
+ 1025              		.size	OVER_CURRENT_ISR, .-OVER_CURRENT_ISR
+ 1026              		.global	bDoneMovingCalibrate
+ 1027              		.global	motorStatus
+ 1028              		.comm	rxPacketLocal,4,4
+ 1029              		.comm	pMotor,4,4
+ 1030              		.bss
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 27
+
+
+ 1031              		.align	2
+ 1032              		.set	.LANCHOR0,. + 0
+ 1033              		.type	motorStatus, %object
+ 1034              		.size	motorStatus, 84
+ 1035              	motorStatus:
+ 1036 0000 00000000 		.space	84
+ 1036      00000000 
+ 1036      00000000 
+ 1036      00000000 
+ 1036      00000000 
+ 1037              		.type	bDoneMovingCalibrate, %object
+ 1038              		.size	bDoneMovingCalibrate, 1
+ 1039              	bDoneMovingCalibrate:
+ 1040 0054 00       		.space	1
+ 1041 0055 000000   		.space	3
+ 1042              		.type	timeOutCalibrate, %object
+ 1043              		.size	timeOutCalibrate, 4
+ 1044              	timeOutCalibrate:
+ 1045 0058 00000000 		.space	4
+ 1046              		.text
+ 1047              	.Letext0:
+ 1048              		.file 2 "Generated_Source\\PSoC4/cytypes.h"
+ 1049              		.file 3 "motorControl.h"
+ 1050              		.file 4 "BrightnessCommManager.h"
+ 1051              		.file 5 "commonVariables.h"
+ 1052              		.file 6 "Generated_Source\\PSoC4/motorControlPWM.h"
+ 1053              		.file 7 "Generated_Source\\PSoC4/CyLib.h"
+ 1054              		.file 8 "Generated_Source\\PSoC4/ADC_SAR_Seq.h"
+ 1055              		.file 9 "Generated_Source\\PSoC4/limitSwitch.h"
+ 1056              		.file 10 "Generated_Source\\PSoC4/pwmClock.h"
+ 1057              		.file 11 "Generated_Source\\PSoC4/overCurrentTimerISR.h"
+ 1058              		.file 12 "Generated_Source\\PSoC4/overCurrentTimer.h"
+ 1059              		.file 13 "Generated_Source\\PSoC4/hallEffectISR.h"
+ 1060              		.section	.debug_info,"",%progbits
+ 1061              	.Ldebug_info0:
+ 1062 0000 94080000 		.4byte	0x894
+ 1063 0004 0400     		.2byte	0x4
+ 1064 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 1065 000a 04       		.byte	0x4
+ 1066 000b 01       		.uleb128 0x1
+ 1067 000c 3A020000 		.4byte	.LASF114
+ 1068 0010 0C       		.byte	0xc
+ 1069 0011 C8020000 		.4byte	.LASF115
+ 1070 0015 49000000 		.4byte	.LASF116
+ 1071 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 1072 001d 00000000 		.4byte	0
+ 1073 0021 00000000 		.4byte	.Ldebug_line0
+ 1074 0025 02       		.uleb128 0x2
+ 1075 0026 01       		.byte	0x1
+ 1076 0027 06       		.byte	0x6
+ 1077 0028 87040000 		.4byte	.LASF0
+ 1078 002c 02       		.uleb128 0x2
+ 1079 002d 01       		.byte	0x1
+ 1080 002e 08       		.byte	0x8
+ 1081 002f 4D040000 		.4byte	.LASF1
+ 1082 0033 02       		.uleb128 0x2
+ 1083 0034 02       		.byte	0x2
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 28
+
+
+ 1084 0035 05       		.byte	0x5
+ 1085 0036 78010000 		.4byte	.LASF2
+ 1086 003a 02       		.uleb128 0x2
+ 1087 003b 02       		.byte	0x2
+ 1088 003c 07       		.byte	0x7
+ 1089 003d 2C050000 		.4byte	.LASF3
+ 1090 0041 02       		.uleb128 0x2
+ 1091 0042 04       		.byte	0x4
+ 1092 0043 05       		.byte	0x5
+ 1093 0044 7A030000 		.4byte	.LASF4
+ 1094 0048 02       		.uleb128 0x2
+ 1095 0049 04       		.byte	0x4
+ 1096 004a 07       		.byte	0x7
+ 1097 004b 87060000 		.4byte	.LASF5
+ 1098 004f 02       		.uleb128 0x2
+ 1099 0050 08       		.byte	0x8
+ 1100 0051 05       		.byte	0x5
+ 1101 0052 27030000 		.4byte	.LASF6
+ 1102 0056 02       		.uleb128 0x2
+ 1103 0057 08       		.byte	0x8
+ 1104 0058 07       		.byte	0x7
+ 1105 0059 93040000 		.4byte	.LASF7
+ 1106 005d 03       		.uleb128 0x3
+ 1107 005e 04       		.byte	0x4
+ 1108 005f 05       		.byte	0x5
+ 1109 0060 696E7400 		.ascii	"int\000"
+ 1110 0064 02       		.uleb128 0x2
+ 1111 0065 04       		.byte	0x4
+ 1112 0066 07       		.byte	0x7
+ 1113 0067 BB040000 		.4byte	.LASF8
+ 1114 006b 04       		.uleb128 0x4
+ 1115 006c FC020000 		.4byte	.LASF9
+ 1116 0070 02       		.byte	0x2
+ 1117 0071 D201     		.2byte	0x1d2
+ 1118 0073 2C000000 		.4byte	0x2c
+ 1119 0077 04       		.uleb128 0x4
+ 1120 0078 41060000 		.4byte	.LASF10
+ 1121 007c 02       		.byte	0x2
+ 1122 007d D301     		.2byte	0x1d3
+ 1123 007f 3A000000 		.4byte	0x3a
+ 1124 0083 04       		.uleb128 0x4
+ 1125 0084 6B060000 		.4byte	.LASF11
+ 1126 0088 02       		.byte	0x2
+ 1127 0089 D401     		.2byte	0x1d4
+ 1128 008b 48000000 		.4byte	0x48
+ 1129 008f 04       		.uleb128 0x4
+ 1130 0090 F6020000 		.4byte	.LASF12
+ 1131 0094 02       		.byte	0x2
+ 1132 0095 D601     		.2byte	0x1d6
+ 1133 0097 33000000 		.4byte	0x33
+ 1134 009b 02       		.uleb128 0x2
+ 1135 009c 04       		.byte	0x4
+ 1136 009d 04       		.byte	0x4
+ 1137 009e 21030000 		.4byte	.LASF13
+ 1138 00a2 02       		.uleb128 0x2
+ 1139 00a3 08       		.byte	0x8
+ 1140 00a4 04       		.byte	0x4
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 29
+
+
+ 1141 00a5 F1000000 		.4byte	.LASF14
+ 1142 00a9 02       		.uleb128 0x2
+ 1143 00aa 01       		.byte	0x1
+ 1144 00ab 08       		.byte	0x8
+ 1145 00ac 6E050000 		.4byte	.LASF15
+ 1146 00b0 05       		.uleb128 0x5
+ 1147 00b1 6B000000 		.4byte	0x6b
+ 1148 00b5 04       		.uleb128 0x4
+ 1149 00b6 CF070000 		.4byte	.LASF16
+ 1150 00ba 02       		.byte	0x2
+ 1151 00bb 7E02     		.2byte	0x27e
+ 1152 00bd C1000000 		.4byte	0xc1
+ 1153 00c1 05       		.uleb128 0x5
+ 1154 00c2 83000000 		.4byte	0x83
+ 1155 00c6 02       		.uleb128 0x2
+ 1156 00c7 08       		.byte	0x8
+ 1157 00c8 04       		.byte	0x4
+ 1158 00c9 09040000 		.4byte	.LASF17
+ 1159 00cd 02       		.uleb128 0x2
+ 1160 00ce 04       		.byte	0x4
+ 1161 00cf 07       		.byte	0x7
+ 1162 00d0 90010000 		.4byte	.LASF18
+ 1163 00d4 06       		.uleb128 0x6
+ 1164 00d5 89050000 		.4byte	.LASF50
+ 1165 00d9 01       		.byte	0x1
+ 1166 00da 2C000000 		.4byte	0x2c
+ 1167 00de 03       		.byte	0x3
+ 1168 00df 15       		.byte	0x15
+ 1169 00e0 FD000000 		.4byte	0xfd
+ 1170 00e4 07       		.uleb128 0x7
+ 1171 00e5 E2040000 		.4byte	.LASF19
+ 1172 00e9 00       		.byte	0
+ 1173 00ea 07       		.uleb128 0x7
+ 1174 00eb D8010000 		.4byte	.LASF20
+ 1175 00ef 02       		.byte	0x2
+ 1176 00f0 07       		.uleb128 0x7
+ 1177 00f1 A3010000 		.4byte	.LASF21
+ 1178 00f5 03       		.byte	0x3
+ 1179 00f6 07       		.uleb128 0x7
+ 1180 00f7 FA040000 		.4byte	.LASF22
+ 1181 00fb 01       		.byte	0x1
+ 1182 00fc 00       		.byte	0
+ 1183 00fd 08       		.uleb128 0x8
+ 1184 00fe 1F070000 		.4byte	.LASF67
+ 1185 0102 54       		.byte	0x54
+ 1186 0103 03       		.byte	0x3
+ 1187 0104 1D       		.byte	0x1d
+ 1188 0105 42020000 		.4byte	0x242
+ 1189 0109 09       		.uleb128 0x9
+ 1190 010a 0E020000 		.4byte	.LASF23
+ 1191 010e 03       		.byte	0x3
+ 1192 010f 1F       		.byte	0x1f
+ 1193 0110 77000000 		.4byte	0x77
+ 1194 0114 00       		.byte	0
+ 1195 0115 09       		.uleb128 0x9
+ 1196 0116 DF030000 		.4byte	.LASF24
+ 1197 011a 03       		.byte	0x3
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 30
+
+
+ 1198 011b 20       		.byte	0x20
+ 1199 011c 77000000 		.4byte	0x77
+ 1200 0120 02       		.byte	0x2
+ 1201 0121 09       		.uleb128 0x9
+ 1202 0122 79070000 		.4byte	.LASF25
+ 1203 0126 03       		.byte	0x3
+ 1204 0127 21       		.byte	0x21
+ 1205 0128 77000000 		.4byte	0x77
+ 1206 012c 04       		.byte	0x4
+ 1207 012d 09       		.uleb128 0x9
+ 1208 012e 00000000 		.4byte	.LASF26
+ 1209 0132 03       		.byte	0x3
+ 1210 0133 22       		.byte	0x22
+ 1211 0134 9B000000 		.4byte	0x9b
+ 1212 0138 08       		.byte	0x8
+ 1213 0139 09       		.uleb128 0x9
+ 1214 013a B6050000 		.4byte	.LASF27
+ 1215 013e 03       		.byte	0x3
+ 1216 013f 23       		.byte	0x23
+ 1217 0140 6B000000 		.4byte	0x6b
+ 1218 0144 0C       		.byte	0xc
+ 1219 0145 09       		.uleb128 0x9
+ 1220 0146 72060000 		.4byte	.LASF28
+ 1221 014a 03       		.byte	0x3
+ 1222 014b 25       		.byte	0x25
+ 1223 014c 6B000000 		.4byte	0x6b
+ 1224 0150 0D       		.byte	0xd
+ 1225 0151 09       		.uleb128 0x9
+ 1226 0152 CD060000 		.4byte	.LASF29
+ 1227 0156 03       		.byte	0x3
+ 1228 0157 27       		.byte	0x27
+ 1229 0158 8F000000 		.4byte	0x8f
+ 1230 015c 0E       		.byte	0xe
+ 1231 015d 09       		.uleb128 0x9
+ 1232 015e AA040000 		.4byte	.LASF30
+ 1233 0162 03       		.byte	0x3
+ 1234 0163 28       		.byte	0x28
+ 1235 0164 8F000000 		.4byte	0x8f
+ 1236 0168 10       		.byte	0x10
+ 1237 0169 09       		.uleb128 0x9
+ 1238 016a 63050000 		.4byte	.LASF31
+ 1239 016e 03       		.byte	0x3
+ 1240 016f 29       		.byte	0x29
+ 1241 0170 8F000000 		.4byte	0x8f
+ 1242 0174 12       		.byte	0x12
+ 1243 0175 09       		.uleb128 0x9
+ 1244 0176 F9030000 		.4byte	.LASF32
+ 1245 017a 03       		.byte	0x3
+ 1246 017b 2B       		.byte	0x2b
+ 1247 017c 9B000000 		.4byte	0x9b
+ 1248 0180 14       		.byte	0x14
+ 1249 0181 09       		.uleb128 0x9
+ 1250 0182 C3030000 		.4byte	.LASF33
+ 1251 0186 03       		.byte	0x3
+ 1252 0187 2C       		.byte	0x2c
+ 1253 0188 8F000000 		.4byte	0x8f
+ 1254 018c 18       		.byte	0x18
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 31
+
+
+ 1255 018d 09       		.uleb128 0x9
+ 1256 018e 57030000 		.4byte	.LASF34
+ 1257 0192 03       		.byte	0x3
+ 1258 0193 2D       		.byte	0x2d
+ 1259 0194 8F000000 		.4byte	0x8f
+ 1260 0198 1A       		.byte	0x1a
+ 1261 0199 09       		.uleb128 0x9
+ 1262 019a CE030000 		.4byte	.LASF35
+ 1263 019e 03       		.byte	0x3
+ 1264 019f 2E       		.byte	0x2e
+ 1265 01a0 8F000000 		.4byte	0x8f
+ 1266 01a4 1C       		.byte	0x1c
+ 1267 01a5 09       		.uleb128 0x9
+ 1268 01a6 70040000 		.4byte	.LASF36
+ 1269 01aa 03       		.byte	0x3
+ 1270 01ab 30       		.byte	0x30
+ 1271 01ac 9B000000 		.4byte	0x9b
+ 1272 01b0 20       		.byte	0x20
+ 1273 01b1 09       		.uleb128 0x9
+ 1274 01b2 B0070000 		.4byte	.LASF37
+ 1275 01b6 03       		.byte	0x3
+ 1276 01b7 31       		.byte	0x31
+ 1277 01b8 9B000000 		.4byte	0x9b
+ 1278 01bc 24       		.byte	0x24
+ 1279 01bd 09       		.uleb128 0x9
+ 1280 01be 35030000 		.4byte	.LASF38
+ 1281 01c2 03       		.byte	0x3
+ 1282 01c3 32       		.byte	0x32
+ 1283 01c4 9B000000 		.4byte	0x9b
+ 1284 01c8 28       		.byte	0x28
+ 1285 01c9 09       		.uleb128 0x9
+ 1286 01ca EA020000 		.4byte	.LASF39
+ 1287 01ce 03       		.byte	0x3
+ 1288 01cf 33       		.byte	0x33
+ 1289 01d0 8F000000 		.4byte	0x8f
+ 1290 01d4 2C       		.byte	0x2c
+ 1291 01d5 09       		.uleb128 0x9
+ 1292 01d6 1E050000 		.4byte	.LASF40
+ 1293 01da 03       		.byte	0x3
+ 1294 01db 35       		.byte	0x35
+ 1295 01dc 6B000000 		.4byte	0x6b
+ 1296 01e0 2E       		.byte	0x2e
+ 1297 01e1 09       		.uleb128 0x9
+ 1298 01e2 CE010000 		.4byte	.LASF41
+ 1299 01e6 03       		.byte	0x3
+ 1300 01e7 36       		.byte	0x36
+ 1301 01e8 6B000000 		.4byte	0x6b
+ 1302 01ec 2F       		.byte	0x2f
+ 1303 01ed 09       		.uleb128 0x9
+ 1304 01ee EE030000 		.4byte	.LASF42
+ 1305 01f2 03       		.byte	0x3
+ 1306 01f3 38       		.byte	0x38
+ 1307 01f4 6B000000 		.4byte	0x6b
+ 1308 01f8 30       		.byte	0x30
+ 1309 01f9 09       		.uleb128 0x9
+ 1310 01fa 99060000 		.4byte	.LASF43
+ 1311 01fe 03       		.byte	0x3
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 32
+
+
+ 1312 01ff 3A       		.byte	0x3a
+ 1313 0200 42020000 		.4byte	0x242
+ 1314 0204 32       		.byte	0x32
+ 1315 0205 09       		.uleb128 0x9
+ 1316 0206 18020000 		.4byte	.LASF44
+ 1317 020a 03       		.byte	0x3
+ 1318 020b 3B       		.byte	0x3b
+ 1319 020c 6B000000 		.4byte	0x6b
+ 1320 0210 4A       		.byte	0x4a
+ 1321 0211 09       		.uleb128 0x9
+ 1322 0212 38070000 		.4byte	.LASF45
+ 1323 0216 03       		.byte	0x3
+ 1324 0217 3C       		.byte	0x3c
+ 1325 0218 77000000 		.4byte	0x77
+ 1326 021c 4C       		.byte	0x4c
+ 1327 021d 09       		.uleb128 0x9
+ 1328 021e EB010000 		.4byte	.LASF46
+ 1329 0222 03       		.byte	0x3
+ 1330 0223 3D       		.byte	0x3d
+ 1331 0224 6B000000 		.4byte	0x6b
+ 1332 0228 4E       		.byte	0x4e
+ 1333 0229 09       		.uleb128 0x9
+ 1334 022a E1000000 		.4byte	.LASF47
+ 1335 022e 03       		.byte	0x3
+ 1336 022f 3E       		.byte	0x3e
+ 1337 0230 6B000000 		.4byte	0x6b
+ 1338 0234 4F       		.byte	0x4f
+ 1339 0235 09       		.uleb128 0x9
+ 1340 0236 04070000 		.4byte	.LASF48
+ 1341 023a 03       		.byte	0x3
+ 1342 023b 3F       		.byte	0x3f
+ 1343 023c 77000000 		.4byte	0x77
+ 1344 0240 50       		.byte	0x50
+ 1345 0241 00       		.byte	0
+ 1346 0242 0A       		.uleb128 0xa
+ 1347 0243 77000000 		.4byte	0x77
+ 1348 0247 52020000 		.4byte	0x252
+ 1349 024b 0B       		.uleb128 0xb
+ 1350 024c CD000000 		.4byte	0xcd
+ 1351 0250 0B       		.byte	0xb
+ 1352 0251 00       		.byte	0
+ 1353 0252 0C       		.uleb128 0xc
+ 1354 0253 19030000 		.4byte	.LASF49
+ 1355 0257 03       		.byte	0x3
+ 1356 0258 40       		.byte	0x40
+ 1357 0259 FD000000 		.4byte	0xfd
+ 1358 025d 06       		.uleb128 0x6
+ 1359 025e C8040000 		.4byte	.LASF51
+ 1360 0262 01       		.byte	0x1
+ 1361 0263 2C000000 		.4byte	0x2c
+ 1362 0267 03       		.byte	0x3
+ 1363 0268 42       		.byte	0x42
+ 1364 0269 86020000 		.4byte	0x286
+ 1365 026d 07       		.uleb128 0x7
+ 1366 026e 97030000 		.4byte	.LASF52
+ 1367 0272 01       		.byte	0x1
+ 1368 0273 07       		.uleb128 0x7
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 33
+
+
+ 1369 0274 7D040000 		.4byte	.LASF53
+ 1370 0278 0A       		.byte	0xa
+ 1371 0279 07       		.uleb128 0x7
+ 1372 027a 34020000 		.4byte	.LASF54
+ 1373 027e 00       		.byte	0
+ 1374 027f 07       		.uleb128 0x7
+ 1375 0280 49070000 		.4byte	.LASF55
+ 1376 0284 03       		.byte	0x3
+ 1377 0285 00       		.byte	0
+ 1378 0286 0C       		.uleb128 0xc
+ 1379 0287 1B000000 		.4byte	.LASF56
+ 1380 028b 03       		.byte	0x3
+ 1381 028c 48       		.byte	0x48
+ 1382 028d 5D020000 		.4byte	0x25d
+ 1383 0291 06       		.uleb128 0x6
+ 1384 0292 7E050000 		.4byte	.LASF57
+ 1385 0296 01       		.byte	0x1
+ 1386 0297 2C000000 		.4byte	0x2c
+ 1387 029b 03       		.byte	0x3
+ 1388 029c 4A       		.byte	0x4a
+ 1389 029d B4020000 		.4byte	0x2b4
+ 1390 02a1 07       		.uleb128 0x7
+ 1391 02a2 73050000 		.4byte	.LASF58
+ 1392 02a6 FF       		.byte	0xff
+ 1393 02a7 0D       		.uleb128 0xd
+ 1394 02a8 4F464600 		.ascii	"OFF\000"
+ 1395 02ac 00       		.byte	0
+ 1396 02ad 07       		.uleb128 0x7
+ 1397 02ae C0010000 		.4byte	.LASF59
+ 1398 02b2 3F       		.byte	0x3f
+ 1399 02b3 00       		.byte	0
+ 1400 02b4 0C       		.uleb128 0xc
+ 1401 02b5 43070000 		.4byte	.LASF60
+ 1402 02b9 03       		.byte	0x3
+ 1403 02ba 4F       		.byte	0x4f
+ 1404 02bb 91020000 		.4byte	0x291
+ 1405 02bf 06       		.uleb128 0x6
+ 1406 02c0 D5070000 		.4byte	.LASF61
+ 1407 02c4 01       		.byte	0x1
+ 1408 02c5 2C000000 		.4byte	0x2c
+ 1409 02c9 03       		.byte	0x3
+ 1410 02ca 51       		.byte	0x51
+ 1411 02cb EE020000 		.4byte	0x2ee
+ 1412 02cf 07       		.uleb128 0x7
+ 1413 02d0 0B050000 		.4byte	.LASF62
+ 1414 02d4 FF       		.byte	0xff
+ 1415 02d5 07       		.uleb128 0x7
+ 1416 02d6 F5050000 		.4byte	.LASF63
+ 1417 02da 05       		.byte	0x5
+ 1418 02db 07       		.uleb128 0x7
+ 1419 02dc 58060000 		.4byte	.LASF64
+ 1420 02e0 FF       		.byte	0xff
+ 1421 02e1 07       		.uleb128 0x7
+ 1422 02e2 25070000 		.4byte	.LASF65
+ 1423 02e6 00       		.byte	0
+ 1424 02e7 07       		.uleb128 0x7
+ 1425 02e8 E4050000 		.4byte	.LASF66
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 34
+
+
+ 1426 02ec 00       		.byte	0
+ 1427 02ed 00       		.byte	0
+ 1428 02ee 08       		.uleb128 0x8
+ 1429 02ef 66070000 		.4byte	.LASF68
+ 1430 02f3 0E       		.byte	0xe
+ 1431 02f4 04       		.byte	0x4
+ 1432 02f5 23       		.byte	0x23
+ 1433 02f6 37030000 		.4byte	0x337
+ 1434 02fa 09       		.uleb128 0x9
+ 1435 02fb 99010000 		.4byte	.LASF69
+ 1436 02ff 04       		.byte	0x4
+ 1437 0300 25       		.byte	0x25
+ 1438 0301 6B000000 		.4byte	0x6b
+ 1439 0305 00       		.byte	0
+ 1440 0306 09       		.uleb128 0x9
+ 1441 0307 25000000 		.4byte	.LASF70
+ 1442 030b 04       		.byte	0x4
+ 1443 030c 26       		.byte	0x26
+ 1444 030d 6B000000 		.4byte	0x6b
+ 1445 0311 01       		.byte	0x1
+ 1446 0312 09       		.uleb128 0x9
+ 1447 0313 4F010000 		.4byte	.LASF71
+ 1448 0317 04       		.byte	0x4
+ 1449 0318 27       		.byte	0x27
+ 1450 0319 77000000 		.4byte	0x77
+ 1451 031d 02       		.byte	0x2
+ 1452 031e 09       		.uleb128 0x9
+ 1453 031f 02030000 		.4byte	.LASF72
+ 1454 0323 04       		.byte	0x4
+ 1455 0324 28       		.byte	0x28
+ 1456 0325 37030000 		.4byte	0x337
+ 1457 0329 04       		.byte	0x4
+ 1458 032a 09       		.uleb128 0x9
+ 1459 032b 9F030000 		.4byte	.LASF73
+ 1460 032f 04       		.byte	0x4
+ 1461 0330 29       		.byte	0x29
+ 1462 0331 6B000000 		.4byte	0x6b
+ 1463 0335 0C       		.byte	0xc
+ 1464 0336 00       		.byte	0
+ 1465 0337 0A       		.uleb128 0xa
+ 1466 0338 6B000000 		.4byte	0x6b
+ 1467 033c 47030000 		.4byte	0x347
+ 1468 0340 0B       		.uleb128 0xb
+ 1469 0341 CD000000 		.4byte	0xcd
+ 1470 0345 07       		.byte	0x7
+ 1471 0346 00       		.byte	0
+ 1472 0347 0E       		.uleb128 0xe
+ 1473 0348 30010000 		.4byte	.LASF117
+ 1474 034c 0E       		.byte	0xe
+ 1475 034d 04       		.byte	0x4
+ 1476 034e 1F       		.byte	0x1f
+ 1477 034f 6A030000 		.4byte	0x36a
+ 1478 0353 0F       		.uleb128 0xf
+ 1479 0354 A6060000 		.4byte	.LASF74
+ 1480 0358 04       		.byte	0x4
+ 1481 0359 21       		.byte	0x21
+ 1482 035a 6A030000 		.4byte	0x36a
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 35
+
+
+ 1483 035e 0F       		.uleb128 0xf
+ 1484 035f 8F030000 		.4byte	.LASF75
+ 1485 0363 04       		.byte	0x4
+ 1486 0364 2A       		.byte	0x2a
+ 1487 0365 EE020000 		.4byte	0x2ee
+ 1488 0369 00       		.byte	0
+ 1489 036a 0A       		.uleb128 0xa
+ 1490 036b 6B000000 		.4byte	0x6b
+ 1491 036f 7A030000 		.4byte	0x37a
+ 1492 0373 0B       		.uleb128 0xb
+ 1493 0374 CD000000 		.4byte	0xcd
+ 1494 0378 0C       		.byte	0xc
+ 1495 0379 00       		.byte	0
+ 1496 037a 0C       		.uleb128 0xc
+ 1497 037b B7010000 		.4byte	.LASF76
+ 1498 037f 04       		.byte	0x4
+ 1499 0380 2B       		.byte	0x2b
+ 1500 0381 47030000 		.4byte	0x347
+ 1501 0385 10       		.uleb128 0x10
+ 1502 0386 0A010000 		.4byte	.LASF77
+ 1503 038a 01       		.byte	0x1
+ 1504 038b C5       		.byte	0xc5
+ 1505 038c 00000000 		.4byte	.LFB36
+ 1506 0390 14000000 		.4byte	.LFE36-.LFB36
+ 1507 0394 01       		.uleb128 0x1
+ 1508 0395 9C       		.byte	0x9c
+ 1509 0396 AF030000 		.4byte	0x3af
+ 1510 039a 11       		.uleb128 0x11
+ 1511 039b 60010000 		.4byte	.LASF82
+ 1512 039f 01       		.byte	0x1
+ 1513 03a0 C7       		.byte	0xc7
+ 1514 03a1 AF030000 		.4byte	0x3af
+ 1515 03a5 12       		.uleb128 0x12
+ 1516 03a6 06000000 		.4byte	.LVL0
+ 1517 03aa E7070000 		.4byte	0x7e7
+ 1518 03ae 00       		.byte	0
+ 1519 03af 13       		.uleb128 0x13
+ 1520 03b0 04       		.byte	0x4
+ 1521 03b1 B5030000 		.4byte	0x3b5
+ 1522 03b5 14       		.uleb128 0x14
+ 1523 03b6 6B000000 		.4byte	0x6b
+ 1524 03ba 10       		.uleb128 0x10
+ 1525 03bb 98070000 		.4byte	.LASF78
+ 1526 03bf 01       		.byte	0x1
+ 1527 03c0 CC       		.byte	0xcc
+ 1528 03c1 00000000 		.4byte	.LFB37
+ 1529 03c5 6C000000 		.4byte	.LFE37-.LFB37
+ 1530 03c9 01       		.uleb128 0x1
+ 1531 03ca 9C       		.byte	0x9c
+ 1532 03cb F7030000 		.4byte	0x3f7
+ 1533 03cf 15       		.uleb128 0x15
+ 1534 03d0 CE010000 		.4byte	.LASF41
+ 1535 03d4 01       		.byte	0x1
+ 1536 03d5 CC       		.byte	0xcc
+ 1537 03d6 86020000 		.4byte	0x286
+ 1538 03da 00000000 		.4byte	.LLST0
+ 1539 03de 15       		.uleb128 0x15
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 36
+
+
+ 1540 03df F4040000 		.4byte	.LASF79
+ 1541 03e3 01       		.byte	0x1
+ 1542 03e4 CC       		.byte	0xcc
+ 1543 03e5 B4020000 		.4byte	0x2b4
+ 1544 03e9 6C000000 		.4byte	.LLST1
+ 1545 03ed 12       		.uleb128 0x12
+ 1546 03ee 66000000 		.4byte	.LVL9
+ 1547 03f2 F2070000 		.4byte	0x7f2
+ 1548 03f6 00       		.byte	0
+ 1549 03f7 10       		.uleb128 0x10
+ 1550 03f8 C2050000 		.4byte	.LASF80
+ 1551 03fc 01       		.byte	0x1
+ 1552 03fd 28       		.byte	0x28
+ 1553 03fe 00000000 		.4byte	.LFB32
+ 1554 0402 3C000000 		.4byte	.LFE32-.LFB32
+ 1555 0406 01       		.uleb128 0x1
+ 1556 0407 9C       		.byte	0x9c
+ 1557 0408 55040000 		.4byte	0x455
+ 1558 040c 16       		.uleb128 0x16
+ 1559 040d 12000000 		.4byte	.LVL10
+ 1560 0411 BA030000 		.4byte	0x3ba
+ 1561 0415 25040000 		.4byte	0x425
+ 1562 0419 17       		.uleb128 0x17
+ 1563 041a 01       		.uleb128 0x1
+ 1564 041b 50       		.byte	0x50
+ 1565 041c 01       		.uleb128 0x1
+ 1566 041d 30       		.byte	0x30
+ 1567 041e 17       		.uleb128 0x17
+ 1568 041f 01       		.uleb128 0x1
+ 1569 0420 51       		.byte	0x51
+ 1570 0421 02       		.uleb128 0x2
+ 1571 0422 09       		.byte	0x9
+ 1572 0423 FF       		.byte	0xff
+ 1573 0424 00       		.byte	0
+ 1574 0425 16       		.uleb128 0x16
+ 1575 0426 18000000 		.4byte	.LVL11
+ 1576 042a FD070000 		.4byte	0x7fd
+ 1577 042e 38040000 		.4byte	0x438
+ 1578 0432 17       		.uleb128 0x17
+ 1579 0433 01       		.uleb128 0x1
+ 1580 0434 50       		.byte	0x50
+ 1581 0435 01       		.uleb128 0x1
+ 1582 0436 3A       		.byte	0x3a
+ 1583 0437 00       		.byte	0
+ 1584 0438 16       		.uleb128 0x16
+ 1585 0439 20000000 		.4byte	.LVL12
+ 1586 043d 08080000 		.4byte	0x808
+ 1587 0441 4B040000 		.4byte	0x44b
+ 1588 0445 17       		.uleb128 0x17
+ 1589 0446 01       		.uleb128 0x1
+ 1590 0447 50       		.byte	0x50
+ 1591 0448 01       		.uleb128 0x1
+ 1592 0449 33       		.byte	0x33
+ 1593 044a 00       		.byte	0
+ 1594 044b 12       		.uleb128 0x12
+ 1595 044c 34000000 		.4byte	.LVL13
+ 1596 0450 13080000 		.4byte	0x813
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 37
+
+
+ 1597 0454 00       		.byte	0
+ 1598 0455 10       		.uleb128 0x10
+ 1599 0456 48060000 		.4byte	.LASF81
+ 1600 045a 01       		.byte	0x1
+ 1601 045b 6A       		.byte	0x6a
+ 1602 045c 00000000 		.4byte	.LFB34
+ 1603 0460 58000000 		.4byte	.LFE34-.LFB34
+ 1604 0464 01       		.uleb128 0x1
+ 1605 0465 9C       		.byte	0x9c
+ 1606 0466 F9040000 		.4byte	0x4f9
+ 1607 046a 11       		.uleb128 0x11
+ 1608 046b 60030000 		.4byte	.LASF83
+ 1609 046f 01       		.byte	0x1
+ 1610 0470 6C       		.byte	0x6c
+ 1611 0471 AF030000 		.4byte	0x3af
+ 1612 0475 12       		.uleb128 0x12
+ 1613 0476 06000000 		.4byte	.LVL14
+ 1614 047a 1E080000 		.4byte	0x81e
+ 1615 047e 12       		.uleb128 0x12
+ 1616 047f 0A000000 		.4byte	.LVL15
+ 1617 0483 29080000 		.4byte	0x829
+ 1618 0487 16       		.uleb128 0x16
+ 1619 0488 10000000 		.4byte	.LVL16
+ 1620 048c 34080000 		.4byte	0x834
+ 1621 0490 9A040000 		.4byte	0x49a
+ 1622 0494 17       		.uleb128 0x17
+ 1623 0495 01       		.uleb128 0x1
+ 1624 0496 50       		.byte	0x50
+ 1625 0497 01       		.uleb128 0x1
+ 1626 0498 31       		.byte	0x31
+ 1627 0499 00       		.byte	0
+ 1628 049a 16       		.uleb128 0x16
+ 1629 049b 16000000 		.4byte	.LVL17
+ 1630 049f F2070000 		.4byte	0x7f2
+ 1631 04a3 AD040000 		.4byte	0x4ad
+ 1632 04a7 17       		.uleb128 0x17
+ 1633 04a8 01       		.uleb128 0x1
+ 1634 04a9 50       		.byte	0x50
+ 1635 04aa 01       		.uleb128 0x1
+ 1636 04ab 30       		.byte	0x30
+ 1637 04ac 00       		.byte	0
+ 1638 04ad 12       		.uleb128 0x12
+ 1639 04ae 20000000 		.4byte	.LVL18
+ 1640 04b2 3F080000 		.4byte	0x83f
+ 1641 04b6 12       		.uleb128 0x12
+ 1642 04b7 28000000 		.4byte	.LVL19
+ 1643 04bb E7070000 		.4byte	0x7e7
+ 1644 04bf 16       		.uleb128 0x16
+ 1645 04c0 3C000000 		.4byte	.LVL20
+ 1646 04c4 BA030000 		.4byte	0x3ba
+ 1647 04c8 D8040000 		.4byte	0x4d8
+ 1648 04cc 17       		.uleb128 0x17
+ 1649 04cd 01       		.uleb128 0x1
+ 1650 04ce 50       		.byte	0x50
+ 1651 04cf 01       		.uleb128 0x1
+ 1652 04d0 30       		.byte	0x30
+ 1653 04d1 17       		.uleb128 0x17
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 38
+
+
+ 1654 04d2 01       		.uleb128 0x1
+ 1655 04d3 51       		.byte	0x51
+ 1656 04d4 02       		.uleb128 0x2
+ 1657 04d5 09       		.byte	0x9
+ 1658 04d6 FF       		.byte	0xff
+ 1659 04d7 00       		.byte	0
+ 1660 04d8 16       		.uleb128 0x16
+ 1661 04d9 42000000 		.4byte	.LVL21
+ 1662 04dd 4A080000 		.4byte	0x84a
+ 1663 04e1 EF040000 		.4byte	0x4ef
+ 1664 04e5 17       		.uleb128 0x17
+ 1665 04e6 01       		.uleb128 0x1
+ 1666 04e7 50       		.byte	0x50
+ 1667 04e8 05       		.uleb128 0x5
+ 1668 04e9 03       		.byte	0x3
+ 1669 04ea 00000000 		.4byte	OVER_CURRENT_ISR
+ 1670 04ee 00       		.byte	0
+ 1671 04ef 12       		.uleb128 0x12
+ 1672 04f0 46000000 		.4byte	.LVL22
+ 1673 04f4 55080000 		.4byte	0x855
+ 1674 04f8 00       		.byte	0
+ 1675 04f9 18       		.uleb128 0x18
+ 1676 04fa FD010000 		.4byte	.LASF85
+ 1677 04fe 01       		.byte	0x1
+ 1678 04ff E6       		.byte	0xe6
+ 1679 0500 0E060000 		.4byte	0x60e
+ 1680 0504 00000000 		.4byte	.LFB38
+ 1681 0508 D8010000 		.4byte	.LFE38-.LFB38
+ 1682 050c 01       		.uleb128 0x1
+ 1683 050d 9C       		.byte	0x9c
+ 1684 050e 0E060000 		.4byte	0x60e
+ 1685 0512 15       		.uleb128 0x15
+ 1686 0513 EF060000 		.4byte	.LASF84
+ 1687 0517 01       		.byte	0x1
+ 1688 0518 E6       		.byte	0xe6
+ 1689 0519 8F000000 		.4byte	0x8f
+ 1690 051d 8D000000 		.4byte	.LLST2
+ 1691 0521 16       		.uleb128 0x16
+ 1692 0522 80000000 		.4byte	.LVL30
+ 1693 0526 08080000 		.4byte	0x808
+ 1694 052a 34050000 		.4byte	0x534
+ 1695 052e 17       		.uleb128 0x17
+ 1696 052f 01       		.uleb128 0x1
+ 1697 0530 50       		.byte	0x50
+ 1698 0531 01       		.uleb128 0x1
+ 1699 0532 33       		.byte	0x33
+ 1700 0533 00       		.byte	0
+ 1701 0534 16       		.uleb128 0x16
+ 1702 0535 26010000 		.4byte	.LVL42
+ 1703 0539 BA030000 		.4byte	0x3ba
+ 1704 053d 4D050000 		.4byte	0x54d
+ 1705 0541 17       		.uleb128 0x17
+ 1706 0542 01       		.uleb128 0x1
+ 1707 0543 50       		.byte	0x50
+ 1708 0544 01       		.uleb128 0x1
+ 1709 0545 30       		.byte	0x30
+ 1710 0546 17       		.uleb128 0x17
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 39
+
+
+ 1711 0547 01       		.uleb128 0x1
+ 1712 0548 51       		.byte	0x51
+ 1713 0549 02       		.uleb128 0x2
+ 1714 054a 09       		.byte	0x9
+ 1715 054b FF       		.byte	0xff
+ 1716 054c 00       		.byte	0
+ 1717 054d 16       		.uleb128 0x16
+ 1718 054e 2C010000 		.4byte	.LVL43
+ 1719 0552 FD070000 		.4byte	0x7fd
+ 1720 0556 61050000 		.4byte	0x561
+ 1721 055a 17       		.uleb128 0x17
+ 1722 055b 01       		.uleb128 0x1
+ 1723 055c 50       		.byte	0x50
+ 1724 055d 02       		.uleb128 0x2
+ 1725 055e 08       		.byte	0x8
+ 1726 055f 32       		.byte	0x32
+ 1727 0560 00       		.byte	0
+ 1728 0561 16       		.uleb128 0x16
+ 1729 0562 4A010000 		.4byte	.LVL44
+ 1730 0566 BA030000 		.4byte	0x3ba
+ 1731 056a 74050000 		.4byte	0x574
+ 1732 056e 17       		.uleb128 0x17
+ 1733 056f 01       		.uleb128 0x1
+ 1734 0570 50       		.byte	0x50
+ 1735 0571 01       		.uleb128 0x1
+ 1736 0572 31       		.byte	0x31
+ 1737 0573 00       		.byte	0
+ 1738 0574 16       		.uleb128 0x16
+ 1739 0575 56010000 		.4byte	.LVL45
+ 1740 0579 BA030000 		.4byte	0x3ba
+ 1741 057d 8D050000 		.4byte	0x58d
+ 1742 0581 17       		.uleb128 0x17
+ 1743 0582 01       		.uleb128 0x1
+ 1744 0583 50       		.byte	0x50
+ 1745 0584 01       		.uleb128 0x1
+ 1746 0585 31       		.byte	0x31
+ 1747 0586 17       		.uleb128 0x17
+ 1748 0587 01       		.uleb128 0x1
+ 1749 0588 51       		.byte	0x51
+ 1750 0589 02       		.uleb128 0x2
+ 1751 058a 09       		.byte	0x9
+ 1752 058b FF       		.byte	0xff
+ 1753 058c 00       		.byte	0
+ 1754 058d 16       		.uleb128 0x16
+ 1755 058e 68010000 		.4byte	.LVL46
+ 1756 0592 BA030000 		.4byte	0x3ba
+ 1757 0596 A0050000 		.4byte	0x5a0
+ 1758 059a 17       		.uleb128 0x17
+ 1759 059b 01       		.uleb128 0x1
+ 1760 059c 50       		.byte	0x50
+ 1761 059d 01       		.uleb128 0x1
+ 1762 059e 31       		.byte	0x31
+ 1763 059f 00       		.byte	0
+ 1764 05a0 16       		.uleb128 0x16
+ 1765 05a1 84010000 		.4byte	.LVL47
+ 1766 05a5 BA030000 		.4byte	0x3ba
+ 1767 05a9 B9050000 		.4byte	0x5b9
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 40
+
+
+ 1768 05ad 17       		.uleb128 0x17
+ 1769 05ae 01       		.uleb128 0x1
+ 1770 05af 50       		.byte	0x50
+ 1771 05b0 01       		.uleb128 0x1
+ 1772 05b1 3A       		.byte	0x3a
+ 1773 05b2 17       		.uleb128 0x17
+ 1774 05b3 01       		.uleb128 0x1
+ 1775 05b4 51       		.byte	0x51
+ 1776 05b5 02       		.uleb128 0x2
+ 1777 05b6 09       		.byte	0x9
+ 1778 05b7 FF       		.byte	0xff
+ 1779 05b8 00       		.byte	0
+ 1780 05b9 16       		.uleb128 0x16
+ 1781 05ba 90010000 		.4byte	.LVL48
+ 1782 05be BA030000 		.4byte	0x3ba
+ 1783 05c2 CC050000 		.4byte	0x5cc
+ 1784 05c6 17       		.uleb128 0x17
+ 1785 05c7 01       		.uleb128 0x1
+ 1786 05c8 50       		.byte	0x50
+ 1787 05c9 01       		.uleb128 0x1
+ 1788 05ca 3A       		.byte	0x3a
+ 1789 05cb 00       		.byte	0
+ 1790 05cc 16       		.uleb128 0x16
+ 1791 05cd A4010000 		.4byte	.LVL51
+ 1792 05d1 BA030000 		.4byte	0x3ba
+ 1793 05d5 E5050000 		.4byte	0x5e5
+ 1794 05d9 17       		.uleb128 0x17
+ 1795 05da 01       		.uleb128 0x1
+ 1796 05db 50       		.byte	0x50
+ 1797 05dc 01       		.uleb128 0x1
+ 1798 05dd 30       		.byte	0x30
+ 1799 05de 17       		.uleb128 0x17
+ 1800 05df 01       		.uleb128 0x1
+ 1801 05e0 51       		.byte	0x51
+ 1802 05e1 02       		.uleb128 0x2
+ 1803 05e2 09       		.byte	0x9
+ 1804 05e3 FF       		.byte	0xff
+ 1805 05e4 00       		.byte	0
+ 1806 05e5 16       		.uleb128 0x16
+ 1807 05e6 AA010000 		.4byte	.LVL52
+ 1808 05ea FD070000 		.4byte	0x7fd
+ 1809 05ee F9050000 		.4byte	0x5f9
+ 1810 05f2 17       		.uleb128 0x17
+ 1811 05f3 01       		.uleb128 0x1
+ 1812 05f4 50       		.byte	0x50
+ 1813 05f5 02       		.uleb128 0x2
+ 1814 05f6 08       		.byte	0x8
+ 1815 05f7 32       		.byte	0x32
+ 1816 05f8 00       		.byte	0
+ 1817 05f9 19       		.uleb128 0x19
+ 1818 05fa B2010000 		.4byte	.LVL53
+ 1819 05fe BA030000 		.4byte	0x3ba
+ 1820 0602 17       		.uleb128 0x17
+ 1821 0603 01       		.uleb128 0x1
+ 1822 0604 50       		.byte	0x50
+ 1823 0605 01       		.uleb128 0x1
+ 1824 0606 33       		.byte	0x33
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 41
+
+
+ 1825 0607 17       		.uleb128 0x17
+ 1826 0608 01       		.uleb128 0x1
+ 1827 0609 51       		.byte	0x51
+ 1828 060a 01       		.uleb128 0x1
+ 1829 060b 30       		.byte	0x30
+ 1830 060c 00       		.byte	0
+ 1831 060d 00       		.byte	0
+ 1832 060e 13       		.uleb128 0x13
+ 1833 060f 04       		.byte	0x4
+ 1834 0610 52020000 		.4byte	0x252
+ 1835 0614 1A       		.uleb128 0x1a
+ 1836 0615 40010000 		.4byte	.LASF86
+ 1837 0619 01       		.byte	0x1
+ 1838 061a 9E       		.byte	0x9e
+ 1839 061b 8F000000 		.4byte	0x8f
+ 1840 061f 00000000 		.4byte	.LFB35
+ 1841 0623 AC000000 		.4byte	.LFE35-.LFB35
+ 1842 0627 01       		.uleb128 0x1
+ 1843 0628 9C       		.byte	0x9c
+ 1844 0629 C5060000 		.4byte	0x6c5
+ 1845 062d 16       		.uleb128 0x16
+ 1846 062e 14000000 		.4byte	.LVL54
+ 1847 0632 F9040000 		.4byte	0x4f9
+ 1848 0636 40060000 		.4byte	0x640
+ 1849 063a 17       		.uleb128 0x17
+ 1850 063b 01       		.uleb128 0x1
+ 1851 063c 50       		.byte	0x50
+ 1852 063d 01       		.uleb128 0x1
+ 1853 063e 31       		.byte	0x31
+ 1854 063f 00       		.byte	0
+ 1855 0640 16       		.uleb128 0x16
+ 1856 0641 24000000 		.4byte	.LVL55
+ 1857 0645 60080000 		.4byte	0x860
+ 1858 0649 57060000 		.4byte	0x657
+ 1859 064d 17       		.uleb128 0x17
+ 1860 064e 01       		.uleb128 0x1
+ 1861 064f 50       		.byte	0x50
+ 1862 0650 05       		.uleb128 0x5
+ 1863 0651 03       		.byte	0x3
+ 1864 0652 00000000 		.4byte	HALL_EFFECT_EDGE_DETECT_INTERRUPT
+ 1865 0656 00       		.byte	0
+ 1866 0657 16       		.uleb128 0x16
+ 1867 0658 2A000000 		.4byte	.LVL56
+ 1868 065c FD070000 		.4byte	0x7fd
+ 1869 0660 6C060000 		.4byte	0x66c
+ 1870 0664 17       		.uleb128 0x17
+ 1871 0665 01       		.uleb128 0x1
+ 1872 0666 50       		.byte	0x50
+ 1873 0667 03       		.uleb128 0x3
+ 1874 0668 0A       		.byte	0xa
+ 1875 0669 8813     		.2byte	0x1388
+ 1876 066b 00       		.byte	0
+ 1877 066c 16       		.uleb128 0x16
+ 1878 066d 4C000000 		.4byte	.LVL57
+ 1879 0671 FD070000 		.4byte	0x7fd
+ 1880 0675 7F060000 		.4byte	0x67f
+ 1881 0679 17       		.uleb128 0x17
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 42
+
+
+ 1882 067a 01       		.uleb128 0x1
+ 1883 067b 50       		.byte	0x50
+ 1884 067c 01       		.uleb128 0x1
+ 1885 067d 31       		.byte	0x31
+ 1886 067e 00       		.byte	0
+ 1887 067f 16       		.uleb128 0x16
+ 1888 0680 54000000 		.4byte	.LVL58
+ 1889 0684 F9040000 		.4byte	0x4f9
+ 1890 0688 93060000 		.4byte	0x693
+ 1891 068c 17       		.uleb128 0x17
+ 1892 068d 01       		.uleb128 0x1
+ 1893 068e 50       		.byte	0x50
+ 1894 068f 02       		.uleb128 0x2
+ 1895 0690 08       		.byte	0x8
+ 1896 0691 FC       		.byte	0xfc
+ 1897 0692 00       		.byte	0
+ 1898 0693 16       		.uleb128 0x16
+ 1899 0694 86000000 		.4byte	.LVL59
+ 1900 0698 BA030000 		.4byte	0x3ba
+ 1901 069c AC060000 		.4byte	0x6ac
+ 1902 06a0 17       		.uleb128 0x17
+ 1903 06a1 01       		.uleb128 0x1
+ 1904 06a2 50       		.byte	0x50
+ 1905 06a3 01       		.uleb128 0x1
+ 1906 06a4 30       		.byte	0x30
+ 1907 06a5 17       		.uleb128 0x17
+ 1908 06a6 01       		.uleb128 0x1
+ 1909 06a7 51       		.byte	0x51
+ 1910 06a8 02       		.uleb128 0x2
+ 1911 06a9 09       		.byte	0x9
+ 1912 06aa FF       		.byte	0xff
+ 1913 06ab 00       		.byte	0
+ 1914 06ac 12       		.uleb128 0x12
+ 1915 06ad 8A000000 		.4byte	.LVL60
+ 1916 06b1 6B080000 		.4byte	0x86b
+ 1917 06b5 19       		.uleb128 0x19
+ 1918 06b6 90000000 		.4byte	.LVL61
+ 1919 06ba FD070000 		.4byte	0x7fd
+ 1920 06be 17       		.uleb128 0x17
+ 1921 06bf 01       		.uleb128 0x1
+ 1922 06c0 50       		.byte	0x50
+ 1923 06c1 01       		.uleb128 0x1
+ 1924 06c2 3A       		.byte	0x3a
+ 1925 06c3 00       		.byte	0
+ 1926 06c4 00       		.byte	0
+ 1927 06c5 1B       		.uleb128 0x1b
+ 1928 06c6 55070000 		.4byte	.LASF87
+ 1929 06ca 01       		.byte	0x1
+ 1930 06cb 6801     		.2byte	0x168
+ 1931 06cd 00000000 		.4byte	.LFB39
+ 1932 06d1 0C000000 		.4byte	.LFE39-.LFB39
+ 1933 06d5 01       		.uleb128 0x1
+ 1934 06d6 9C       		.byte	0x9c
+ 1935 06d7 EA060000 		.4byte	0x6ea
+ 1936 06db 1C       		.uleb128 0x1c
+ 1937 06dc D7020000 		.4byte	.LASF88
+ 1938 06e0 01       		.byte	0x1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 43
+
+
+ 1939 06e1 6801     		.2byte	0x168
+ 1940 06e3 6B000000 		.4byte	0x6b
+ 1941 06e7 01       		.uleb128 0x1
+ 1942 06e8 50       		.byte	0x50
+ 1943 06e9 00       		.byte	0
+ 1944 06ea 1D       		.uleb128 0x1d
+ 1945 06eb DD060000 		.4byte	.LASF89
+ 1946 06ef 01       		.byte	0x1
+ 1947 06f0 6D01     		.2byte	0x16d
+ 1948 06f2 77000000 		.4byte	0x77
+ 1949 06f6 00000000 		.4byte	.LFB40
+ 1950 06fa 0C000000 		.4byte	.LFE40-.LFB40
+ 1951 06fe 01       		.uleb128 0x1
+ 1952 06ff 9C       		.byte	0x9c
+ 1953 0700 24070000 		.4byte	0x724
+ 1954 0704 1E       		.uleb128 0x1e
+ 1955 0705 F8000000 		.4byte	.LASF91
+ 1956 0709 01       		.byte	0x1
+ 1957 070a 6F01     		.2byte	0x16f
+ 1958 070c 77000000 		.4byte	0x77
+ 1959 0710 C7000000 		.4byte	.LLST3
+ 1960 0714 19       		.uleb128 0x19
+ 1961 0715 08000000 		.4byte	.LVL64
+ 1962 0719 08080000 		.4byte	0x808
+ 1963 071d 17       		.uleb128 0x17
+ 1964 071e 01       		.uleb128 0x1
+ 1965 071f 50       		.byte	0x50
+ 1966 0720 01       		.uleb128 0x1
+ 1967 0721 32       		.byte	0x32
+ 1968 0722 00       		.byte	0
+ 1969 0723 00       		.byte	0
+ 1970 0724 10       		.uleb128 0x10
+ 1971 0725 B4000000 		.4byte	.LASF90
+ 1972 0729 01       		.byte	0x1
+ 1973 072a 34       		.byte	0x34
+ 1974 072b 00000000 		.4byte	.LFB33
+ 1975 072f 28010000 		.4byte	.LFE33-.LFB33
+ 1976 0733 01       		.uleb128 0x1
+ 1977 0734 9C       		.byte	0x9c
+ 1978 0735 81070000 		.4byte	0x781
+ 1979 0739 16       		.uleb128 0x16
+ 1980 073a 08000000 		.4byte	.LVL66
+ 1981 073e 76080000 		.4byte	0x876
+ 1982 0742 4C070000 		.4byte	0x74c
+ 1983 0746 17       		.uleb128 0x17
+ 1984 0747 01       		.uleb128 0x1
+ 1985 0748 50       		.byte	0x50
+ 1986 0749 01       		.uleb128 0x1
+ 1987 074a 31       		.byte	0x31
+ 1988 074b 00       		.byte	0
+ 1989 074c 12       		.uleb128 0x12
+ 1990 074d 18000000 		.4byte	.LVL67
+ 1991 0751 EA060000 		.4byte	0x6ea
+ 1992 0755 16       		.uleb128 0x16
+ 1993 0756 A8000000 		.4byte	.LVL68
+ 1994 075a BA030000 		.4byte	0x3ba
+ 1995 075e 6E070000 		.4byte	0x76e
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 44
+
+
+ 1996 0762 17       		.uleb128 0x17
+ 1997 0763 01       		.uleb128 0x1
+ 1998 0764 50       		.byte	0x50
+ 1999 0765 01       		.uleb128 0x1
+ 2000 0766 30       		.byte	0x30
+ 2001 0767 17       		.uleb128 0x17
+ 2002 0768 01       		.uleb128 0x1
+ 2003 0769 51       		.byte	0x51
+ 2004 076a 02       		.uleb128 0x2
+ 2005 076b 09       		.byte	0x9
+ 2006 076c FF       		.byte	0xff
+ 2007 076d 00       		.byte	0
+ 2008 076e 12       		.uleb128 0x12
+ 2009 076f 1A010000 		.4byte	.LVL69
+ 2010 0773 81080000 		.4byte	0x881
+ 2011 0777 12       		.uleb128 0x12
+ 2012 0778 1E010000 		.4byte	.LVL70
+ 2013 077c 8C080000 		.4byte	0x88c
+ 2014 0780 00       		.byte	0
+ 2015 0781 1F       		.uleb128 0x1f
+ 2016 0782 1F010000 		.4byte	.LASF92
+ 2017 0786 01       		.byte	0x1
+ 2018 0787 17       		.byte	0x17
+ 2019 0788 83000000 		.4byte	0x83
+ 2020 078c 05       		.uleb128 0x5
+ 2021 078d 03       		.byte	0x3
+ 2022 078e 58000000 		.4byte	timeOutCalibrate
+ 2023 0792 20       		.uleb128 0x20
+ 2024 0793 15040000 		.4byte	.LASF93
+ 2025 0797 05       		.byte	0x5
+ 2026 0798 25       		.byte	0x25
+ 2027 0799 B0000000 		.4byte	0xb0
+ 2028 079d 21       		.uleb128 0x21
+ 2029 079e E4070000 		.4byte	.LASF94
+ 2030 07a2 01       		.byte	0x1
+ 2031 07a3 14       		.byte	0x14
+ 2032 07a4 0E060000 		.4byte	0x60e
+ 2033 07a8 05       		.uleb128 0x5
+ 2034 07a9 03       		.byte	0x3
+ 2035 07aa 00000000 		.4byte	pMotor
+ 2036 07ae 21       		.uleb128 0x21
+ 2037 07af 82010000 		.4byte	.LASF95
+ 2038 07b3 01       		.byte	0x1
+ 2039 07b4 11       		.byte	0x11
+ 2040 07b5 BF070000 		.4byte	0x7bf
+ 2041 07b9 05       		.uleb128 0x5
+ 2042 07ba 03       		.byte	0x3
+ 2043 07bb 00000000 		.4byte	rxPacketLocal
+ 2044 07bf 13       		.uleb128 0x13
+ 2045 07c0 04       		.byte	0x4
+ 2046 07c1 7A030000 		.4byte	0x37a
+ 2047 07c5 21       		.uleb128 0x21
+ 2048 07c6 6D070000 		.4byte	.LASF96
+ 2049 07ca 01       		.byte	0x1
+ 2050 07cb 12       		.byte	0x12
+ 2051 07cc 52020000 		.4byte	0x252
+ 2052 07d0 05       		.uleb128 0x5
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 45
+
+
+ 2053 07d1 03       		.byte	0x3
+ 2054 07d2 00000000 		.4byte	motorStatus
+ 2055 07d6 21       		.uleb128 0x21
+ 2056 07d7 5B040000 		.4byte	.LASF97
+ 2057 07db 01       		.byte	0x1
+ 2058 07dc 16       		.byte	0x16
+ 2059 07dd 6B000000 		.4byte	0x6b
+ 2060 07e1 05       		.uleb128 0x5
+ 2061 07e2 03       		.byte	0x3
+ 2062 07e3 00000000 		.4byte	bDoneMovingCalibrate
+ 2063 07e7 22       		.uleb128 0x22
+ 2064 07e8 2C000000 		.4byte	.LASF98
+ 2065 07ec 2C000000 		.4byte	.LASF98
+ 2066 07f0 05       		.byte	0x5
+ 2067 07f1 2F       		.byte	0x2f
+ 2068 07f2 22       		.uleb128 0x22
+ 2069 07f3 08060000 		.4byte	.LASF99
+ 2070 07f7 08060000 		.4byte	.LASF99
+ 2071 07fb 06       		.byte	0x6
+ 2072 07fc C3       		.byte	0xc3
+ 2073 07fd 22       		.uleb128 0x22
+ 2074 07fe A8070000 		.4byte	.LASF100
+ 2075 0802 A8070000 		.4byte	.LASF100
+ 2076 0806 07       		.byte	0x7
+ 2077 0807 D9       		.byte	0xd9
+ 2078 0808 22       		.uleb128 0x22
+ 2079 0809 AB030000 		.4byte	.LASF101
+ 2080 080d AB030000 		.4byte	.LASF101
+ 2081 0811 08       		.byte	0x8
+ 2082 0812 A0       		.byte	0xa0
+ 2083 0813 22       		.uleb128 0x22
+ 2084 0814 9B050000 		.4byte	.LASF102
+ 2085 0818 9B050000 		.4byte	.LASF102
+ 2086 081c 09       		.byte	0x9
+ 2087 081d 39       		.byte	0x39
+ 2088 081e 22       		.uleb128 0x22
+ 2089 081f 89070000 		.4byte	.LASF103
+ 2090 0823 89070000 		.4byte	.LASF103
+ 2091 0827 0A       		.byte	0xa
+ 2092 0828 23       		.byte	0x23
+ 2093 0829 22       		.uleb128 0x22
+ 2094 082a B9070000 		.4byte	.LASF104
+ 2095 082e B9070000 		.4byte	.LASF104
+ 2096 0832 06       		.byte	0x6
+ 2097 0833 92       		.byte	0x92
+ 2098 0834 22       		.uleb128 0x22
+ 2099 0835 EB070000 		.4byte	.LASF105
+ 2100 0839 EB070000 		.4byte	.LASF105
+ 2101 083d 06       		.byte	0x6
+ 2102 083e A4       		.byte	0xa4
+ 2103 083f 22       		.uleb128 0x22
+ 2104 0840 83030000 		.4byte	.LASF106
+ 2105 0844 83030000 		.4byte	.LASF106
+ 2106 0848 04       		.byte	0x4
+ 2107 0849 39       		.byte	0x39
+ 2108 084a 22       		.uleb128 0x22
+ 2109 084b 25060000 		.4byte	.LASF107
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 46
+
+
+ 2110 084f 25060000 		.4byte	.LASF107
+ 2111 0853 0B       		.byte	0xb
+ 2112 0854 18       		.byte	0x18
+ 2113 0855 22       		.uleb128 0x22
+ 2114 0856 40030000 		.4byte	.LASF108
+ 2115 085a 40030000 		.4byte	.LASF108
+ 2116 085e 0C       		.byte	0xc
+ 2117 085f 5A       		.byte	0x5a
+ 2118 0860 22       		.uleb128 0x22
+ 2119 0861 24040000 		.4byte	.LASF109
+ 2120 0865 24040000 		.4byte	.LASF109
+ 2121 0869 0D       		.byte	0xd
+ 2122 086a 18       		.byte	0x18
+ 2123 086b 22       		.uleb128 0x22
+ 2124 086c 3A040000 		.4byte	.LASF110
+ 2125 0870 3A040000 		.4byte	.LASF110
+ 2126 0874 0D       		.byte	0xd
+ 2127 0875 19       		.byte	0x19
+ 2128 0876 22       		.uleb128 0x22
+ 2129 0877 C5000000 		.4byte	.LASF111
+ 2130 087b C5000000 		.4byte	.LASF111
+ 2131 087f 08       		.byte	0x8
+ 2132 0880 9F       		.byte	0x9f
+ 2133 0881 22       		.uleb128 0x22
+ 2134 0882 AC060000 		.4byte	.LASF112
+ 2135 0886 AC060000 		.4byte	.LASF112
+ 2136 088a 0B       		.byte	0xb
+ 2137 088b 28       		.byte	0x28
+ 2138 088c 22       		.uleb128 0x22
+ 2139 088d 3F050000 		.4byte	.LASF113
+ 2140 0891 3F050000 		.4byte	.LASF113
+ 2141 0895 0C       		.byte	0xc
+ 2142 0896 5E       		.byte	0x5e
+ 2143 0897 00       		.byte	0
+ 2144              		.section	.debug_abbrev,"",%progbits
+ 2145              	.Ldebug_abbrev0:
+ 2146 0000 01       		.uleb128 0x1
+ 2147 0001 11       		.uleb128 0x11
+ 2148 0002 01       		.byte	0x1
+ 2149 0003 25       		.uleb128 0x25
+ 2150 0004 0E       		.uleb128 0xe
+ 2151 0005 13       		.uleb128 0x13
+ 2152 0006 0B       		.uleb128 0xb
+ 2153 0007 03       		.uleb128 0x3
+ 2154 0008 0E       		.uleb128 0xe
+ 2155 0009 1B       		.uleb128 0x1b
+ 2156 000a 0E       		.uleb128 0xe
+ 2157 000b 55       		.uleb128 0x55
+ 2158 000c 17       		.uleb128 0x17
+ 2159 000d 11       		.uleb128 0x11
+ 2160 000e 01       		.uleb128 0x1
+ 2161 000f 10       		.uleb128 0x10
+ 2162 0010 17       		.uleb128 0x17
+ 2163 0011 00       		.byte	0
+ 2164 0012 00       		.byte	0
+ 2165 0013 02       		.uleb128 0x2
+ 2166 0014 24       		.uleb128 0x24
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 47
+
+
+ 2167 0015 00       		.byte	0
+ 2168 0016 0B       		.uleb128 0xb
+ 2169 0017 0B       		.uleb128 0xb
+ 2170 0018 3E       		.uleb128 0x3e
+ 2171 0019 0B       		.uleb128 0xb
+ 2172 001a 03       		.uleb128 0x3
+ 2173 001b 0E       		.uleb128 0xe
+ 2174 001c 00       		.byte	0
+ 2175 001d 00       		.byte	0
+ 2176 001e 03       		.uleb128 0x3
+ 2177 001f 24       		.uleb128 0x24
+ 2178 0020 00       		.byte	0
+ 2179 0021 0B       		.uleb128 0xb
+ 2180 0022 0B       		.uleb128 0xb
+ 2181 0023 3E       		.uleb128 0x3e
+ 2182 0024 0B       		.uleb128 0xb
+ 2183 0025 03       		.uleb128 0x3
+ 2184 0026 08       		.uleb128 0x8
+ 2185 0027 00       		.byte	0
+ 2186 0028 00       		.byte	0
+ 2187 0029 04       		.uleb128 0x4
+ 2188 002a 16       		.uleb128 0x16
+ 2189 002b 00       		.byte	0
+ 2190 002c 03       		.uleb128 0x3
+ 2191 002d 0E       		.uleb128 0xe
+ 2192 002e 3A       		.uleb128 0x3a
+ 2193 002f 0B       		.uleb128 0xb
+ 2194 0030 3B       		.uleb128 0x3b
+ 2195 0031 05       		.uleb128 0x5
+ 2196 0032 49       		.uleb128 0x49
+ 2197 0033 13       		.uleb128 0x13
+ 2198 0034 00       		.byte	0
+ 2199 0035 00       		.byte	0
+ 2200 0036 05       		.uleb128 0x5
+ 2201 0037 35       		.uleb128 0x35
+ 2202 0038 00       		.byte	0
+ 2203 0039 49       		.uleb128 0x49
+ 2204 003a 13       		.uleb128 0x13
+ 2205 003b 00       		.byte	0
+ 2206 003c 00       		.byte	0
+ 2207 003d 06       		.uleb128 0x6
+ 2208 003e 04       		.uleb128 0x4
+ 2209 003f 01       		.byte	0x1
+ 2210 0040 03       		.uleb128 0x3
+ 2211 0041 0E       		.uleb128 0xe
+ 2212 0042 0B       		.uleb128 0xb
+ 2213 0043 0B       		.uleb128 0xb
+ 2214 0044 49       		.uleb128 0x49
+ 2215 0045 13       		.uleb128 0x13
+ 2216 0046 3A       		.uleb128 0x3a
+ 2217 0047 0B       		.uleb128 0xb
+ 2218 0048 3B       		.uleb128 0x3b
+ 2219 0049 0B       		.uleb128 0xb
+ 2220 004a 01       		.uleb128 0x1
+ 2221 004b 13       		.uleb128 0x13
+ 2222 004c 00       		.byte	0
+ 2223 004d 00       		.byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 48
+
+
+ 2224 004e 07       		.uleb128 0x7
+ 2225 004f 28       		.uleb128 0x28
+ 2226 0050 00       		.byte	0
+ 2227 0051 03       		.uleb128 0x3
+ 2228 0052 0E       		.uleb128 0xe
+ 2229 0053 1C       		.uleb128 0x1c
+ 2230 0054 0B       		.uleb128 0xb
+ 2231 0055 00       		.byte	0
+ 2232 0056 00       		.byte	0
+ 2233 0057 08       		.uleb128 0x8
+ 2234 0058 13       		.uleb128 0x13
+ 2235 0059 01       		.byte	0x1
+ 2236 005a 03       		.uleb128 0x3
+ 2237 005b 0E       		.uleb128 0xe
+ 2238 005c 0B       		.uleb128 0xb
+ 2239 005d 0B       		.uleb128 0xb
+ 2240 005e 3A       		.uleb128 0x3a
+ 2241 005f 0B       		.uleb128 0xb
+ 2242 0060 3B       		.uleb128 0x3b
+ 2243 0061 0B       		.uleb128 0xb
+ 2244 0062 01       		.uleb128 0x1
+ 2245 0063 13       		.uleb128 0x13
+ 2246 0064 00       		.byte	0
+ 2247 0065 00       		.byte	0
+ 2248 0066 09       		.uleb128 0x9
+ 2249 0067 0D       		.uleb128 0xd
+ 2250 0068 00       		.byte	0
+ 2251 0069 03       		.uleb128 0x3
+ 2252 006a 0E       		.uleb128 0xe
+ 2253 006b 3A       		.uleb128 0x3a
+ 2254 006c 0B       		.uleb128 0xb
+ 2255 006d 3B       		.uleb128 0x3b
+ 2256 006e 0B       		.uleb128 0xb
+ 2257 006f 49       		.uleb128 0x49
+ 2258 0070 13       		.uleb128 0x13
+ 2259 0071 38       		.uleb128 0x38
+ 2260 0072 0B       		.uleb128 0xb
+ 2261 0073 00       		.byte	0
+ 2262 0074 00       		.byte	0
+ 2263 0075 0A       		.uleb128 0xa
+ 2264 0076 01       		.uleb128 0x1
+ 2265 0077 01       		.byte	0x1
+ 2266 0078 49       		.uleb128 0x49
+ 2267 0079 13       		.uleb128 0x13
+ 2268 007a 01       		.uleb128 0x1
+ 2269 007b 13       		.uleb128 0x13
+ 2270 007c 00       		.byte	0
+ 2271 007d 00       		.byte	0
+ 2272 007e 0B       		.uleb128 0xb
+ 2273 007f 21       		.uleb128 0x21
+ 2274 0080 00       		.byte	0
+ 2275 0081 49       		.uleb128 0x49
+ 2276 0082 13       		.uleb128 0x13
+ 2277 0083 2F       		.uleb128 0x2f
+ 2278 0084 0B       		.uleb128 0xb
+ 2279 0085 00       		.byte	0
+ 2280 0086 00       		.byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 49
+
+
+ 2281 0087 0C       		.uleb128 0xc
+ 2282 0088 16       		.uleb128 0x16
+ 2283 0089 00       		.byte	0
+ 2284 008a 03       		.uleb128 0x3
+ 2285 008b 0E       		.uleb128 0xe
+ 2286 008c 3A       		.uleb128 0x3a
+ 2287 008d 0B       		.uleb128 0xb
+ 2288 008e 3B       		.uleb128 0x3b
+ 2289 008f 0B       		.uleb128 0xb
+ 2290 0090 49       		.uleb128 0x49
+ 2291 0091 13       		.uleb128 0x13
+ 2292 0092 00       		.byte	0
+ 2293 0093 00       		.byte	0
+ 2294 0094 0D       		.uleb128 0xd
+ 2295 0095 28       		.uleb128 0x28
+ 2296 0096 00       		.byte	0
+ 2297 0097 03       		.uleb128 0x3
+ 2298 0098 08       		.uleb128 0x8
+ 2299 0099 1C       		.uleb128 0x1c
+ 2300 009a 0B       		.uleb128 0xb
+ 2301 009b 00       		.byte	0
+ 2302 009c 00       		.byte	0
+ 2303 009d 0E       		.uleb128 0xe
+ 2304 009e 17       		.uleb128 0x17
+ 2305 009f 01       		.byte	0x1
+ 2306 00a0 03       		.uleb128 0x3
+ 2307 00a1 0E       		.uleb128 0xe
+ 2308 00a2 0B       		.uleb128 0xb
+ 2309 00a3 0B       		.uleb128 0xb
+ 2310 00a4 3A       		.uleb128 0x3a
+ 2311 00a5 0B       		.uleb128 0xb
+ 2312 00a6 3B       		.uleb128 0x3b
+ 2313 00a7 0B       		.uleb128 0xb
+ 2314 00a8 01       		.uleb128 0x1
+ 2315 00a9 13       		.uleb128 0x13
+ 2316 00aa 00       		.byte	0
+ 2317 00ab 00       		.byte	0
+ 2318 00ac 0F       		.uleb128 0xf
+ 2319 00ad 0D       		.uleb128 0xd
+ 2320 00ae 00       		.byte	0
+ 2321 00af 03       		.uleb128 0x3
+ 2322 00b0 0E       		.uleb128 0xe
+ 2323 00b1 3A       		.uleb128 0x3a
+ 2324 00b2 0B       		.uleb128 0xb
+ 2325 00b3 3B       		.uleb128 0x3b
+ 2326 00b4 0B       		.uleb128 0xb
+ 2327 00b5 49       		.uleb128 0x49
+ 2328 00b6 13       		.uleb128 0x13
+ 2329 00b7 00       		.byte	0
+ 2330 00b8 00       		.byte	0
+ 2331 00b9 10       		.uleb128 0x10
+ 2332 00ba 2E       		.uleb128 0x2e
+ 2333 00bb 01       		.byte	0x1
+ 2334 00bc 3F       		.uleb128 0x3f
+ 2335 00bd 19       		.uleb128 0x19
+ 2336 00be 03       		.uleb128 0x3
+ 2337 00bf 0E       		.uleb128 0xe
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 50
+
+
+ 2338 00c0 3A       		.uleb128 0x3a
+ 2339 00c1 0B       		.uleb128 0xb
+ 2340 00c2 3B       		.uleb128 0x3b
+ 2341 00c3 0B       		.uleb128 0xb
+ 2342 00c4 27       		.uleb128 0x27
+ 2343 00c5 19       		.uleb128 0x19
+ 2344 00c6 11       		.uleb128 0x11
+ 2345 00c7 01       		.uleb128 0x1
+ 2346 00c8 12       		.uleb128 0x12
+ 2347 00c9 06       		.uleb128 0x6
+ 2348 00ca 40       		.uleb128 0x40
+ 2349 00cb 18       		.uleb128 0x18
+ 2350 00cc 9742     		.uleb128 0x2117
+ 2351 00ce 19       		.uleb128 0x19
+ 2352 00cf 01       		.uleb128 0x1
+ 2353 00d0 13       		.uleb128 0x13
+ 2354 00d1 00       		.byte	0
+ 2355 00d2 00       		.byte	0
+ 2356 00d3 11       		.uleb128 0x11
+ 2357 00d4 34       		.uleb128 0x34
+ 2358 00d5 00       		.byte	0
+ 2359 00d6 03       		.uleb128 0x3
+ 2360 00d7 0E       		.uleb128 0xe
+ 2361 00d8 3A       		.uleb128 0x3a
+ 2362 00d9 0B       		.uleb128 0xb
+ 2363 00da 3B       		.uleb128 0x3b
+ 2364 00db 0B       		.uleb128 0xb
+ 2365 00dc 49       		.uleb128 0x49
+ 2366 00dd 13       		.uleb128 0x13
+ 2367 00de 00       		.byte	0
+ 2368 00df 00       		.byte	0
+ 2369 00e0 12       		.uleb128 0x12
+ 2370 00e1 898201   		.uleb128 0x4109
+ 2371 00e4 00       		.byte	0
+ 2372 00e5 11       		.uleb128 0x11
+ 2373 00e6 01       		.uleb128 0x1
+ 2374 00e7 31       		.uleb128 0x31
+ 2375 00e8 13       		.uleb128 0x13
+ 2376 00e9 00       		.byte	0
+ 2377 00ea 00       		.byte	0
+ 2378 00eb 13       		.uleb128 0x13
+ 2379 00ec 0F       		.uleb128 0xf
+ 2380 00ed 00       		.byte	0
+ 2381 00ee 0B       		.uleb128 0xb
+ 2382 00ef 0B       		.uleb128 0xb
+ 2383 00f0 49       		.uleb128 0x49
+ 2384 00f1 13       		.uleb128 0x13
+ 2385 00f2 00       		.byte	0
+ 2386 00f3 00       		.byte	0
+ 2387 00f4 14       		.uleb128 0x14
+ 2388 00f5 26       		.uleb128 0x26
+ 2389 00f6 00       		.byte	0
+ 2390 00f7 49       		.uleb128 0x49
+ 2391 00f8 13       		.uleb128 0x13
+ 2392 00f9 00       		.byte	0
+ 2393 00fa 00       		.byte	0
+ 2394 00fb 15       		.uleb128 0x15
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 51
+
+
+ 2395 00fc 05       		.uleb128 0x5
+ 2396 00fd 00       		.byte	0
+ 2397 00fe 03       		.uleb128 0x3
+ 2398 00ff 0E       		.uleb128 0xe
+ 2399 0100 3A       		.uleb128 0x3a
+ 2400 0101 0B       		.uleb128 0xb
+ 2401 0102 3B       		.uleb128 0x3b
+ 2402 0103 0B       		.uleb128 0xb
+ 2403 0104 49       		.uleb128 0x49
+ 2404 0105 13       		.uleb128 0x13
+ 2405 0106 02       		.uleb128 0x2
+ 2406 0107 17       		.uleb128 0x17
+ 2407 0108 00       		.byte	0
+ 2408 0109 00       		.byte	0
+ 2409 010a 16       		.uleb128 0x16
+ 2410 010b 898201   		.uleb128 0x4109
+ 2411 010e 01       		.byte	0x1
+ 2412 010f 11       		.uleb128 0x11
+ 2413 0110 01       		.uleb128 0x1
+ 2414 0111 31       		.uleb128 0x31
+ 2415 0112 13       		.uleb128 0x13
+ 2416 0113 01       		.uleb128 0x1
+ 2417 0114 13       		.uleb128 0x13
+ 2418 0115 00       		.byte	0
+ 2419 0116 00       		.byte	0
+ 2420 0117 17       		.uleb128 0x17
+ 2421 0118 8A8201   		.uleb128 0x410a
+ 2422 011b 00       		.byte	0
+ 2423 011c 02       		.uleb128 0x2
+ 2424 011d 18       		.uleb128 0x18
+ 2425 011e 9142     		.uleb128 0x2111
+ 2426 0120 18       		.uleb128 0x18
+ 2427 0121 00       		.byte	0
+ 2428 0122 00       		.byte	0
+ 2429 0123 18       		.uleb128 0x18
+ 2430 0124 2E       		.uleb128 0x2e
+ 2431 0125 01       		.byte	0x1
+ 2432 0126 3F       		.uleb128 0x3f
+ 2433 0127 19       		.uleb128 0x19
+ 2434 0128 03       		.uleb128 0x3
+ 2435 0129 0E       		.uleb128 0xe
+ 2436 012a 3A       		.uleb128 0x3a
+ 2437 012b 0B       		.uleb128 0xb
+ 2438 012c 3B       		.uleb128 0x3b
+ 2439 012d 0B       		.uleb128 0xb
+ 2440 012e 27       		.uleb128 0x27
+ 2441 012f 19       		.uleb128 0x19
+ 2442 0130 49       		.uleb128 0x49
+ 2443 0131 13       		.uleb128 0x13
+ 2444 0132 11       		.uleb128 0x11
+ 2445 0133 01       		.uleb128 0x1
+ 2446 0134 12       		.uleb128 0x12
+ 2447 0135 06       		.uleb128 0x6
+ 2448 0136 40       		.uleb128 0x40
+ 2449 0137 18       		.uleb128 0x18
+ 2450 0138 9642     		.uleb128 0x2116
+ 2451 013a 19       		.uleb128 0x19
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 52
+
+
+ 2452 013b 01       		.uleb128 0x1
+ 2453 013c 13       		.uleb128 0x13
+ 2454 013d 00       		.byte	0
+ 2455 013e 00       		.byte	0
+ 2456 013f 19       		.uleb128 0x19
+ 2457 0140 898201   		.uleb128 0x4109
+ 2458 0143 01       		.byte	0x1
+ 2459 0144 11       		.uleb128 0x11
+ 2460 0145 01       		.uleb128 0x1
+ 2461 0146 31       		.uleb128 0x31
+ 2462 0147 13       		.uleb128 0x13
+ 2463 0148 00       		.byte	0
+ 2464 0149 00       		.byte	0
+ 2465 014a 1A       		.uleb128 0x1a
+ 2466 014b 2E       		.uleb128 0x2e
+ 2467 014c 01       		.byte	0x1
+ 2468 014d 3F       		.uleb128 0x3f
+ 2469 014e 19       		.uleb128 0x19
+ 2470 014f 03       		.uleb128 0x3
+ 2471 0150 0E       		.uleb128 0xe
+ 2472 0151 3A       		.uleb128 0x3a
+ 2473 0152 0B       		.uleb128 0xb
+ 2474 0153 3B       		.uleb128 0x3b
+ 2475 0154 0B       		.uleb128 0xb
+ 2476 0155 27       		.uleb128 0x27
+ 2477 0156 19       		.uleb128 0x19
+ 2478 0157 49       		.uleb128 0x49
+ 2479 0158 13       		.uleb128 0x13
+ 2480 0159 11       		.uleb128 0x11
+ 2481 015a 01       		.uleb128 0x1
+ 2482 015b 12       		.uleb128 0x12
+ 2483 015c 06       		.uleb128 0x6
+ 2484 015d 40       		.uleb128 0x40
+ 2485 015e 18       		.uleb128 0x18
+ 2486 015f 9742     		.uleb128 0x2117
+ 2487 0161 19       		.uleb128 0x19
+ 2488 0162 01       		.uleb128 0x1
+ 2489 0163 13       		.uleb128 0x13
+ 2490 0164 00       		.byte	0
+ 2491 0165 00       		.byte	0
+ 2492 0166 1B       		.uleb128 0x1b
+ 2493 0167 2E       		.uleb128 0x2e
+ 2494 0168 01       		.byte	0x1
+ 2495 0169 3F       		.uleb128 0x3f
+ 2496 016a 19       		.uleb128 0x19
+ 2497 016b 03       		.uleb128 0x3
+ 2498 016c 0E       		.uleb128 0xe
+ 2499 016d 3A       		.uleb128 0x3a
+ 2500 016e 0B       		.uleb128 0xb
+ 2501 016f 3B       		.uleb128 0x3b
+ 2502 0170 05       		.uleb128 0x5
+ 2503 0171 27       		.uleb128 0x27
+ 2504 0172 19       		.uleb128 0x19
+ 2505 0173 11       		.uleb128 0x11
+ 2506 0174 01       		.uleb128 0x1
+ 2507 0175 12       		.uleb128 0x12
+ 2508 0176 06       		.uleb128 0x6
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 53
+
+
+ 2509 0177 40       		.uleb128 0x40
+ 2510 0178 18       		.uleb128 0x18
+ 2511 0179 9742     		.uleb128 0x2117
+ 2512 017b 19       		.uleb128 0x19
+ 2513 017c 01       		.uleb128 0x1
+ 2514 017d 13       		.uleb128 0x13
+ 2515 017e 00       		.byte	0
+ 2516 017f 00       		.byte	0
+ 2517 0180 1C       		.uleb128 0x1c
+ 2518 0181 05       		.uleb128 0x5
+ 2519 0182 00       		.byte	0
+ 2520 0183 03       		.uleb128 0x3
+ 2521 0184 0E       		.uleb128 0xe
+ 2522 0185 3A       		.uleb128 0x3a
+ 2523 0186 0B       		.uleb128 0xb
+ 2524 0187 3B       		.uleb128 0x3b
+ 2525 0188 05       		.uleb128 0x5
+ 2526 0189 49       		.uleb128 0x49
+ 2527 018a 13       		.uleb128 0x13
+ 2528 018b 02       		.uleb128 0x2
+ 2529 018c 18       		.uleb128 0x18
+ 2530 018d 00       		.byte	0
+ 2531 018e 00       		.byte	0
+ 2532 018f 1D       		.uleb128 0x1d
+ 2533 0190 2E       		.uleb128 0x2e
+ 2534 0191 01       		.byte	0x1
+ 2535 0192 3F       		.uleb128 0x3f
+ 2536 0193 19       		.uleb128 0x19
+ 2537 0194 03       		.uleb128 0x3
+ 2538 0195 0E       		.uleb128 0xe
+ 2539 0196 3A       		.uleb128 0x3a
+ 2540 0197 0B       		.uleb128 0xb
+ 2541 0198 3B       		.uleb128 0x3b
+ 2542 0199 05       		.uleb128 0x5
+ 2543 019a 27       		.uleb128 0x27
+ 2544 019b 19       		.uleb128 0x19
+ 2545 019c 49       		.uleb128 0x49
+ 2546 019d 13       		.uleb128 0x13
+ 2547 019e 11       		.uleb128 0x11
+ 2548 019f 01       		.uleb128 0x1
+ 2549 01a0 12       		.uleb128 0x12
+ 2550 01a1 06       		.uleb128 0x6
+ 2551 01a2 40       		.uleb128 0x40
+ 2552 01a3 18       		.uleb128 0x18
+ 2553 01a4 9742     		.uleb128 0x2117
+ 2554 01a6 19       		.uleb128 0x19
+ 2555 01a7 01       		.uleb128 0x1
+ 2556 01a8 13       		.uleb128 0x13
+ 2557 01a9 00       		.byte	0
+ 2558 01aa 00       		.byte	0
+ 2559 01ab 1E       		.uleb128 0x1e
+ 2560 01ac 34       		.uleb128 0x34
+ 2561 01ad 00       		.byte	0
+ 2562 01ae 03       		.uleb128 0x3
+ 2563 01af 0E       		.uleb128 0xe
+ 2564 01b0 3A       		.uleb128 0x3a
+ 2565 01b1 0B       		.uleb128 0xb
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 54
+
+
+ 2566 01b2 3B       		.uleb128 0x3b
+ 2567 01b3 05       		.uleb128 0x5
+ 2568 01b4 49       		.uleb128 0x49
+ 2569 01b5 13       		.uleb128 0x13
+ 2570 01b6 02       		.uleb128 0x2
+ 2571 01b7 17       		.uleb128 0x17
+ 2572 01b8 00       		.byte	0
+ 2573 01b9 00       		.byte	0
+ 2574 01ba 1F       		.uleb128 0x1f
+ 2575 01bb 34       		.uleb128 0x34
+ 2576 01bc 00       		.byte	0
+ 2577 01bd 03       		.uleb128 0x3
+ 2578 01be 0E       		.uleb128 0xe
+ 2579 01bf 3A       		.uleb128 0x3a
+ 2580 01c0 0B       		.uleb128 0xb
+ 2581 01c1 3B       		.uleb128 0x3b
+ 2582 01c2 0B       		.uleb128 0xb
+ 2583 01c3 49       		.uleb128 0x49
+ 2584 01c4 13       		.uleb128 0x13
+ 2585 01c5 02       		.uleb128 0x2
+ 2586 01c6 18       		.uleb128 0x18
+ 2587 01c7 00       		.byte	0
+ 2588 01c8 00       		.byte	0
+ 2589 01c9 20       		.uleb128 0x20
+ 2590 01ca 34       		.uleb128 0x34
+ 2591 01cb 00       		.byte	0
+ 2592 01cc 03       		.uleb128 0x3
+ 2593 01cd 0E       		.uleb128 0xe
+ 2594 01ce 3A       		.uleb128 0x3a
+ 2595 01cf 0B       		.uleb128 0xb
+ 2596 01d0 3B       		.uleb128 0x3b
+ 2597 01d1 0B       		.uleb128 0xb
+ 2598 01d2 49       		.uleb128 0x49
+ 2599 01d3 13       		.uleb128 0x13
+ 2600 01d4 3F       		.uleb128 0x3f
+ 2601 01d5 19       		.uleb128 0x19
+ 2602 01d6 3C       		.uleb128 0x3c
+ 2603 01d7 19       		.uleb128 0x19
+ 2604 01d8 00       		.byte	0
+ 2605 01d9 00       		.byte	0
+ 2606 01da 21       		.uleb128 0x21
+ 2607 01db 34       		.uleb128 0x34
+ 2608 01dc 00       		.byte	0
+ 2609 01dd 03       		.uleb128 0x3
+ 2610 01de 0E       		.uleb128 0xe
+ 2611 01df 3A       		.uleb128 0x3a
+ 2612 01e0 0B       		.uleb128 0xb
+ 2613 01e1 3B       		.uleb128 0x3b
+ 2614 01e2 0B       		.uleb128 0xb
+ 2615 01e3 49       		.uleb128 0x49
+ 2616 01e4 13       		.uleb128 0x13
+ 2617 01e5 3F       		.uleb128 0x3f
+ 2618 01e6 19       		.uleb128 0x19
+ 2619 01e7 02       		.uleb128 0x2
+ 2620 01e8 18       		.uleb128 0x18
+ 2621 01e9 00       		.byte	0
+ 2622 01ea 00       		.byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 55
+
+
+ 2623 01eb 22       		.uleb128 0x22
+ 2624 01ec 2E       		.uleb128 0x2e
+ 2625 01ed 00       		.byte	0
+ 2626 01ee 3F       		.uleb128 0x3f
+ 2627 01ef 19       		.uleb128 0x19
+ 2628 01f0 3C       		.uleb128 0x3c
+ 2629 01f1 19       		.uleb128 0x19
+ 2630 01f2 6E       		.uleb128 0x6e
+ 2631 01f3 0E       		.uleb128 0xe
+ 2632 01f4 03       		.uleb128 0x3
+ 2633 01f5 0E       		.uleb128 0xe
+ 2634 01f6 3A       		.uleb128 0x3a
+ 2635 01f7 0B       		.uleb128 0xb
+ 2636 01f8 3B       		.uleb128 0x3b
+ 2637 01f9 0B       		.uleb128 0xb
+ 2638 01fa 00       		.byte	0
+ 2639 01fb 00       		.byte	0
+ 2640 01fc 00       		.byte	0
+ 2641              		.section	.debug_loc,"",%progbits
+ 2642              	.Ldebug_loc0:
+ 2643              	.LLST0:
+ 2644 0000 00000000 		.4byte	.LVL1
+ 2645 0004 0C000000 		.4byte	.LVL2
+ 2646 0008 0100     		.2byte	0x1
+ 2647 000a 50       		.byte	0x50
+ 2648 000b 0C000000 		.4byte	.LVL2
+ 2649 000f 1A000000 		.4byte	.LVL3
+ 2650 0013 0400     		.2byte	0x4
+ 2651 0015 F3       		.byte	0xf3
+ 2652 0016 01       		.uleb128 0x1
+ 2653 0017 50       		.byte	0x50
+ 2654 0018 9F       		.byte	0x9f
+ 2655 0019 1A000000 		.4byte	.LVL3
+ 2656 001d 22000000 		.4byte	.LVL4
+ 2657 0021 0100     		.2byte	0x1
+ 2658 0023 50       		.byte	0x50
+ 2659 0024 22000000 		.4byte	.LVL4
+ 2660 0028 32000000 		.4byte	.LVL5
+ 2661 002c 0400     		.2byte	0x4
+ 2662 002e F3       		.byte	0xf3
+ 2663 002f 01       		.uleb128 0x1
+ 2664 0030 50       		.byte	0x50
+ 2665 0031 9F       		.byte	0x9f
+ 2666 0032 32000000 		.4byte	.LVL5
+ 2667 0036 3C000000 		.4byte	.LVL6
+ 2668 003a 0100     		.2byte	0x1
+ 2669 003c 50       		.byte	0x50
+ 2670 003d 3C000000 		.4byte	.LVL6
+ 2671 0041 4A000000 		.4byte	.LVL7
+ 2672 0045 0400     		.2byte	0x4
+ 2673 0047 F3       		.byte	0xf3
+ 2674 0048 01       		.uleb128 0x1
+ 2675 0049 50       		.byte	0x50
+ 2676 004a 9F       		.byte	0x9f
+ 2677 004b 4A000000 		.4byte	.LVL7
+ 2678 004f 52000000 		.4byte	.LVL8
+ 2679 0053 0100     		.2byte	0x1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 56
+
+
+ 2680 0055 50       		.byte	0x50
+ 2681 0056 52000000 		.4byte	.LVL8
+ 2682 005a 6C000000 		.4byte	.LFE37
+ 2683 005e 0400     		.2byte	0x4
+ 2684 0060 F3       		.byte	0xf3
+ 2685 0061 01       		.uleb128 0x1
+ 2686 0062 50       		.byte	0x50
+ 2687 0063 9F       		.byte	0x9f
+ 2688 0064 00000000 		.4byte	0
+ 2689 0068 00000000 		.4byte	0
+ 2690              	.LLST1:
+ 2691 006c 00000000 		.4byte	.LVL1
+ 2692 0070 65000000 		.4byte	.LVL9-1
+ 2693 0074 0100     		.2byte	0x1
+ 2694 0076 51       		.byte	0x51
+ 2695 0077 65000000 		.4byte	.LVL9-1
+ 2696 007b 6C000000 		.4byte	.LFE37
+ 2697 007f 0400     		.2byte	0x4
+ 2698 0081 F3       		.byte	0xf3
+ 2699 0082 01       		.uleb128 0x1
+ 2700 0083 51       		.byte	0x51
+ 2701 0084 9F       		.byte	0x9f
+ 2702 0085 00000000 		.4byte	0
+ 2703 0089 00000000 		.4byte	0
+ 2704              	.LLST2:
+ 2705 008d 00000000 		.4byte	.LVL23
+ 2706 0091 26000000 		.4byte	.LVL24
+ 2707 0095 0100     		.2byte	0x1
+ 2708 0097 50       		.byte	0x50
+ 2709 0098 26000000 		.4byte	.LVL24
+ 2710 009c 9C010000 		.4byte	.LVL49
+ 2711 00a0 0400     		.2byte	0x4
+ 2712 00a2 F3       		.byte	0xf3
+ 2713 00a3 01       		.uleb128 0x1
+ 2714 00a4 50       		.byte	0x50
+ 2715 00a5 9F       		.byte	0x9f
+ 2716 00a6 9C010000 		.4byte	.LVL49
+ 2717 00aa A0010000 		.4byte	.LVL50
+ 2718 00ae 0100     		.2byte	0x1
+ 2719 00b0 50       		.byte	0x50
+ 2720 00b1 A0010000 		.4byte	.LVL50
+ 2721 00b5 D8010000 		.4byte	.LFE38
+ 2722 00b9 0400     		.2byte	0x4
+ 2723 00bb F3       		.byte	0xf3
+ 2724 00bc 01       		.uleb128 0x1
+ 2725 00bd 50       		.byte	0x50
+ 2726 00be 9F       		.byte	0x9f
+ 2727 00bf 00000000 		.4byte	0
+ 2728 00c3 00000000 		.4byte	0
+ 2729              	.LLST3:
+ 2730 00c7 02000000 		.4byte	.LVL63
+ 2731 00cb 0A000000 		.4byte	.LVL65
+ 2732 00cf 0200     		.2byte	0x2
+ 2733 00d1 30       		.byte	0x30
+ 2734 00d2 9F       		.byte	0x9f
+ 2735 00d3 0A000000 		.4byte	.LVL65
+ 2736 00d7 0C000000 		.4byte	.LFE40
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 57
+
+
+ 2737 00db 0100     		.2byte	0x1
+ 2738 00dd 50       		.byte	0x50
+ 2739 00de 00000000 		.4byte	0
+ 2740 00e2 00000000 		.4byte	0
+ 2741              		.section	.debug_aranges,"",%progbits
+ 2742 0000 5C000000 		.4byte	0x5c
+ 2743 0004 0200     		.2byte	0x2
+ 2744 0006 00000000 		.4byte	.Ldebug_info0
+ 2745 000a 04       		.byte	0x4
+ 2746 000b 00       		.byte	0
+ 2747 000c 0000     		.2byte	0
+ 2748 000e 0000     		.2byte	0
+ 2749 0010 00000000 		.4byte	.LFB36
+ 2750 0014 14000000 		.4byte	.LFE36-.LFB36
+ 2751 0018 00000000 		.4byte	.LFB37
+ 2752 001c 6C000000 		.4byte	.LFE37-.LFB37
+ 2753 0020 00000000 		.4byte	.LFB32
+ 2754 0024 3C000000 		.4byte	.LFE32-.LFB32
+ 2755 0028 00000000 		.4byte	.LFB34
+ 2756 002c 58000000 		.4byte	.LFE34-.LFB34
+ 2757 0030 00000000 		.4byte	.LFB38
+ 2758 0034 D8010000 		.4byte	.LFE38-.LFB38
+ 2759 0038 00000000 		.4byte	.LFB35
+ 2760 003c AC000000 		.4byte	.LFE35-.LFB35
+ 2761 0040 00000000 		.4byte	.LFB39
+ 2762 0044 0C000000 		.4byte	.LFE39-.LFB39
+ 2763 0048 00000000 		.4byte	.LFB40
+ 2764 004c 0C000000 		.4byte	.LFE40-.LFB40
+ 2765 0050 00000000 		.4byte	.LFB33
+ 2766 0054 28010000 		.4byte	.LFE33-.LFB33
+ 2767 0058 00000000 		.4byte	0
+ 2768 005c 00000000 		.4byte	0
+ 2769              		.section	.debug_ranges,"",%progbits
+ 2770              	.Ldebug_ranges0:
+ 2771 0000 00000000 		.4byte	.LFB36
+ 2772 0004 14000000 		.4byte	.LFE36
+ 2773 0008 00000000 		.4byte	.LFB37
+ 2774 000c 6C000000 		.4byte	.LFE37
+ 2775 0010 00000000 		.4byte	.LFB32
+ 2776 0014 3C000000 		.4byte	.LFE32
+ 2777 0018 00000000 		.4byte	.LFB34
+ 2778 001c 58000000 		.4byte	.LFE34
+ 2779 0020 00000000 		.4byte	.LFB38
+ 2780 0024 D8010000 		.4byte	.LFE38
+ 2781 0028 00000000 		.4byte	.LFB35
+ 2782 002c AC000000 		.4byte	.LFE35
+ 2783 0030 00000000 		.4byte	.LFB39
+ 2784 0034 0C000000 		.4byte	.LFE39
+ 2785 0038 00000000 		.4byte	.LFB40
+ 2786 003c 0C000000 		.4byte	.LFE40
+ 2787 0040 00000000 		.4byte	.LFB33
+ 2788 0044 28010000 		.4byte	.LFE33
+ 2789 0048 00000000 		.4byte	0
+ 2790 004c 00000000 		.4byte	0
+ 2791              		.section	.debug_line,"",%progbits
+ 2792              	.Ldebug_line0:
+ 2793 0000 8B020000 		.section	.debug_str,"MS",%progbits,1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 58
+
+
+ 2793      02001D01 
+ 2793      00000201 
+ 2793      FB0E0D00 
+ 2793      01010101 
+ 2794              	.LASF26:
+ 2795 0000 63616C63 		.ascii	"calculatePercentageOfRange\000"
+ 2795      756C6174 
+ 2795      65506572 
+ 2795      63656E74 
+ 2795      6167654F 
+ 2796              	.LASF56:
+ 2797 001b 44697265 		.ascii	"Direction\000"
+ 2797      6374696F 
+ 2797      6E00
+ 2798              	.LASF70:
+ 2799 0025 68656164 		.ascii	"header\000"
+ 2799      657200
+ 2800              	.LASF98:
+ 2801 002c 6765744E 		.ascii	"getNonVolatileBarStateMemory\000"
+ 2801      6F6E566F 
+ 2801      6C617469 
+ 2801      6C654261 
+ 2801      72537461 
+ 2802              	.LASF116:
+ 2803 0049 433A5C55 		.ascii	"C:\\Users\\kylep\\Box Sync\\Box Sync\\Feniex Electr"
+ 2803      73657273 
+ 2803      5C6B796C 
+ 2803      65705C42 
+ 2803      6F782053 
+ 2804 0077 6963616C 		.ascii	"ical Files\\WorkingFolder-Kyle\\Firm-AI-Cube\\81-00"
+ 2804      2046696C 
+ 2804      65735C57 
+ 2804      6F726B69 
+ 2804      6E67466F 
+ 2805 00a7 3032342D 		.ascii	"024-01.cydsn\000"
+ 2805      30312E63 
+ 2805      7964736E 
+ 2805      00
+ 2806              	.LASF90:
+ 2807 00b4 4F564552 		.ascii	"OVER_CURRENT_ISR\000"
+ 2807      5F435552 
+ 2807      52454E54 
+ 2807      5F495352 
+ 2807      00
+ 2808              	.LASF111:
+ 2809 00c5 4144435F 		.ascii	"ADC_SAR_Seq_IsEndConversion\000"
+ 2809      5341525F 
+ 2809      5365715F 
+ 2809      4973456E 
+ 2809      64436F6E 
+ 2810              	.LASF47:
+ 2811 00e1 624F7665 		.ascii	"bOverCurrentEnd\000"
+ 2811      72437572 
+ 2811      72656E74 
+ 2811      456E6400 
+ 2812              	.LASF14:
+ 2813 00f1 646F7562 		.ascii	"double\000"
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 59
+
+
+ 2813      6C6500
+ 2814              	.LASF91:
+ 2815 00f8 6D6F746F 		.ascii	"motorCurrentValue\000"
+ 2815      72437572 
+ 2815      72656E74 
+ 2815      56616C75 
+ 2815      6500
+ 2816              	.LASF77:
+ 2817 010a 6C6F6164 		.ascii	"loadLimitSwitchValue\000"
+ 2817      4C696D69 
+ 2817      74537769 
+ 2817      74636856 
+ 2817      616C7565 
+ 2818              	.LASF92:
+ 2819 011f 74696D65 		.ascii	"timeOutCalibrate\000"
+ 2819      4F757443 
+ 2819      616C6962 
+ 2819      72617465 
+ 2819      00
+ 2820              	.LASF117:
+ 2821 0130 72785061 		.ascii	"rxPacketPayload\000"
+ 2821      636B6574 
+ 2821      5061796C 
+ 2821      6F616400 
+ 2822              	.LASF86:
+ 2823 0140 63616C69 		.ascii	"calibrateMotor\000"
+ 2823      62726174 
+ 2823      654D6F74 
+ 2823      6F7200
+ 2824              	.LASF71:
+ 2825 014f 656E644D 		.ascii	"endMotorPosition\000"
+ 2825      6F746F72 
+ 2825      506F7369 
+ 2825      74696F6E 
+ 2825      00
+ 2826              	.LASF82:
+ 2827 0160 704C6F63 		.ascii	"pLocalNonVolatileMemory\000"
+ 2827      616C4E6F 
+ 2827      6E566F6C 
+ 2827      6174696C 
+ 2827      654D656D 
+ 2828              	.LASF2:
+ 2829 0178 73686F72 		.ascii	"short int\000"
+ 2829      7420696E 
+ 2829      7400
+ 2830              	.LASF95:
+ 2831 0182 72785061 		.ascii	"rxPacketLocal\000"
+ 2831      636B6574 
+ 2831      4C6F6361 
+ 2831      6C00
+ 2832              	.LASF18:
+ 2833 0190 73697A65 		.ascii	"sizetype\000"
+ 2833      74797065 
+ 2833      00
+ 2834              	.LASF69:
+ 2835 0199 73746172 		.ascii	"startByte\000"
+ 2835      74427974 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 60
+
+
+ 2835      6500
+ 2836              	.LASF21:
+ 2837 01a3 4D4F5645 		.ascii	"MOVE_BACKWARD_STATE\000"
+ 2837      5F424143 
+ 2837      4B574152 
+ 2837      445F5354 
+ 2837      41544500 
+ 2838              	.LASF76:
+ 2839 01b7 52785061 		.ascii	"RxPacket\000"
+ 2839      636B6574 
+ 2839      00
+ 2840              	.LASF59:
+ 2841 01c0 4D494E49 		.ascii	"MINIMUM_SPEED\000"
+ 2841      4D554D5F 
+ 2841      53504545 
+ 2841      4400
+ 2842              	.LASF41:
+ 2843 01ce 64697265 		.ascii	"direction\000"
+ 2843      6374696F 
+ 2843      6E00
+ 2844              	.LASF20:
+ 2845 01d8 4D4F5645 		.ascii	"MOVE_FORWARD_STATE\000"
+ 2845      5F464F52 
+ 2845      57415244 
+ 2845      5F535441 
+ 2845      544500
+ 2846              	.LASF46:
+ 2847 01eb 624F7665 		.ascii	"bOverCurrentStart\000"
+ 2847      72437572 
+ 2847      72656E74 
+ 2847      53746172 
+ 2847      7400
+ 2848              	.LASF85:
+ 2849 01fd 6D6F746F 		.ascii	"motorControlLoop\000"
+ 2849      72436F6E 
+ 2849      74726F6C 
+ 2849      4C6F6F70 
+ 2849      00
+ 2850              	.LASF23:
+ 2851 020e 63757272 		.ascii	"currentCS\000"
+ 2851      656E7443 
+ 2851      5300
+ 2852              	.LASF44:
+ 2853 0218 6D6F746F 		.ascii	"motorCurrentSamplesIterator\000"
+ 2853      72437572 
+ 2853      72656E74 
+ 2853      53616D70 
+ 2853      6C657349 
+ 2854              	.LASF54:
+ 2855 0234 4252414B 		.ascii	"BRAKE\000"
+ 2855      4500
+ 2856              	.LASF114:
+ 2857 023a 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 2857      43313120 
+ 2857      352E342E 
+ 2857      31203230 
+ 2857      31363036 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 61
+
+
+ 2858 026d 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m0 -mthumb -g -O"
+ 2858      20726576 
+ 2858      6973696F 
+ 2858      6E203233 
+ 2858      37373135 
+ 2859 02a0 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 2859      66756E63 
+ 2859      74696F6E 
+ 2859      2D736563 
+ 2859      74696F6E 
+ 2860              	.LASF115:
+ 2861 02c8 6D6F746F 		.ascii	"motorControl.c\000"
+ 2861      72436F6E 
+ 2861      74726F6C 
+ 2861      2E6300
+ 2862              	.LASF88:
+ 2863 02d7 6C6F6361 		.ascii	"localMotorPosition\000"
+ 2863      6C4D6F74 
+ 2863      6F72506F 
+ 2863      73697469 
+ 2863      6F6E00
+ 2864              	.LASF39:
+ 2865 02ea 4D6F746F 		.ascii	"MotorOutput\000"
+ 2865      724F7574 
+ 2865      70757400 
+ 2866              	.LASF12:
+ 2867 02f6 696E7431 		.ascii	"int16\000"
+ 2867      3600
+ 2868              	.LASF9:
+ 2869 02fc 75696E74 		.ascii	"uint8\000"
+ 2869      3800
+ 2870              	.LASF72:
+ 2871 0302 64657369 		.ascii	"desiredLightBrightness\000"
+ 2871      7265644C 
+ 2871      69676874 
+ 2871      42726967 
+ 2871      68746E65 
+ 2872              	.LASF49:
+ 2873 0319 4D6F746F 		.ascii	"MotorIO\000"
+ 2873      72494F00 
+ 2874              	.LASF13:
+ 2875 0321 666C6F61 		.ascii	"float\000"
+ 2875      7400
+ 2876              	.LASF6:
+ 2877 0327 6C6F6E67 		.ascii	"long long int\000"
+ 2877      206C6F6E 
+ 2877      6720696E 
+ 2877      7400
+ 2878              	.LASF38:
+ 2879 0335 44657269 		.ascii	"Derivative\000"
+ 2879      76617469 
+ 2879      766500
+ 2880              	.LASF108:
+ 2881 0340 6F766572 		.ascii	"overCurrentTimer_Start\000"
+ 2881      43757272 
+ 2881      656E7454 
+ 2881      696D6572 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 62
+
+
+ 2881      5F537461 
+ 2882              	.LASF34:
+ 2883 0357 6572726F 		.ascii	"errorPot\000"
+ 2883      72506F74 
+ 2883      00
+ 2884              	.LASF83:
+ 2885 0360 704E6F6E 		.ascii	"pNonVolatileMotorPosition\000"
+ 2885      566F6C61 
+ 2885      74696C65 
+ 2885      4D6F746F 
+ 2885      72506F73 
+ 2886              	.LASF4:
+ 2887 037a 6C6F6E67 		.ascii	"long int\000"
+ 2887      20696E74 
+ 2887      00
+ 2888              	.LASF106:
+ 2889 0383 67657452 		.ascii	"getRxPacket\000"
+ 2889      78506163 
+ 2889      6B657400 
+ 2890              	.LASF75:
+ 2891 038f 5061796C 		.ascii	"Payload\000"
+ 2891      6F616400 
+ 2892              	.LASF52:
+ 2893 0397 464F5257 		.ascii	"FORWARD\000"
+ 2893      41524400 
+ 2894              	.LASF73:
+ 2895 039f 63616C69 		.ascii	"calibration\000"
+ 2895      62726174 
+ 2895      696F6E00 
+ 2896              	.LASF101:
+ 2897 03ab 4144435F 		.ascii	"ADC_SAR_Seq_GetResult16\000"
+ 2897      5341525F 
+ 2897      5365715F 
+ 2897      47657452 
+ 2897      6573756C 
+ 2898              	.LASF33:
+ 2899 03c3 64657369 		.ascii	"desiredPot\000"
+ 2899      72656450 
+ 2899      6F7400
+ 2900              	.LASF35:
+ 2901 03ce 70726576 		.ascii	"previousErrorPot\000"
+ 2901      696F7573 
+ 2901      4572726F 
+ 2901      72506F74 
+ 2901      00
+ 2902              	.LASF24:
+ 2903 03df 666F7277 		.ascii	"forwardLimitCS\000"
+ 2903      6172644C 
+ 2903      696D6974 
+ 2903      435300
+ 2904              	.LASF42:
+ 2905 03ee 63616C69 		.ascii	"calibrated\000"
+ 2905      62726174 
+ 2905      656400
+ 2906              	.LASF32:
+ 2907 03f9 64657369 		.ascii	"desiredPotFloat\000"
+ 2907      72656450 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 63
+
+
+ 2907      6F74466C 
+ 2907      6F617400 
+ 2908              	.LASF17:
+ 2909 0409 6C6F6E67 		.ascii	"long double\000"
+ 2909      20646F75 
+ 2909      626C6500 
+ 2910              	.LASF93:
+ 2911 0415 74696D65 		.ascii	"timerForInputs\000"
+ 2911      72466F72 
+ 2911      496E7075 
+ 2911      747300
+ 2912              	.LASF109:
+ 2913 0424 68616C6C 		.ascii	"hallEffectISR_StartEx\000"
+ 2913      45666665 
+ 2913      63744953 
+ 2913      525F5374 
+ 2913      61727445 
+ 2914              	.LASF110:
+ 2915 043a 68616C6C 		.ascii	"hallEffectISR_Stop\000"
+ 2915      45666665 
+ 2915      63744953 
+ 2915      525F5374 
+ 2915      6F7000
+ 2916              	.LASF1:
+ 2917 044d 756E7369 		.ascii	"unsigned char\000"
+ 2917      676E6564 
+ 2917      20636861 
+ 2917      7200
+ 2918              	.LASF97:
+ 2919 045b 62446F6E 		.ascii	"bDoneMovingCalibrate\000"
+ 2919      654D6F76 
+ 2919      696E6743 
+ 2919      616C6962 
+ 2919      72617465 
+ 2920              	.LASF36:
+ 2921 0470 50726F70 		.ascii	"Proportional\000"
+ 2921      6F727469 
+ 2921      6F6E616C 
+ 2921      00
+ 2922              	.LASF53:
+ 2923 047d 4241434B 		.ascii	"BACKWARDS\000"
+ 2923      57415244 
+ 2923      5300
+ 2924              	.LASF0:
+ 2925 0487 7369676E 		.ascii	"signed char\000"
+ 2925      65642063 
+ 2925      68617200 
+ 2926              	.LASF7:
+ 2927 0493 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 2927      206C6F6E 
+ 2927      6720756E 
+ 2927      7369676E 
+ 2927      65642069 
+ 2928              	.LASF30:
+ 2929 04aa 6261636B 		.ascii	"backwardPotLimit\000"
+ 2929      77617264 
+ 2929      506F744C 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 64
+
+
+ 2929      696D6974 
+ 2929      00
+ 2930              	.LASF8:
+ 2931 04bb 756E7369 		.ascii	"unsigned int\000"
+ 2931      676E6564 
+ 2931      20696E74 
+ 2931      00
+ 2932              	.LASF51:
+ 2933 04c8 4D6F746F 		.ascii	"MotorDirectionOFF_NOTHING\000"
+ 2933      72446972 
+ 2933      65637469 
+ 2933      6F6E4F46 
+ 2933      465F4E4F 
+ 2934              	.LASF19:
+ 2935 04e2 53544152 		.ascii	"START_CALIBRATING\000"
+ 2935      545F4341 
+ 2935      4C494252 
+ 2935      4154494E 
+ 2935      4700
+ 2936              	.LASF79:
+ 2937 04f4 73706565 		.ascii	"speed\000"
+ 2937      6400
+ 2938              	.LASF22:
+ 2939 04fa 444F4E45 		.ascii	"DONE_CALIBRATING\000"
+ 2939      5F43414C 
+ 2939      49425241 
+ 2939      54494E47 
+ 2939      00
+ 2940              	.LASF62:
+ 2941 050b 4D414E49 		.ascii	"MANIP_VARIABLE_MAX\000"
+ 2941      505F5641 
+ 2941      52494142 
+ 2941      4C455F4D 
+ 2941      415800
+ 2942              	.LASF40:
+ 2943 051e 61646A75 		.ascii	"adjustedSpeed\000"
+ 2943      73746564 
+ 2943      53706565 
+ 2943      6400
+ 2944              	.LASF3:
+ 2945 052c 73686F72 		.ascii	"short unsigned int\000"
+ 2945      7420756E 
+ 2945      7369676E 
+ 2945      65642069 
+ 2945      6E7400
+ 2946              	.LASF113:
+ 2947 053f 6F766572 		.ascii	"overCurrentTimer_ReadStatusRegister\000"
+ 2947      43757272 
+ 2947      656E7454 
+ 2947      696D6572 
+ 2947      5F526561 
+ 2948              	.LASF31:
+ 2949 0563 63757272 		.ascii	"currentPot\000"
+ 2949      656E7450 
+ 2949      6F7400
+ 2950              	.LASF15:
+ 2951 056e 63686172 		.ascii	"char\000"
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 65
+
+
+ 2951      00
+ 2952              	.LASF58:
+ 2953 0573 46554C4C 		.ascii	"FULL_SPEED\000"
+ 2953      5F535045 
+ 2953      454400
+ 2954              	.LASF57:
+ 2955 057e 4D6F746F 		.ascii	"MotorSpeed\000"
+ 2955      72537065 
+ 2955      656400
+ 2956              	.LASF50:
+ 2957 0589 43616C69 		.ascii	"CalibrationStates\000"
+ 2957      62726174 
+ 2957      696F6E53 
+ 2957      74617465 
+ 2957      7300
+ 2958              	.LASF102:
+ 2959 059b 6C696D69 		.ascii	"limitSwitch_ClearInterrupt\000"
+ 2959      74537769 
+ 2959      7463685F 
+ 2959      436C6561 
+ 2959      72496E74 
+ 2960              	.LASF27:
+ 2961 05b6 62446F6E 		.ascii	"bDoneMoving\000"
+ 2961      654D6F76 
+ 2961      696E6700 
+ 2962              	.LASF80:
+ 2963 05c2 48414C4C 		.ascii	"HALL_EFFECT_EDGE_DETECT_INTERRUPT\000"
+ 2963      5F454646 
+ 2963      4543545F 
+ 2963      45444745 
+ 2963      5F444554 
+ 2964              	.LASF66:
+ 2965 05e4 44455349 		.ascii	"DESIRED_POSITION\000"
+ 2965      5245445F 
+ 2965      504F5349 
+ 2965      54494F4E 
+ 2965      00
+ 2966              	.LASF63:
+ 2967 05f5 4D414E49 		.ascii	"MANIP_VARIABLE_MIN\000"
+ 2967      505F5641 
+ 2967      52494142 
+ 2967      4C455F4D 
+ 2967      494E00
+ 2968              	.LASF99:
+ 2969 0608 6D6F746F 		.ascii	"motorControlPWM_WriteCompare\000"
+ 2969      72436F6E 
+ 2969      74726F6C 
+ 2969      50574D5F 
+ 2969      57726974 
+ 2970              	.LASF107:
+ 2971 0625 6F766572 		.ascii	"overCurrentTimerISR_StartEx\000"
+ 2971      43757272 
+ 2971      656E7454 
+ 2971      696D6572 
+ 2971      4953525F 
+ 2972              	.LASF10:
+ 2973 0641 75696E74 		.ascii	"uint16\000"
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 66
+
+
+ 2973      313600
+ 2974              	.LASF81:
+ 2975 0648 696E6974 		.ascii	"initializeMotor\000"
+ 2975      69616C69 
+ 2975      7A654D6F 
+ 2975      746F7200 
+ 2976              	.LASF64:
+ 2977 0658 48415244 		.ascii	"HARDWARE_LIMIT_MAX\000"
+ 2977      57415245 
+ 2977      5F4C494D 
+ 2977      49545F4D 
+ 2977      415800
+ 2978              	.LASF11:
+ 2979 066b 75696E74 		.ascii	"uint32\000"
+ 2979      333200
+ 2980              	.LASF28:
+ 2981 0672 68616C6C 		.ascii	"hallEffectEdgeDetect\000"
+ 2981      45666665 
+ 2981      63744564 
+ 2981      67654465 
+ 2981      74656374 
+ 2982              	.LASF5:
+ 2983 0687 6C6F6E67 		.ascii	"long unsigned int\000"
+ 2983      20756E73 
+ 2983      69676E65 
+ 2983      6420696E 
+ 2983      7400
+ 2984              	.LASF43:
+ 2985 0699 6D6F746F 		.ascii	"motorCurrent\000"
+ 2985      72437572 
+ 2985      72656E74 
+ 2985      00
+ 2986              	.LASF74:
+ 2987 06a6 62797465 		.ascii	"bytes\000"
+ 2987      7300
+ 2988              	.LASF112:
+ 2989 06ac 6F766572 		.ascii	"overCurrentTimerISR_ClearPending\000"
+ 2989      43757272 
+ 2989      656E7454 
+ 2989      696D6572 
+ 2989      4953525F 
+ 2990              	.LASF29:
+ 2991 06cd 666F7277 		.ascii	"forwardPotLimit\000"
+ 2991      61726450 
+ 2991      6F744C69 
+ 2991      6D697400 
+ 2992              	.LASF89:
+ 2993 06dd 63686563 		.ascii	"checkMotorCurrent\000"
+ 2993      6B4D6F74 
+ 2993      6F724375 
+ 2993      7272656E 
+ 2993      7400
+ 2994              	.LASF84:
+ 2995 06ef 6D616E75 		.ascii	"manualDesiredPostion\000"
+ 2995      616C4465 
+ 2995      73697265 
+ 2995      64506F73 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 67
+
+
+ 2995      74696F6E 
+ 2996              	.LASF48:
+ 2997 0704 6F766572 		.ascii	"overCurrentTimerOutCounter\000"
+ 2997      43757272 
+ 2997      656E7454 
+ 2997      696D6572 
+ 2997      4F757443 
+ 2998              	.LASF67:
+ 2999 071f 4D6F746F 		.ascii	"Motor\000"
+ 2999      7200
+ 3000              	.LASF65:
+ 3001 0725 48415244 		.ascii	"HARDWARE_LIMIT_MIN\000"
+ 3001      57415245 
+ 3001      5F4C494D 
+ 3001      49545F4D 
+ 3001      494E00
+ 3002              	.LASF45:
+ 3003 0738 62757356 		.ascii	"busVoltage\000"
+ 3003      6F6C7461 
+ 3003      676500
+ 3004              	.LASF60:
+ 3005 0743 53706565 		.ascii	"Speed\000"
+ 3005      6400
+ 3006              	.LASF55:
+ 3007 0749 4F46465F 		.ascii	"OFF_NOTHING\000"
+ 3007      4E4F5448 
+ 3007      494E4700 
+ 3008              	.LASF87:
+ 3009 0755 7365744D 		.ascii	"setMotorPosition\000"
+ 3009      6F746F72 
+ 3009      506F7369 
+ 3009      74696F6E 
+ 3009      00
+ 3010              	.LASF68:
+ 3011 0766 72784461 		.ascii	"rxData\000"
+ 3011      746100
+ 3012              	.LASF96:
+ 3013 076d 6D6F746F 		.ascii	"motorStatus\000"
+ 3013      72537461 
+ 3013      74757300 
+ 3014              	.LASF25:
+ 3015 0779 6261636B 		.ascii	"backwardLimitCS\000"
+ 3015      77617264 
+ 3015      4C696D69 
+ 3015      74435300 
+ 3016              	.LASF103:
+ 3017 0789 70776D43 		.ascii	"pwmClock_Start\000"
+ 3017      6C6F636B 
+ 3017      5F537461 
+ 3017      727400
+ 3018              	.LASF78:
+ 3019 0798 7365744D 		.ascii	"setMotorOutputs\000"
+ 3019      6F746F72 
+ 3019      4F757470 
+ 3019      75747300 
+ 3020              	.LASF100:
+ 3021 07a8 43794465 		.ascii	"CyDelay\000"
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccA4RiPy.s 			page 68
+
+
+ 3021      6C617900 
+ 3022              	.LASF37:
+ 3023 07b0 496E7465 		.ascii	"Integral\000"
+ 3023      6772616C 
+ 3023      00
+ 3024              	.LASF104:
+ 3025 07b9 6D6F746F 		.ascii	"motorControlPWM_Start\000"
+ 3025      72436F6E 
+ 3025      74726F6C 
+ 3025      50574D5F 
+ 3025      53746172 
+ 3026              	.LASF16:
+ 3027 07cf 72656733 		.ascii	"reg32\000"
+ 3027      3200
+ 3028              	.LASF61:
+ 3029 07d5 4D6F746F 		.ascii	"MotorConstants\000"
+ 3029      72436F6E 
+ 3029      7374616E 
+ 3029      747300
+ 3030              	.LASF94:
+ 3031 07e4 704D6F74 		.ascii	"pMotor\000"
+ 3031      6F7200
+ 3032              	.LASF105:
+ 3033 07eb 6D6F746F 		.ascii	"motorControlPWM_SetCompareMode\000"
+ 3033      72436F6E 
+ 3033      74726F6C 
+ 3033      50574D5F 
+ 3033      53657443 
+ 3034              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

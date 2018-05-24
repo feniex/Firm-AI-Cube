@@ -1,0 +1,1888 @@
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"UART_LED_UART.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.UART_LED_UartInit,"ax",%progbits
+  20              		.align	2
+  21              		.global	UART_LED_UartInit
+  22              		.code	16
+  23              		.thumb_func
+  24              		.type	UART_LED_UartInit, %function
+  25              	UART_LED_UartInit:
+  26              	.LFB0:
+  27              		.file 1 "Generated_Source\\PSoC4\\UART_LED_UART.c"
+   1:Generated_Source\PSoC4/UART_LED_UART.c **** /***************************************************************************//**
+   2:Generated_Source\PSoC4/UART_LED_UART.c **** * \file UART_LED_UART.c
+   3:Generated_Source\PSoC4/UART_LED_UART.c **** * \version 4.0
+   4:Generated_Source\PSoC4/UART_LED_UART.c **** *
+   5:Generated_Source\PSoC4/UART_LED_UART.c **** * \brief
+   6:Generated_Source\PSoC4/UART_LED_UART.c **** *  This file provides the source code to the API for the SCB Component in
+   7:Generated_Source\PSoC4/UART_LED_UART.c **** *  UART mode.
+   8:Generated_Source\PSoC4/UART_LED_UART.c **** *
+   9:Generated_Source\PSoC4/UART_LED_UART.c **** * Note:
+  10:Generated_Source\PSoC4/UART_LED_UART.c **** *
+  11:Generated_Source\PSoC4/UART_LED_UART.c **** *******************************************************************************
+  12:Generated_Source\PSoC4/UART_LED_UART.c **** * \copyright
+  13:Generated_Source\PSoC4/UART_LED_UART.c **** * Copyright 2013-2017, Cypress Semiconductor Corporation.  All rights reserved.
+  14:Generated_Source\PSoC4/UART_LED_UART.c **** * You may use this file only in accordance with the license, terms, conditions,
+  15:Generated_Source\PSoC4/UART_LED_UART.c **** * disclaimers, and limitations in the end user license agreement accompanying
+  16:Generated_Source\PSoC4/UART_LED_UART.c **** * the software package with which this file was provided.
+  17:Generated_Source\PSoC4/UART_LED_UART.c **** *******************************************************************************/
+  18:Generated_Source\PSoC4/UART_LED_UART.c **** 
+  19:Generated_Source\PSoC4/UART_LED_UART.c **** #include "UART_LED_PVT.h"
+  20:Generated_Source\PSoC4/UART_LED_UART.c **** #include "UART_LED_SPI_UART_PVT.h"
+  21:Generated_Source\PSoC4/UART_LED_UART.c **** 
+  22:Generated_Source\PSoC4/UART_LED_UART.c **** 
+  23:Generated_Source\PSoC4/UART_LED_UART.c **** #if (UART_LED_UART_WAKE_ENABLE_CONST && UART_LED_UART_RX_WAKEUP_IRQ)
+  24:Generated_Source\PSoC4/UART_LED_UART.c ****     /**
+  25:Generated_Source\PSoC4/UART_LED_UART.c ****     * \addtogroup group_globals
+  26:Generated_Source\PSoC4/UART_LED_UART.c ****     * \{
+  27:Generated_Source\PSoC4/UART_LED_UART.c ****     */
+  28:Generated_Source\PSoC4/UART_LED_UART.c ****     /** This global variable determines whether to enable Skip Start
+  29:Generated_Source\PSoC4/UART_LED_UART.c ****     * functionality when UART_LED_Sleep() function is called:
+  30:Generated_Source\PSoC4/UART_LED_UART.c ****     * 0 – disable, other values – enable. Default value is 1.
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 2
+
+
+  31:Generated_Source\PSoC4/UART_LED_UART.c ****     * It is only available when Enable wakeup from Deep Sleep Mode is enabled.
+  32:Generated_Source\PSoC4/UART_LED_UART.c ****     */
+  33:Generated_Source\PSoC4/UART_LED_UART.c ****     uint8 UART_LED_skipStart = 1u;
+  34:Generated_Source\PSoC4/UART_LED_UART.c ****     /** \} globals */
+  35:Generated_Source\PSoC4/UART_LED_UART.c **** #endif /* (UART_LED_UART_WAKE_ENABLE_CONST && UART_LED_UART_RX_WAKEUP_IRQ) */
+  36:Generated_Source\PSoC4/UART_LED_UART.c **** 
+  37:Generated_Source\PSoC4/UART_LED_UART.c **** #if(UART_LED_SCB_MODE_UNCONFIG_CONST_CFG)
+  38:Generated_Source\PSoC4/UART_LED_UART.c **** 
+  39:Generated_Source\PSoC4/UART_LED_UART.c ****     /***************************************
+  40:Generated_Source\PSoC4/UART_LED_UART.c ****     *  Configuration Structure Initialization
+  41:Generated_Source\PSoC4/UART_LED_UART.c ****     ***************************************/
+  42:Generated_Source\PSoC4/UART_LED_UART.c **** 
+  43:Generated_Source\PSoC4/UART_LED_UART.c ****     const UART_LED_UART_INIT_STRUCT UART_LED_configUart =
+  44:Generated_Source\PSoC4/UART_LED_UART.c ****     {
+  45:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_UART_SUB_MODE,
+  46:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_UART_DIRECTION,
+  47:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_UART_DATA_BITS_NUM,
+  48:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_UART_PARITY_TYPE,
+  49:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_UART_STOP_BITS_NUM,
+  50:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_UART_OVS_FACTOR,
+  51:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_UART_IRDA_LOW_POWER,
+  52:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_UART_MEDIAN_FILTER_ENABLE,
+  53:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_UART_RETRY_ON_NACK,
+  54:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_UART_IRDA_POLARITY,
+  55:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_UART_DROP_ON_PARITY_ERR,
+  56:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_UART_DROP_ON_FRAME_ERR,
+  57:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_UART_WAKE_ENABLE,
+  58:Generated_Source\PSoC4/UART_LED_UART.c ****         0u,
+  59:Generated_Source\PSoC4/UART_LED_UART.c ****         NULL,
+  60:Generated_Source\PSoC4/UART_LED_UART.c ****         0u,
+  61:Generated_Source\PSoC4/UART_LED_UART.c ****         NULL,
+  62:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_UART_MP_MODE_ENABLE,
+  63:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_UART_MP_ACCEPT_ADDRESS,
+  64:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_UART_MP_RX_ADDRESS,
+  65:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_UART_MP_RX_ADDRESS_MASK,
+  66:Generated_Source\PSoC4/UART_LED_UART.c ****         (uint32) UART_LED_SCB_IRQ_INTERNAL,
+  67:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_UART_INTR_RX_MASK,
+  68:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_UART_RX_TRIGGER_LEVEL,
+  69:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_UART_INTR_TX_MASK,
+  70:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_UART_TX_TRIGGER_LEVEL,
+  71:Generated_Source\PSoC4/UART_LED_UART.c ****         (uint8) UART_LED_UART_BYTE_MODE_ENABLE,
+  72:Generated_Source\PSoC4/UART_LED_UART.c ****         (uint8) UART_LED_UART_CTS_ENABLE,
+  73:Generated_Source\PSoC4/UART_LED_UART.c ****         (uint8) UART_LED_UART_CTS_POLARITY,
+  74:Generated_Source\PSoC4/UART_LED_UART.c ****         (uint8) UART_LED_UART_RTS_POLARITY,
+  75:Generated_Source\PSoC4/UART_LED_UART.c ****         (uint8) UART_LED_UART_RTS_FIFO_LEVEL,
+  76:Generated_Source\PSoC4/UART_LED_UART.c ****         (uint8) UART_LED_UART_RX_BREAK_WIDTH
+  77:Generated_Source\PSoC4/UART_LED_UART.c ****     };
+  78:Generated_Source\PSoC4/UART_LED_UART.c **** 
+  79:Generated_Source\PSoC4/UART_LED_UART.c **** 
+  80:Generated_Source\PSoC4/UART_LED_UART.c ****     /*******************************************************************************
+  81:Generated_Source\PSoC4/UART_LED_UART.c ****     * Function Name: UART_LED_UartInit
+  82:Generated_Source\PSoC4/UART_LED_UART.c ****     ****************************************************************************//**
+  83:Generated_Source\PSoC4/UART_LED_UART.c ****     *
+  84:Generated_Source\PSoC4/UART_LED_UART.c ****     *  Configures the UART_LED for UART operation.
+  85:Generated_Source\PSoC4/UART_LED_UART.c ****     *
+  86:Generated_Source\PSoC4/UART_LED_UART.c ****     *  This function is intended specifically to be used when the UART_LED
+  87:Generated_Source\PSoC4/UART_LED_UART.c ****     *  configuration is set to “Unconfigured UART_LED” in the customizer.
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 3
+
+
+  88:Generated_Source\PSoC4/UART_LED_UART.c ****     *  After initializing the UART_LED in UART mode using this function,
+  89:Generated_Source\PSoC4/UART_LED_UART.c ****     *  the component can be enabled using the UART_LED_Start() or
+  90:Generated_Source\PSoC4/UART_LED_UART.c ****     * UART_LED_Enable() function.
+  91:Generated_Source\PSoC4/UART_LED_UART.c ****     *  This function uses a pointer to a structure that provides the configuration
+  92:Generated_Source\PSoC4/UART_LED_UART.c ****     *  settings. This structure contains the same information that would otherwise
+  93:Generated_Source\PSoC4/UART_LED_UART.c ****     *  be provided by the customizer settings.
+  94:Generated_Source\PSoC4/UART_LED_UART.c ****     *
+  95:Generated_Source\PSoC4/UART_LED_UART.c ****     *  \param config: pointer to a structure that contains the following list of
+  96:Generated_Source\PSoC4/UART_LED_UART.c ****     *   fields. These fields match the selections available in the customizer.
+  97:Generated_Source\PSoC4/UART_LED_UART.c ****     *   Refer to the customizer for further description of the settings.
+  98:Generated_Source\PSoC4/UART_LED_UART.c ****     *
+  99:Generated_Source\PSoC4/UART_LED_UART.c ****     *******************************************************************************/
+ 100:Generated_Source\PSoC4/UART_LED_UART.c ****     void UART_LED_UartInit(const UART_LED_UART_INIT_STRUCT *config)
+ 101:Generated_Source\PSoC4/UART_LED_UART.c ****     {
+ 102:Generated_Source\PSoC4/UART_LED_UART.c ****         uint32 pinsConfig;
+ 103:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 104:Generated_Source\PSoC4/UART_LED_UART.c ****         if (NULL == config)
+ 105:Generated_Source\PSoC4/UART_LED_UART.c ****         {
+ 106:Generated_Source\PSoC4/UART_LED_UART.c ****             CYASSERT(0u != 0u); /* Halt execution due to bad function parameter */
+ 107:Generated_Source\PSoC4/UART_LED_UART.c ****         }
+ 108:Generated_Source\PSoC4/UART_LED_UART.c ****         else
+ 109:Generated_Source\PSoC4/UART_LED_UART.c ****         {
+ 110:Generated_Source\PSoC4/UART_LED_UART.c ****             /* Get direction to configure UART pins: TX, RX or TX+RX */
+ 111:Generated_Source\PSoC4/UART_LED_UART.c ****             pinsConfig  = config->direction;
+ 112:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 113:Generated_Source\PSoC4/UART_LED_UART.c ****         #if !(UART_LED_CY_SCBIP_V0 || UART_LED_CY_SCBIP_V1)
+ 114:Generated_Source\PSoC4/UART_LED_UART.c ****             /* Add RTS and CTS pins to configure */
+ 115:Generated_Source\PSoC4/UART_LED_UART.c ****             pinsConfig |= (0u != config->rtsRxFifoLevel) ? (UART_LED_UART_RTS_PIN_ENABLE) : (0u);
+ 116:Generated_Source\PSoC4/UART_LED_UART.c ****             pinsConfig |= (0u != config->enableCts)      ? (UART_LED_UART_CTS_PIN_ENABLE) : (0u);
+ 117:Generated_Source\PSoC4/UART_LED_UART.c ****         #endif /* !(UART_LED_CY_SCBIP_V0 || UART_LED_CY_SCBIP_V1) */
+ 118:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 119:Generated_Source\PSoC4/UART_LED_UART.c ****             /* Configure pins */
+ 120:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_SetPins(UART_LED_SCB_MODE_UART, config->mode, pinsConfig);
+ 121:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 122:Generated_Source\PSoC4/UART_LED_UART.c ****             /* Store internal configuration */
+ 123:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_scbMode       = (uint8) UART_LED_SCB_MODE_UART;
+ 124:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_scbEnableWake = (uint8) config->enableWake;
+ 125:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_scbEnableIntr = (uint8) config->enableInterrupt;
+ 126:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 127:Generated_Source\PSoC4/UART_LED_UART.c ****             /* Set RX direction internal variables */
+ 128:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_rxBuffer      =         config->rxBuffer;
+ 129:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_rxDataBits    = (uint8) config->dataBits;
+ 130:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_rxBufferSize  =         config->rxBufferSize;
+ 131:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 132:Generated_Source\PSoC4/UART_LED_UART.c ****             /* Set TX direction internal variables */
+ 133:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_txBuffer      =         config->txBuffer;
+ 134:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_txDataBits    = (uint8) config->dataBits;
+ 135:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_txBufferSize  =         config->txBufferSize;
+ 136:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 137:Generated_Source\PSoC4/UART_LED_UART.c ****             /* Configure UART interface */
+ 138:Generated_Source\PSoC4/UART_LED_UART.c ****             if(UART_LED_UART_MODE_IRDA == config->mode)
+ 139:Generated_Source\PSoC4/UART_LED_UART.c ****             {
+ 140:Generated_Source\PSoC4/UART_LED_UART.c ****                 /* OVS settings: IrDA */
+ 141:Generated_Source\PSoC4/UART_LED_UART.c ****                 UART_LED_CTRL_REG  = ((0u != config->enableIrdaLowPower) ?
+ 142:Generated_Source\PSoC4/UART_LED_UART.c ****                                                 (UART_LED_UART_GET_CTRL_OVS_IRDA_LP(config->oversam
+ 143:Generated_Source\PSoC4/UART_LED_UART.c ****                                                 (UART_LED_CTRL_OVS_IRDA_OVS16));
+ 144:Generated_Source\PSoC4/UART_LED_UART.c ****             }
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 4
+
+
+ 145:Generated_Source\PSoC4/UART_LED_UART.c ****             else
+ 146:Generated_Source\PSoC4/UART_LED_UART.c ****             {
+ 147:Generated_Source\PSoC4/UART_LED_UART.c ****                 /* OVS settings: UART and SmartCard */
+ 148:Generated_Source\PSoC4/UART_LED_UART.c ****                 UART_LED_CTRL_REG  = UART_LED_GET_CTRL_OVS(config->oversample);
+ 149:Generated_Source\PSoC4/UART_LED_UART.c ****             }
+ 150:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 151:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_CTRL_REG     |= UART_LED_GET_CTRL_BYTE_MODE  (config->enableByteMode)      |
+ 152:Generated_Source\PSoC4/UART_LED_UART.c ****                                              UART_LED_GET_CTRL_ADDR_ACCEPT(config->multiprocAcceptA
+ 153:Generated_Source\PSoC4/UART_LED_UART.c ****                                              UART_LED_CTRL_UART;
+ 154:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 155:Generated_Source\PSoC4/UART_LED_UART.c ****             /* Configure sub-mode: UART, SmartCard or IrDA */
+ 156:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_UART_CTRL_REG = UART_LED_GET_UART_CTRL_MODE(config->mode);
+ 157:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 158:Generated_Source\PSoC4/UART_LED_UART.c ****             /* Configure RX direction */
+ 159:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_UART_RX_CTRL_REG = UART_LED_GET_UART_RX_CTRL_MODE(config->stopBits)           
+ 160:Generated_Source\PSoC4/UART_LED_UART.c ****                                         UART_LED_GET_UART_RX_CTRL_POLARITY(config->enableInvertedRx
+ 161:Generated_Source\PSoC4/UART_LED_UART.c ****                                         UART_LED_GET_UART_RX_CTRL_MP_MODE(config->enableMultiproc) 
+ 162:Generated_Source\PSoC4/UART_LED_UART.c ****                                         UART_LED_GET_UART_RX_CTRL_DROP_ON_PARITY_ERR(config->dropOn
+ 163:Generated_Source\PSoC4/UART_LED_UART.c ****                                         UART_LED_GET_UART_RX_CTRL_DROP_ON_FRAME_ERR(config->dropOnF
+ 164:Generated_Source\PSoC4/UART_LED_UART.c ****                                         UART_LED_GET_UART_RX_CTRL_BREAK_WIDTH(config->breakWidth);
+ 165:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 166:Generated_Source\PSoC4/UART_LED_UART.c ****             if(UART_LED_UART_PARITY_NONE != config->parity)
+ 167:Generated_Source\PSoC4/UART_LED_UART.c ****             {
+ 168:Generated_Source\PSoC4/UART_LED_UART.c ****                UART_LED_UART_RX_CTRL_REG |= UART_LED_GET_UART_RX_CTRL_PARITY(config->parity) |
+ 169:Generated_Source\PSoC4/UART_LED_UART.c ****                                                     UART_LED_UART_RX_CTRL_PARITY_ENABLED;
+ 170:Generated_Source\PSoC4/UART_LED_UART.c ****             }
+ 171:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 172:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_RX_CTRL_REG      = UART_LED_GET_RX_CTRL_DATA_WIDTH(config->dataBits)       |
+ 173:Generated_Source\PSoC4/UART_LED_UART.c ****                                                 UART_LED_GET_RX_CTRL_MEDIAN(config->enableMedianFil
+ 174:Generated_Source\PSoC4/UART_LED_UART.c ****                                                 UART_LED_GET_UART_RX_CTRL_ENABLED(config->direction
+ 175:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 176:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_RX_FIFO_CTRL_REG = UART_LED_GET_RX_FIFO_CTRL_TRIGGER_LEVEL(config->rxTriggerLe
+ 177:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 178:Generated_Source\PSoC4/UART_LED_UART.c ****             /* Configure MP address */
+ 179:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_RX_MATCH_REG     = UART_LED_GET_RX_MATCH_ADDR(config->multiprocAddr) |
+ 180:Generated_Source\PSoC4/UART_LED_UART.c ****                                                 UART_LED_GET_RX_MATCH_MASK(config->multiprocAddrMas
+ 181:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 182:Generated_Source\PSoC4/UART_LED_UART.c ****             /* Configure RX direction */
+ 183:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_UART_TX_CTRL_REG = UART_LED_GET_UART_TX_CTRL_MODE(config->stopBits) |
+ 184:Generated_Source\PSoC4/UART_LED_UART.c ****                                                 UART_LED_GET_UART_TX_CTRL_RETRY_NACK(config->enable
+ 185:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 186:Generated_Source\PSoC4/UART_LED_UART.c ****             if(UART_LED_UART_PARITY_NONE != config->parity)
+ 187:Generated_Source\PSoC4/UART_LED_UART.c ****             {
+ 188:Generated_Source\PSoC4/UART_LED_UART.c ****                UART_LED_UART_TX_CTRL_REG |= UART_LED_GET_UART_TX_CTRL_PARITY(config->parity) |
+ 189:Generated_Source\PSoC4/UART_LED_UART.c ****                                                     UART_LED_UART_TX_CTRL_PARITY_ENABLED;
+ 190:Generated_Source\PSoC4/UART_LED_UART.c ****             }
+ 191:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 192:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_TX_CTRL_REG      = UART_LED_GET_TX_CTRL_DATA_WIDTH(config->dataBits)    |
+ 193:Generated_Source\PSoC4/UART_LED_UART.c ****                                                 UART_LED_GET_UART_TX_CTRL_ENABLED(config->direction
+ 194:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 195:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_TX_FIFO_CTRL_REG = UART_LED_GET_TX_FIFO_CTRL_TRIGGER_LEVEL(config->txTriggerLe
+ 196:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 197:Generated_Source\PSoC4/UART_LED_UART.c ****         #if !(UART_LED_CY_SCBIP_V0 || UART_LED_CY_SCBIP_V1)
+ 198:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_UART_FLOW_CTRL_REG = UART_LED_GET_UART_FLOW_CTRL_CTS_ENABLE(config->enableCts)
+ 199:Generated_Source\PSoC4/UART_LED_UART.c ****                                             UART_LED_GET_UART_FLOW_CTRL_CTS_POLARITY (config->ctsPo
+ 200:Generated_Source\PSoC4/UART_LED_UART.c ****                                             UART_LED_GET_UART_FLOW_CTRL_RTS_POLARITY (config->rtsPo
+ 201:Generated_Source\PSoC4/UART_LED_UART.c ****                                             UART_LED_GET_UART_FLOW_CTRL_TRIGGER_LEVEL(config->rtsRx
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 5
+
+
+ 202:Generated_Source\PSoC4/UART_LED_UART.c ****         #endif /* !(UART_LED_CY_SCBIP_V0 || UART_LED_CY_SCBIP_V1) */
+ 203:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 204:Generated_Source\PSoC4/UART_LED_UART.c ****             /* Configure interrupt with UART handler but do not enable it */
+ 205:Generated_Source\PSoC4/UART_LED_UART.c ****             CyIntDisable    (UART_LED_ISR_NUMBER);
+ 206:Generated_Source\PSoC4/UART_LED_UART.c ****             CyIntSetPriority(UART_LED_ISR_NUMBER, UART_LED_ISR_PRIORITY);
+ 207:Generated_Source\PSoC4/UART_LED_UART.c ****             (void) CyIntSetVector(UART_LED_ISR_NUMBER, &UART_LED_SPI_UART_ISR);
+ 208:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 209:Generated_Source\PSoC4/UART_LED_UART.c ****             /* Configure WAKE interrupt */
+ 210:Generated_Source\PSoC4/UART_LED_UART.c ****         #if(UART_LED_UART_RX_WAKEUP_IRQ)
+ 211:Generated_Source\PSoC4/UART_LED_UART.c ****             CyIntDisable    (UART_LED_RX_WAKE_ISR_NUMBER);
+ 212:Generated_Source\PSoC4/UART_LED_UART.c ****             CyIntSetPriority(UART_LED_RX_WAKE_ISR_NUMBER, UART_LED_RX_WAKE_ISR_PRIORITY);
+ 213:Generated_Source\PSoC4/UART_LED_UART.c ****             (void) CyIntSetVector(UART_LED_RX_WAKE_ISR_NUMBER, &UART_LED_UART_WAKEUP_ISR);
+ 214:Generated_Source\PSoC4/UART_LED_UART.c ****         #endif /* (UART_LED_UART_RX_WAKEUP_IRQ) */
+ 215:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 216:Generated_Source\PSoC4/UART_LED_UART.c ****             /* Configure interrupt sources */
+ 217:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_INTR_I2C_EC_MASK_REG = UART_LED_NO_INTR_SOURCES;
+ 218:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_INTR_SPI_EC_MASK_REG = UART_LED_NO_INTR_SOURCES;
+ 219:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_INTR_SLAVE_MASK_REG  = UART_LED_NO_INTR_SOURCES;
+ 220:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_INTR_MASTER_MASK_REG = UART_LED_NO_INTR_SOURCES;
+ 221:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_INTR_RX_MASK_REG     = config->rxInterruptMask;
+ 222:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_INTR_TX_MASK_REG     = config->txInterruptMask;
+ 223:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 224:Generated_Source\PSoC4/UART_LED_UART.c ****             /* Configure TX interrupt sources to restore. */
+ 225:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_IntrTxMask = LO16(UART_LED_INTR_TX_MASK_REG);
+ 226:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 227:Generated_Source\PSoC4/UART_LED_UART.c ****             /* Clear RX buffer indexes */
+ 228:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_rxBufferHead     = 0u;
+ 229:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_rxBufferTail     = 0u;
+ 230:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_rxBufferOverflow = 0u;
+ 231:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 232:Generated_Source\PSoC4/UART_LED_UART.c ****             /* Clear TX buffer indexes */
+ 233:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_txBufferHead = 0u;
+ 234:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_txBufferTail = 0u;
+ 235:Generated_Source\PSoC4/UART_LED_UART.c ****         }
+ 236:Generated_Source\PSoC4/UART_LED_UART.c ****     }
+ 237:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 238:Generated_Source\PSoC4/UART_LED_UART.c **** #else
+ 239:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 240:Generated_Source\PSoC4/UART_LED_UART.c ****     /*******************************************************************************
+ 241:Generated_Source\PSoC4/UART_LED_UART.c ****     * Function Name: UART_LED_UartInit
+ 242:Generated_Source\PSoC4/UART_LED_UART.c ****     ****************************************************************************//**
+ 243:Generated_Source\PSoC4/UART_LED_UART.c ****     *
+ 244:Generated_Source\PSoC4/UART_LED_UART.c ****     *  Configures the SCB for the UART operation.
+ 245:Generated_Source\PSoC4/UART_LED_UART.c ****     *
+ 246:Generated_Source\PSoC4/UART_LED_UART.c ****     *******************************************************************************/
+ 247:Generated_Source\PSoC4/UART_LED_UART.c ****     void UART_LED_UartInit(void)
+ 248:Generated_Source\PSoC4/UART_LED_UART.c ****     {
+  28              		.loc 1 248 0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32              		@ link register save eliminated.
+ 249:Generated_Source\PSoC4/UART_LED_UART.c ****         /* Configure UART interface */
+ 250:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_CTRL_REG = UART_LED_UART_DEFAULT_CTRL;
+  33              		.loc 1 250 0
+  34 0000 144A     		ldr	r2, .L2
+  35 0002 154B     		ldr	r3, .L2+4
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 6
+
+
+  36 0004 1A60     		str	r2, [r3]
+ 251:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 252:Generated_Source\PSoC4/UART_LED_UART.c ****         /* Configure sub-mode: UART, SmartCard or IrDA */
+ 253:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_UART_CTRL_REG = UART_LED_UART_DEFAULT_UART_CTRL;
+  37              		.loc 1 253 0
+  38 0006 0023     		movs	r3, #0
+  39 0008 144A     		ldr	r2, .L2+8
+  40 000a 1360     		str	r3, [r2]
+ 254:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 255:Generated_Source\PSoC4/UART_LED_UART.c ****         /* Configure RX direction */
+ 256:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_UART_RX_CTRL_REG = UART_LED_UART_DEFAULT_UART_RX_CTRL;
+  41              		.loc 1 256 0
+  42 000c 1449     		ldr	r1, .L2+12
+  43 000e 154A     		ldr	r2, .L2+16
+  44 0010 1160     		str	r1, [r2]
+ 257:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_RX_CTRL_REG      = UART_LED_UART_DEFAULT_RX_CTRL;
+  45              		.loc 1 257 0
+  46 0012 1549     		ldr	r1, .L2+20
+  47 0014 154A     		ldr	r2, .L2+24
+  48 0016 1160     		str	r1, [r2]
+ 258:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_RX_FIFO_CTRL_REG = UART_LED_UART_DEFAULT_RX_FIFO_CTRL;
+  49              		.loc 1 258 0
+  50 0018 0722     		movs	r2, #7
+  51 001a 1549     		ldr	r1, .L2+28
+  52 001c 0A60     		str	r2, [r1]
+ 259:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_RX_MATCH_REG     = UART_LED_UART_DEFAULT_RX_MATCH_REG;
+  53              		.loc 1 259 0
+  54 001e 1549     		ldr	r1, .L2+32
+  55 0020 0B60     		str	r3, [r1]
+ 260:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 261:Generated_Source\PSoC4/UART_LED_UART.c ****         /* Configure TX direction */
+ 262:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_UART_TX_CTRL_REG = UART_LED_UART_DEFAULT_UART_TX_CTRL;
+  56              		.loc 1 262 0
+  57 0022 0120     		movs	r0, #1
+  58 0024 1449     		ldr	r1, .L2+36
+  59 0026 0860     		str	r0, [r1]
+ 263:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_TX_CTRL_REG      = UART_LED_UART_DEFAULT_TX_CTRL;
+  60              		.loc 1 263 0
+  61 0028 1449     		ldr	r1, .L2+40
+  62 002a 0A60     		str	r2, [r1]
+ 264:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_TX_FIFO_CTRL_REG = UART_LED_UART_DEFAULT_TX_FIFO_CTRL;
+  63              		.loc 1 264 0
+  64 002c 144A     		ldr	r2, .L2+44
+  65 002e 1360     		str	r3, [r2]
+ 265:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 266:Generated_Source\PSoC4/UART_LED_UART.c ****     #if !(UART_LED_CY_SCBIP_V0 || UART_LED_CY_SCBIP_V1)
+ 267:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_UART_FLOW_CTRL_REG = UART_LED_UART_DEFAULT_FLOW_CTRL;
+ 268:Generated_Source\PSoC4/UART_LED_UART.c ****     #endif /* !(UART_LED_CY_SCBIP_V0 || UART_LED_CY_SCBIP_V1) */
+ 269:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 270:Generated_Source\PSoC4/UART_LED_UART.c ****         /* Configure interrupt with UART handler but do not enable it */
+ 271:Generated_Source\PSoC4/UART_LED_UART.c ****     #if(UART_LED_SCB_IRQ_INTERNAL)
+ 272:Generated_Source\PSoC4/UART_LED_UART.c ****         CyIntDisable    (UART_LED_ISR_NUMBER);
+ 273:Generated_Source\PSoC4/UART_LED_UART.c ****         CyIntSetPriority(UART_LED_ISR_NUMBER, UART_LED_ISR_PRIORITY);
+ 274:Generated_Source\PSoC4/UART_LED_UART.c ****         (void) CyIntSetVector(UART_LED_ISR_NUMBER, &UART_LED_SPI_UART_ISR);
+ 275:Generated_Source\PSoC4/UART_LED_UART.c ****     #endif /* (UART_LED_SCB_IRQ_INTERNAL) */
+ 276:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 277:Generated_Source\PSoC4/UART_LED_UART.c ****         /* Configure WAKE interrupt */
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 7
+
+
+ 278:Generated_Source\PSoC4/UART_LED_UART.c ****     #if(UART_LED_UART_RX_WAKEUP_IRQ)
+ 279:Generated_Source\PSoC4/UART_LED_UART.c ****         CyIntDisable    (UART_LED_RX_WAKE_ISR_NUMBER);
+ 280:Generated_Source\PSoC4/UART_LED_UART.c ****         CyIntSetPriority(UART_LED_RX_WAKE_ISR_NUMBER, UART_LED_RX_WAKE_ISR_PRIORITY);
+ 281:Generated_Source\PSoC4/UART_LED_UART.c ****         (void) CyIntSetVector(UART_LED_RX_WAKE_ISR_NUMBER, &UART_LED_UART_WAKEUP_ISR);
+ 282:Generated_Source\PSoC4/UART_LED_UART.c ****     #endif /* (UART_LED_UART_RX_WAKEUP_IRQ) */
+ 283:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 284:Generated_Source\PSoC4/UART_LED_UART.c ****         /* Configure interrupt sources */
+ 285:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_INTR_I2C_EC_MASK_REG = UART_LED_UART_DEFAULT_INTR_I2C_EC_MASK;
+  66              		.loc 1 285 0
+  67 0030 144A     		ldr	r2, .L2+48
+  68 0032 1360     		str	r3, [r2]
+ 286:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_INTR_SPI_EC_MASK_REG = UART_LED_UART_DEFAULT_INTR_SPI_EC_MASK;
+  69              		.loc 1 286 0
+  70 0034 144A     		ldr	r2, .L2+52
+  71 0036 1360     		str	r3, [r2]
+ 287:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_INTR_SLAVE_MASK_REG  = UART_LED_UART_DEFAULT_INTR_SLAVE_MASK;
+  72              		.loc 1 287 0
+  73 0038 144A     		ldr	r2, .L2+56
+  74 003a 1360     		str	r3, [r2]
+ 288:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_INTR_MASTER_MASK_REG = UART_LED_UART_DEFAULT_INTR_MASTER_MASK;
+  75              		.loc 1 288 0
+  76 003c 144A     		ldr	r2, .L2+60
+  77 003e 1360     		str	r3, [r2]
+ 289:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_INTR_RX_MASK_REG     = UART_LED_UART_DEFAULT_INTR_RX_MASK;
+  78              		.loc 1 289 0
+  79 0040 0421     		movs	r1, #4
+  80 0042 144A     		ldr	r2, .L2+64
+  81 0044 1160     		str	r1, [r2]
+ 290:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_INTR_TX_MASK_REG     = UART_LED_UART_DEFAULT_INTR_TX_MASK;
+  82              		.loc 1 290 0
+  83 0046 144A     		ldr	r2, .L2+68
+  84 0048 1360     		str	r3, [r2]
+ 291:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 292:Generated_Source\PSoC4/UART_LED_UART.c ****         /* Configure TX interrupt sources to restore. */
+ 293:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_IntrTxMask = LO16(UART_LED_INTR_TX_MASK_REG);
+  85              		.loc 1 293 0
+  86 004a 1268     		ldr	r2, [r2]
+  87 004c 134B     		ldr	r3, .L2+72
+  88 004e 1A80     		strh	r2, [r3]
+ 294:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 295:Generated_Source\PSoC4/UART_LED_UART.c ****     #if(UART_LED_INTERNAL_RX_SW_BUFFER_CONST)
+ 296:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_rxBufferHead     = 0u;
+ 297:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_rxBufferTail     = 0u;
+ 298:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_rxBufferOverflow = 0u;
+ 299:Generated_Source\PSoC4/UART_LED_UART.c ****     #endif /* (UART_LED_INTERNAL_RX_SW_BUFFER_CONST) */
+ 300:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 301:Generated_Source\PSoC4/UART_LED_UART.c ****     #if(UART_LED_INTERNAL_TX_SW_BUFFER_CONST)
+ 302:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_txBufferHead = 0u;
+ 303:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_txBufferTail = 0u;
+ 304:Generated_Source\PSoC4/UART_LED_UART.c ****     #endif /* (UART_LED_INTERNAL_TX_SW_BUFFER_CONST) */
+ 305:Generated_Source\PSoC4/UART_LED_UART.c ****     }
+  89              		.loc 1 305 0
+  90              		@ sp needed
+  91 0050 7047     		bx	lr
+  92              	.L3:
+  93 0052 C046     		.align	2
+  94              	.L2:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 8
+
+
+  95 0054 0B000002 		.word	33554443
+  96 0058 00000740 		.word	1074200576
+  97 005c 40000740 		.word	1074200640
+  98 0060 01000A00 		.word	655361
+  99 0064 48000740 		.word	1074200648
+ 100 0068 07000080 		.word	-2147483641
+ 101 006c 00030740 		.word	1074201344
+ 102 0070 04030740 		.word	1074201348
+ 103 0074 10030740 		.word	1074201360
+ 104 0078 44000740 		.word	1074200644
+ 105 007c 00020740 		.word	1074201088
+ 106 0080 04020740 		.word	1074201092
+ 107 0084 880E0740 		.word	1074204296
+ 108 0088 C80E0740 		.word	1074204360
+ 109 008c 480F0740 		.word	1074204488
+ 110 0090 080F0740 		.word	1074204424
+ 111 0094 C80F0740 		.word	1074204616
+ 112 0098 880F0740 		.word	1074204552
+ 113 009c 00000000 		.word	UART_LED_IntrTxMask
+ 114              		.cfi_endproc
+ 115              	.LFE0:
+ 116              		.size	UART_LED_UartInit, .-UART_LED_UartInit
+ 117              		.section	.text.UART_LED_UartPostEnable,"ax",%progbits
+ 118              		.align	2
+ 119              		.global	UART_LED_UartPostEnable
+ 120              		.code	16
+ 121              		.thumb_func
+ 122              		.type	UART_LED_UartPostEnable, %function
+ 123              	UART_LED_UartPostEnable:
+ 124              	.LFB1:
+ 306:Generated_Source\PSoC4/UART_LED_UART.c **** #endif /* (UART_LED_SCB_MODE_UNCONFIG_CONST_CFG) */
+ 307:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 308:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 309:Generated_Source\PSoC4/UART_LED_UART.c **** /*******************************************************************************
+ 310:Generated_Source\PSoC4/UART_LED_UART.c **** * Function Name: UART_LED_UartPostEnable
+ 311:Generated_Source\PSoC4/UART_LED_UART.c **** ****************************************************************************//**
+ 312:Generated_Source\PSoC4/UART_LED_UART.c **** *
+ 313:Generated_Source\PSoC4/UART_LED_UART.c **** *  Restores HSIOM settings for the UART output pins (TX and/or RTS) to be
+ 314:Generated_Source\PSoC4/UART_LED_UART.c **** *  controlled by the SCB UART.
+ 315:Generated_Source\PSoC4/UART_LED_UART.c **** *
+ 316:Generated_Source\PSoC4/UART_LED_UART.c **** *******************************************************************************/
+ 317:Generated_Source\PSoC4/UART_LED_UART.c **** void UART_LED_UartPostEnable(void)
+ 318:Generated_Source\PSoC4/UART_LED_UART.c **** {
+ 125              		.loc 1 318 0
+ 126              		.cfi_startproc
+ 127              		@ args = 0, pretend = 0, frame = 0
+ 128              		@ frame_needed = 0, uses_anonymous_args = 0
+ 129              		@ link register save eliminated.
+ 319:Generated_Source\PSoC4/UART_LED_UART.c **** #if (UART_LED_SCB_MODE_UNCONFIG_CONST_CFG)
+ 320:Generated_Source\PSoC4/UART_LED_UART.c ****     #if (UART_LED_TX_SDA_MISO_PIN)
+ 321:Generated_Source\PSoC4/UART_LED_UART.c ****         if (UART_LED_CHECK_TX_SDA_MISO_PIN_USED)
+ 322:Generated_Source\PSoC4/UART_LED_UART.c ****         {
+ 323:Generated_Source\PSoC4/UART_LED_UART.c ****             /* Set SCB UART to drive the output pin */
+ 324:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_SET_HSIOM_SEL(UART_LED_TX_SDA_MISO_HSIOM_REG, UART_LED_TX_SDA_MISO_HSIOM_MASK,
+ 325:Generated_Source\PSoC4/UART_LED_UART.c ****                                            UART_LED_TX_SDA_MISO_HSIOM_POS, UART_LED_TX_SDA_MISO_HSI
+ 326:Generated_Source\PSoC4/UART_LED_UART.c ****         }
+ 327:Generated_Source\PSoC4/UART_LED_UART.c ****     #endif /* (UART_LED_TX_SDA_MISO_PIN_PIN) */
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 9
+
+
+ 328:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 329:Generated_Source\PSoC4/UART_LED_UART.c ****     #if !(UART_LED_CY_SCBIP_V0 || UART_LED_CY_SCBIP_V1)
+ 330:Generated_Source\PSoC4/UART_LED_UART.c ****         #if (UART_LED_SS0_PIN)
+ 331:Generated_Source\PSoC4/UART_LED_UART.c ****             if (UART_LED_CHECK_SS0_PIN_USED)
+ 332:Generated_Source\PSoC4/UART_LED_UART.c ****             {
+ 333:Generated_Source\PSoC4/UART_LED_UART.c ****                 /* Set SCB UART to drive the output pin */
+ 334:Generated_Source\PSoC4/UART_LED_UART.c ****                 UART_LED_SET_HSIOM_SEL(UART_LED_SS0_HSIOM_REG, UART_LED_SS0_HSIOM_MASK,
+ 335:Generated_Source\PSoC4/UART_LED_UART.c ****                                                UART_LED_SS0_HSIOM_POS, UART_LED_SS0_HSIOM_SEL_UART)
+ 336:Generated_Source\PSoC4/UART_LED_UART.c ****             }
+ 337:Generated_Source\PSoC4/UART_LED_UART.c ****         #endif /* (UART_LED_SS0_PIN) */
+ 338:Generated_Source\PSoC4/UART_LED_UART.c ****     #endif /* !(UART_LED_CY_SCBIP_V0 || UART_LED_CY_SCBIP_V1) */
+ 339:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 340:Generated_Source\PSoC4/UART_LED_UART.c **** #else
+ 341:Generated_Source\PSoC4/UART_LED_UART.c ****     #if (UART_LED_UART_TX_PIN)
+ 342:Generated_Source\PSoC4/UART_LED_UART.c ****          /* Set SCB UART to drive the output pin */
+ 343:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_SET_HSIOM_SEL(UART_LED_TX_HSIOM_REG, UART_LED_TX_HSIOM_MASK,
+ 344:Generated_Source\PSoC4/UART_LED_UART.c ****                                        UART_LED_TX_HSIOM_POS, UART_LED_TX_HSIOM_SEL_UART);
+ 345:Generated_Source\PSoC4/UART_LED_UART.c ****     #endif /* (UART_LED_UART_TX_PIN) */
+ 346:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 347:Generated_Source\PSoC4/UART_LED_UART.c ****     #if (UART_LED_UART_RTS_PIN)
+ 348:Generated_Source\PSoC4/UART_LED_UART.c ****         /* Set SCB UART to drive the output pin */
+ 349:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_SET_HSIOM_SEL(UART_LED_RTS_HSIOM_REG, UART_LED_RTS_HSIOM_MASK,
+ 350:Generated_Source\PSoC4/UART_LED_UART.c ****                                        UART_LED_RTS_HSIOM_POS, UART_LED_RTS_HSIOM_SEL_UART);
+ 351:Generated_Source\PSoC4/UART_LED_UART.c ****     #endif /* (UART_LED_UART_RTS_PIN) */
+ 352:Generated_Source\PSoC4/UART_LED_UART.c **** #endif /* (UART_LED_SCB_MODE_UNCONFIG_CONST_CFG) */
+ 353:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 354:Generated_Source\PSoC4/UART_LED_UART.c ****     /* Restore TX interrupt sources. */
+ 355:Generated_Source\PSoC4/UART_LED_UART.c ****     UART_LED_SetTxInterruptMode(UART_LED_IntrTxMask);
+ 130              		.loc 1 355 0
+ 131 0000 024B     		ldr	r3, .L5
+ 132 0002 1A88     		ldrh	r2, [r3]
+ 133 0004 024B     		ldr	r3, .L5+4
+ 134 0006 1A60     		str	r2, [r3]
+ 356:Generated_Source\PSoC4/UART_LED_UART.c **** }
+ 135              		.loc 1 356 0
+ 136              		@ sp needed
+ 137 0008 7047     		bx	lr
+ 138              	.L6:
+ 139 000a C046     		.align	2
+ 140              	.L5:
+ 141 000c 00000000 		.word	UART_LED_IntrTxMask
+ 142 0010 880F0740 		.word	1074204552
+ 143              		.cfi_endproc
+ 144              	.LFE1:
+ 145              		.size	UART_LED_UartPostEnable, .-UART_LED_UartPostEnable
+ 146              		.section	.text.UART_LED_UartStop,"ax",%progbits
+ 147              		.align	2
+ 148              		.global	UART_LED_UartStop
+ 149              		.code	16
+ 150              		.thumb_func
+ 151              		.type	UART_LED_UartStop, %function
+ 152              	UART_LED_UartStop:
+ 153              	.LFB2:
+ 357:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 358:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 359:Generated_Source\PSoC4/UART_LED_UART.c **** /*******************************************************************************
+ 360:Generated_Source\PSoC4/UART_LED_UART.c **** * Function Name: UART_LED_UartStop
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 10
+
+
+ 361:Generated_Source\PSoC4/UART_LED_UART.c **** ****************************************************************************//**
+ 362:Generated_Source\PSoC4/UART_LED_UART.c **** *
+ 363:Generated_Source\PSoC4/UART_LED_UART.c **** *  Changes the HSIOM settings for the UART output pins (TX and/or RTS) to keep
+ 364:Generated_Source\PSoC4/UART_LED_UART.c **** *  them inactive after the block is disabled. The output pins are controlled by
+ 365:Generated_Source\PSoC4/UART_LED_UART.c **** *  the GPIO data register. Also, the function disables the skip start feature
+ 366:Generated_Source\PSoC4/UART_LED_UART.c **** *  to not cause it to trigger after the component is enabled.
+ 367:Generated_Source\PSoC4/UART_LED_UART.c **** *
+ 368:Generated_Source\PSoC4/UART_LED_UART.c **** *******************************************************************************/
+ 369:Generated_Source\PSoC4/UART_LED_UART.c **** void UART_LED_UartStop(void)
+ 370:Generated_Source\PSoC4/UART_LED_UART.c **** {
+ 154              		.loc 1 370 0
+ 155              		.cfi_startproc
+ 156              		@ args = 0, pretend = 0, frame = 0
+ 157              		@ frame_needed = 0, uses_anonymous_args = 0
+ 158              		@ link register save eliminated.
+ 371:Generated_Source\PSoC4/UART_LED_UART.c **** #if(UART_LED_SCB_MODE_UNCONFIG_CONST_CFG)
+ 372:Generated_Source\PSoC4/UART_LED_UART.c ****     #if (UART_LED_TX_SDA_MISO_PIN)
+ 373:Generated_Source\PSoC4/UART_LED_UART.c ****         if (UART_LED_CHECK_TX_SDA_MISO_PIN_USED)
+ 374:Generated_Source\PSoC4/UART_LED_UART.c ****         {
+ 375:Generated_Source\PSoC4/UART_LED_UART.c ****             /* Set GPIO to drive output pin */
+ 376:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_SET_HSIOM_SEL(UART_LED_TX_SDA_MISO_HSIOM_REG, UART_LED_TX_SDA_MISO_HSIOM_MASK,
+ 377:Generated_Source\PSoC4/UART_LED_UART.c ****                                            UART_LED_TX_SDA_MISO_HSIOM_POS, UART_LED_TX_SDA_MISO_HSI
+ 378:Generated_Source\PSoC4/UART_LED_UART.c ****         }
+ 379:Generated_Source\PSoC4/UART_LED_UART.c ****     #endif /* (UART_LED_TX_SDA_MISO_PIN_PIN) */
+ 380:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 381:Generated_Source\PSoC4/UART_LED_UART.c ****     #if !(UART_LED_CY_SCBIP_V0 || UART_LED_CY_SCBIP_V1)
+ 382:Generated_Source\PSoC4/UART_LED_UART.c ****         #if (UART_LED_SS0_PIN)
+ 383:Generated_Source\PSoC4/UART_LED_UART.c ****             if (UART_LED_CHECK_SS0_PIN_USED)
+ 384:Generated_Source\PSoC4/UART_LED_UART.c ****             {
+ 385:Generated_Source\PSoC4/UART_LED_UART.c ****                 /* Set output pin state after block is disabled */
+ 386:Generated_Source\PSoC4/UART_LED_UART.c ****                 UART_LED_spi_ss0_Write(UART_LED_GET_UART_RTS_INACTIVE);
+ 387:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 388:Generated_Source\PSoC4/UART_LED_UART.c ****                 /* Set GPIO to drive output pin */
+ 389:Generated_Source\PSoC4/UART_LED_UART.c ****                 UART_LED_SET_HSIOM_SEL(UART_LED_SS0_HSIOM_REG, UART_LED_SS0_HSIOM_MASK,
+ 390:Generated_Source\PSoC4/UART_LED_UART.c ****                                                UART_LED_SS0_HSIOM_POS, UART_LED_SS0_HSIOM_SEL_GPIO)
+ 391:Generated_Source\PSoC4/UART_LED_UART.c ****             }
+ 392:Generated_Source\PSoC4/UART_LED_UART.c ****         #endif /* (UART_LED_SS0_PIN) */
+ 393:Generated_Source\PSoC4/UART_LED_UART.c ****     #endif /* !(UART_LED_CY_SCBIP_V0 || UART_LED_CY_SCBIP_V1) */
+ 394:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 395:Generated_Source\PSoC4/UART_LED_UART.c **** #else
+ 396:Generated_Source\PSoC4/UART_LED_UART.c ****     #if (UART_LED_UART_TX_PIN)
+ 397:Generated_Source\PSoC4/UART_LED_UART.c ****         /* Set GPIO to drive output pin */
+ 398:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_SET_HSIOM_SEL(UART_LED_TX_HSIOM_REG, UART_LED_TX_HSIOM_MASK,
+ 399:Generated_Source\PSoC4/UART_LED_UART.c ****                                        UART_LED_TX_HSIOM_POS, UART_LED_TX_HSIOM_SEL_GPIO);
+ 400:Generated_Source\PSoC4/UART_LED_UART.c ****     #endif /* (UART_LED_UART_TX_PIN) */
+ 401:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 402:Generated_Source\PSoC4/UART_LED_UART.c ****     #if (UART_LED_UART_RTS_PIN)
+ 403:Generated_Source\PSoC4/UART_LED_UART.c ****         /* Set output pin state after block is disabled */
+ 404:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_rts_Write(UART_LED_GET_UART_RTS_INACTIVE);
+ 405:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 406:Generated_Source\PSoC4/UART_LED_UART.c ****         /* Set GPIO to drive output pin */
+ 407:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_SET_HSIOM_SEL(UART_LED_RTS_HSIOM_REG, UART_LED_RTS_HSIOM_MASK,
+ 408:Generated_Source\PSoC4/UART_LED_UART.c ****                                        UART_LED_RTS_HSIOM_POS, UART_LED_RTS_HSIOM_SEL_GPIO);
+ 409:Generated_Source\PSoC4/UART_LED_UART.c ****     #endif /* (UART_LED_UART_RTS_PIN) */
+ 410:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 411:Generated_Source\PSoC4/UART_LED_UART.c **** #endif /* (UART_LED_SCB_MODE_UNCONFIG_CONST_CFG) */
+ 412:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 11
+
+
+ 413:Generated_Source\PSoC4/UART_LED_UART.c **** #if (UART_LED_UART_WAKE_ENABLE_CONST)
+ 414:Generated_Source\PSoC4/UART_LED_UART.c ****     /* Disable skip start feature used for wakeup */
+ 415:Generated_Source\PSoC4/UART_LED_UART.c ****     UART_LED_UART_RX_CTRL_REG &= (uint32) ~UART_LED_UART_RX_CTRL_SKIP_START;
+ 416:Generated_Source\PSoC4/UART_LED_UART.c **** #endif /* (UART_LED_UART_WAKE_ENABLE_CONST) */
+ 417:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 418:Generated_Source\PSoC4/UART_LED_UART.c ****     /* Store TX interrupt sources (exclude level triggered). */
+ 419:Generated_Source\PSoC4/UART_LED_UART.c ****     UART_LED_IntrTxMask = LO16(UART_LED_GetTxInterruptMode() & UART_LED_INTR_UART_TX_RESTORE);
+ 159              		.loc 1 419 0
+ 160 0000 034B     		ldr	r3, .L8
+ 161 0002 1A68     		ldr	r2, [r3]
+ 162 0004 E423     		movs	r3, #228
+ 163 0006 DB00     		lsls	r3, r3, #3
+ 164 0008 1340     		ands	r3, r2
+ 165 000a 024A     		ldr	r2, .L8+4
+ 166 000c 1380     		strh	r3, [r2]
+ 420:Generated_Source\PSoC4/UART_LED_UART.c **** }
+ 167              		.loc 1 420 0
+ 168              		@ sp needed
+ 169 000e 7047     		bx	lr
+ 170              	.L9:
+ 171              		.align	2
+ 172              	.L8:
+ 173 0010 880F0740 		.word	1074204552
+ 174 0014 00000000 		.word	UART_LED_IntrTxMask
+ 175              		.cfi_endproc
+ 176              	.LFE2:
+ 177              		.size	UART_LED_UartStop, .-UART_LED_UartStop
+ 178              		.section	.text.UART_LED_UartSetRxAddress,"ax",%progbits
+ 179              		.align	2
+ 180              		.global	UART_LED_UartSetRxAddress
+ 181              		.code	16
+ 182              		.thumb_func
+ 183              		.type	UART_LED_UartSetRxAddress, %function
+ 184              	UART_LED_UartSetRxAddress:
+ 185              	.LFB3:
+ 421:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 422:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 423:Generated_Source\PSoC4/UART_LED_UART.c **** /*******************************************************************************
+ 424:Generated_Source\PSoC4/UART_LED_UART.c **** * Function Name: UART_LED_UartSetRxAddress
+ 425:Generated_Source\PSoC4/UART_LED_UART.c **** ****************************************************************************//**
+ 426:Generated_Source\PSoC4/UART_LED_UART.c **** *
+ 427:Generated_Source\PSoC4/UART_LED_UART.c **** *  Sets the hardware detectable receiver address for the UART in the
+ 428:Generated_Source\PSoC4/UART_LED_UART.c **** *  Multiprocessor mode.
+ 429:Generated_Source\PSoC4/UART_LED_UART.c **** *
+ 430:Generated_Source\PSoC4/UART_LED_UART.c **** *  \param address: Address for hardware address detection.
+ 431:Generated_Source\PSoC4/UART_LED_UART.c **** *
+ 432:Generated_Source\PSoC4/UART_LED_UART.c **** *******************************************************************************/
+ 433:Generated_Source\PSoC4/UART_LED_UART.c **** void UART_LED_UartSetRxAddress(uint32 address)
+ 434:Generated_Source\PSoC4/UART_LED_UART.c **** {
+ 186              		.loc 1 434 0
+ 187              		.cfi_startproc
+ 188              		@ args = 0, pretend = 0, frame = 0
+ 189              		@ frame_needed = 0, uses_anonymous_args = 0
+ 190              		@ link register save eliminated.
+ 191              	.LVL0:
+ 435:Generated_Source\PSoC4/UART_LED_UART.c ****      uint32 matchReg;
+ 436:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 12
+
+
+ 437:Generated_Source\PSoC4/UART_LED_UART.c ****     matchReg = UART_LED_RX_MATCH_REG;
+ 192              		.loc 1 437 0
+ 193 0000 034A     		ldr	r2, .L11
+ 194 0002 1368     		ldr	r3, [r2]
+ 195              	.LVL1:
+ 438:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 439:Generated_Source\PSoC4/UART_LED_UART.c ****     matchReg &= ((uint32) ~UART_LED_RX_MATCH_ADDR_MASK); /* Clear address bits */
+ 196              		.loc 1 439 0
+ 197 0004 FF21     		movs	r1, #255
+ 198 0006 8B43     		bics	r3, r1
+ 199              	.LVL2:
+ 440:Generated_Source\PSoC4/UART_LED_UART.c ****     matchReg |= ((uint32)  (address & UART_LED_RX_MATCH_ADDR_MASK)); /* Set address  */
+ 200              		.loc 1 440 0
+ 201 0008 0840     		ands	r0, r1
+ 202              	.LVL3:
+ 203 000a 1843     		orrs	r0, r3
+ 204              	.LVL4:
+ 441:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 442:Generated_Source\PSoC4/UART_LED_UART.c ****     UART_LED_RX_MATCH_REG = matchReg;
+ 205              		.loc 1 442 0
+ 206 000c 1060     		str	r0, [r2]
+ 443:Generated_Source\PSoC4/UART_LED_UART.c **** }
+ 207              		.loc 1 443 0
+ 208              		@ sp needed
+ 209 000e 7047     		bx	lr
+ 210              	.L12:
+ 211              		.align	2
+ 212              	.L11:
+ 213 0010 10030740 		.word	1074201360
+ 214              		.cfi_endproc
+ 215              	.LFE3:
+ 216              		.size	UART_LED_UartSetRxAddress, .-UART_LED_UartSetRxAddress
+ 217              		.section	.text.UART_LED_UartSetRxAddressMask,"ax",%progbits
+ 218              		.align	2
+ 219              		.global	UART_LED_UartSetRxAddressMask
+ 220              		.code	16
+ 221              		.thumb_func
+ 222              		.type	UART_LED_UartSetRxAddressMask, %function
+ 223              	UART_LED_UartSetRxAddressMask:
+ 224              	.LFB4:
+ 444:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 445:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 446:Generated_Source\PSoC4/UART_LED_UART.c **** /*******************************************************************************
+ 447:Generated_Source\PSoC4/UART_LED_UART.c **** * Function Name: UART_LED_UartSetRxAddressMask
+ 448:Generated_Source\PSoC4/UART_LED_UART.c **** ****************************************************************************//**
+ 449:Generated_Source\PSoC4/UART_LED_UART.c **** *
+ 450:Generated_Source\PSoC4/UART_LED_UART.c **** *  Sets the hardware address mask for the UART in the Multiprocessor mode.
+ 451:Generated_Source\PSoC4/UART_LED_UART.c **** *
+ 452:Generated_Source\PSoC4/UART_LED_UART.c **** *  \param addressMask: Address mask.
+ 453:Generated_Source\PSoC4/UART_LED_UART.c **** *   - Bit value 0 – excludes bit from address comparison.
+ 454:Generated_Source\PSoC4/UART_LED_UART.c **** *   - Bit value 1 – the bit needs to match with the corresponding bit
+ 455:Generated_Source\PSoC4/UART_LED_UART.c **** *     of the address.
+ 456:Generated_Source\PSoC4/UART_LED_UART.c **** *
+ 457:Generated_Source\PSoC4/UART_LED_UART.c **** *******************************************************************************/
+ 458:Generated_Source\PSoC4/UART_LED_UART.c **** void UART_LED_UartSetRxAddressMask(uint32 addressMask)
+ 459:Generated_Source\PSoC4/UART_LED_UART.c **** {
+ 225              		.loc 1 459 0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 13
+
+
+ 226              		.cfi_startproc
+ 227              		@ args = 0, pretend = 0, frame = 0
+ 228              		@ frame_needed = 0, uses_anonymous_args = 0
+ 229              		@ link register save eliminated.
+ 230              	.LVL5:
+ 460:Generated_Source\PSoC4/UART_LED_UART.c ****     uint32 matchReg;
+ 461:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 462:Generated_Source\PSoC4/UART_LED_UART.c ****     matchReg = UART_LED_RX_MATCH_REG;
+ 231              		.loc 1 462 0
+ 232 0000 034A     		ldr	r2, .L14
+ 233 0002 1168     		ldr	r1, [r2]
+ 234              	.LVL6:
+ 463:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 464:Generated_Source\PSoC4/UART_LED_UART.c ****     matchReg &= ((uint32) ~UART_LED_RX_MATCH_MASK_MASK); /* Clear address mask bits */
+ 235              		.loc 1 464 0
+ 236 0004 034B     		ldr	r3, .L14+4
+ 237 0006 0B40     		ands	r3, r1
+ 238              	.LVL7:
+ 465:Generated_Source\PSoC4/UART_LED_UART.c ****     matchReg |= ((uint32) (addressMask << UART_LED_RX_MATCH_MASK_POS));
+ 239              		.loc 1 465 0
+ 240 0008 0004     		lsls	r0, r0, #16
+ 241              	.LVL8:
+ 242 000a 1843     		orrs	r0, r3
+ 243              	.LVL9:
+ 466:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 467:Generated_Source\PSoC4/UART_LED_UART.c ****     UART_LED_RX_MATCH_REG = matchReg;
+ 244              		.loc 1 467 0
+ 245 000c 1060     		str	r0, [r2]
+ 468:Generated_Source\PSoC4/UART_LED_UART.c **** }
+ 246              		.loc 1 468 0
+ 247              		@ sp needed
+ 248 000e 7047     		bx	lr
+ 249              	.L15:
+ 250              		.align	2
+ 251              	.L14:
+ 252 0010 10030740 		.word	1074201360
+ 253 0014 FFFF00FF 		.word	-16711681
+ 254              		.cfi_endproc
+ 255              	.LFE4:
+ 256              		.size	UART_LED_UartSetRxAddressMask, .-UART_LED_UartSetRxAddressMask
+ 257              		.section	.text.UART_LED_UartGetChar,"ax",%progbits
+ 258              		.align	2
+ 259              		.global	UART_LED_UartGetChar
+ 260              		.code	16
+ 261              		.thumb_func
+ 262              		.type	UART_LED_UartGetChar, %function
+ 263              	UART_LED_UartGetChar:
+ 264              	.LFB5:
+ 469:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 470:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 471:Generated_Source\PSoC4/UART_LED_UART.c **** #if(UART_LED_UART_RX_DIRECTION)
+ 472:Generated_Source\PSoC4/UART_LED_UART.c ****     /*******************************************************************************
+ 473:Generated_Source\PSoC4/UART_LED_UART.c ****     * Function Name: UART_LED_UartGetChar
+ 474:Generated_Source\PSoC4/UART_LED_UART.c ****     ****************************************************************************//**
+ 475:Generated_Source\PSoC4/UART_LED_UART.c ****     *
+ 476:Generated_Source\PSoC4/UART_LED_UART.c ****     *  Retrieves next data element from receive buffer.
+ 477:Generated_Source\PSoC4/UART_LED_UART.c ****     *  This function is designed for ASCII characters and returns a char where
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 14
+
+
+ 478:Generated_Source\PSoC4/UART_LED_UART.c ****     *  1 to 255 are valid characters and 0 indicates an error occurred or no data
+ 479:Generated_Source\PSoC4/UART_LED_UART.c ****     *  is present.
+ 480:Generated_Source\PSoC4/UART_LED_UART.c ****     *  - RX software buffer is disabled: Returns data element retrieved from RX
+ 481:Generated_Source\PSoC4/UART_LED_UART.c ****     *    FIFO.
+ 482:Generated_Source\PSoC4/UART_LED_UART.c ****     *  - RX software buffer is enabled: Returns data element from the software
+ 483:Generated_Source\PSoC4/UART_LED_UART.c ****     *    receive buffer.
+ 484:Generated_Source\PSoC4/UART_LED_UART.c ****     *
+ 485:Generated_Source\PSoC4/UART_LED_UART.c ****     *  \return
+ 486:Generated_Source\PSoC4/UART_LED_UART.c ****     *   Next data element from the receive buffer. ASCII character values from
+ 487:Generated_Source\PSoC4/UART_LED_UART.c ****     *   1 to 255 are valid. A returned zero signifies an error condition or no
+ 488:Generated_Source\PSoC4/UART_LED_UART.c ****     *   data available.
+ 489:Generated_Source\PSoC4/UART_LED_UART.c ****     *
+ 490:Generated_Source\PSoC4/UART_LED_UART.c ****     *  \sideeffect
+ 491:Generated_Source\PSoC4/UART_LED_UART.c ****     *   The errors bits may not correspond with reading characters due to
+ 492:Generated_Source\PSoC4/UART_LED_UART.c ****     *   RX FIFO and software buffer usage.
+ 493:Generated_Source\PSoC4/UART_LED_UART.c ****     *   RX software buffer is enabled: The internal software buffer overflow
+ 494:Generated_Source\PSoC4/UART_LED_UART.c ****     *   is not treated as an error condition.
+ 495:Generated_Source\PSoC4/UART_LED_UART.c ****     *   Check UART_LED_rxBufferOverflow to capture that error condition.
+ 496:Generated_Source\PSoC4/UART_LED_UART.c ****     *
+ 497:Generated_Source\PSoC4/UART_LED_UART.c ****     *******************************************************************************/
+ 498:Generated_Source\PSoC4/UART_LED_UART.c ****     uint32 UART_LED_UartGetChar(void)
+ 499:Generated_Source\PSoC4/UART_LED_UART.c ****     {
+ 265              		.loc 1 499 0
+ 266              		.cfi_startproc
+ 267              		@ args = 0, pretend = 0, frame = 0
+ 268              		@ frame_needed = 0, uses_anonymous_args = 0
+ 269 0000 10B5     		push	{r4, lr}
+ 270              		.cfi_def_cfa_offset 8
+ 271              		.cfi_offset 4, -8
+ 272              		.cfi_offset 14, -4
+ 273              	.LVL10:
+ 500:Generated_Source\PSoC4/UART_LED_UART.c ****         uint32 rxData = 0u;
+ 501:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 502:Generated_Source\PSoC4/UART_LED_UART.c ****         /* Reads data only if there is data to read */
+ 503:Generated_Source\PSoC4/UART_LED_UART.c ****         if (0u != UART_LED_SpiUartGetRxBufferSize())
+ 274              		.loc 1 503 0
+ 275 0002 FFF7FEFF 		bl	UART_LED_SpiUartGetRxBufferSize
+ 276              	.LVL11:
+ 277 0006 0028     		cmp	r0, #0
+ 278 0008 02D0     		beq	.L19
+ 504:Generated_Source\PSoC4/UART_LED_UART.c ****         {
+ 505:Generated_Source\PSoC4/UART_LED_UART.c ****             rxData = UART_LED_SpiUartReadRxData();
+ 279              		.loc 1 505 0
+ 280 000a FFF7FEFF 		bl	UART_LED_SpiUartReadRxData
+ 281              	.LVL12:
+ 282 000e 00E0     		b	.L17
+ 283              	.LVL13:
+ 284              	.L19:
+ 500:Generated_Source\PSoC4/UART_LED_UART.c ****         uint32 rxData = 0u;
+ 285              		.loc 1 500 0
+ 286 0010 0020     		movs	r0, #0
+ 287              	.LVL14:
+ 288              	.L17:
+ 506:Generated_Source\PSoC4/UART_LED_UART.c ****         }
+ 507:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 508:Generated_Source\PSoC4/UART_LED_UART.c ****         if (UART_LED_CHECK_INTR_RX(UART_LED_INTR_RX_ERR))
+ 289              		.loc 1 508 0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 15
+
+
+ 290 0012 054B     		ldr	r3, .L20
+ 291 0014 1A68     		ldr	r2, [r3]
+ 292 0016 D823     		movs	r3, #216
+ 293 0018 9B00     		lsls	r3, r3, #2
+ 294 001a 1A42     		tst	r2, r3
+ 295 001c 03D0     		beq	.L18
+ 296              	.LVL15:
+ 509:Generated_Source\PSoC4/UART_LED_UART.c ****         {
+ 510:Generated_Source\PSoC4/UART_LED_UART.c ****             rxData = 0u; /* Error occurred: returns zero */
+ 511:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_ClearRxInterruptSource(UART_LED_INTR_RX_ERR);
+ 297              		.loc 1 511 0
+ 298 001e 1A00     		movs	r2, r3
+ 299 0020 014B     		ldr	r3, .L20
+ 300 0022 1A60     		str	r2, [r3]
+ 510:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_ClearRxInterruptSource(UART_LED_INTR_RX_ERR);
+ 301              		.loc 1 510 0
+ 302 0024 0020     		movs	r0, #0
+ 303              	.LVL16:
+ 304              	.L18:
+ 512:Generated_Source\PSoC4/UART_LED_UART.c ****         }
+ 513:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 514:Generated_Source\PSoC4/UART_LED_UART.c ****         return (rxData);
+ 515:Generated_Source\PSoC4/UART_LED_UART.c ****     }
+ 305              		.loc 1 515 0
+ 306              		@ sp needed
+ 307 0026 10BD     		pop	{r4, pc}
+ 308              	.L21:
+ 309              		.align	2
+ 310              	.L20:
+ 311 0028 C00F0740 		.word	1074204608
+ 312              		.cfi_endproc
+ 313              	.LFE5:
+ 314              		.size	UART_LED_UartGetChar, .-UART_LED_UartGetChar
+ 315              		.section	.text.UART_LED_UartGetByte,"ax",%progbits
+ 316              		.align	2
+ 317              		.global	UART_LED_UartGetByte
+ 318              		.code	16
+ 319              		.thumb_func
+ 320              		.type	UART_LED_UartGetByte, %function
+ 321              	UART_LED_UartGetByte:
+ 322              	.LFB6:
+ 516:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 517:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 518:Generated_Source\PSoC4/UART_LED_UART.c ****     /*******************************************************************************
+ 519:Generated_Source\PSoC4/UART_LED_UART.c ****     * Function Name: UART_LED_UartGetByte
+ 520:Generated_Source\PSoC4/UART_LED_UART.c ****     ****************************************************************************//**
+ 521:Generated_Source\PSoC4/UART_LED_UART.c ****     *
+ 522:Generated_Source\PSoC4/UART_LED_UART.c ****     *  Retrieves the next data element from the receive buffer, returns the
+ 523:Generated_Source\PSoC4/UART_LED_UART.c ****     *  received byte and error condition.
+ 524:Generated_Source\PSoC4/UART_LED_UART.c ****     *   - The RX software buffer is disabled: returns the data element retrieved
+ 525:Generated_Source\PSoC4/UART_LED_UART.c ****     *     from the RX FIFO. Undefined data will be returned if the RX FIFO is
+ 526:Generated_Source\PSoC4/UART_LED_UART.c ****     *     empty.
+ 527:Generated_Source\PSoC4/UART_LED_UART.c ****     *   - The RX software buffer is enabled: returns data element from the
+ 528:Generated_Source\PSoC4/UART_LED_UART.c ****     *     software receive buffer.
+ 529:Generated_Source\PSoC4/UART_LED_UART.c ****     *
+ 530:Generated_Source\PSoC4/UART_LED_UART.c ****     *  \return
+ 531:Generated_Source\PSoC4/UART_LED_UART.c ****     *   Bits 7-0 contain the next data element from the receive buffer and
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 16
+
+
+ 532:Generated_Source\PSoC4/UART_LED_UART.c ****     *   other bits contain the error condition.
+ 533:Generated_Source\PSoC4/UART_LED_UART.c ****     *   - UART_LED_UART_RX_OVERFLOW - Attempt to write to a full
+ 534:Generated_Source\PSoC4/UART_LED_UART.c ****     *     receiver FIFO.
+ 535:Generated_Source\PSoC4/UART_LED_UART.c ****     *   - UART_LED_UART_RX_UNDERFLOW    Attempt to read from an empty
+ 536:Generated_Source\PSoC4/UART_LED_UART.c ****     *     receiver FIFO.
+ 537:Generated_Source\PSoC4/UART_LED_UART.c ****     *   - UART_LED_UART_RX_FRAME_ERROR - UART framing error detected.
+ 538:Generated_Source\PSoC4/UART_LED_UART.c ****     *   - UART_LED_UART_RX_PARITY_ERROR - UART parity error detected.
+ 539:Generated_Source\PSoC4/UART_LED_UART.c ****     *
+ 540:Generated_Source\PSoC4/UART_LED_UART.c ****     *  \sideeffect
+ 541:Generated_Source\PSoC4/UART_LED_UART.c ****     *   The errors bits may not correspond with reading characters due to
+ 542:Generated_Source\PSoC4/UART_LED_UART.c ****     *   RX FIFO and software buffer usage.
+ 543:Generated_Source\PSoC4/UART_LED_UART.c ****     *   RX software buffer is enabled: The internal software buffer overflow
+ 544:Generated_Source\PSoC4/UART_LED_UART.c ****     *   is not treated as an error condition.
+ 545:Generated_Source\PSoC4/UART_LED_UART.c ****     *   Check UART_LED_rxBufferOverflow to capture that error condition.
+ 546:Generated_Source\PSoC4/UART_LED_UART.c ****     *
+ 547:Generated_Source\PSoC4/UART_LED_UART.c ****     *******************************************************************************/
+ 548:Generated_Source\PSoC4/UART_LED_UART.c ****     uint32 UART_LED_UartGetByte(void)
+ 549:Generated_Source\PSoC4/UART_LED_UART.c ****     {
+ 323              		.loc 1 549 0
+ 324              		.cfi_startproc
+ 325              		@ args = 0, pretend = 0, frame = 0
+ 326              		@ frame_needed = 0, uses_anonymous_args = 0
+ 327 0000 10B5     		push	{r4, lr}
+ 328              		.cfi_def_cfa_offset 8
+ 329              		.cfi_offset 4, -8
+ 330              		.cfi_offset 14, -4
+ 550:Generated_Source\PSoC4/UART_LED_UART.c ****         uint32 rxData;
+ 551:Generated_Source\PSoC4/UART_LED_UART.c ****         uint32 tmpStatus;
+ 552:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 553:Generated_Source\PSoC4/UART_LED_UART.c ****         #if (UART_LED_CHECK_RX_SW_BUFFER)
+ 554:Generated_Source\PSoC4/UART_LED_UART.c ****         {
+ 555:Generated_Source\PSoC4/UART_LED_UART.c ****             UART_LED_DisableInt();
+ 556:Generated_Source\PSoC4/UART_LED_UART.c ****         }
+ 557:Generated_Source\PSoC4/UART_LED_UART.c ****         #endif
+ 558:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 559:Generated_Source\PSoC4/UART_LED_UART.c ****         if (0u != UART_LED_SpiUartGetRxBufferSize())
+ 331              		.loc 1 559 0
+ 332 0002 FFF7FEFF 		bl	UART_LED_SpiUartGetRxBufferSize
+ 333              	.LVL17:
+ 334 0006 0028     		cmp	r0, #0
+ 335 0008 02D0     		beq	.L23
+ 560:Generated_Source\PSoC4/UART_LED_UART.c ****         {
+ 561:Generated_Source\PSoC4/UART_LED_UART.c ****             /* Enables interrupt to receive more bytes: at least one byte is in
+ 562:Generated_Source\PSoC4/UART_LED_UART.c ****             * buffer.
+ 563:Generated_Source\PSoC4/UART_LED_UART.c ****             */
+ 564:Generated_Source\PSoC4/UART_LED_UART.c ****             #if (UART_LED_CHECK_RX_SW_BUFFER)
+ 565:Generated_Source\PSoC4/UART_LED_UART.c ****             {
+ 566:Generated_Source\PSoC4/UART_LED_UART.c ****                 UART_LED_EnableInt();
+ 567:Generated_Source\PSoC4/UART_LED_UART.c ****             }
+ 568:Generated_Source\PSoC4/UART_LED_UART.c ****             #endif
+ 569:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 570:Generated_Source\PSoC4/UART_LED_UART.c ****             /* Get received byte */
+ 571:Generated_Source\PSoC4/UART_LED_UART.c ****             rxData = UART_LED_SpiUartReadRxData();
+ 336              		.loc 1 571 0
+ 337 000a FFF7FEFF 		bl	UART_LED_SpiUartReadRxData
+ 338              	.LVL18:
+ 339 000e 01E0     		b	.L24
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 17
+
+
+ 340              	.LVL19:
+ 341              	.L23:
+ 572:Generated_Source\PSoC4/UART_LED_UART.c ****         }
+ 573:Generated_Source\PSoC4/UART_LED_UART.c ****         else
+ 574:Generated_Source\PSoC4/UART_LED_UART.c ****         {
+ 575:Generated_Source\PSoC4/UART_LED_UART.c ****             /* Reads a byte directly from RX FIFO: underflow is raised in the
+ 576:Generated_Source\PSoC4/UART_LED_UART.c ****             * case of empty. Otherwise the first received byte will be read.
+ 577:Generated_Source\PSoC4/UART_LED_UART.c ****             */
+ 578:Generated_Source\PSoC4/UART_LED_UART.c ****             rxData = UART_LED_RX_FIFO_RD_REG;
+ 342              		.loc 1 578 0
+ 343 0010 064B     		ldr	r3, .L25
+ 344 0012 1868     		ldr	r0, [r3]
+ 345              	.LVL20:
+ 346              	.L24:
+ 579:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 580:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 581:Generated_Source\PSoC4/UART_LED_UART.c ****             /* Enables interrupt to receive more bytes. */
+ 582:Generated_Source\PSoC4/UART_LED_UART.c ****             #if (UART_LED_CHECK_RX_SW_BUFFER)
+ 583:Generated_Source\PSoC4/UART_LED_UART.c ****             {
+ 584:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 585:Generated_Source\PSoC4/UART_LED_UART.c ****                 /* The byte has been read from RX FIFO. Clear RX interrupt to
+ 586:Generated_Source\PSoC4/UART_LED_UART.c ****                 * not involve interrupt handler when RX FIFO is empty.
+ 587:Generated_Source\PSoC4/UART_LED_UART.c ****                 */
+ 588:Generated_Source\PSoC4/UART_LED_UART.c ****                 UART_LED_ClearRxInterruptSource(UART_LED_INTR_RX_NOT_EMPTY);
+ 589:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 590:Generated_Source\PSoC4/UART_LED_UART.c ****                 UART_LED_EnableInt();
+ 591:Generated_Source\PSoC4/UART_LED_UART.c ****             }
+ 592:Generated_Source\PSoC4/UART_LED_UART.c ****             #endif
+ 593:Generated_Source\PSoC4/UART_LED_UART.c ****         }
+ 594:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 595:Generated_Source\PSoC4/UART_LED_UART.c ****         /* Get and clear RX error mask */
+ 596:Generated_Source\PSoC4/UART_LED_UART.c ****         tmpStatus = (UART_LED_GetRxInterruptSource() & UART_LED_INTR_RX_ERR);
+ 347              		.loc 1 596 0
+ 348 0014 064A     		ldr	r2, .L25+4
+ 349 0016 1368     		ldr	r3, [r2]
+ 350              	.LVL21:
+ 597:Generated_Source\PSoC4/UART_LED_UART.c ****         UART_LED_ClearRxInterruptSource(UART_LED_INTR_RX_ERR);
+ 351              		.loc 1 597 0
+ 352 0018 D821     		movs	r1, #216
+ 353 001a 8900     		lsls	r1, r1, #2
+ 354 001c 1160     		str	r1, [r2]
+ 598:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 599:Generated_Source\PSoC4/UART_LED_UART.c ****         /* Puts together data and error status:
+ 600:Generated_Source\PSoC4/UART_LED_UART.c ****         * MP mode and accept address: 9th bit is set to notify mark.
+ 601:Generated_Source\PSoC4/UART_LED_UART.c ****         */
+ 602:Generated_Source\PSoC4/UART_LED_UART.c ****         rxData |= ((uint32) (tmpStatus << 8u));
+ 355              		.loc 1 602 0
+ 356 001e 1B02     		lsls	r3, r3, #8
+ 357              	.LVL22:
+ 358 0020 D822     		movs	r2, #216
+ 359 0022 9202     		lsls	r2, r2, #10
+ 360 0024 1340     		ands	r3, r2
+ 361 0026 1843     		orrs	r0, r3
+ 362              	.LVL23:
+ 603:Generated_Source\PSoC4/UART_LED_UART.c **** 
+ 604:Generated_Source\PSoC4/UART_LED_UART.c ****         return (rxData);
+ 605:Generated_Source\PSoC4/UART_LED_UART.c ****     }
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 18
+
+
+ 363              		.loc 1 605 0
+ 364              		@ sp needed
+ 365 0028 10BD     		pop	{r4, pc}
+ 366              	.L26:
+ 367 002a C046     		.align	2
+ 368              	.L25:
+ 369 002c 40030740 		.word	1074201408
+ 370 0030 C00F0740 		.word	1074204608
+ 371              		.cfi_endproc
+ 372              	.LFE6:
+ 373              		.size	UART_LED_UartGetByte, .-UART_LED_UartGetByte
+ 374              		.text
+ 375              	.Letext0:
+ 376              		.file 2 "Generated_Source\\PSoC4/cytypes.h"
+ 377              		.file 3 "Generated_Source\\PSoC4\\UART_LED_SPI_UART.h"
+ 378              		.file 4 "Generated_Source\\PSoC4\\UART_LED_PVT.h"
+ 379              		.section	.debug_info,"",%progbits
+ 380              	.Ldebug_info0:
+ 381 0000 04020000 		.4byte	0x204
+ 382 0004 0400     		.2byte	0x4
+ 383 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 384 000a 04       		.byte	0x4
+ 385 000b 01       		.uleb128 0x1
+ 386 000c 52010000 		.4byte	.LASF31
+ 387 0010 0C       		.byte	0xc
+ 388 0011 CD000000 		.4byte	.LASF32
+ 389 0015 8F020000 		.4byte	.LASF33
+ 390 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 391 001d 00000000 		.4byte	0
+ 392 0021 00000000 		.4byte	.Ldebug_line0
+ 393 0025 02       		.uleb128 0x2
+ 394 0026 01       		.byte	0x1
+ 395 0027 06       		.byte	0x6
+ 396 0028 46010000 		.4byte	.LASF0
+ 397 002c 02       		.uleb128 0x2
+ 398 002d 01       		.byte	0x1
+ 399 002e 08       		.byte	0x8
+ 400 002f 63000000 		.4byte	.LASF1
+ 401 0033 02       		.uleb128 0x2
+ 402 0034 02       		.byte	0x2
+ 403 0035 05       		.byte	0x5
+ 404 0036 16020000 		.4byte	.LASF2
+ 405 003a 02       		.uleb128 0x2
+ 406 003b 02       		.byte	0x2
+ 407 003c 07       		.byte	0x7
+ 408 003d 38000000 		.4byte	.LASF3
+ 409 0041 02       		.uleb128 0x2
+ 410 0042 04       		.byte	0x4
+ 411 0043 05       		.byte	0x5
+ 412 0044 40020000 		.4byte	.LASF4
+ 413 0048 02       		.uleb128 0x2
+ 414 0049 04       		.byte	0x4
+ 415 004a 07       		.byte	0x7
+ 416 004b 86000000 		.4byte	.LASF5
+ 417 004f 02       		.uleb128 0x2
+ 418 0050 08       		.byte	0x8
+ 419 0051 05       		.byte	0x5
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 19
+
+
+ 420 0052 03020000 		.4byte	.LASF6
+ 421 0056 02       		.uleb128 0x2
+ 422 0057 08       		.byte	0x8
+ 423 0058 07       		.byte	0x7
+ 424 0059 2F010000 		.4byte	.LASF7
+ 425 005d 03       		.uleb128 0x3
+ 426 005e 04       		.byte	0x4
+ 427 005f 05       		.byte	0x5
+ 428 0060 696E7400 		.ascii	"int\000"
+ 429 0064 02       		.uleb128 0x2
+ 430 0065 04       		.byte	0x4
+ 431 0066 07       		.byte	0x7
+ 432 0067 1A010000 		.4byte	.LASF8
+ 433 006b 04       		.uleb128 0x4
+ 434 006c F4000000 		.4byte	.LASF9
+ 435 0070 02       		.byte	0x2
+ 436 0071 D301     		.2byte	0x1d3
+ 437 0073 3A000000 		.4byte	0x3a
+ 438 0077 04       		.uleb128 0x4
+ 439 0078 FB000000 		.4byte	.LASF10
+ 440 007c 02       		.byte	0x2
+ 441 007d D401     		.2byte	0x1d4
+ 442 007f 48000000 		.4byte	0x48
+ 443 0083 02       		.uleb128 0x2
+ 444 0084 04       		.byte	0x4
+ 445 0085 04       		.byte	0x4
+ 446 0086 4B000000 		.4byte	.LASF11
+ 447 008a 02       		.uleb128 0x2
+ 448 008b 08       		.byte	0x8
+ 449 008c 04       		.byte	0x4
+ 450 008d C6000000 		.4byte	.LASF12
+ 451 0091 02       		.uleb128 0x2
+ 452 0092 01       		.byte	0x1
+ 453 0093 08       		.byte	0x8
+ 454 0094 11020000 		.4byte	.LASF13
+ 455 0098 04       		.uleb128 0x4
+ 456 0099 00000000 		.4byte	.LASF14
+ 457 009d 02       		.byte	0x2
+ 458 009e 7E02     		.2byte	0x27e
+ 459 00a0 A4000000 		.4byte	0xa4
+ 460 00a4 05       		.uleb128 0x5
+ 461 00a5 77000000 		.4byte	0x77
+ 462 00a9 02       		.uleb128 0x2
+ 463 00aa 08       		.byte	0x8
+ 464 00ab 04       		.byte	0x4
+ 465 00ac 5C020000 		.4byte	.LASF15
+ 466 00b0 02       		.uleb128 0x2
+ 467 00b1 04       		.byte	0x4
+ 468 00b2 07       		.byte	0x7
+ 469 00b3 E0010000 		.4byte	.LASF16
+ 470 00b7 06       		.uleb128 0x6
+ 471 00b8 7D020000 		.4byte	.LASF17
+ 472 00bc 01       		.byte	0x1
+ 473 00bd F7       		.byte	0xf7
+ 474 00be 00000000 		.4byte	.LFB0
+ 475 00c2 A0000000 		.4byte	.LFE0-.LFB0
+ 476 00c6 01       		.uleb128 0x1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 20
+
+
+ 477 00c7 9C       		.byte	0x9c
+ 478 00c8 07       		.uleb128 0x7
+ 479 00c9 02010000 		.4byte	.LASF18
+ 480 00cd 01       		.byte	0x1
+ 481 00ce 3D01     		.2byte	0x13d
+ 482 00d0 00000000 		.4byte	.LFB1
+ 483 00d4 14000000 		.4byte	.LFE1-.LFB1
+ 484 00d8 01       		.uleb128 0x1
+ 485 00d9 9C       		.byte	0x9c
+ 486 00da 07       		.uleb128 0x7
+ 487 00db 51000000 		.4byte	.LASF19
+ 488 00df 01       		.byte	0x1
+ 489 00e0 7101     		.2byte	0x171
+ 490 00e2 00000000 		.4byte	.LFB2
+ 491 00e6 18000000 		.4byte	.LFE2-.LFB2
+ 492 00ea 01       		.uleb128 0x1
+ 493 00eb 9C       		.byte	0x9c
+ 494 00ec 08       		.uleb128 0x8
+ 495 00ed E9010000 		.4byte	.LASF20
+ 496 00f1 01       		.byte	0x1
+ 497 00f2 B101     		.2byte	0x1b1
+ 498 00f4 00000000 		.4byte	.LFB3
+ 499 00f8 14000000 		.4byte	.LFE3-.LFB3
+ 500 00fc 01       		.uleb128 0x1
+ 501 00fd 9C       		.byte	0x9c
+ 502 00fe 23010000 		.4byte	0x123
+ 503 0102 09       		.uleb128 0x9
+ 504 0103 27010000 		.4byte	.LASF22
+ 505 0107 01       		.byte	0x1
+ 506 0108 B101     		.2byte	0x1b1
+ 507 010a 77000000 		.4byte	0x77
+ 508 010e 00000000 		.4byte	.LLST0
+ 509 0112 0A       		.uleb128 0xa
+ 510 0113 53020000 		.4byte	.LASF24
+ 511 0117 01       		.byte	0x1
+ 512 0118 B301     		.2byte	0x1b3
+ 513 011a 77000000 		.4byte	0x77
+ 514 011e 21000000 		.4byte	.LLST1
+ 515 0122 00       		.byte	0
+ 516 0123 08       		.uleb128 0x8
+ 517 0124 1A000000 		.4byte	.LASF21
+ 518 0128 01       		.byte	0x1
+ 519 0129 CA01     		.2byte	0x1ca
+ 520 012b 00000000 		.4byte	.LFB4
+ 521 012f 18000000 		.4byte	.LFE4-.LFB4
+ 522 0133 01       		.uleb128 0x1
+ 523 0134 9C       		.byte	0x9c
+ 524 0135 5A010000 		.4byte	0x15a
+ 525 0139 09       		.uleb128 0x9
+ 526 013a BA000000 		.4byte	.LASF23
+ 527 013e 01       		.byte	0x1
+ 528 013f CA01     		.2byte	0x1ca
+ 529 0141 77000000 		.4byte	0x77
+ 530 0145 3F000000 		.4byte	.LLST2
+ 531 0149 0A       		.uleb128 0xa
+ 532 014a 53020000 		.4byte	.LASF24
+ 533 014e 01       		.byte	0x1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 21
+
+
+ 534 014f CC01     		.2byte	0x1cc
+ 535 0151 77000000 		.4byte	0x77
+ 536 0155 60000000 		.4byte	.LLST3
+ 537 0159 00       		.byte	0
+ 538 015a 0B       		.uleb128 0xb
+ 539 015b 71000000 		.4byte	.LASF26
+ 540 015f 01       		.byte	0x1
+ 541 0160 F201     		.2byte	0x1f2
+ 542 0162 77000000 		.4byte	0x77
+ 543 0166 00000000 		.4byte	.LFB5
+ 544 016a 2C000000 		.4byte	.LFE5-.LFB5
+ 545 016e 01       		.uleb128 0x1
+ 546 016f 9C       		.byte	0x9c
+ 547 0170 97010000 		.4byte	0x197
+ 548 0174 0A       		.uleb128 0xa
+ 549 0175 B3000000 		.4byte	.LASF25
+ 550 0179 01       		.byte	0x1
+ 551 017a F401     		.2byte	0x1f4
+ 552 017c 77000000 		.4byte	0x77
+ 553 0180 89000000 		.4byte	.LLST4
+ 554 0184 0C       		.uleb128 0xc
+ 555 0185 06000000 		.4byte	.LVL11
+ 556 0189 EF010000 		.4byte	0x1ef
+ 557 018d 0C       		.uleb128 0xc
+ 558 018e 0E000000 		.4byte	.LVL12
+ 559 0192 FB010000 		.4byte	0x1fb
+ 560 0196 00       		.byte	0
+ 561 0197 0B       		.uleb128 0xb
+ 562 0198 68020000 		.4byte	.LASF27
+ 563 019c 01       		.byte	0x1
+ 564 019d 2402     		.2byte	0x224
+ 565 019f 77000000 		.4byte	0x77
+ 566 01a3 00000000 		.4byte	.LFB6
+ 567 01a7 34000000 		.4byte	.LFE6-.LFB6
+ 568 01ab 01       		.uleb128 0x1
+ 569 01ac 9C       		.byte	0x9c
+ 570 01ad E4010000 		.4byte	0x1e4
+ 571 01b1 0A       		.uleb128 0xa
+ 572 01b2 B3000000 		.4byte	.LASF25
+ 573 01b6 01       		.byte	0x1
+ 574 01b7 2602     		.2byte	0x226
+ 575 01b9 77000000 		.4byte	0x77
+ 576 01bd D6000000 		.4byte	.LLST5
+ 577 01c1 0A       		.uleb128 0xa
+ 578 01c2 49020000 		.4byte	.LASF28
+ 579 01c6 01       		.byte	0x1
+ 580 01c7 2702     		.2byte	0x227
+ 581 01c9 77000000 		.4byte	0x77
+ 582 01cd F4000000 		.4byte	.LLST6
+ 583 01d1 0C       		.uleb128 0xc
+ 584 01d2 06000000 		.4byte	.LVL17
+ 585 01d6 EF010000 		.4byte	0x1ef
+ 586 01da 0C       		.uleb128 0xc
+ 587 01db 0E000000 		.4byte	.LVL18
+ 588 01df FB010000 		.4byte	0x1fb
+ 589 01e3 00       		.byte	0
+ 590 01e4 0D       		.uleb128 0xd
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 22
+
+
+ 591 01e5 06000000 		.4byte	.LASF34
+ 592 01e9 04       		.byte	0x4
+ 593 01ea 5B       		.byte	0x5b
+ 594 01eb 6B000000 		.4byte	0x6b
+ 595 01ef 0E       		.uleb128 0xe
+ 596 01f0 20020000 		.4byte	.LASF29
+ 597 01f4 20020000 		.4byte	.LASF29
+ 598 01f8 03       		.byte	0x3
+ 599 01f9 3E03     		.2byte	0x33e
+ 600 01fb 0E       		.uleb128 0xe
+ 601 01fc 98000000 		.4byte	.LASF30
+ 602 0200 98000000 		.4byte	.LASF30
+ 603 0204 03       		.byte	0x3
+ 604 0205 3D03     		.2byte	0x33d
+ 605 0207 00       		.byte	0
+ 606              		.section	.debug_abbrev,"",%progbits
+ 607              	.Ldebug_abbrev0:
+ 608 0000 01       		.uleb128 0x1
+ 609 0001 11       		.uleb128 0x11
+ 610 0002 01       		.byte	0x1
+ 611 0003 25       		.uleb128 0x25
+ 612 0004 0E       		.uleb128 0xe
+ 613 0005 13       		.uleb128 0x13
+ 614 0006 0B       		.uleb128 0xb
+ 615 0007 03       		.uleb128 0x3
+ 616 0008 0E       		.uleb128 0xe
+ 617 0009 1B       		.uleb128 0x1b
+ 618 000a 0E       		.uleb128 0xe
+ 619 000b 55       		.uleb128 0x55
+ 620 000c 17       		.uleb128 0x17
+ 621 000d 11       		.uleb128 0x11
+ 622 000e 01       		.uleb128 0x1
+ 623 000f 10       		.uleb128 0x10
+ 624 0010 17       		.uleb128 0x17
+ 625 0011 00       		.byte	0
+ 626 0012 00       		.byte	0
+ 627 0013 02       		.uleb128 0x2
+ 628 0014 24       		.uleb128 0x24
+ 629 0015 00       		.byte	0
+ 630 0016 0B       		.uleb128 0xb
+ 631 0017 0B       		.uleb128 0xb
+ 632 0018 3E       		.uleb128 0x3e
+ 633 0019 0B       		.uleb128 0xb
+ 634 001a 03       		.uleb128 0x3
+ 635 001b 0E       		.uleb128 0xe
+ 636 001c 00       		.byte	0
+ 637 001d 00       		.byte	0
+ 638 001e 03       		.uleb128 0x3
+ 639 001f 24       		.uleb128 0x24
+ 640 0020 00       		.byte	0
+ 641 0021 0B       		.uleb128 0xb
+ 642 0022 0B       		.uleb128 0xb
+ 643 0023 3E       		.uleb128 0x3e
+ 644 0024 0B       		.uleb128 0xb
+ 645 0025 03       		.uleb128 0x3
+ 646 0026 08       		.uleb128 0x8
+ 647 0027 00       		.byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 23
+
+
+ 648 0028 00       		.byte	0
+ 649 0029 04       		.uleb128 0x4
+ 650 002a 16       		.uleb128 0x16
+ 651 002b 00       		.byte	0
+ 652 002c 03       		.uleb128 0x3
+ 653 002d 0E       		.uleb128 0xe
+ 654 002e 3A       		.uleb128 0x3a
+ 655 002f 0B       		.uleb128 0xb
+ 656 0030 3B       		.uleb128 0x3b
+ 657 0031 05       		.uleb128 0x5
+ 658 0032 49       		.uleb128 0x49
+ 659 0033 13       		.uleb128 0x13
+ 660 0034 00       		.byte	0
+ 661 0035 00       		.byte	0
+ 662 0036 05       		.uleb128 0x5
+ 663 0037 35       		.uleb128 0x35
+ 664 0038 00       		.byte	0
+ 665 0039 49       		.uleb128 0x49
+ 666 003a 13       		.uleb128 0x13
+ 667 003b 00       		.byte	0
+ 668 003c 00       		.byte	0
+ 669 003d 06       		.uleb128 0x6
+ 670 003e 2E       		.uleb128 0x2e
+ 671 003f 00       		.byte	0
+ 672 0040 3F       		.uleb128 0x3f
+ 673 0041 19       		.uleb128 0x19
+ 674 0042 03       		.uleb128 0x3
+ 675 0043 0E       		.uleb128 0xe
+ 676 0044 3A       		.uleb128 0x3a
+ 677 0045 0B       		.uleb128 0xb
+ 678 0046 3B       		.uleb128 0x3b
+ 679 0047 0B       		.uleb128 0xb
+ 680 0048 27       		.uleb128 0x27
+ 681 0049 19       		.uleb128 0x19
+ 682 004a 11       		.uleb128 0x11
+ 683 004b 01       		.uleb128 0x1
+ 684 004c 12       		.uleb128 0x12
+ 685 004d 06       		.uleb128 0x6
+ 686 004e 40       		.uleb128 0x40
+ 687 004f 18       		.uleb128 0x18
+ 688 0050 9742     		.uleb128 0x2117
+ 689 0052 19       		.uleb128 0x19
+ 690 0053 00       		.byte	0
+ 691 0054 00       		.byte	0
+ 692 0055 07       		.uleb128 0x7
+ 693 0056 2E       		.uleb128 0x2e
+ 694 0057 00       		.byte	0
+ 695 0058 3F       		.uleb128 0x3f
+ 696 0059 19       		.uleb128 0x19
+ 697 005a 03       		.uleb128 0x3
+ 698 005b 0E       		.uleb128 0xe
+ 699 005c 3A       		.uleb128 0x3a
+ 700 005d 0B       		.uleb128 0xb
+ 701 005e 3B       		.uleb128 0x3b
+ 702 005f 05       		.uleb128 0x5
+ 703 0060 27       		.uleb128 0x27
+ 704 0061 19       		.uleb128 0x19
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 24
+
+
+ 705 0062 11       		.uleb128 0x11
+ 706 0063 01       		.uleb128 0x1
+ 707 0064 12       		.uleb128 0x12
+ 708 0065 06       		.uleb128 0x6
+ 709 0066 40       		.uleb128 0x40
+ 710 0067 18       		.uleb128 0x18
+ 711 0068 9742     		.uleb128 0x2117
+ 712 006a 19       		.uleb128 0x19
+ 713 006b 00       		.byte	0
+ 714 006c 00       		.byte	0
+ 715 006d 08       		.uleb128 0x8
+ 716 006e 2E       		.uleb128 0x2e
+ 717 006f 01       		.byte	0x1
+ 718 0070 3F       		.uleb128 0x3f
+ 719 0071 19       		.uleb128 0x19
+ 720 0072 03       		.uleb128 0x3
+ 721 0073 0E       		.uleb128 0xe
+ 722 0074 3A       		.uleb128 0x3a
+ 723 0075 0B       		.uleb128 0xb
+ 724 0076 3B       		.uleb128 0x3b
+ 725 0077 05       		.uleb128 0x5
+ 726 0078 27       		.uleb128 0x27
+ 727 0079 19       		.uleb128 0x19
+ 728 007a 11       		.uleb128 0x11
+ 729 007b 01       		.uleb128 0x1
+ 730 007c 12       		.uleb128 0x12
+ 731 007d 06       		.uleb128 0x6
+ 732 007e 40       		.uleb128 0x40
+ 733 007f 18       		.uleb128 0x18
+ 734 0080 9742     		.uleb128 0x2117
+ 735 0082 19       		.uleb128 0x19
+ 736 0083 01       		.uleb128 0x1
+ 737 0084 13       		.uleb128 0x13
+ 738 0085 00       		.byte	0
+ 739 0086 00       		.byte	0
+ 740 0087 09       		.uleb128 0x9
+ 741 0088 05       		.uleb128 0x5
+ 742 0089 00       		.byte	0
+ 743 008a 03       		.uleb128 0x3
+ 744 008b 0E       		.uleb128 0xe
+ 745 008c 3A       		.uleb128 0x3a
+ 746 008d 0B       		.uleb128 0xb
+ 747 008e 3B       		.uleb128 0x3b
+ 748 008f 05       		.uleb128 0x5
+ 749 0090 49       		.uleb128 0x49
+ 750 0091 13       		.uleb128 0x13
+ 751 0092 02       		.uleb128 0x2
+ 752 0093 17       		.uleb128 0x17
+ 753 0094 00       		.byte	0
+ 754 0095 00       		.byte	0
+ 755 0096 0A       		.uleb128 0xa
+ 756 0097 34       		.uleb128 0x34
+ 757 0098 00       		.byte	0
+ 758 0099 03       		.uleb128 0x3
+ 759 009a 0E       		.uleb128 0xe
+ 760 009b 3A       		.uleb128 0x3a
+ 761 009c 0B       		.uleb128 0xb
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 25
+
+
+ 762 009d 3B       		.uleb128 0x3b
+ 763 009e 05       		.uleb128 0x5
+ 764 009f 49       		.uleb128 0x49
+ 765 00a0 13       		.uleb128 0x13
+ 766 00a1 02       		.uleb128 0x2
+ 767 00a2 17       		.uleb128 0x17
+ 768 00a3 00       		.byte	0
+ 769 00a4 00       		.byte	0
+ 770 00a5 0B       		.uleb128 0xb
+ 771 00a6 2E       		.uleb128 0x2e
+ 772 00a7 01       		.byte	0x1
+ 773 00a8 3F       		.uleb128 0x3f
+ 774 00a9 19       		.uleb128 0x19
+ 775 00aa 03       		.uleb128 0x3
+ 776 00ab 0E       		.uleb128 0xe
+ 777 00ac 3A       		.uleb128 0x3a
+ 778 00ad 0B       		.uleb128 0xb
+ 779 00ae 3B       		.uleb128 0x3b
+ 780 00af 05       		.uleb128 0x5
+ 781 00b0 27       		.uleb128 0x27
+ 782 00b1 19       		.uleb128 0x19
+ 783 00b2 49       		.uleb128 0x49
+ 784 00b3 13       		.uleb128 0x13
+ 785 00b4 11       		.uleb128 0x11
+ 786 00b5 01       		.uleb128 0x1
+ 787 00b6 12       		.uleb128 0x12
+ 788 00b7 06       		.uleb128 0x6
+ 789 00b8 40       		.uleb128 0x40
+ 790 00b9 18       		.uleb128 0x18
+ 791 00ba 9742     		.uleb128 0x2117
+ 792 00bc 19       		.uleb128 0x19
+ 793 00bd 01       		.uleb128 0x1
+ 794 00be 13       		.uleb128 0x13
+ 795 00bf 00       		.byte	0
+ 796 00c0 00       		.byte	0
+ 797 00c1 0C       		.uleb128 0xc
+ 798 00c2 898201   		.uleb128 0x4109
+ 799 00c5 00       		.byte	0
+ 800 00c6 11       		.uleb128 0x11
+ 801 00c7 01       		.uleb128 0x1
+ 802 00c8 31       		.uleb128 0x31
+ 803 00c9 13       		.uleb128 0x13
+ 804 00ca 00       		.byte	0
+ 805 00cb 00       		.byte	0
+ 806 00cc 0D       		.uleb128 0xd
+ 807 00cd 34       		.uleb128 0x34
+ 808 00ce 00       		.byte	0
+ 809 00cf 03       		.uleb128 0x3
+ 810 00d0 0E       		.uleb128 0xe
+ 811 00d1 3A       		.uleb128 0x3a
+ 812 00d2 0B       		.uleb128 0xb
+ 813 00d3 3B       		.uleb128 0x3b
+ 814 00d4 0B       		.uleb128 0xb
+ 815 00d5 49       		.uleb128 0x49
+ 816 00d6 13       		.uleb128 0x13
+ 817 00d7 3F       		.uleb128 0x3f
+ 818 00d8 19       		.uleb128 0x19
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 26
+
+
+ 819 00d9 3C       		.uleb128 0x3c
+ 820 00da 19       		.uleb128 0x19
+ 821 00db 00       		.byte	0
+ 822 00dc 00       		.byte	0
+ 823 00dd 0E       		.uleb128 0xe
+ 824 00de 2E       		.uleb128 0x2e
+ 825 00df 00       		.byte	0
+ 826 00e0 3F       		.uleb128 0x3f
+ 827 00e1 19       		.uleb128 0x19
+ 828 00e2 3C       		.uleb128 0x3c
+ 829 00e3 19       		.uleb128 0x19
+ 830 00e4 6E       		.uleb128 0x6e
+ 831 00e5 0E       		.uleb128 0xe
+ 832 00e6 03       		.uleb128 0x3
+ 833 00e7 0E       		.uleb128 0xe
+ 834 00e8 3A       		.uleb128 0x3a
+ 835 00e9 0B       		.uleb128 0xb
+ 836 00ea 3B       		.uleb128 0x3b
+ 837 00eb 05       		.uleb128 0x5
+ 838 00ec 00       		.byte	0
+ 839 00ed 00       		.byte	0
+ 840 00ee 00       		.byte	0
+ 841              		.section	.debug_loc,"",%progbits
+ 842              	.Ldebug_loc0:
+ 843              	.LLST0:
+ 844 0000 00000000 		.4byte	.LVL0
+ 845 0004 0A000000 		.4byte	.LVL3
+ 846 0008 0100     		.2byte	0x1
+ 847 000a 50       		.byte	0x50
+ 848 000b 0A000000 		.4byte	.LVL3
+ 849 000f 14000000 		.4byte	.LFE3
+ 850 0013 0400     		.2byte	0x4
+ 851 0015 F3       		.byte	0xf3
+ 852 0016 01       		.uleb128 0x1
+ 853 0017 50       		.byte	0x50
+ 854 0018 9F       		.byte	0x9f
+ 855 0019 00000000 		.4byte	0
+ 856 001d 00000000 		.4byte	0
+ 857              	.LLST1:
+ 858 0021 04000000 		.4byte	.LVL1
+ 859 0025 0C000000 		.4byte	.LVL4
+ 860 0029 0100     		.2byte	0x1
+ 861 002b 53       		.byte	0x53
+ 862 002c 0C000000 		.4byte	.LVL4
+ 863 0030 14000000 		.4byte	.LFE3
+ 864 0034 0100     		.2byte	0x1
+ 865 0036 50       		.byte	0x50
+ 866 0037 00000000 		.4byte	0
+ 867 003b 00000000 		.4byte	0
+ 868              	.LLST2:
+ 869 003f 00000000 		.4byte	.LVL5
+ 870 0043 0A000000 		.4byte	.LVL8
+ 871 0047 0100     		.2byte	0x1
+ 872 0049 50       		.byte	0x50
+ 873 004a 0A000000 		.4byte	.LVL8
+ 874 004e 18000000 		.4byte	.LFE4
+ 875 0052 0400     		.2byte	0x4
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 27
+
+
+ 876 0054 F3       		.byte	0xf3
+ 877 0055 01       		.uleb128 0x1
+ 878 0056 50       		.byte	0x50
+ 879 0057 9F       		.byte	0x9f
+ 880 0058 00000000 		.4byte	0
+ 881 005c 00000000 		.4byte	0
+ 882              	.LLST3:
+ 883 0060 04000000 		.4byte	.LVL6
+ 884 0064 08000000 		.4byte	.LVL7
+ 885 0068 0100     		.2byte	0x1
+ 886 006a 51       		.byte	0x51
+ 887 006b 08000000 		.4byte	.LVL7
+ 888 006f 0C000000 		.4byte	.LVL9
+ 889 0073 0100     		.2byte	0x1
+ 890 0075 53       		.byte	0x53
+ 891 0076 0C000000 		.4byte	.LVL9
+ 892 007a 18000000 		.4byte	.LFE4
+ 893 007e 0100     		.2byte	0x1
+ 894 0080 50       		.byte	0x50
+ 895 0081 00000000 		.4byte	0
+ 896 0085 00000000 		.4byte	0
+ 897              	.LLST4:
+ 898 0089 02000000 		.4byte	.LVL10
+ 899 008d 0E000000 		.4byte	.LVL12
+ 900 0091 0200     		.2byte	0x2
+ 901 0093 30       		.byte	0x30
+ 902 0094 9F       		.byte	0x9f
+ 903 0095 0E000000 		.4byte	.LVL12
+ 904 0099 10000000 		.4byte	.LVL13
+ 905 009d 0100     		.2byte	0x1
+ 906 009f 50       		.byte	0x50
+ 907 00a0 10000000 		.4byte	.LVL13
+ 908 00a4 12000000 		.4byte	.LVL14
+ 909 00a8 0200     		.2byte	0x2
+ 910 00aa 30       		.byte	0x30
+ 911 00ab 9F       		.byte	0x9f
+ 912 00ac 12000000 		.4byte	.LVL14
+ 913 00b0 1E000000 		.4byte	.LVL15
+ 914 00b4 0100     		.2byte	0x1
+ 915 00b6 50       		.byte	0x50
+ 916 00b7 1E000000 		.4byte	.LVL15
+ 917 00bb 26000000 		.4byte	.LVL16
+ 918 00bf 0200     		.2byte	0x2
+ 919 00c1 30       		.byte	0x30
+ 920 00c2 9F       		.byte	0x9f
+ 921 00c3 26000000 		.4byte	.LVL16
+ 922 00c7 2C000000 		.4byte	.LFE5
+ 923 00cb 0100     		.2byte	0x1
+ 924 00cd 50       		.byte	0x50
+ 925 00ce 00000000 		.4byte	0
+ 926 00d2 00000000 		.4byte	0
+ 927              	.LLST5:
+ 928 00d6 0E000000 		.4byte	.LVL18
+ 929 00da 10000000 		.4byte	.LVL19
+ 930 00de 0100     		.2byte	0x1
+ 931 00e0 50       		.byte	0x50
+ 932 00e1 14000000 		.4byte	.LVL20
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 28
+
+
+ 933 00e5 34000000 		.4byte	.LFE6
+ 934 00e9 0100     		.2byte	0x1
+ 935 00eb 50       		.byte	0x50
+ 936 00ec 00000000 		.4byte	0
+ 937 00f0 00000000 		.4byte	0
+ 938              	.LLST6:
+ 939 00f4 18000000 		.4byte	.LVL21
+ 940 00f8 20000000 		.4byte	.LVL22
+ 941 00fc 0700     		.2byte	0x7
+ 942 00fe 73       		.byte	0x73
+ 943 00ff 00       		.sleb128 0
+ 944 0100 0A       		.byte	0xa
+ 945 0101 6003     		.2byte	0x360
+ 946 0103 1A       		.byte	0x1a
+ 947 0104 9F       		.byte	0x9f
+ 948 0105 00000000 		.4byte	0
+ 949 0109 00000000 		.4byte	0
+ 950              		.section	.debug_aranges,"",%progbits
+ 951 0000 4C000000 		.4byte	0x4c
+ 952 0004 0200     		.2byte	0x2
+ 953 0006 00000000 		.4byte	.Ldebug_info0
+ 954 000a 04       		.byte	0x4
+ 955 000b 00       		.byte	0
+ 956 000c 0000     		.2byte	0
+ 957 000e 0000     		.2byte	0
+ 958 0010 00000000 		.4byte	.LFB0
+ 959 0014 A0000000 		.4byte	.LFE0-.LFB0
+ 960 0018 00000000 		.4byte	.LFB1
+ 961 001c 14000000 		.4byte	.LFE1-.LFB1
+ 962 0020 00000000 		.4byte	.LFB2
+ 963 0024 18000000 		.4byte	.LFE2-.LFB2
+ 964 0028 00000000 		.4byte	.LFB3
+ 965 002c 14000000 		.4byte	.LFE3-.LFB3
+ 966 0030 00000000 		.4byte	.LFB4
+ 967 0034 18000000 		.4byte	.LFE4-.LFB4
+ 968 0038 00000000 		.4byte	.LFB5
+ 969 003c 2C000000 		.4byte	.LFE5-.LFB5
+ 970 0040 00000000 		.4byte	.LFB6
+ 971 0044 34000000 		.4byte	.LFE6-.LFB6
+ 972 0048 00000000 		.4byte	0
+ 973 004c 00000000 		.4byte	0
+ 974              		.section	.debug_ranges,"",%progbits
+ 975              	.Ldebug_ranges0:
+ 976 0000 00000000 		.4byte	.LFB0
+ 977 0004 A0000000 		.4byte	.LFE0
+ 978 0008 00000000 		.4byte	.LFB1
+ 979 000c 14000000 		.4byte	.LFE1
+ 980 0010 00000000 		.4byte	.LFB2
+ 981 0014 18000000 		.4byte	.LFE2
+ 982 0018 00000000 		.4byte	.LFB3
+ 983 001c 14000000 		.4byte	.LFE3
+ 984 0020 00000000 		.4byte	.LFB4
+ 985 0024 18000000 		.4byte	.LFE4
+ 986 0028 00000000 		.4byte	.LFB5
+ 987 002c 2C000000 		.4byte	.LFE5
+ 988 0030 00000000 		.4byte	.LFB6
+ 989 0034 34000000 		.4byte	.LFE6
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 29
+
+
+ 990 0038 00000000 		.4byte	0
+ 991 003c 00000000 		.4byte	0
+ 992              		.section	.debug_line,"",%progbits
+ 993              	.Ldebug_line0:
+ 994 0000 24010000 		.section	.debug_str,"MS",%progbits,1
+ 994      02007300 
+ 994      00000201 
+ 994      FB0E0D00 
+ 994      01010101 
+ 995              	.LASF14:
+ 996 0000 72656733 		.ascii	"reg32\000"
+ 996      3200
+ 997              	.LASF34:
+ 998 0006 55415254 		.ascii	"UART_LED_IntrTxMask\000"
+ 998      5F4C4544 
+ 998      5F496E74 
+ 998      7254784D 
+ 998      61736B00 
+ 999              	.LASF21:
+ 1000 001a 55415254 		.ascii	"UART_LED_UartSetRxAddressMask\000"
+ 1000      5F4C4544 
+ 1000      5F556172 
+ 1000      74536574 
+ 1000      52784164 
+ 1001              	.LASF3:
+ 1002 0038 73686F72 		.ascii	"short unsigned int\000"
+ 1002      7420756E 
+ 1002      7369676E 
+ 1002      65642069 
+ 1002      6E7400
+ 1003              	.LASF11:
+ 1004 004b 666C6F61 		.ascii	"float\000"
+ 1004      7400
+ 1005              	.LASF19:
+ 1006 0051 55415254 		.ascii	"UART_LED_UartStop\000"
+ 1006      5F4C4544 
+ 1006      5F556172 
+ 1006      7453746F 
+ 1006      7000
+ 1007              	.LASF1:
+ 1008 0063 756E7369 		.ascii	"unsigned char\000"
+ 1008      676E6564 
+ 1008      20636861 
+ 1008      7200
+ 1009              	.LASF26:
+ 1010 0071 55415254 		.ascii	"UART_LED_UartGetChar\000"
+ 1010      5F4C4544 
+ 1010      5F556172 
+ 1010      74476574 
+ 1010      43686172 
+ 1011              	.LASF5:
+ 1012 0086 6C6F6E67 		.ascii	"long unsigned int\000"
+ 1012      20756E73 
+ 1012      69676E65 
+ 1012      6420696E 
+ 1012      7400
+ 1013              	.LASF30:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 30
+
+
+ 1014 0098 55415254 		.ascii	"UART_LED_SpiUartReadRxData\000"
+ 1014      5F4C4544 
+ 1014      5F537069 
+ 1014      55617274 
+ 1014      52656164 
+ 1015              	.LASF25:
+ 1016 00b3 72784461 		.ascii	"rxData\000"
+ 1016      746100
+ 1017              	.LASF23:
+ 1018 00ba 61646472 		.ascii	"addressMask\000"
+ 1018      6573734D 
+ 1018      61736B00 
+ 1019              	.LASF12:
+ 1020 00c6 646F7562 		.ascii	"double\000"
+ 1020      6C6500
+ 1021              	.LASF32:
+ 1022 00cd 47656E65 		.ascii	"Generated_Source\\PSoC4\\UART_LED_UART.c\000"
+ 1022      72617465 
+ 1022      645F536F 
+ 1022      75726365 
+ 1022      5C50536F 
+ 1023              	.LASF9:
+ 1024 00f4 75696E74 		.ascii	"uint16\000"
+ 1024      313600
+ 1025              	.LASF10:
+ 1026 00fb 75696E74 		.ascii	"uint32\000"
+ 1026      333200
+ 1027              	.LASF18:
+ 1028 0102 55415254 		.ascii	"UART_LED_UartPostEnable\000"
+ 1028      5F4C4544 
+ 1028      5F556172 
+ 1028      74506F73 
+ 1028      74456E61 
+ 1029              	.LASF8:
+ 1030 011a 756E7369 		.ascii	"unsigned int\000"
+ 1030      676E6564 
+ 1030      20696E74 
+ 1030      00
+ 1031              	.LASF22:
+ 1032 0127 61646472 		.ascii	"address\000"
+ 1032      65737300 
+ 1033              	.LASF7:
+ 1034 012f 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 1034      206C6F6E 
+ 1034      6720756E 
+ 1034      7369676E 
+ 1034      65642069 
+ 1035              	.LASF0:
+ 1036 0146 7369676E 		.ascii	"signed char\000"
+ 1036      65642063 
+ 1036      68617200 
+ 1037              	.LASF31:
+ 1038 0152 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 1038      43313120 
+ 1038      352E342E 
+ 1038      31203230 
+ 1038      31363036 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 31
+
+
+ 1039 0185 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m0 -mthumb -g -O"
+ 1039      20726576 
+ 1039      6973696F 
+ 1039      6E203233 
+ 1039      37373135 
+ 1040 01b8 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 1040      66756E63 
+ 1040      74696F6E 
+ 1040      2D736563 
+ 1040      74696F6E 
+ 1041              	.LASF16:
+ 1042 01e0 73697A65 		.ascii	"sizetype\000"
+ 1042      74797065 
+ 1042      00
+ 1043              	.LASF20:
+ 1044 01e9 55415254 		.ascii	"UART_LED_UartSetRxAddress\000"
+ 1044      5F4C4544 
+ 1044      5F556172 
+ 1044      74536574 
+ 1044      52784164 
+ 1045              	.LASF6:
+ 1046 0203 6C6F6E67 		.ascii	"long long int\000"
+ 1046      206C6F6E 
+ 1046      6720696E 
+ 1046      7400
+ 1047              	.LASF13:
+ 1048 0211 63686172 		.ascii	"char\000"
+ 1048      00
+ 1049              	.LASF2:
+ 1050 0216 73686F72 		.ascii	"short int\000"
+ 1050      7420696E 
+ 1050      7400
+ 1051              	.LASF29:
+ 1052 0220 55415254 		.ascii	"UART_LED_SpiUartGetRxBufferSize\000"
+ 1052      5F4C4544 
+ 1052      5F537069 
+ 1052      55617274 
+ 1052      47657452 
+ 1053              	.LASF4:
+ 1054 0240 6C6F6E67 		.ascii	"long int\000"
+ 1054      20696E74 
+ 1054      00
+ 1055              	.LASF28:
+ 1056 0249 746D7053 		.ascii	"tmpStatus\000"
+ 1056      74617475 
+ 1056      7300
+ 1057              	.LASF24:
+ 1058 0253 6D617463 		.ascii	"matchReg\000"
+ 1058      68526567 
+ 1058      00
+ 1059              	.LASF15:
+ 1060 025c 6C6F6E67 		.ascii	"long double\000"
+ 1060      20646F75 
+ 1060      626C6500 
+ 1061              	.LASF27:
+ 1062 0268 55415254 		.ascii	"UART_LED_UartGetByte\000"
+ 1062      5F4C4544 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\cc45eu1m.s 			page 32
+
+
+ 1062      5F556172 
+ 1062      74476574 
+ 1062      42797465 
+ 1063              	.LASF17:
+ 1064 027d 55415254 		.ascii	"UART_LED_UartInit\000"
+ 1064      5F4C4544 
+ 1064      5F556172 
+ 1064      74496E69 
+ 1064      7400
+ 1065              	.LASF33:
+ 1066 028f 433A5C55 		.ascii	"C:\\Users\\kylep\\Box Sync\\Box Sync\\Feniex Electr"
+ 1066      73657273 
+ 1066      5C6B796C 
+ 1066      65705C42 
+ 1066      6F782053 
+ 1067 02bd 6963616C 		.ascii	"ical Files\\WorkingFolder-Kyle\\Firm-AI-Cube\\81-00"
+ 1067      2046696C 
+ 1067      65735C57 
+ 1067      6F726B69 
+ 1067      6E67466F 
+ 1068 02ed 3032342D 		.ascii	"024-01.cydsn\000"
+ 1068      30312E63 
+ 1068      7964736E 
+ 1068      00
+ 1069              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

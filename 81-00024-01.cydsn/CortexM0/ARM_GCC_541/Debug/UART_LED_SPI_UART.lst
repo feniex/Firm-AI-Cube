@@ -1,0 +1,1307 @@
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxHY49W.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"UART_LED_SPI_UART.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.UART_LED_SpiUartReadRxData,"ax",%progbits
+  20              		.align	2
+  21              		.global	UART_LED_SpiUartReadRxData
+  22              		.code	16
+  23              		.thumb_func
+  24              		.type	UART_LED_SpiUartReadRxData, %function
+  25              	UART_LED_SpiUartReadRxData:
+  26              	.LFB0:
+  27              		.file 1 "Generated_Source\\PSoC4\\UART_LED_SPI_UART.c"
+   1:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** /***************************************************************************//**
+   2:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** * \file UART_LED_SPI_UART.c
+   3:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** * \version 4.0
+   4:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** *
+   5:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** * \brief
+   6:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** *  This file provides the source code to the API for the SCB Component in
+   7:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** *  SPI and UART modes.
+   8:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** *
+   9:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** * Note:
+  10:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** *
+  11:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** *******************************************************************************
+  12:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** * \copyright
+  13:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** * Copyright 2013-2017, Cypress Semiconductor Corporation.  All rights reserved.
+  14:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** * You may use this file only in accordance with the license, terms, conditions,
+  15:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** * disclaimers, and limitations in the end user license agreement accompanying
+  16:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** * the software package with which this file was provided.
+  17:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** *******************************************************************************/
+  18:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+  19:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** #include "UART_LED_PVT.h"
+  20:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** #include "UART_LED_SPI_UART_PVT.h"
+  21:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+  22:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** /***************************************
+  23:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** *        SPI/UART Private Vars
+  24:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** ***************************************/
+  25:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+  26:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** #if(UART_LED_INTERNAL_RX_SW_BUFFER_CONST)
+  27:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     /* Start index to put data into the software receive buffer.*/
+  28:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     volatile uint32 UART_LED_rxBufferHead;
+  29:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     /* Start index to get data from the software receive buffer.*/
+  30:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     volatile uint32 UART_LED_rxBufferTail;
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxHY49W.s 			page 2
+
+
+  31:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     /**
+  32:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     * \addtogroup group_globals
+  33:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     * \{
+  34:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     */
+  35:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     /** Sets when internal software receive buffer overflow
+  36:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  was occurred.
+  37:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     */
+  38:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     volatile uint8  UART_LED_rxBufferOverflow;
+  39:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     /** \} globals */
+  40:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** #endif /* (UART_LED_INTERNAL_RX_SW_BUFFER_CONST) */
+  41:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+  42:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** #if(UART_LED_INTERNAL_TX_SW_BUFFER_CONST)
+  43:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     /* Start index to put data into the software transmit buffer.*/
+  44:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     volatile uint32 UART_LED_txBufferHead;
+  45:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     /* Start index to get data from the software transmit buffer.*/
+  46:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     volatile uint32 UART_LED_txBufferTail;
+  47:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** #endif /* (UART_LED_INTERNAL_TX_SW_BUFFER_CONST) */
+  48:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+  49:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** #if(UART_LED_INTERNAL_RX_SW_BUFFER)
+  50:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     /* Add one element to the buffer to receive full packet. One byte in receive buffer is always e
+  51:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     volatile uint8 UART_LED_rxBufferInternal[UART_LED_INTERNAL_RX_BUFFER_SIZE];
+  52:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** #endif /* (UART_LED_INTERNAL_RX_SW_BUFFER) */
+  53:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+  54:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** #if(UART_LED_INTERNAL_TX_SW_BUFFER)
+  55:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     volatile uint8 UART_LED_txBufferInternal[UART_LED_TX_BUFFER_SIZE];
+  56:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** #endif /* (UART_LED_INTERNAL_TX_SW_BUFFER) */
+  57:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+  58:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+  59:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** #if(UART_LED_RX_DIRECTION)
+  60:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     /*******************************************************************************
+  61:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     * Function Name: UART_LED_SpiUartReadRxData
+  62:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     ****************************************************************************//**
+  63:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *
+  64:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  Retrieves the next data element from the receive buffer.
+  65:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *   - RX software buffer is disabled: Returns data element retrieved from
+  66:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *     RX FIFO. Undefined data will be returned if the RX FIFO is empty.
+  67:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *   - RX software buffer is enabled: Returns data element from the software
+  68:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *     receive buffer. Zero value is returned if the software receive buffer
+  69:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *     is empty.
+  70:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *
+  71:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     * \return
+  72:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  Next data element from the receive buffer. 
+  73:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  The amount of data bits to be received depends on RX data bits selection 
+  74:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  (the data bit counting starts from LSB of return value).
+  75:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *
+  76:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     * \globalvars
+  77:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  UART_LED_rxBufferHead - the start index to put data into the 
+  78:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  software receive buffer.
+  79:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  UART_LED_rxBufferTail - the start index to get data from the 
+  80:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  software receive buffer.
+  81:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *
+  82:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *******************************************************************************/
+  83:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     uint32 UART_LED_SpiUartReadRxData(void)
+  84:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     {
+  28              		.loc 1 84 0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxHY49W.s 			page 3
+
+
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32              		@ link register save eliminated.
+  33              	.LVL0:
+  85:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         uint32 rxData = 0u;
+  86:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+  87:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     #if (UART_LED_INTERNAL_RX_SW_BUFFER_CONST)
+  88:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         uint32 locTail;
+  89:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     #endif /* (UART_LED_INTERNAL_RX_SW_BUFFER_CONST) */
+  90:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+  91:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         #if (UART_LED_CHECK_RX_SW_BUFFER)
+  92:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         {
+  93:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             if (UART_LED_rxBufferHead != UART_LED_rxBufferTail)
+  94:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             {
+  95:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 /* There is data in RX software buffer */
+  96:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+  97:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 /* Calculate index to read from */
+  98:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 locTail = (UART_LED_rxBufferTail + 1u);
+  99:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 100:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 if (UART_LED_INTERNAL_RX_BUFFER_SIZE == locTail)
+ 101:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 {
+ 102:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                     locTail = 0u;
+ 103:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 }
+ 104:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 105:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 /* Get data from RX software buffer */
+ 106:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 rxData = UART_LED_GetWordFromRxBuffer(locTail);
+ 107:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 108:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 /* Change index in the buffer */
+ 109:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 UART_LED_rxBufferTail = locTail;
+ 110:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 111:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 #if (UART_LED_CHECK_UART_RTS_CONTROL_FLOW)
+ 112:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 {
+ 113:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                     /* Check if RX Not Empty is disabled in the interrupt */
+ 114:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                     if (0u == (UART_LED_INTR_RX_MASK_REG & UART_LED_INTR_RX_NOT_EMPTY))
+ 115:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                     {
+ 116:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                         /* Enable RX Not Empty interrupt source to continue
+ 117:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                         * receiving data into software buffer.
+ 118:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                         */
+ 119:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                         UART_LED_INTR_RX_MASK_REG |= UART_LED_INTR_RX_NOT_EMPTY;
+ 120:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                     }
+ 121:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 }
+ 122:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 #endif
+ 123:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 124:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             }
+ 125:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         }
+ 126:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         #else
+ 127:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         {
+ 128:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             /* Read data from RX FIFO */
+ 129:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             rxData = UART_LED_RX_FIFO_RD_REG;
+  34              		.loc 1 129 0
+  35 0000 014B     		ldr	r3, .L2
+  36 0002 1868     		ldr	r0, [r3]
+  37              	.LVL1:
+ 130:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         }
+ 131:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         #endif
+ 132:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 133:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         return (rxData);
+ 134:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     }
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxHY49W.s 			page 4
+
+
+  38              		.loc 1 134 0
+  39              		@ sp needed
+  40 0004 7047     		bx	lr
+  41              	.L3:
+  42 0006 C046     		.align	2
+  43              	.L2:
+  44 0008 40030740 		.word	1074201408
+  45              		.cfi_endproc
+  46              	.LFE0:
+  47              		.size	UART_LED_SpiUartReadRxData, .-UART_LED_SpiUartReadRxData
+  48              		.section	.text.UART_LED_SpiUartGetRxBufferSize,"ax",%progbits
+  49              		.align	2
+  50              		.global	UART_LED_SpiUartGetRxBufferSize
+  51              		.code	16
+  52              		.thumb_func
+  53              		.type	UART_LED_SpiUartGetRxBufferSize, %function
+  54              	UART_LED_SpiUartGetRxBufferSize:
+  55              	.LFB1:
+ 135:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 136:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 137:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     /*******************************************************************************
+ 138:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     * Function Name: UART_LED_SpiUartGetRxBufferSize
+ 139:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     ****************************************************************************//**
+ 140:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *
+ 141:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  Returns the number of received data elements in the receive buffer.
+ 142:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *   - RX software buffer disabled: returns the number of used entries in
+ 143:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *     RX FIFO.
+ 144:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *   - RX software buffer enabled: returns the number of elements which were
+ 145:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *     placed in the receive buffer. This does not include the hardware RX FIFO.
+ 146:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *
+ 147:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     * \return
+ 148:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  Number of received data elements.
+ 149:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *
+ 150:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     * \globalvars
+ 151:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  UART_LED_rxBufferHead - the start index to put data into the 
+ 152:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  software receive buffer.
+ 153:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  UART_LED_rxBufferTail - the start index to get data from the 
+ 154:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  software receive buffer.
+ 155:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *
+ 156:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *******************************************************************************/
+ 157:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     uint32 UART_LED_SpiUartGetRxBufferSize(void)
+ 158:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     {
+  56              		.loc 1 158 0
+  57              		.cfi_startproc
+  58              		@ args = 0, pretend = 0, frame = 0
+  59              		@ frame_needed = 0, uses_anonymous_args = 0
+  60              		@ link register save eliminated.
+ 159:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         uint32 size;
+ 160:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     #if (UART_LED_INTERNAL_RX_SW_BUFFER_CONST)
+ 161:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         uint32 locHead;
+ 162:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     #endif /* (UART_LED_INTERNAL_RX_SW_BUFFER_CONST) */
+ 163:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 164:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         #if (UART_LED_CHECK_RX_SW_BUFFER)
+ 165:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         {
+ 166:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             locHead = UART_LED_rxBufferHead;
+ 167:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 168:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             if(locHead >= UART_LED_rxBufferTail)
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxHY49W.s 			page 5
+
+
+ 169:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             {
+ 170:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 size = (locHead - UART_LED_rxBufferTail);
+ 171:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             }
+ 172:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             else
+ 173:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             {
+ 174:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 size = (locHead + (UART_LED_INTERNAL_RX_BUFFER_SIZE - UART_LED_rxBufferTail));
+ 175:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             }
+ 176:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         }
+ 177:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         #else
+ 178:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         {
+ 179:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             size = UART_LED_GET_RX_FIFO_ENTRIES;
+  61              		.loc 1 179 0
+  62 0000 024B     		ldr	r3, .L5
+  63 0002 1B68     		ldr	r3, [r3]
+  64 0004 0F20     		movs	r0, #15
+  65 0006 1840     		ands	r0, r3
+  66              	.LVL2:
+ 180:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         }
+ 181:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         #endif
+ 182:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 183:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         return (size);
+ 184:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     }
+  67              		.loc 1 184 0
+  68              		@ sp needed
+  69 0008 7047     		bx	lr
+  70              	.L6:
+  71 000a C046     		.align	2
+  72              	.L5:
+  73 000c 08030740 		.word	1074201352
+  74              		.cfi_endproc
+  75              	.LFE1:
+  76              		.size	UART_LED_SpiUartGetRxBufferSize, .-UART_LED_SpiUartGetRxBufferSize
+  77              		.section	.text.UART_LED_SpiUartClearRxBuffer,"ax",%progbits
+  78              		.align	2
+  79              		.global	UART_LED_SpiUartClearRxBuffer
+  80              		.code	16
+  81              		.thumb_func
+  82              		.type	UART_LED_SpiUartClearRxBuffer, %function
+  83              	UART_LED_SpiUartClearRxBuffer:
+  84              	.LFB2:
+ 185:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 186:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 187:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     /*******************************************************************************
+ 188:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     * Function Name: UART_LED_SpiUartClearRxBuffer
+ 189:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     ****************************************************************************//**
+ 190:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *
+ 191:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  Clears the receive buffer and RX FIFO.
+ 192:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *
+ 193:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     * \globalvars
+ 194:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  UART_LED_rxBufferHead - the start index to put data into the 
+ 195:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  software receive buffer.
+ 196:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  UART_LED_rxBufferTail - the start index to get data from the 
+ 197:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  software receive buffer.
+ 198:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *
+ 199:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *******************************************************************************/
+ 200:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     void UART_LED_SpiUartClearRxBuffer(void)
+ 201:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     {
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxHY49W.s 			page 6
+
+
+  85              		.loc 1 201 0
+  86              		.cfi_startproc
+  87              		@ args = 0, pretend = 0, frame = 0
+  88              		@ frame_needed = 0, uses_anonymous_args = 0
+  89              		@ link register save eliminated.
+ 202:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         #if (UART_LED_CHECK_RX_SW_BUFFER)
+ 203:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         {
+ 204:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             /* Lock from component interruption */
+ 205:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             UART_LED_DisableInt();
+ 206:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 207:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             /* Flush RX software buffer */
+ 208:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             UART_LED_rxBufferHead = UART_LED_rxBufferTail;
+ 209:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             UART_LED_rxBufferOverflow = 0u;
+ 210:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 211:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             UART_LED_CLEAR_RX_FIFO;
+ 212:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             UART_LED_ClearRxInterruptSource(UART_LED_INTR_RX_ALL);
+ 213:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 214:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             #if (UART_LED_CHECK_UART_RTS_CONTROL_FLOW)
+ 215:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             {
+ 216:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 /* Enable RX Not Empty interrupt source to continue receiving
+ 217:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 * data into software buffer.
+ 218:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 */
+ 219:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 UART_LED_INTR_RX_MASK_REG |= UART_LED_INTR_RX_NOT_EMPTY;
+ 220:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             }
+ 221:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             #endif
+ 222:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             
+ 223:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             /* Release lock */
+ 224:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             UART_LED_EnableInt();
+ 225:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         }
+ 226:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         #else
+ 227:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         {
+ 228:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             UART_LED_CLEAR_RX_FIFO;
+  90              		.loc 1 228 0
+  91 0000 054B     		ldr	r3, .L8
+  92 0002 1A68     		ldr	r2, [r3]
+  93 0004 8021     		movs	r1, #128
+  94 0006 4902     		lsls	r1, r1, #9
+  95 0008 0A43     		orrs	r2, r1
+  96 000a 1A60     		str	r2, [r3]
+  97 000c 1968     		ldr	r1, [r3]
+  98 000e 034A     		ldr	r2, .L8+4
+  99 0010 0A40     		ands	r2, r1
+ 100 0012 1A60     		str	r2, [r3]
+ 229:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         }
+ 230:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         #endif
+ 231:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     }
+ 101              		.loc 1 231 0
+ 102              		@ sp needed
+ 103 0014 7047     		bx	lr
+ 104              	.L9:
+ 105 0016 C046     		.align	2
+ 106              	.L8:
+ 107 0018 04030740 		.word	1074201348
+ 108 001c FFFFFEFF 		.word	-65537
+ 109              		.cfi_endproc
+ 110              	.LFE2:
+ 111              		.size	UART_LED_SpiUartClearRxBuffer, .-UART_LED_SpiUartClearRxBuffer
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxHY49W.s 			page 7
+
+
+ 112              		.section	.text.UART_LED_SpiUartDisableIntRx,"ax",%progbits
+ 113              		.align	2
+ 114              		.global	UART_LED_SpiUartDisableIntRx
+ 115              		.code	16
+ 116              		.thumb_func
+ 117              		.type	UART_LED_SpiUartDisableIntRx, %function
+ 118              	UART_LED_SpiUartDisableIntRx:
+ 119              	.LFB3:
+ 232:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 233:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** #endif /* (UART_LED_RX_DIRECTION) */
+ 234:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 235:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 236:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** #if(UART_LED_TX_DIRECTION)
+ 237:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     /*******************************************************************************
+ 238:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     * Function Name: UART_LED_SpiUartWriteTxData
+ 239:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     ****************************************************************************//**
+ 240:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *
+ 241:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  Places a data entry into the transmit buffer to be sent at the next available
+ 242:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  bus time.
+ 243:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  This function is blocking and waits until there is space available to put the
+ 244:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  requested data in the transmit buffer.
+ 245:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *
+ 246:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  \param txDataByte: the data to be transmitted.
+ 247:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *   The amount of data bits to be transmitted depends on TX data bits selection 
+ 248:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *   (the data bit counting starts from LSB of txDataByte).
+ 249:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *
+ 250:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     * \globalvars
+ 251:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  UART_LED_txBufferHead - the start index to put data into the 
+ 252:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  software transmit buffer.
+ 253:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  UART_LED_txBufferTail - start index to get data from the software
+ 254:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  transmit buffer.
+ 255:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *
+ 256:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *******************************************************************************/
+ 257:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     void UART_LED_SpiUartWriteTxData(uint32 txData)
+ 258:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     {
+ 259:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     #if (UART_LED_INTERNAL_TX_SW_BUFFER_CONST)
+ 260:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         uint32 locHead;
+ 261:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     #endif /* (UART_LED_INTERNAL_TX_SW_BUFFER_CONST) */
+ 262:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 263:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         #if (UART_LED_CHECK_TX_SW_BUFFER)
+ 264:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         {
+ 265:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             /* Put data directly into the TX FIFO */
+ 266:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             if ((UART_LED_txBufferHead == UART_LED_txBufferTail) &&
+ 267:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 (UART_LED_SPI_UART_FIFO_SIZE != UART_LED_GET_TX_FIFO_ENTRIES))
+ 268:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             {
+ 269:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 /* TX software buffer is empty: put data directly in TX FIFO */
+ 270:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 UART_LED_TX_FIFO_WR_REG = txData;
+ 271:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             }
+ 272:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             /* Put data into TX software buffer */
+ 273:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             else
+ 274:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             {
+ 275:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 /* Head index to put data */
+ 276:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 locHead = (UART_LED_txBufferHead + 1u);
+ 277:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 278:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 /* Adjust TX software buffer index */
+ 279:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 if (UART_LED_TX_BUFFER_SIZE == locHead)
+ 280:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 {
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxHY49W.s 			page 8
+
+
+ 281:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                     locHead = 0u;
+ 282:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 }
+ 283:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 284:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 /* Wait for space in TX software buffer */
+ 285:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 while (locHead == UART_LED_txBufferTail)
+ 286:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 {
+ 287:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 }
+ 288:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 289:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 /* TX software buffer has at least one room */
+ 290:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 291:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 /* Clear old status of INTR_TX_NOT_FULL. It sets at the end of transfer when TX FIF
+ 292:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 UART_LED_ClearTxInterruptSource(UART_LED_INTR_TX_NOT_FULL);
+ 293:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 294:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 UART_LED_PutWordInTxBuffer(locHead, txData);
+ 295:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 296:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 UART_LED_txBufferHead = locHead;
+ 297:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 298:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 /* Check if TX Not Full is disabled in interrupt */
+ 299:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 if (0u == (UART_LED_INTR_TX_MASK_REG & UART_LED_INTR_TX_NOT_FULL))
+ 300:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 {
+ 301:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                     /* Enable TX Not Full interrupt source to transmit from software buffer */
+ 302:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                     UART_LED_INTR_TX_MASK_REG |= (uint32) UART_LED_INTR_TX_NOT_FULL;
+ 303:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 }
+ 304:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             }
+ 305:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         }
+ 306:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         #else
+ 307:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         {
+ 308:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             /* Wait until TX FIFO has space to put data element */
+ 309:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             while (UART_LED_SPI_UART_FIFO_SIZE == UART_LED_GET_TX_FIFO_ENTRIES)
+ 310:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             {
+ 311:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             }
+ 312:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 313:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             UART_LED_TX_FIFO_WR_REG = txData;
+ 314:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         }
+ 315:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         #endif
+ 316:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     }
+ 317:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 318:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 319:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     /*******************************************************************************
+ 320:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     * Function Name: UART_LED_SpiUartPutArray
+ 321:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     ****************************************************************************//**
+ 322:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *
+ 323:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  Places an array of data into the transmit buffer to be sent.
+ 324:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  This function is blocking and waits until there is a space available to put
+ 325:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  all the requested data in the transmit buffer. The array size can be greater
+ 326:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  than transmit buffer size.
+ 327:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *
+ 328:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     * \param wrBuf: pointer to an array of data to be placed in transmit buffer. 
+ 329:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  The width of the data to be transmitted depends on TX data width selection 
+ 330:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  (the data bit counting starts from LSB for each array element).
+ 331:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     * \param count: number of data elements to be placed in the transmit buffer.
+ 332:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *
+ 333:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     * \globalvars
+ 334:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  UART_LED_txBufferHead - the start index to put data into the 
+ 335:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  software transmit buffer.
+ 336:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  UART_LED_txBufferTail - start index to get data from the software
+ 337:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  transmit buffer.
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxHY49W.s 			page 9
+
+
+ 338:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *
+ 339:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *******************************************************************************/
+ 340:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     void UART_LED_SpiUartPutArray(const uint8 wrBuf[], uint32 count)
+ 341:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     {
+ 342:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         uint32 i;
+ 343:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 344:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         for (i=0u; i < count; i++)
+ 345:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         {
+ 346:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             UART_LED_SpiUartWriteTxData((uint32) wrBuf[i]);
+ 347:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         }
+ 348:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     }
+ 349:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 350:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 351:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     /*******************************************************************************
+ 352:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     * Function Name: UART_LED_SpiUartGetTxBufferSize
+ 353:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     ****************************************************************************//**
+ 354:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *
+ 355:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  Returns the number of elements currently in the transmit buffer.
+ 356:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *   - TX software buffer is disabled: returns the number of used entries in
+ 357:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *     TX FIFO.
+ 358:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *   - TX software buffer is enabled: returns the number of elements currently
+ 359:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *     used in the transmit buffer. This number does not include used entries in
+ 360:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *     the TX FIFO. The transmit buffer size is zero until the TX FIFO is
+ 361:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *     not full.
+ 362:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *
+ 363:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     * \return
+ 364:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  Number of data elements ready to transmit.
+ 365:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *
+ 366:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     * \globalvars
+ 367:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  UART_LED_txBufferHead - the start index to put data into the 
+ 368:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  software transmit buffer.
+ 369:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  UART_LED_txBufferTail - start index to get data from the software
+ 370:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  transmit buffer.
+ 371:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *
+ 372:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *******************************************************************************/
+ 373:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     uint32 UART_LED_SpiUartGetTxBufferSize(void)
+ 374:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     {
+ 375:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         uint32 size;
+ 376:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     #if (UART_LED_INTERNAL_TX_SW_BUFFER_CONST)
+ 377:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         uint32 locTail;
+ 378:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     #endif /* (UART_LED_INTERNAL_TX_SW_BUFFER_CONST) */
+ 379:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 380:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         #if (UART_LED_CHECK_TX_SW_BUFFER)
+ 381:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         {
+ 382:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             /* Get current Tail index */
+ 383:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             locTail = UART_LED_txBufferTail;
+ 384:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 385:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             if (UART_LED_txBufferHead >= locTail)
+ 386:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             {
+ 387:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 size = (UART_LED_txBufferHead - locTail);
+ 388:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             }
+ 389:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             else
+ 390:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             {
+ 391:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****                 size = (UART_LED_txBufferHead + (UART_LED_TX_BUFFER_SIZE - locTail));
+ 392:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             }
+ 393:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         }
+ 394:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         #else
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxHY49W.s 			page 10
+
+
+ 395:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         {
+ 396:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             size = UART_LED_GET_TX_FIFO_ENTRIES;
+ 397:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         }
+ 398:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         #endif
+ 399:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 400:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         return (size);
+ 401:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     }
+ 402:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 403:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 404:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     /*******************************************************************************
+ 405:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     * Function Name: UART_LED_SpiUartClearTxBuffer
+ 406:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     ****************************************************************************//**
+ 407:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *
+ 408:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  Clears the transmit buffer and TX FIFO.
+ 409:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *
+ 410:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     * \globalvars
+ 411:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  UART_LED_txBufferHead - the start index to put data into the 
+ 412:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  software transmit buffer.
+ 413:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  UART_LED_txBufferTail - start index to get data from the software
+ 414:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *  transmit buffer.
+ 415:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *
+ 416:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     *******************************************************************************/
+ 417:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     void UART_LED_SpiUartClearTxBuffer(void)
+ 418:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     {
+ 419:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         #if (UART_LED_CHECK_TX_SW_BUFFER)
+ 420:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         {
+ 421:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             /* Lock from component interruption */
+ 422:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             UART_LED_DisableInt();
+ 423:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 424:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             /* Flush TX software buffer */
+ 425:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             UART_LED_txBufferHead = UART_LED_txBufferTail;
+ 426:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 427:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             UART_LED_INTR_TX_MASK_REG &= (uint32) ~UART_LED_INTR_TX_NOT_FULL;
+ 428:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             UART_LED_CLEAR_TX_FIFO;
+ 429:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             UART_LED_ClearTxInterruptSource(UART_LED_INTR_TX_ALL);
+ 430:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 431:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             /* Release lock */
+ 432:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             UART_LED_EnableInt();
+ 433:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         }
+ 434:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         #else
+ 435:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         {
+ 436:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****             UART_LED_CLEAR_TX_FIFO;
+ 437:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         }
+ 438:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****         #endif
+ 439:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     }
+ 440:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 441:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** #endif /* (UART_LED_TX_DIRECTION) */
+ 442:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 443:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 444:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** /*******************************************************************************
+ 445:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** * Function Name: UART_LED_SpiUartDisableIntRx
+ 446:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** ****************************************************************************//**
+ 447:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** *
+ 448:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** *  Disables the RX interrupt sources.
+ 449:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** *
+ 450:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** *  \return
+ 451:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** *   Returns the RX interrupt sources enabled before the function call.
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxHY49W.s 			page 11
+
+
+ 452:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** *
+ 453:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** *******************************************************************************/
+ 454:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** uint32 UART_LED_SpiUartDisableIntRx(void)
+ 455:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** {
+ 120              		.loc 1 455 0
+ 121              		.cfi_startproc
+ 122              		@ args = 0, pretend = 0, frame = 0
+ 123              		@ frame_needed = 0, uses_anonymous_args = 0
+ 124              		@ link register save eliminated.
+ 456:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     uint32 intSource;
+ 457:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 458:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     intSource = UART_LED_GetRxInterruptMode();
+ 125              		.loc 1 458 0
+ 126 0000 024B     		ldr	r3, .L11
+ 127 0002 1868     		ldr	r0, [r3]
+ 128              	.LVL3:
+ 459:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 460:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     UART_LED_SetRxInterruptMode(UART_LED_NO_INTR_SOURCES);
+ 129              		.loc 1 460 0
+ 130 0004 0022     		movs	r2, #0
+ 131 0006 1A60     		str	r2, [r3]
+ 461:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 462:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     return (intSource);
+ 463:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** }
+ 132              		.loc 1 463 0
+ 133              		@ sp needed
+ 134 0008 7047     		bx	lr
+ 135              	.L12:
+ 136 000a C046     		.align	2
+ 137              	.L11:
+ 138 000c C80F0740 		.word	1074204616
+ 139              		.cfi_endproc
+ 140              	.LFE3:
+ 141              		.size	UART_LED_SpiUartDisableIntRx, .-UART_LED_SpiUartDisableIntRx
+ 142              		.section	.text.UART_LED_SpiUartDisableIntTx,"ax",%progbits
+ 143              		.align	2
+ 144              		.global	UART_LED_SpiUartDisableIntTx
+ 145              		.code	16
+ 146              		.thumb_func
+ 147              		.type	UART_LED_SpiUartDisableIntTx, %function
+ 148              	UART_LED_SpiUartDisableIntTx:
+ 149              	.LFB4:
+ 464:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 465:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 466:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** /*******************************************************************************
+ 467:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** * Function Name: UART_LED_SpiUartDisableIntTx
+ 468:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** ****************************************************************************//**
+ 469:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** *
+ 470:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** *  Disables TX interrupt sources.
+ 471:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** *
+ 472:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** *  \return
+ 473:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** *   Returns TX interrupt sources enabled before function call.
+ 474:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** *
+ 475:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** *******************************************************************************/
+ 476:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** uint32 UART_LED_SpiUartDisableIntTx(void)
+ 477:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** {
+ 150              		.loc 1 477 0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxHY49W.s 			page 12
+
+
+ 151              		.cfi_startproc
+ 152              		@ args = 0, pretend = 0, frame = 0
+ 153              		@ frame_needed = 0, uses_anonymous_args = 0
+ 154              		@ link register save eliminated.
+ 478:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     uint32 intSourceMask;
+ 479:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 480:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     intSourceMask = UART_LED_GetTxInterruptMode();
+ 155              		.loc 1 480 0
+ 156 0000 024B     		ldr	r3, .L14
+ 157 0002 1868     		ldr	r0, [r3]
+ 158              	.LVL4:
+ 481:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 482:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     UART_LED_SetTxInterruptMode(UART_LED_NO_INTR_SOURCES);
+ 159              		.loc 1 482 0
+ 160 0004 0022     		movs	r2, #0
+ 161 0006 1A60     		str	r2, [r3]
+ 483:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** 
+ 484:Generated_Source\PSoC4/UART_LED_SPI_UART.c ****     return (intSourceMask);
+ 485:Generated_Source\PSoC4/UART_LED_SPI_UART.c **** }
+ 162              		.loc 1 485 0
+ 163              		@ sp needed
+ 164 0008 7047     		bx	lr
+ 165              	.L15:
+ 166 000a C046     		.align	2
+ 167              	.L14:
+ 168 000c 880F0740 		.word	1074204552
+ 169              		.cfi_endproc
+ 170              	.LFE4:
+ 171              		.size	UART_LED_SpiUartDisableIntTx, .-UART_LED_SpiUartDisableIntTx
+ 172              		.text
+ 173              	.Letext0:
+ 174              		.file 2 "Generated_Source\\PSoC4/cytypes.h"
+ 175              		.section	.debug_info,"",%progbits
+ 176              	.Ldebug_info0:
+ 177 0000 57010000 		.4byte	0x157
+ 178 0004 0400     		.2byte	0x4
+ 179 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 180 000a 04       		.byte	0x4
+ 181 000b 01       		.uleb128 0x1
+ 182 000c 85010000 		.4byte	.LASF23
+ 183 0010 0C       		.byte	0xc
+ 184 0011 22000000 		.4byte	.LASF24
+ 185 0015 DB000000 		.4byte	.LASF25
+ 186 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 187 001d 00000000 		.4byte	0
+ 188 0021 00000000 		.4byte	.Ldebug_line0
+ 189 0025 02       		.uleb128 0x2
+ 190 0026 01       		.byte	0x1
+ 191 0027 06       		.byte	0x6
+ 192 0028 26020000 		.4byte	.LASF0
+ 193 002c 02       		.uleb128 0x2
+ 194 002d 01       		.byte	0x1
+ 195 002e 08       		.byte	0x8
+ 196 002f C8000000 		.4byte	.LASF1
+ 197 0033 02       		.uleb128 0x2
+ 198 0034 02       		.byte	0x2
+ 199 0035 05       		.byte	0x5
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxHY49W.s 			page 13
+
+
+ 200 0036 45020000 		.4byte	.LASF2
+ 201 003a 02       		.uleb128 0x2
+ 202 003b 02       		.byte	0x2
+ 203 003c 07       		.byte	0x7
+ 204 003d 13020000 		.4byte	.LASF3
+ 205 0041 02       		.uleb128 0x2
+ 206 0042 04       		.byte	0x4
+ 207 0043 05       		.byte	0x5
+ 208 0044 46010000 		.4byte	.LASF4
+ 209 0048 02       		.uleb128 0x2
+ 210 0049 04       		.byte	0x4
+ 211 004a 07       		.byte	0x7
+ 212 004b 88000000 		.4byte	.LASF5
+ 213 004f 02       		.uleb128 0x2
+ 214 0050 08       		.byte	0x8
+ 215 0051 05       		.byte	0x5
+ 216 0052 00000000 		.4byte	.LASF6
+ 217 0056 02       		.uleb128 0x2
+ 218 0057 08       		.byte	0x8
+ 219 0058 07       		.byte	0x7
+ 220 0059 9A000000 		.4byte	.LASF7
+ 221 005d 03       		.uleb128 0x3
+ 222 005e 04       		.byte	0x4
+ 223 005f 05       		.byte	0x5
+ 224 0060 696E7400 		.ascii	"int\000"
+ 225 0064 02       		.uleb128 0x2
+ 226 0065 04       		.byte	0x4
+ 227 0066 07       		.byte	0x7
+ 228 0067 15000000 		.4byte	.LASF8
+ 229 006b 04       		.uleb128 0x4
+ 230 006c 0E000000 		.4byte	.LASF12
+ 231 0070 02       		.byte	0x2
+ 232 0071 D401     		.2byte	0x1d4
+ 233 0073 48000000 		.4byte	0x48
+ 234 0077 02       		.uleb128 0x2
+ 235 0078 04       		.byte	0x4
+ 236 0079 04       		.byte	0x4
+ 237 007a BB000000 		.4byte	.LASF9
+ 238 007e 02       		.uleb128 0x2
+ 239 007f 08       		.byte	0x8
+ 240 0080 04       		.byte	0x4
+ 241 0081 6C010000 		.4byte	.LASF10
+ 242 0085 02       		.uleb128 0x2
+ 243 0086 01       		.byte	0x1
+ 244 0087 08       		.byte	0x8
+ 245 0088 D6000000 		.4byte	.LASF11
+ 246 008c 04       		.uleb128 0x4
+ 247 008d 7F010000 		.4byte	.LASF13
+ 248 0091 02       		.byte	0x2
+ 249 0092 7E02     		.2byte	0x27e
+ 250 0094 98000000 		.4byte	0x98
+ 251 0098 05       		.uleb128 0x5
+ 252 0099 6B000000 		.4byte	0x6b
+ 253 009d 02       		.uleb128 0x2
+ 254 009e 08       		.byte	0x8
+ 255 009f 04       		.byte	0x4
+ 256 00a0 73010000 		.4byte	.LASF14
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxHY49W.s 			page 14
+
+
+ 257 00a4 02       		.uleb128 0x2
+ 258 00a5 04       		.byte	0x4
+ 259 00a6 07       		.byte	0x7
+ 260 00a7 8A020000 		.4byte	.LASF15
+ 261 00ab 06       		.uleb128 0x6
+ 262 00ac 6D000000 		.4byte	.LASF16
+ 263 00b0 01       		.byte	0x1
+ 264 00b1 53       		.byte	0x53
+ 265 00b2 6B000000 		.4byte	0x6b
+ 266 00b6 00000000 		.4byte	.LFB0
+ 267 00ba 0C000000 		.4byte	.LFE0-.LFB0
+ 268 00be 01       		.uleb128 0x1
+ 269 00bf 9C       		.byte	0x9c
+ 270 00c0 D4000000 		.4byte	0xd4
+ 271 00c4 07       		.uleb128 0x7
+ 272 00c5 C1000000 		.4byte	.LASF18
+ 273 00c9 01       		.byte	0x1
+ 274 00ca 55       		.byte	0x55
+ 275 00cb 6B000000 		.4byte	0x6b
+ 276 00cf 00000000 		.4byte	.LLST0
+ 277 00d3 00       		.byte	0
+ 278 00d4 06       		.uleb128 0x6
+ 279 00d5 4D000000 		.4byte	.LASF17
+ 280 00d9 01       		.byte	0x1
+ 281 00da 9D       		.byte	0x9d
+ 282 00db 6B000000 		.4byte	0x6b
+ 283 00df 00000000 		.4byte	.LFB1
+ 284 00e3 10000000 		.4byte	.LFE1-.LFB1
+ 285 00e7 01       		.uleb128 0x1
+ 286 00e8 9C       		.byte	0x9c
+ 287 00e9 FB000000 		.4byte	0xfb
+ 288 00ed 08       		.uleb128 0x8
+ 289 00ee 32020000 		.4byte	.LASF19
+ 290 00f2 01       		.byte	0x1
+ 291 00f3 9F       		.byte	0x9f
+ 292 00f4 6B000000 		.4byte	0x6b
+ 293 00f8 01       		.uleb128 0x1
+ 294 00f9 50       		.byte	0x50
+ 295 00fa 00       		.byte	0
+ 296 00fb 09       		.uleb128 0x9
+ 297 00fc 6C020000 		.4byte	.LASF26
+ 298 0100 01       		.byte	0x1
+ 299 0101 C8       		.byte	0xc8
+ 300 0102 00000000 		.4byte	.LFB2
+ 301 0106 20000000 		.4byte	.LFE2-.LFB2
+ 302 010a 01       		.uleb128 0x1
+ 303 010b 9C       		.byte	0x9c
+ 304 010c 0A       		.uleb128 0xa
+ 305 010d 4F010000 		.4byte	.LASF20
+ 306 0111 01       		.byte	0x1
+ 307 0112 C601     		.2byte	0x1c6
+ 308 0114 6B000000 		.4byte	0x6b
+ 309 0118 00000000 		.4byte	.LFB3
+ 310 011c 10000000 		.4byte	.LFE3-.LFB3
+ 311 0120 01       		.uleb128 0x1
+ 312 0121 9C       		.byte	0x9c
+ 313 0122 35010000 		.4byte	0x135
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxHY49W.s 			page 15
+
+
+ 314 0126 0B       		.uleb128 0xb
+ 315 0127 B1000000 		.4byte	.LASF21
+ 316 012b 01       		.byte	0x1
+ 317 012c C801     		.2byte	0x1c8
+ 318 012e 6B000000 		.4byte	0x6b
+ 319 0132 01       		.uleb128 0x1
+ 320 0133 50       		.byte	0x50
+ 321 0134 00       		.byte	0
+ 322 0135 0C       		.uleb128 0xc
+ 323 0136 4F020000 		.4byte	.LASF27
+ 324 013a 01       		.byte	0x1
+ 325 013b DC01     		.2byte	0x1dc
+ 326 013d 6B000000 		.4byte	0x6b
+ 327 0141 00000000 		.4byte	.LFB4
+ 328 0145 10000000 		.4byte	.LFE4-.LFB4
+ 329 0149 01       		.uleb128 0x1
+ 330 014a 9C       		.byte	0x9c
+ 331 014b 0B       		.uleb128 0xb
+ 332 014c 37020000 		.4byte	.LASF22
+ 333 0150 01       		.byte	0x1
+ 334 0151 DE01     		.2byte	0x1de
+ 335 0153 6B000000 		.4byte	0x6b
+ 336 0157 01       		.uleb128 0x1
+ 337 0158 50       		.byte	0x50
+ 338 0159 00       		.byte	0
+ 339 015a 00       		.byte	0
+ 340              		.section	.debug_abbrev,"",%progbits
+ 341              	.Ldebug_abbrev0:
+ 342 0000 01       		.uleb128 0x1
+ 343 0001 11       		.uleb128 0x11
+ 344 0002 01       		.byte	0x1
+ 345 0003 25       		.uleb128 0x25
+ 346 0004 0E       		.uleb128 0xe
+ 347 0005 13       		.uleb128 0x13
+ 348 0006 0B       		.uleb128 0xb
+ 349 0007 03       		.uleb128 0x3
+ 350 0008 0E       		.uleb128 0xe
+ 351 0009 1B       		.uleb128 0x1b
+ 352 000a 0E       		.uleb128 0xe
+ 353 000b 55       		.uleb128 0x55
+ 354 000c 17       		.uleb128 0x17
+ 355 000d 11       		.uleb128 0x11
+ 356 000e 01       		.uleb128 0x1
+ 357 000f 10       		.uleb128 0x10
+ 358 0010 17       		.uleb128 0x17
+ 359 0011 00       		.byte	0
+ 360 0012 00       		.byte	0
+ 361 0013 02       		.uleb128 0x2
+ 362 0014 24       		.uleb128 0x24
+ 363 0015 00       		.byte	0
+ 364 0016 0B       		.uleb128 0xb
+ 365 0017 0B       		.uleb128 0xb
+ 366 0018 3E       		.uleb128 0x3e
+ 367 0019 0B       		.uleb128 0xb
+ 368 001a 03       		.uleb128 0x3
+ 369 001b 0E       		.uleb128 0xe
+ 370 001c 00       		.byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxHY49W.s 			page 16
+
+
+ 371 001d 00       		.byte	0
+ 372 001e 03       		.uleb128 0x3
+ 373 001f 24       		.uleb128 0x24
+ 374 0020 00       		.byte	0
+ 375 0021 0B       		.uleb128 0xb
+ 376 0022 0B       		.uleb128 0xb
+ 377 0023 3E       		.uleb128 0x3e
+ 378 0024 0B       		.uleb128 0xb
+ 379 0025 03       		.uleb128 0x3
+ 380 0026 08       		.uleb128 0x8
+ 381 0027 00       		.byte	0
+ 382 0028 00       		.byte	0
+ 383 0029 04       		.uleb128 0x4
+ 384 002a 16       		.uleb128 0x16
+ 385 002b 00       		.byte	0
+ 386 002c 03       		.uleb128 0x3
+ 387 002d 0E       		.uleb128 0xe
+ 388 002e 3A       		.uleb128 0x3a
+ 389 002f 0B       		.uleb128 0xb
+ 390 0030 3B       		.uleb128 0x3b
+ 391 0031 05       		.uleb128 0x5
+ 392 0032 49       		.uleb128 0x49
+ 393 0033 13       		.uleb128 0x13
+ 394 0034 00       		.byte	0
+ 395 0035 00       		.byte	0
+ 396 0036 05       		.uleb128 0x5
+ 397 0037 35       		.uleb128 0x35
+ 398 0038 00       		.byte	0
+ 399 0039 49       		.uleb128 0x49
+ 400 003a 13       		.uleb128 0x13
+ 401 003b 00       		.byte	0
+ 402 003c 00       		.byte	0
+ 403 003d 06       		.uleb128 0x6
+ 404 003e 2E       		.uleb128 0x2e
+ 405 003f 01       		.byte	0x1
+ 406 0040 3F       		.uleb128 0x3f
+ 407 0041 19       		.uleb128 0x19
+ 408 0042 03       		.uleb128 0x3
+ 409 0043 0E       		.uleb128 0xe
+ 410 0044 3A       		.uleb128 0x3a
+ 411 0045 0B       		.uleb128 0xb
+ 412 0046 3B       		.uleb128 0x3b
+ 413 0047 0B       		.uleb128 0xb
+ 414 0048 27       		.uleb128 0x27
+ 415 0049 19       		.uleb128 0x19
+ 416 004a 49       		.uleb128 0x49
+ 417 004b 13       		.uleb128 0x13
+ 418 004c 11       		.uleb128 0x11
+ 419 004d 01       		.uleb128 0x1
+ 420 004e 12       		.uleb128 0x12
+ 421 004f 06       		.uleb128 0x6
+ 422 0050 40       		.uleb128 0x40
+ 423 0051 18       		.uleb128 0x18
+ 424 0052 9742     		.uleb128 0x2117
+ 425 0054 19       		.uleb128 0x19
+ 426 0055 01       		.uleb128 0x1
+ 427 0056 13       		.uleb128 0x13
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxHY49W.s 			page 17
+
+
+ 428 0057 00       		.byte	0
+ 429 0058 00       		.byte	0
+ 430 0059 07       		.uleb128 0x7
+ 431 005a 34       		.uleb128 0x34
+ 432 005b 00       		.byte	0
+ 433 005c 03       		.uleb128 0x3
+ 434 005d 0E       		.uleb128 0xe
+ 435 005e 3A       		.uleb128 0x3a
+ 436 005f 0B       		.uleb128 0xb
+ 437 0060 3B       		.uleb128 0x3b
+ 438 0061 0B       		.uleb128 0xb
+ 439 0062 49       		.uleb128 0x49
+ 440 0063 13       		.uleb128 0x13
+ 441 0064 02       		.uleb128 0x2
+ 442 0065 17       		.uleb128 0x17
+ 443 0066 00       		.byte	0
+ 444 0067 00       		.byte	0
+ 445 0068 08       		.uleb128 0x8
+ 446 0069 34       		.uleb128 0x34
+ 447 006a 00       		.byte	0
+ 448 006b 03       		.uleb128 0x3
+ 449 006c 0E       		.uleb128 0xe
+ 450 006d 3A       		.uleb128 0x3a
+ 451 006e 0B       		.uleb128 0xb
+ 452 006f 3B       		.uleb128 0x3b
+ 453 0070 0B       		.uleb128 0xb
+ 454 0071 49       		.uleb128 0x49
+ 455 0072 13       		.uleb128 0x13
+ 456 0073 02       		.uleb128 0x2
+ 457 0074 18       		.uleb128 0x18
+ 458 0075 00       		.byte	0
+ 459 0076 00       		.byte	0
+ 460 0077 09       		.uleb128 0x9
+ 461 0078 2E       		.uleb128 0x2e
+ 462 0079 00       		.byte	0
+ 463 007a 3F       		.uleb128 0x3f
+ 464 007b 19       		.uleb128 0x19
+ 465 007c 03       		.uleb128 0x3
+ 466 007d 0E       		.uleb128 0xe
+ 467 007e 3A       		.uleb128 0x3a
+ 468 007f 0B       		.uleb128 0xb
+ 469 0080 3B       		.uleb128 0x3b
+ 470 0081 0B       		.uleb128 0xb
+ 471 0082 27       		.uleb128 0x27
+ 472 0083 19       		.uleb128 0x19
+ 473 0084 11       		.uleb128 0x11
+ 474 0085 01       		.uleb128 0x1
+ 475 0086 12       		.uleb128 0x12
+ 476 0087 06       		.uleb128 0x6
+ 477 0088 40       		.uleb128 0x40
+ 478 0089 18       		.uleb128 0x18
+ 479 008a 9742     		.uleb128 0x2117
+ 480 008c 19       		.uleb128 0x19
+ 481 008d 00       		.byte	0
+ 482 008e 00       		.byte	0
+ 483 008f 0A       		.uleb128 0xa
+ 484 0090 2E       		.uleb128 0x2e
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxHY49W.s 			page 18
+
+
+ 485 0091 01       		.byte	0x1
+ 486 0092 3F       		.uleb128 0x3f
+ 487 0093 19       		.uleb128 0x19
+ 488 0094 03       		.uleb128 0x3
+ 489 0095 0E       		.uleb128 0xe
+ 490 0096 3A       		.uleb128 0x3a
+ 491 0097 0B       		.uleb128 0xb
+ 492 0098 3B       		.uleb128 0x3b
+ 493 0099 05       		.uleb128 0x5
+ 494 009a 27       		.uleb128 0x27
+ 495 009b 19       		.uleb128 0x19
+ 496 009c 49       		.uleb128 0x49
+ 497 009d 13       		.uleb128 0x13
+ 498 009e 11       		.uleb128 0x11
+ 499 009f 01       		.uleb128 0x1
+ 500 00a0 12       		.uleb128 0x12
+ 501 00a1 06       		.uleb128 0x6
+ 502 00a2 40       		.uleb128 0x40
+ 503 00a3 18       		.uleb128 0x18
+ 504 00a4 9742     		.uleb128 0x2117
+ 505 00a6 19       		.uleb128 0x19
+ 506 00a7 01       		.uleb128 0x1
+ 507 00a8 13       		.uleb128 0x13
+ 508 00a9 00       		.byte	0
+ 509 00aa 00       		.byte	0
+ 510 00ab 0B       		.uleb128 0xb
+ 511 00ac 34       		.uleb128 0x34
+ 512 00ad 00       		.byte	0
+ 513 00ae 03       		.uleb128 0x3
+ 514 00af 0E       		.uleb128 0xe
+ 515 00b0 3A       		.uleb128 0x3a
+ 516 00b1 0B       		.uleb128 0xb
+ 517 00b2 3B       		.uleb128 0x3b
+ 518 00b3 05       		.uleb128 0x5
+ 519 00b4 49       		.uleb128 0x49
+ 520 00b5 13       		.uleb128 0x13
+ 521 00b6 02       		.uleb128 0x2
+ 522 00b7 18       		.uleb128 0x18
+ 523 00b8 00       		.byte	0
+ 524 00b9 00       		.byte	0
+ 525 00ba 0C       		.uleb128 0xc
+ 526 00bb 2E       		.uleb128 0x2e
+ 527 00bc 01       		.byte	0x1
+ 528 00bd 3F       		.uleb128 0x3f
+ 529 00be 19       		.uleb128 0x19
+ 530 00bf 03       		.uleb128 0x3
+ 531 00c0 0E       		.uleb128 0xe
+ 532 00c1 3A       		.uleb128 0x3a
+ 533 00c2 0B       		.uleb128 0xb
+ 534 00c3 3B       		.uleb128 0x3b
+ 535 00c4 05       		.uleb128 0x5
+ 536 00c5 27       		.uleb128 0x27
+ 537 00c6 19       		.uleb128 0x19
+ 538 00c7 49       		.uleb128 0x49
+ 539 00c8 13       		.uleb128 0x13
+ 540 00c9 11       		.uleb128 0x11
+ 541 00ca 01       		.uleb128 0x1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxHY49W.s 			page 19
+
+
+ 542 00cb 12       		.uleb128 0x12
+ 543 00cc 06       		.uleb128 0x6
+ 544 00cd 40       		.uleb128 0x40
+ 545 00ce 18       		.uleb128 0x18
+ 546 00cf 9742     		.uleb128 0x2117
+ 547 00d1 19       		.uleb128 0x19
+ 548 00d2 00       		.byte	0
+ 549 00d3 00       		.byte	0
+ 550 00d4 00       		.byte	0
+ 551              		.section	.debug_loc,"",%progbits
+ 552              	.Ldebug_loc0:
+ 553              	.LLST0:
+ 554 0000 00000000 		.4byte	.LVL0
+ 555 0004 04000000 		.4byte	.LVL1
+ 556 0008 0200     		.2byte	0x2
+ 557 000a 30       		.byte	0x30
+ 558 000b 9F       		.byte	0x9f
+ 559 000c 04000000 		.4byte	.LVL1
+ 560 0010 0C000000 		.4byte	.LFE0
+ 561 0014 0100     		.2byte	0x1
+ 562 0016 50       		.byte	0x50
+ 563 0017 00000000 		.4byte	0
+ 564 001b 00000000 		.4byte	0
+ 565              		.section	.debug_aranges,"",%progbits
+ 566 0000 3C000000 		.4byte	0x3c
+ 567 0004 0200     		.2byte	0x2
+ 568 0006 00000000 		.4byte	.Ldebug_info0
+ 569 000a 04       		.byte	0x4
+ 570 000b 00       		.byte	0
+ 571 000c 0000     		.2byte	0
+ 572 000e 0000     		.2byte	0
+ 573 0010 00000000 		.4byte	.LFB0
+ 574 0014 0C000000 		.4byte	.LFE0-.LFB0
+ 575 0018 00000000 		.4byte	.LFB1
+ 576 001c 10000000 		.4byte	.LFE1-.LFB1
+ 577 0020 00000000 		.4byte	.LFB2
+ 578 0024 20000000 		.4byte	.LFE2-.LFB2
+ 579 0028 00000000 		.4byte	.LFB3
+ 580 002c 10000000 		.4byte	.LFE3-.LFB3
+ 581 0030 00000000 		.4byte	.LFB4
+ 582 0034 10000000 		.4byte	.LFE4-.LFB4
+ 583 0038 00000000 		.4byte	0
+ 584 003c 00000000 		.4byte	0
+ 585              		.section	.debug_ranges,"",%progbits
+ 586              	.Ldebug_ranges0:
+ 587 0000 00000000 		.4byte	.LFB0
+ 588 0004 0C000000 		.4byte	.LFE0
+ 589 0008 00000000 		.4byte	.LFB1
+ 590 000c 10000000 		.4byte	.LFE1
+ 591 0010 00000000 		.4byte	.LFB2
+ 592 0014 20000000 		.4byte	.LFE2
+ 593 0018 00000000 		.4byte	.LFB3
+ 594 001c 10000000 		.4byte	.LFE3
+ 595 0020 00000000 		.4byte	.LFB4
+ 596 0024 10000000 		.4byte	.LFE4
+ 597 0028 00000000 		.4byte	0
+ 598 002c 00000000 		.4byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxHY49W.s 			page 20
+
+
+ 599              		.section	.debug_line,"",%progbits
+ 600              	.Ldebug_line0:
+ 601 0000 B6000000 		.section	.debug_str,"MS",%progbits,1
+ 601      02004E00 
+ 601      00000201 
+ 601      FB0E0D00 
+ 601      01010101 
+ 602              	.LASF6:
+ 603 0000 6C6F6E67 		.ascii	"long long int\000"
+ 603      206C6F6E 
+ 603      6720696E 
+ 603      7400
+ 604              	.LASF12:
+ 605 000e 75696E74 		.ascii	"uint32\000"
+ 605      333200
+ 606              	.LASF8:
+ 607 0015 756E7369 		.ascii	"unsigned int\000"
+ 607      676E6564 
+ 607      20696E74 
+ 607      00
+ 608              	.LASF24:
+ 609 0022 47656E65 		.ascii	"Generated_Source\\PSoC4\\UART_LED_SPI_UART.c\000"
+ 609      72617465 
+ 609      645F536F 
+ 609      75726365 
+ 609      5C50536F 
+ 610              	.LASF17:
+ 611 004d 55415254 		.ascii	"UART_LED_SpiUartGetRxBufferSize\000"
+ 611      5F4C4544 
+ 611      5F537069 
+ 611      55617274 
+ 611      47657452 
+ 612              	.LASF16:
+ 613 006d 55415254 		.ascii	"UART_LED_SpiUartReadRxData\000"
+ 613      5F4C4544 
+ 613      5F537069 
+ 613      55617274 
+ 613      52656164 
+ 614              	.LASF5:
+ 615 0088 6C6F6E67 		.ascii	"long unsigned int\000"
+ 615      20756E73 
+ 615      69676E65 
+ 615      6420696E 
+ 615      7400
+ 616              	.LASF7:
+ 617 009a 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 617      206C6F6E 
+ 617      6720756E 
+ 617      7369676E 
+ 617      65642069 
+ 618              	.LASF21:
+ 619 00b1 696E7453 		.ascii	"intSource\000"
+ 619      6F757263 
+ 619      6500
+ 620              	.LASF9:
+ 621 00bb 666C6F61 		.ascii	"float\000"
+ 621      7400
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxHY49W.s 			page 21
+
+
+ 622              	.LASF18:
+ 623 00c1 72784461 		.ascii	"rxData\000"
+ 623      746100
+ 624              	.LASF1:
+ 625 00c8 756E7369 		.ascii	"unsigned char\000"
+ 625      676E6564 
+ 625      20636861 
+ 625      7200
+ 626              	.LASF11:
+ 627 00d6 63686172 		.ascii	"char\000"
+ 627      00
+ 628              	.LASF25:
+ 629 00db 433A5C55 		.ascii	"C:\\Users\\kylep\\Box Sync\\Box Sync\\Feniex Electr"
+ 629      73657273 
+ 629      5C6B796C 
+ 629      65705C42 
+ 629      6F782053 
+ 630 0109 6963616C 		.ascii	"ical Files\\WorkingFolder-Kyle\\Firm-AI-Cube\\81-00"
+ 630      2046696C 
+ 630      65735C57 
+ 630      6F726B69 
+ 630      6E67466F 
+ 631 0139 3032342D 		.ascii	"024-01.cydsn\000"
+ 631      30312E63 
+ 631      7964736E 
+ 631      00
+ 632              	.LASF4:
+ 633 0146 6C6F6E67 		.ascii	"long int\000"
+ 633      20696E74 
+ 633      00
+ 634              	.LASF20:
+ 635 014f 55415254 		.ascii	"UART_LED_SpiUartDisableIntRx\000"
+ 635      5F4C4544 
+ 635      5F537069 
+ 635      55617274 
+ 635      44697361 
+ 636              	.LASF10:
+ 637 016c 646F7562 		.ascii	"double\000"
+ 637      6C6500
+ 638              	.LASF14:
+ 639 0173 6C6F6E67 		.ascii	"long double\000"
+ 639      20646F75 
+ 639      626C6500 
+ 640              	.LASF13:
+ 641 017f 72656733 		.ascii	"reg32\000"
+ 641      3200
+ 642              	.LASF23:
+ 643 0185 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 643      43313120 
+ 643      352E342E 
+ 643      31203230 
+ 643      31363036 
+ 644 01b8 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m0 -mthumb -g -O"
+ 644      20726576 
+ 644      6973696F 
+ 644      6E203233 
+ 644      37373135 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxHY49W.s 			page 22
+
+
+ 645 01eb 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 645      66756E63 
+ 645      74696F6E 
+ 645      2D736563 
+ 645      74696F6E 
+ 646              	.LASF3:
+ 647 0213 73686F72 		.ascii	"short unsigned int\000"
+ 647      7420756E 
+ 647      7369676E 
+ 647      65642069 
+ 647      6E7400
+ 648              	.LASF0:
+ 649 0226 7369676E 		.ascii	"signed char\000"
+ 649      65642063 
+ 649      68617200 
+ 650              	.LASF19:
+ 651 0232 73697A65 		.ascii	"size\000"
+ 651      00
+ 652              	.LASF22:
+ 653 0237 696E7453 		.ascii	"intSourceMask\000"
+ 653      6F757263 
+ 653      654D6173 
+ 653      6B00
+ 654              	.LASF2:
+ 655 0245 73686F72 		.ascii	"short int\000"
+ 655      7420696E 
+ 655      7400
+ 656              	.LASF27:
+ 657 024f 55415254 		.ascii	"UART_LED_SpiUartDisableIntTx\000"
+ 657      5F4C4544 
+ 657      5F537069 
+ 657      55617274 
+ 657      44697361 
+ 658              	.LASF26:
+ 659 026c 55415254 		.ascii	"UART_LED_SpiUartClearRxBuffer\000"
+ 659      5F4C4544 
+ 659      5F537069 
+ 659      55617274 
+ 659      436C6561 
+ 660              	.LASF15:
+ 661 028a 73697A65 		.ascii	"sizetype\000"
+ 661      74797065 
+ 661      00
+ 662              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

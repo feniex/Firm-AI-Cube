@@ -1,0 +1,2500 @@
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"motorControlPWM.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.motorControlPWM_Enable,"ax",%progbits
+  20              		.align	2
+  21              		.global	motorControlPWM_Enable
+  22              		.code	16
+  23              		.thumb_func
+  24              		.type	motorControlPWM_Enable, %function
+  25              	motorControlPWM_Enable:
+  26              	.LFB2:
+  27              		.file 1 "Generated_Source\\PSoC4\\motorControlPWM.c"
+   1:Generated_Source\PSoC4/motorControlPWM.c **** /*******************************************************************************
+   2:Generated_Source\PSoC4/motorControlPWM.c **** * File Name: motorControlPWM.c
+   3:Generated_Source\PSoC4/motorControlPWM.c **** * Version 3.30
+   4:Generated_Source\PSoC4/motorControlPWM.c **** *
+   5:Generated_Source\PSoC4/motorControlPWM.c **** * Description:
+   6:Generated_Source\PSoC4/motorControlPWM.c **** *  The PWM User Module consist of an 8 or 16-bit counter with two 8 or 16-bit
+   7:Generated_Source\PSoC4/motorControlPWM.c **** *  comparitors. Each instance of this user module is capable of generating
+   8:Generated_Source\PSoC4/motorControlPWM.c **** *  two PWM outputs with the same period. The pulse width is selectable between
+   9:Generated_Source\PSoC4/motorControlPWM.c **** *  1 and 255/65535. The period is selectable between 2 and 255/65536 clocks.
+  10:Generated_Source\PSoC4/motorControlPWM.c **** *  The compare value output may be configured to be active when the present
+  11:Generated_Source\PSoC4/motorControlPWM.c **** *  counter is less than or less than/equal to the compare value.
+  12:Generated_Source\PSoC4/motorControlPWM.c **** *  A terminal count output is also provided. It generates a pulse one clock
+  13:Generated_Source\PSoC4/motorControlPWM.c **** *  width wide when the counter is equal to zero.
+  14:Generated_Source\PSoC4/motorControlPWM.c **** *
+  15:Generated_Source\PSoC4/motorControlPWM.c **** * Note:
+  16:Generated_Source\PSoC4/motorControlPWM.c **** *
+  17:Generated_Source\PSoC4/motorControlPWM.c **** *******************************************************************************
+  18:Generated_Source\PSoC4/motorControlPWM.c **** * Copyright 2008-2014, Cypress Semiconductor Corporation.  All rights reserved.
+  19:Generated_Source\PSoC4/motorControlPWM.c **** * You may use this file only in accordance with the license, terms, conditions,
+  20:Generated_Source\PSoC4/motorControlPWM.c **** * disclaimers, and limitations in the end user license agreement accompanying
+  21:Generated_Source\PSoC4/motorControlPWM.c **** * the software package with which this file was provided.
+  22:Generated_Source\PSoC4/motorControlPWM.c **** ********************************************************************************/
+  23:Generated_Source\PSoC4/motorControlPWM.c **** 
+  24:Generated_Source\PSoC4/motorControlPWM.c **** #include "motorControlPWM.h"
+  25:Generated_Source\PSoC4/motorControlPWM.c **** 
+  26:Generated_Source\PSoC4/motorControlPWM.c **** /* Error message for removed <resource> through optimization */
+  27:Generated_Source\PSoC4/motorControlPWM.c **** #ifdef motorControlPWM_PWMUDB_genblk1_ctrlreg__REMOVED
+  28:Generated_Source\PSoC4/motorControlPWM.c ****     #error PWM_v3_30 detected with a constant 0 for the enable or \
+  29:Generated_Source\PSoC4/motorControlPWM.c ****          constant 1 for reset. This will prevent the component from operating.
+  30:Generated_Source\PSoC4/motorControlPWM.c **** #endif /* motorControlPWM_PWMUDB_genblk1_ctrlreg__REMOVED */
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 2
+
+
+  31:Generated_Source\PSoC4/motorControlPWM.c **** 
+  32:Generated_Source\PSoC4/motorControlPWM.c **** uint8 motorControlPWM_initVar = 0u;
+  33:Generated_Source\PSoC4/motorControlPWM.c **** 
+  34:Generated_Source\PSoC4/motorControlPWM.c **** 
+  35:Generated_Source\PSoC4/motorControlPWM.c **** /*******************************************************************************
+  36:Generated_Source\PSoC4/motorControlPWM.c **** * Function Name: motorControlPWM_Start
+  37:Generated_Source\PSoC4/motorControlPWM.c **** ********************************************************************************
+  38:Generated_Source\PSoC4/motorControlPWM.c **** *
+  39:Generated_Source\PSoC4/motorControlPWM.c **** * Summary:
+  40:Generated_Source\PSoC4/motorControlPWM.c **** *  The start function initializes the pwm with the default values, the
+  41:Generated_Source\PSoC4/motorControlPWM.c **** *  enables the counter to begin counting.  It does not enable interrupts,
+  42:Generated_Source\PSoC4/motorControlPWM.c **** *  the EnableInt command should be called if interrupt generation is required.
+  43:Generated_Source\PSoC4/motorControlPWM.c **** *
+  44:Generated_Source\PSoC4/motorControlPWM.c **** * Parameters:
+  45:Generated_Source\PSoC4/motorControlPWM.c **** *  None
+  46:Generated_Source\PSoC4/motorControlPWM.c **** *
+  47:Generated_Source\PSoC4/motorControlPWM.c **** * Return:
+  48:Generated_Source\PSoC4/motorControlPWM.c **** *  None
+  49:Generated_Source\PSoC4/motorControlPWM.c **** *
+  50:Generated_Source\PSoC4/motorControlPWM.c **** * Global variables:
+  51:Generated_Source\PSoC4/motorControlPWM.c **** *  motorControlPWM_initVar: Is modified when this function is called for the
+  52:Generated_Source\PSoC4/motorControlPWM.c **** *   first time. Is used to ensure that initialization happens only once.
+  53:Generated_Source\PSoC4/motorControlPWM.c **** *
+  54:Generated_Source\PSoC4/motorControlPWM.c **** *******************************************************************************/
+  55:Generated_Source\PSoC4/motorControlPWM.c **** void motorControlPWM_Start(void) 
+  56:Generated_Source\PSoC4/motorControlPWM.c **** {
+  57:Generated_Source\PSoC4/motorControlPWM.c ****     /* If not Initialized then initialize all required hardware and software */
+  58:Generated_Source\PSoC4/motorControlPWM.c ****     if(motorControlPWM_initVar == 0u)
+  59:Generated_Source\PSoC4/motorControlPWM.c ****     {
+  60:Generated_Source\PSoC4/motorControlPWM.c ****         motorControlPWM_Init();
+  61:Generated_Source\PSoC4/motorControlPWM.c ****         motorControlPWM_initVar = 1u;
+  62:Generated_Source\PSoC4/motorControlPWM.c ****     }
+  63:Generated_Source\PSoC4/motorControlPWM.c ****     motorControlPWM_Enable();
+  64:Generated_Source\PSoC4/motorControlPWM.c **** 
+  65:Generated_Source\PSoC4/motorControlPWM.c **** }
+  66:Generated_Source\PSoC4/motorControlPWM.c **** 
+  67:Generated_Source\PSoC4/motorControlPWM.c **** 
+  68:Generated_Source\PSoC4/motorControlPWM.c **** /*******************************************************************************
+  69:Generated_Source\PSoC4/motorControlPWM.c **** * Function Name: motorControlPWM_Init
+  70:Generated_Source\PSoC4/motorControlPWM.c **** ********************************************************************************
+  71:Generated_Source\PSoC4/motorControlPWM.c **** *
+  72:Generated_Source\PSoC4/motorControlPWM.c **** * Summary:
+  73:Generated_Source\PSoC4/motorControlPWM.c **** *  Initialize component's parameters to the parameters set by user in the
+  74:Generated_Source\PSoC4/motorControlPWM.c **** *  customizer of the component placed onto schematic. Usually called in
+  75:Generated_Source\PSoC4/motorControlPWM.c **** *  motorControlPWM_Start().
+  76:Generated_Source\PSoC4/motorControlPWM.c **** *
+  77:Generated_Source\PSoC4/motorControlPWM.c **** * Parameters:
+  78:Generated_Source\PSoC4/motorControlPWM.c **** *  None
+  79:Generated_Source\PSoC4/motorControlPWM.c **** *
+  80:Generated_Source\PSoC4/motorControlPWM.c **** * Return:
+  81:Generated_Source\PSoC4/motorControlPWM.c **** *  None
+  82:Generated_Source\PSoC4/motorControlPWM.c **** *
+  83:Generated_Source\PSoC4/motorControlPWM.c **** *******************************************************************************/
+  84:Generated_Source\PSoC4/motorControlPWM.c **** void motorControlPWM_Init(void) 
+  85:Generated_Source\PSoC4/motorControlPWM.c **** {
+  86:Generated_Source\PSoC4/motorControlPWM.c ****     #if (motorControlPWM_UsingFixedFunction || motorControlPWM_UseControl)
+  87:Generated_Source\PSoC4/motorControlPWM.c ****         uint8 ctrl;
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 3
+
+
+  88:Generated_Source\PSoC4/motorControlPWM.c ****     #endif /* (motorControlPWM_UsingFixedFunction || motorControlPWM_UseControl) */
+  89:Generated_Source\PSoC4/motorControlPWM.c **** 
+  90:Generated_Source\PSoC4/motorControlPWM.c ****     #if(!motorControlPWM_UsingFixedFunction)
+  91:Generated_Source\PSoC4/motorControlPWM.c ****         #if(motorControlPWM_UseStatus)
+  92:Generated_Source\PSoC4/motorControlPWM.c ****             /* Interrupt State Backup for Critical Region*/
+  93:Generated_Source\PSoC4/motorControlPWM.c ****             uint8 motorControlPWM_interruptState;
+  94:Generated_Source\PSoC4/motorControlPWM.c ****         #endif /* (motorControlPWM_UseStatus) */
+  95:Generated_Source\PSoC4/motorControlPWM.c ****     #endif /* (!motorControlPWM_UsingFixedFunction) */
+  96:Generated_Source\PSoC4/motorControlPWM.c **** 
+  97:Generated_Source\PSoC4/motorControlPWM.c ****     #if (motorControlPWM_UsingFixedFunction)
+  98:Generated_Source\PSoC4/motorControlPWM.c ****         /* You are allowed to write the compare value (FF only) */
+  99:Generated_Source\PSoC4/motorControlPWM.c ****         motorControlPWM_CONTROL |= motorControlPWM_CFG0_MODE;
+ 100:Generated_Source\PSoC4/motorControlPWM.c ****         #if (motorControlPWM_DeadBand2_4)
+ 101:Generated_Source\PSoC4/motorControlPWM.c ****             motorControlPWM_CONTROL |= motorControlPWM_CFG0_DB;
+ 102:Generated_Source\PSoC4/motorControlPWM.c ****         #endif /* (motorControlPWM_DeadBand2_4) */
+ 103:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 104:Generated_Source\PSoC4/motorControlPWM.c ****         ctrl = motorControlPWM_CONTROL3 & ((uint8 )(~motorControlPWM_CTRL_CMPMODE1_MASK));
+ 105:Generated_Source\PSoC4/motorControlPWM.c ****         motorControlPWM_CONTROL3 = ctrl | motorControlPWM_DEFAULT_COMPARE1_MODE;
+ 106:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 107:Generated_Source\PSoC4/motorControlPWM.c ****          /* Clear and Set SYNCTC and SYNCCMP bits of RT1 register */
+ 108:Generated_Source\PSoC4/motorControlPWM.c ****         motorControlPWM_RT1 &= ((uint8)(~motorControlPWM_RT1_MASK));
+ 109:Generated_Source\PSoC4/motorControlPWM.c ****         motorControlPWM_RT1 |= motorControlPWM_SYNC;
+ 110:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 111:Generated_Source\PSoC4/motorControlPWM.c ****         /*Enable DSI Sync all all inputs of the PWM*/
+ 112:Generated_Source\PSoC4/motorControlPWM.c ****         motorControlPWM_RT1 &= ((uint8)(~motorControlPWM_SYNCDSI_MASK));
+ 113:Generated_Source\PSoC4/motorControlPWM.c ****         motorControlPWM_RT1 |= motorControlPWM_SYNCDSI_EN;
+ 114:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 115:Generated_Source\PSoC4/motorControlPWM.c ****     #elif (motorControlPWM_UseControl)
+ 116:Generated_Source\PSoC4/motorControlPWM.c ****         /* Set the default compare mode defined in the parameter */
+ 117:Generated_Source\PSoC4/motorControlPWM.c ****         ctrl = motorControlPWM_CONTROL & ((uint8)(~motorControlPWM_CTRL_CMPMODE2_MASK)) &
+ 118:Generated_Source\PSoC4/motorControlPWM.c ****                 ((uint8)(~motorControlPWM_CTRL_CMPMODE1_MASK));
+ 119:Generated_Source\PSoC4/motorControlPWM.c ****         motorControlPWM_CONTROL = ctrl | motorControlPWM_DEFAULT_COMPARE2_MODE |
+ 120:Generated_Source\PSoC4/motorControlPWM.c ****                                    motorControlPWM_DEFAULT_COMPARE1_MODE;
+ 121:Generated_Source\PSoC4/motorControlPWM.c ****     #endif /* (motorControlPWM_UsingFixedFunction) */
+ 122:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 123:Generated_Source\PSoC4/motorControlPWM.c ****     #if (!motorControlPWM_UsingFixedFunction)
+ 124:Generated_Source\PSoC4/motorControlPWM.c ****         #if (motorControlPWM_Resolution == 8)
+ 125:Generated_Source\PSoC4/motorControlPWM.c ****             /* Set FIFO 0 to 1 byte register for period*/
+ 126:Generated_Source\PSoC4/motorControlPWM.c ****             motorControlPWM_AUX_CONTROLDP0 |= (motorControlPWM_AUX_CTRL_FIFO0_CLR);
+ 127:Generated_Source\PSoC4/motorControlPWM.c ****         #else /* (motorControlPWM_Resolution == 16)*/
+ 128:Generated_Source\PSoC4/motorControlPWM.c ****             /* Set FIFO 0 to 1 byte register for period */
+ 129:Generated_Source\PSoC4/motorControlPWM.c ****             motorControlPWM_AUX_CONTROLDP0 |= (motorControlPWM_AUX_CTRL_FIFO0_CLR);
+ 130:Generated_Source\PSoC4/motorControlPWM.c ****             motorControlPWM_AUX_CONTROLDP1 |= (motorControlPWM_AUX_CTRL_FIFO0_CLR);
+ 131:Generated_Source\PSoC4/motorControlPWM.c ****         #endif /* (motorControlPWM_Resolution == 8) */
+ 132:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 133:Generated_Source\PSoC4/motorControlPWM.c ****         motorControlPWM_WriteCounter(motorControlPWM_INIT_PERIOD_VALUE);
+ 134:Generated_Source\PSoC4/motorControlPWM.c ****     #endif /* (!motorControlPWM_UsingFixedFunction) */
+ 135:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 136:Generated_Source\PSoC4/motorControlPWM.c ****     motorControlPWM_WritePeriod(motorControlPWM_INIT_PERIOD_VALUE);
+ 137:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 138:Generated_Source\PSoC4/motorControlPWM.c ****         #if (motorControlPWM_UseOneCompareMode)
+ 139:Generated_Source\PSoC4/motorControlPWM.c ****             motorControlPWM_WriteCompare(motorControlPWM_INIT_COMPARE_VALUE1);
+ 140:Generated_Source\PSoC4/motorControlPWM.c ****         #else
+ 141:Generated_Source\PSoC4/motorControlPWM.c ****             motorControlPWM_WriteCompare1(motorControlPWM_INIT_COMPARE_VALUE1);
+ 142:Generated_Source\PSoC4/motorControlPWM.c ****             motorControlPWM_WriteCompare2(motorControlPWM_INIT_COMPARE_VALUE2);
+ 143:Generated_Source\PSoC4/motorControlPWM.c ****         #endif /* (motorControlPWM_UseOneCompareMode) */
+ 144:Generated_Source\PSoC4/motorControlPWM.c **** 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 4
+
+
+ 145:Generated_Source\PSoC4/motorControlPWM.c ****         #if (motorControlPWM_KillModeMinTime)
+ 146:Generated_Source\PSoC4/motorControlPWM.c ****             motorControlPWM_WriteKillTime(motorControlPWM_MinimumKillTime);
+ 147:Generated_Source\PSoC4/motorControlPWM.c ****         #endif /* (motorControlPWM_KillModeMinTime) */
+ 148:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 149:Generated_Source\PSoC4/motorControlPWM.c ****         #if (motorControlPWM_DeadBandUsed)
+ 150:Generated_Source\PSoC4/motorControlPWM.c ****             motorControlPWM_WriteDeadTime(motorControlPWM_INIT_DEAD_TIME);
+ 151:Generated_Source\PSoC4/motorControlPWM.c ****         #endif /* (motorControlPWM_DeadBandUsed) */
+ 152:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 153:Generated_Source\PSoC4/motorControlPWM.c ****     #if (motorControlPWM_UseStatus || motorControlPWM_UsingFixedFunction)
+ 154:Generated_Source\PSoC4/motorControlPWM.c ****         motorControlPWM_SetInterruptMode(motorControlPWM_INIT_INTERRUPTS_MODE);
+ 155:Generated_Source\PSoC4/motorControlPWM.c ****     #endif /* (motorControlPWM_UseStatus || motorControlPWM_UsingFixedFunction) */
+ 156:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 157:Generated_Source\PSoC4/motorControlPWM.c ****     #if (motorControlPWM_UsingFixedFunction)
+ 158:Generated_Source\PSoC4/motorControlPWM.c ****         /* Globally Enable the Fixed Function Block chosen */
+ 159:Generated_Source\PSoC4/motorControlPWM.c ****         motorControlPWM_GLOBAL_ENABLE |= motorControlPWM_BLOCK_EN_MASK;
+ 160:Generated_Source\PSoC4/motorControlPWM.c ****         /* Set the Interrupt source to come from the status register */
+ 161:Generated_Source\PSoC4/motorControlPWM.c ****         motorControlPWM_CONTROL2 |= motorControlPWM_CTRL2_IRQ_SEL;
+ 162:Generated_Source\PSoC4/motorControlPWM.c ****     #else
+ 163:Generated_Source\PSoC4/motorControlPWM.c ****         #if(motorControlPWM_UseStatus)
+ 164:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 165:Generated_Source\PSoC4/motorControlPWM.c ****             /* CyEnterCriticalRegion and CyExitCriticalRegion are used to mark following region cri
+ 166:Generated_Source\PSoC4/motorControlPWM.c ****             /* Enter Critical Region*/
+ 167:Generated_Source\PSoC4/motorControlPWM.c ****             motorControlPWM_interruptState = CyEnterCriticalSection();
+ 168:Generated_Source\PSoC4/motorControlPWM.c ****             /* Use the interrupt output of the status register for IRQ output */
+ 169:Generated_Source\PSoC4/motorControlPWM.c ****             motorControlPWM_STATUS_AUX_CTRL |= motorControlPWM_STATUS_ACTL_INT_EN_MASK;
+ 170:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 171:Generated_Source\PSoC4/motorControlPWM.c ****              /* Exit Critical Region*/
+ 172:Generated_Source\PSoC4/motorControlPWM.c ****             CyExitCriticalSection(motorControlPWM_interruptState);
+ 173:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 174:Generated_Source\PSoC4/motorControlPWM.c ****             /* Clear the FIFO to enable the motorControlPWM_STATUS_FIFOFULL
+ 175:Generated_Source\PSoC4/motorControlPWM.c ****                    bit to be set on FIFO full. */
+ 176:Generated_Source\PSoC4/motorControlPWM.c ****             motorControlPWM_ClearFIFO();
+ 177:Generated_Source\PSoC4/motorControlPWM.c ****         #endif /* (motorControlPWM_UseStatus) */
+ 178:Generated_Source\PSoC4/motorControlPWM.c ****     #endif /* (motorControlPWM_UsingFixedFunction) */
+ 179:Generated_Source\PSoC4/motorControlPWM.c **** }
+ 180:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 181:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 182:Generated_Source\PSoC4/motorControlPWM.c **** /*******************************************************************************
+ 183:Generated_Source\PSoC4/motorControlPWM.c **** * Function Name: motorControlPWM_Enable
+ 184:Generated_Source\PSoC4/motorControlPWM.c **** ********************************************************************************
+ 185:Generated_Source\PSoC4/motorControlPWM.c **** *
+ 186:Generated_Source\PSoC4/motorControlPWM.c **** * Summary:
+ 187:Generated_Source\PSoC4/motorControlPWM.c **** *  Enables the PWM block operation
+ 188:Generated_Source\PSoC4/motorControlPWM.c **** *
+ 189:Generated_Source\PSoC4/motorControlPWM.c **** * Parameters:
+ 190:Generated_Source\PSoC4/motorControlPWM.c **** *  None
+ 191:Generated_Source\PSoC4/motorControlPWM.c **** *
+ 192:Generated_Source\PSoC4/motorControlPWM.c **** * Return:
+ 193:Generated_Source\PSoC4/motorControlPWM.c **** *  None
+ 194:Generated_Source\PSoC4/motorControlPWM.c **** *
+ 195:Generated_Source\PSoC4/motorControlPWM.c **** * Side Effects:
+ 196:Generated_Source\PSoC4/motorControlPWM.c **** *  This works only if software enable mode is chosen
+ 197:Generated_Source\PSoC4/motorControlPWM.c **** *
+ 198:Generated_Source\PSoC4/motorControlPWM.c **** *******************************************************************************/
+ 199:Generated_Source\PSoC4/motorControlPWM.c **** void motorControlPWM_Enable(void) 
+ 200:Generated_Source\PSoC4/motorControlPWM.c **** {
+  28              		.loc 1 200 0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 5
+
+
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32              		@ link register save eliminated.
+ 201:Generated_Source\PSoC4/motorControlPWM.c ****     /* Globally Enable the Fixed Function Block chosen */
+ 202:Generated_Source\PSoC4/motorControlPWM.c ****     #if (motorControlPWM_UsingFixedFunction)
+ 203:Generated_Source\PSoC4/motorControlPWM.c ****         motorControlPWM_GLOBAL_ENABLE |= motorControlPWM_BLOCK_EN_MASK;
+ 204:Generated_Source\PSoC4/motorControlPWM.c ****         motorControlPWM_GLOBAL_STBY_ENABLE |= motorControlPWM_BLOCK_STBY_EN_MASK;
+ 205:Generated_Source\PSoC4/motorControlPWM.c ****     #endif /* (motorControlPWM_UsingFixedFunction) */
+ 206:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 207:Generated_Source\PSoC4/motorControlPWM.c ****     /* Enable the PWM from the control register  */
+ 208:Generated_Source\PSoC4/motorControlPWM.c ****     #if (motorControlPWM_UseControl || motorControlPWM_UsingFixedFunction)
+ 209:Generated_Source\PSoC4/motorControlPWM.c ****         motorControlPWM_CONTROL |= motorControlPWM_CTRL_ENABLE;
+  33              		.loc 1 209 0
+  34 0000 034A     		ldr	r2, .L2
+  35 0002 1178     		ldrb	r1, [r2]
+  36 0004 8023     		movs	r3, #128
+  37 0006 5B42     		rsbs	r3, r3, #0
+  38 0008 0B43     		orrs	r3, r1
+  39 000a DBB2     		uxtb	r3, r3
+  40 000c 1370     		strb	r3, [r2]
+ 210:Generated_Source\PSoC4/motorControlPWM.c ****     #endif /* (motorControlPWM_UseControl || motorControlPWM_UsingFixedFunction) */
+ 211:Generated_Source\PSoC4/motorControlPWM.c **** }
+  41              		.loc 1 211 0
+  42              		@ sp needed
+  43 000e 7047     		bx	lr
+  44              	.L3:
+  45              		.align	2
+  46              	.L2:
+  47 0010 72000F40 		.word	1074724978
+  48              		.cfi_endproc
+  49              	.LFE2:
+  50              		.size	motorControlPWM_Enable, .-motorControlPWM_Enable
+  51              		.section	.text.motorControlPWM_Stop,"ax",%progbits
+  52              		.align	2
+  53              		.global	motorControlPWM_Stop
+  54              		.code	16
+  55              		.thumb_func
+  56              		.type	motorControlPWM_Stop, %function
+  57              	motorControlPWM_Stop:
+  58              	.LFB3:
+ 212:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 213:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 214:Generated_Source\PSoC4/motorControlPWM.c **** /*******************************************************************************
+ 215:Generated_Source\PSoC4/motorControlPWM.c **** * Function Name: motorControlPWM_Stop
+ 216:Generated_Source\PSoC4/motorControlPWM.c **** ********************************************************************************
+ 217:Generated_Source\PSoC4/motorControlPWM.c **** *
+ 218:Generated_Source\PSoC4/motorControlPWM.c **** * Summary:
+ 219:Generated_Source\PSoC4/motorControlPWM.c **** *  The stop function halts the PWM, but does not change any modes or disable
+ 220:Generated_Source\PSoC4/motorControlPWM.c **** *  interrupts.
+ 221:Generated_Source\PSoC4/motorControlPWM.c **** *
+ 222:Generated_Source\PSoC4/motorControlPWM.c **** * Parameters:
+ 223:Generated_Source\PSoC4/motorControlPWM.c **** *  None
+ 224:Generated_Source\PSoC4/motorControlPWM.c **** *
+ 225:Generated_Source\PSoC4/motorControlPWM.c **** * Return:
+ 226:Generated_Source\PSoC4/motorControlPWM.c **** *  None
+ 227:Generated_Source\PSoC4/motorControlPWM.c **** *
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 6
+
+
+ 228:Generated_Source\PSoC4/motorControlPWM.c **** * Side Effects:
+ 229:Generated_Source\PSoC4/motorControlPWM.c **** *  If the Enable mode is set to Hardware only then this function
+ 230:Generated_Source\PSoC4/motorControlPWM.c **** *  has no effect on the operation of the PWM
+ 231:Generated_Source\PSoC4/motorControlPWM.c **** *
+ 232:Generated_Source\PSoC4/motorControlPWM.c **** *******************************************************************************/
+ 233:Generated_Source\PSoC4/motorControlPWM.c **** void motorControlPWM_Stop(void) 
+ 234:Generated_Source\PSoC4/motorControlPWM.c **** {
+  59              		.loc 1 234 0
+  60              		.cfi_startproc
+  61              		@ args = 0, pretend = 0, frame = 0
+  62              		@ frame_needed = 0, uses_anonymous_args = 0
+  63              		@ link register save eliminated.
+ 235:Generated_Source\PSoC4/motorControlPWM.c ****     #if (motorControlPWM_UseControl || motorControlPWM_UsingFixedFunction)
+ 236:Generated_Source\PSoC4/motorControlPWM.c ****         motorControlPWM_CONTROL &= ((uint8)(~motorControlPWM_CTRL_ENABLE));
+  64              		.loc 1 236 0
+  65 0000 024A     		ldr	r2, .L5
+  66 0002 1178     		ldrb	r1, [r2]
+  67 0004 7F23     		movs	r3, #127
+  68 0006 0B40     		ands	r3, r1
+  69 0008 1370     		strb	r3, [r2]
+ 237:Generated_Source\PSoC4/motorControlPWM.c ****     #endif /* (motorControlPWM_UseControl || motorControlPWM_UsingFixedFunction) */
+ 238:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 239:Generated_Source\PSoC4/motorControlPWM.c ****     /* Globally disable the Fixed Function Block chosen */
+ 240:Generated_Source\PSoC4/motorControlPWM.c ****     #if (motorControlPWM_UsingFixedFunction)
+ 241:Generated_Source\PSoC4/motorControlPWM.c ****         motorControlPWM_GLOBAL_ENABLE &= ((uint8)(~motorControlPWM_BLOCK_EN_MASK));
+ 242:Generated_Source\PSoC4/motorControlPWM.c ****         motorControlPWM_GLOBAL_STBY_ENABLE &= ((uint8)(~motorControlPWM_BLOCK_STBY_EN_MASK));
+ 243:Generated_Source\PSoC4/motorControlPWM.c ****     #endif /* (motorControlPWM_UsingFixedFunction) */
+ 244:Generated_Source\PSoC4/motorControlPWM.c **** }
+  70              		.loc 1 244 0
+  71              		@ sp needed
+  72 000a 7047     		bx	lr
+  73              	.L6:
+  74              		.align	2
+  75              	.L5:
+  76 000c 72000F40 		.word	1074724978
+  77              		.cfi_endproc
+  78              	.LFE3:
+  79              		.size	motorControlPWM_Stop, .-motorControlPWM_Stop
+  80              		.section	.text.motorControlPWM_SetCompareMode,"ax",%progbits
+  81              		.align	2
+  82              		.global	motorControlPWM_SetCompareMode
+  83              		.code	16
+  84              		.thumb_func
+  85              		.type	motorControlPWM_SetCompareMode, %function
+  86              	motorControlPWM_SetCompareMode:
+  87              	.LFB4:
+ 245:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 246:Generated_Source\PSoC4/motorControlPWM.c **** #if (motorControlPWM_UseOneCompareMode)
+ 247:Generated_Source\PSoC4/motorControlPWM.c ****     #if (motorControlPWM_CompareMode1SW)
+ 248:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 249:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 250:Generated_Source\PSoC4/motorControlPWM.c ****         /*******************************************************************************
+ 251:Generated_Source\PSoC4/motorControlPWM.c ****         * Function Name: motorControlPWM_SetCompareMode
+ 252:Generated_Source\PSoC4/motorControlPWM.c ****         ********************************************************************************
+ 253:Generated_Source\PSoC4/motorControlPWM.c ****         *
+ 254:Generated_Source\PSoC4/motorControlPWM.c ****         * Summary:
+ 255:Generated_Source\PSoC4/motorControlPWM.c ****         *  This function writes the Compare Mode for the pwm output when in Dither mode,
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 7
+
+
+ 256:Generated_Source\PSoC4/motorControlPWM.c ****         *  Center Align Mode or One Output Mode.
+ 257:Generated_Source\PSoC4/motorControlPWM.c ****         *
+ 258:Generated_Source\PSoC4/motorControlPWM.c ****         * Parameters:
+ 259:Generated_Source\PSoC4/motorControlPWM.c ****         *  comparemode:  The new compare mode for the PWM output. Use the compare types
+ 260:Generated_Source\PSoC4/motorControlPWM.c ****         *                defined in the H file as input arguments.
+ 261:Generated_Source\PSoC4/motorControlPWM.c ****         *
+ 262:Generated_Source\PSoC4/motorControlPWM.c ****         * Return:
+ 263:Generated_Source\PSoC4/motorControlPWM.c ****         *  None
+ 264:Generated_Source\PSoC4/motorControlPWM.c ****         *
+ 265:Generated_Source\PSoC4/motorControlPWM.c ****         *******************************************************************************/
+ 266:Generated_Source\PSoC4/motorControlPWM.c ****         void motorControlPWM_SetCompareMode(uint8 comparemode) 
+ 267:Generated_Source\PSoC4/motorControlPWM.c ****         {
+  88              		.loc 1 267 0
+  89              		.cfi_startproc
+  90              		@ args = 0, pretend = 0, frame = 0
+  91              		@ frame_needed = 0, uses_anonymous_args = 0
+  92              	.LVL0:
+  93 0000 10B5     		push	{r4, lr}
+  94              		.cfi_def_cfa_offset 8
+  95              		.cfi_offset 4, -8
+  96              		.cfi_offset 14, -4
+  97 0002 0300     		movs	r3, r0
+ 268:Generated_Source\PSoC4/motorControlPWM.c ****             #if(motorControlPWM_UsingFixedFunction)
+ 269:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 270:Generated_Source\PSoC4/motorControlPWM.c ****                 #if(0 != motorControlPWM_CTRL_CMPMODE1_SHIFT)
+ 271:Generated_Source\PSoC4/motorControlPWM.c ****                     uint8 comparemodemasked = ((uint8)((uint8)comparemode << motorControlPWM_CTRL_C
+ 272:Generated_Source\PSoC4/motorControlPWM.c ****                 #else
+ 273:Generated_Source\PSoC4/motorControlPWM.c ****                     uint8 comparemodemasked = comparemode;
+ 274:Generated_Source\PSoC4/motorControlPWM.c ****                 #endif /* (0 != motorControlPWM_CTRL_CMPMODE1_SHIFT) */
+ 275:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 276:Generated_Source\PSoC4/motorControlPWM.c ****                 motorControlPWM_CONTROL3 &= ((uint8)(~motorControlPWM_CTRL_CMPMODE1_MASK)); /*Clear
+ 277:Generated_Source\PSoC4/motorControlPWM.c ****                 motorControlPWM_CONTROL3 |= comparemodemasked;
+ 278:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 279:Generated_Source\PSoC4/motorControlPWM.c ****             #elif (motorControlPWM_UseControl)
+ 280:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 281:Generated_Source\PSoC4/motorControlPWM.c ****                 #if(0 != motorControlPWM_CTRL_CMPMODE1_SHIFT)
+ 282:Generated_Source\PSoC4/motorControlPWM.c ****                     uint8 comparemode1masked = ((uint8)((uint8)comparemode << motorControlPWM_CTRL_
+ 283:Generated_Source\PSoC4/motorControlPWM.c ****                                                 motorControlPWM_CTRL_CMPMODE1_MASK;
+ 284:Generated_Source\PSoC4/motorControlPWM.c ****                 #else
+ 285:Generated_Source\PSoC4/motorControlPWM.c ****                     uint8 comparemode1masked = comparemode & motorControlPWM_CTRL_CMPMODE1_MASK;
+  98              		.loc 1 285 0
+  99 0004 0720     		movs	r0, #7
+ 100              	.LVL1:
+ 101 0006 1840     		ands	r0, r3
+ 102              	.LVL2:
+ 286:Generated_Source\PSoC4/motorControlPWM.c ****                 #endif /* (0 != motorControlPWM_CTRL_CMPMODE1_SHIFT) */
+ 287:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 288:Generated_Source\PSoC4/motorControlPWM.c ****                 #if(0 != motorControlPWM_CTRL_CMPMODE2_SHIFT)
+ 289:Generated_Source\PSoC4/motorControlPWM.c ****                     uint8 comparemode2masked = ((uint8)((uint8)comparemode << motorControlPWM_CTRL_
+ 103              		.loc 1 289 0
+ 104 0008 DB00     		lsls	r3, r3, #3
+ 105 000a 3822     		movs	r2, #56
+ 106 000c 1340     		ands	r3, r2
+ 107              	.LVL3:
+ 290:Generated_Source\PSoC4/motorControlPWM.c ****                                                motorControlPWM_CTRL_CMPMODE2_MASK;
+ 291:Generated_Source\PSoC4/motorControlPWM.c ****                 #else
+ 292:Generated_Source\PSoC4/motorControlPWM.c ****                     uint8 comparemode2masked = comparemode & motorControlPWM_CTRL_CMPMODE2_MASK;
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 8
+
+
+ 293:Generated_Source\PSoC4/motorControlPWM.c ****                 #endif /* (0 != motorControlPWM_CTRL_CMPMODE2_SHIFT) */
+ 294:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 295:Generated_Source\PSoC4/motorControlPWM.c ****                 /*Clear existing mode */
+ 296:Generated_Source\PSoC4/motorControlPWM.c ****                 motorControlPWM_CONTROL &= ((uint8)(~(motorControlPWM_CTRL_CMPMODE1_MASK |
+ 108              		.loc 1 296 0
+ 109 000e 054A     		ldr	r2, .L8
+ 110 0010 1178     		ldrb	r1, [r2]
+ 111 0012 3F24     		movs	r4, #63
+ 112 0014 A143     		bics	r1, r4
+ 113 0016 1170     		strb	r1, [r2]
+ 297:Generated_Source\PSoC4/motorControlPWM.c ****                                             motorControlPWM_CTRL_CMPMODE2_MASK)));
+ 298:Generated_Source\PSoC4/motorControlPWM.c ****                 motorControlPWM_CONTROL |= (comparemode1masked | comparemode2masked);
+ 114              		.loc 1 298 0
+ 115 0018 1178     		ldrb	r1, [r2]
+ 116 001a 1843     		orrs	r0, r3
+ 117              	.LVL4:
+ 118 001c 0843     		orrs	r0, r1
+ 119 001e 1070     		strb	r0, [r2]
+ 299:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 300:Generated_Source\PSoC4/motorControlPWM.c ****             #else
+ 301:Generated_Source\PSoC4/motorControlPWM.c ****                 uint8 temp = comparemode;
+ 302:Generated_Source\PSoC4/motorControlPWM.c ****             #endif /* (motorControlPWM_UsingFixedFunction) */
+ 303:Generated_Source\PSoC4/motorControlPWM.c ****         }
+ 120              		.loc 1 303 0
+ 121              		@ sp needed
+ 122 0020 10BD     		pop	{r4, pc}
+ 123              	.L9:
+ 124 0022 C046     		.align	2
+ 125              	.L8:
+ 126 0024 72000F40 		.word	1074724978
+ 127              		.cfi_endproc
+ 128              	.LFE4:
+ 129              		.size	motorControlPWM_SetCompareMode, .-motorControlPWM_SetCompareMode
+ 130              		.section	.text.motorControlPWM_WriteCounter,"ax",%progbits
+ 131              		.align	2
+ 132              		.global	motorControlPWM_WriteCounter
+ 133              		.code	16
+ 134              		.thumb_func
+ 135              		.type	motorControlPWM_WriteCounter, %function
+ 136              	motorControlPWM_WriteCounter:
+ 137              	.LFB5:
+ 304:Generated_Source\PSoC4/motorControlPWM.c ****     #endif /* motorControlPWM_CompareMode1SW */
+ 305:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 306:Generated_Source\PSoC4/motorControlPWM.c **** #else /* UseOneCompareMode */
+ 307:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 308:Generated_Source\PSoC4/motorControlPWM.c ****     #if (motorControlPWM_CompareMode1SW)
+ 309:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 310:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 311:Generated_Source\PSoC4/motorControlPWM.c ****         /*******************************************************************************
+ 312:Generated_Source\PSoC4/motorControlPWM.c ****         * Function Name: motorControlPWM_SetCompareMode1
+ 313:Generated_Source\PSoC4/motorControlPWM.c ****         ********************************************************************************
+ 314:Generated_Source\PSoC4/motorControlPWM.c ****         *
+ 315:Generated_Source\PSoC4/motorControlPWM.c ****         * Summary:
+ 316:Generated_Source\PSoC4/motorControlPWM.c ****         *  This function writes the Compare Mode for the pwm or pwm1 output
+ 317:Generated_Source\PSoC4/motorControlPWM.c ****         *
+ 318:Generated_Source\PSoC4/motorControlPWM.c ****         * Parameters:
+ 319:Generated_Source\PSoC4/motorControlPWM.c ****         *  comparemode:  The new compare mode for the PWM output. Use the compare types
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 9
+
+
+ 320:Generated_Source\PSoC4/motorControlPWM.c ****         *                defined in the H file as input arguments.
+ 321:Generated_Source\PSoC4/motorControlPWM.c ****         *
+ 322:Generated_Source\PSoC4/motorControlPWM.c ****         * Return:
+ 323:Generated_Source\PSoC4/motorControlPWM.c ****         *  None
+ 324:Generated_Source\PSoC4/motorControlPWM.c ****         *
+ 325:Generated_Source\PSoC4/motorControlPWM.c ****         *******************************************************************************/
+ 326:Generated_Source\PSoC4/motorControlPWM.c ****         void motorControlPWM_SetCompareMode1(uint8 comparemode) 
+ 327:Generated_Source\PSoC4/motorControlPWM.c ****         {
+ 328:Generated_Source\PSoC4/motorControlPWM.c ****             #if(0 != motorControlPWM_CTRL_CMPMODE1_SHIFT)
+ 329:Generated_Source\PSoC4/motorControlPWM.c ****                 uint8 comparemodemasked = ((uint8)((uint8)comparemode << motorControlPWM_CTRL_CMPMO
+ 330:Generated_Source\PSoC4/motorControlPWM.c ****                                            motorControlPWM_CTRL_CMPMODE1_MASK;
+ 331:Generated_Source\PSoC4/motorControlPWM.c ****             #else
+ 332:Generated_Source\PSoC4/motorControlPWM.c ****                 uint8 comparemodemasked = comparemode & motorControlPWM_CTRL_CMPMODE1_MASK;
+ 333:Generated_Source\PSoC4/motorControlPWM.c ****             #endif /* (0 != motorControlPWM_CTRL_CMPMODE1_SHIFT) */
+ 334:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 335:Generated_Source\PSoC4/motorControlPWM.c ****             #if (motorControlPWM_UseControl)
+ 336:Generated_Source\PSoC4/motorControlPWM.c ****                 motorControlPWM_CONTROL &= ((uint8)(~motorControlPWM_CTRL_CMPMODE1_MASK)); /*Clear 
+ 337:Generated_Source\PSoC4/motorControlPWM.c ****                 motorControlPWM_CONTROL |= comparemodemasked;
+ 338:Generated_Source\PSoC4/motorControlPWM.c ****             #endif /* (motorControlPWM_UseControl) */
+ 339:Generated_Source\PSoC4/motorControlPWM.c ****         }
+ 340:Generated_Source\PSoC4/motorControlPWM.c ****     #endif /* motorControlPWM_CompareMode1SW */
+ 341:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 342:Generated_Source\PSoC4/motorControlPWM.c **** #if (motorControlPWM_CompareMode2SW)
+ 343:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 344:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 345:Generated_Source\PSoC4/motorControlPWM.c ****     /*******************************************************************************
+ 346:Generated_Source\PSoC4/motorControlPWM.c ****     * Function Name: motorControlPWM_SetCompareMode2
+ 347:Generated_Source\PSoC4/motorControlPWM.c ****     ********************************************************************************
+ 348:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 349:Generated_Source\PSoC4/motorControlPWM.c ****     * Summary:
+ 350:Generated_Source\PSoC4/motorControlPWM.c ****     *  This function writes the Compare Mode for the pwm or pwm2 output
+ 351:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 352:Generated_Source\PSoC4/motorControlPWM.c ****     * Parameters:
+ 353:Generated_Source\PSoC4/motorControlPWM.c ****     *  comparemode:  The new compare mode for the PWM output. Use the compare types
+ 354:Generated_Source\PSoC4/motorControlPWM.c ****     *                defined in the H file as input arguments.
+ 355:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 356:Generated_Source\PSoC4/motorControlPWM.c ****     * Return:
+ 357:Generated_Source\PSoC4/motorControlPWM.c ****     *  None
+ 358:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 359:Generated_Source\PSoC4/motorControlPWM.c ****     *******************************************************************************/
+ 360:Generated_Source\PSoC4/motorControlPWM.c ****     void motorControlPWM_SetCompareMode2(uint8 comparemode) 
+ 361:Generated_Source\PSoC4/motorControlPWM.c ****     {
+ 362:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 363:Generated_Source\PSoC4/motorControlPWM.c ****         #if(0 != motorControlPWM_CTRL_CMPMODE2_SHIFT)
+ 364:Generated_Source\PSoC4/motorControlPWM.c ****             uint8 comparemodemasked = ((uint8)((uint8)comparemode << motorControlPWM_CTRL_CMPMODE2_
+ 365:Generated_Source\PSoC4/motorControlPWM.c ****                                                  motorControlPWM_CTRL_CMPMODE2_MASK;
+ 366:Generated_Source\PSoC4/motorControlPWM.c ****         #else
+ 367:Generated_Source\PSoC4/motorControlPWM.c ****             uint8 comparemodemasked = comparemode & motorControlPWM_CTRL_CMPMODE2_MASK;
+ 368:Generated_Source\PSoC4/motorControlPWM.c ****         #endif /* (0 != motorControlPWM_CTRL_CMPMODE2_SHIFT) */
+ 369:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 370:Generated_Source\PSoC4/motorControlPWM.c ****         #if (motorControlPWM_UseControl)
+ 371:Generated_Source\PSoC4/motorControlPWM.c ****             motorControlPWM_CONTROL &= ((uint8)(~motorControlPWM_CTRL_CMPMODE2_MASK)); /*Clear exis
+ 372:Generated_Source\PSoC4/motorControlPWM.c ****             motorControlPWM_CONTROL |= comparemodemasked;
+ 373:Generated_Source\PSoC4/motorControlPWM.c ****         #endif /* (motorControlPWM_UseControl) */
+ 374:Generated_Source\PSoC4/motorControlPWM.c ****     }
+ 375:Generated_Source\PSoC4/motorControlPWM.c ****     #endif /*motorControlPWM_CompareMode2SW */
+ 376:Generated_Source\PSoC4/motorControlPWM.c **** 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 10
+
+
+ 377:Generated_Source\PSoC4/motorControlPWM.c **** #endif /* UseOneCompareMode */
+ 378:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 379:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 380:Generated_Source\PSoC4/motorControlPWM.c **** #if (!motorControlPWM_UsingFixedFunction)
+ 381:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 382:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 383:Generated_Source\PSoC4/motorControlPWM.c ****     /*******************************************************************************
+ 384:Generated_Source\PSoC4/motorControlPWM.c ****     * Function Name: motorControlPWM_WriteCounter
+ 385:Generated_Source\PSoC4/motorControlPWM.c ****     ********************************************************************************
+ 386:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 387:Generated_Source\PSoC4/motorControlPWM.c ****     * Summary:
+ 388:Generated_Source\PSoC4/motorControlPWM.c ****     *  Writes a new counter value directly to the counter register. This will be
+ 389:Generated_Source\PSoC4/motorControlPWM.c ****     *  implemented for that currently running period and only that period. This API
+ 390:Generated_Source\PSoC4/motorControlPWM.c ****     *  is valid only for UDB implementation and not available for fixed function
+ 391:Generated_Source\PSoC4/motorControlPWM.c ****     *  PWM implementation.
+ 392:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 393:Generated_Source\PSoC4/motorControlPWM.c ****     * Parameters:
+ 394:Generated_Source\PSoC4/motorControlPWM.c ****     *  counter:  The period new period counter value.
+ 395:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 396:Generated_Source\PSoC4/motorControlPWM.c ****     * Return:
+ 397:Generated_Source\PSoC4/motorControlPWM.c ****     *  None
+ 398:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 399:Generated_Source\PSoC4/motorControlPWM.c ****     * Side Effects:
+ 400:Generated_Source\PSoC4/motorControlPWM.c ****     *  The PWM Period will be reloaded when a counter value will be a zero
+ 401:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 402:Generated_Source\PSoC4/motorControlPWM.c ****     *******************************************************************************/
+ 403:Generated_Source\PSoC4/motorControlPWM.c ****     void motorControlPWM_WriteCounter(uint8 counter) \
+ 404:Generated_Source\PSoC4/motorControlPWM.c ****                                        
+ 405:Generated_Source\PSoC4/motorControlPWM.c ****     {
+ 138              		.loc 1 405 0
+ 139              		.cfi_startproc
+ 140              		@ args = 0, pretend = 0, frame = 0
+ 141              		@ frame_needed = 0, uses_anonymous_args = 0
+ 142              		@ link register save eliminated.
+ 143              	.LVL5:
+ 406:Generated_Source\PSoC4/motorControlPWM.c ****         CY_SET_REG8(motorControlPWM_COUNTER_LSB_PTR, counter);
+ 144              		.loc 1 406 0
+ 145 0000 014B     		ldr	r3, .L11
+ 146 0002 1870     		strb	r0, [r3]
+ 407:Generated_Source\PSoC4/motorControlPWM.c ****     }
+ 147              		.loc 1 407 0
+ 148              		@ sp needed
+ 149 0004 7047     		bx	lr
+ 150              	.L12:
+ 151 0006 C046     		.align	2
+ 152              	.L11:
+ 153 0008 02000F40 		.word	1074724866
+ 154              		.cfi_endproc
+ 155              	.LFE5:
+ 156              		.size	motorControlPWM_WriteCounter, .-motorControlPWM_WriteCounter
+ 157              		.section	.text.motorControlPWM_ReadCounter,"ax",%progbits
+ 158              		.align	2
+ 159              		.global	motorControlPWM_ReadCounter
+ 160              		.code	16
+ 161              		.thumb_func
+ 162              		.type	motorControlPWM_ReadCounter, %function
+ 163              	motorControlPWM_ReadCounter:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 11
+
+
+ 164              	.LFB6:
+ 408:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 409:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 410:Generated_Source\PSoC4/motorControlPWM.c ****     /*******************************************************************************
+ 411:Generated_Source\PSoC4/motorControlPWM.c ****     * Function Name: motorControlPWM_ReadCounter
+ 412:Generated_Source\PSoC4/motorControlPWM.c ****     ********************************************************************************
+ 413:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 414:Generated_Source\PSoC4/motorControlPWM.c ****     * Summary:
+ 415:Generated_Source\PSoC4/motorControlPWM.c ****     *  This function returns the current value of the counter.  It doesn't matter
+ 416:Generated_Source\PSoC4/motorControlPWM.c ****     *  if the counter is enabled or running.
+ 417:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 418:Generated_Source\PSoC4/motorControlPWM.c ****     * Parameters:
+ 419:Generated_Source\PSoC4/motorControlPWM.c ****     *  None
+ 420:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 421:Generated_Source\PSoC4/motorControlPWM.c ****     * Return:
+ 422:Generated_Source\PSoC4/motorControlPWM.c ****     *  The current value of the counter.
+ 423:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 424:Generated_Source\PSoC4/motorControlPWM.c ****     *******************************************************************************/
+ 425:Generated_Source\PSoC4/motorControlPWM.c ****     uint8 motorControlPWM_ReadCounter(void) 
+ 426:Generated_Source\PSoC4/motorControlPWM.c ****     {
+ 165              		.loc 1 426 0
+ 166              		.cfi_startproc
+ 167              		@ args = 0, pretend = 0, frame = 0
+ 168              		@ frame_needed = 0, uses_anonymous_args = 0
+ 169              		@ link register save eliminated.
+ 427:Generated_Source\PSoC4/motorControlPWM.c ****         /* Force capture by reading Accumulator */
+ 428:Generated_Source\PSoC4/motorControlPWM.c ****         /* Must first do a software capture to be able to read the counter */
+ 429:Generated_Source\PSoC4/motorControlPWM.c ****         /* It is up to the user code to make sure there isn't already captured data in the FIFO */
+ 430:Generated_Source\PSoC4/motorControlPWM.c ****           (void)CY_GET_REG8(motorControlPWM_COUNTERCAP_LSB_PTR_8BIT);
+ 170              		.loc 1 430 0
+ 171 0000 024B     		ldr	r3, .L14
+ 172 0002 1B78     		ldrb	r3, [r3]
+ 431:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 432:Generated_Source\PSoC4/motorControlPWM.c ****         /* Read the data from the FIFO */
+ 433:Generated_Source\PSoC4/motorControlPWM.c ****         return (CY_GET_REG8(motorControlPWM_CAPTURE_LSB_PTR));
+ 173              		.loc 1 433 0
+ 174 0004 024B     		ldr	r3, .L14+4
+ 175 0006 1878     		ldrb	r0, [r3]
+ 176 0008 C0B2     		uxtb	r0, r0
+ 434:Generated_Source\PSoC4/motorControlPWM.c ****     }
+ 177              		.loc 1 434 0
+ 178              		@ sp needed
+ 179 000a 7047     		bx	lr
+ 180              	.L15:
+ 181              		.align	2
+ 182              	.L14:
+ 183 000c 12000F40 		.word	1074724882
+ 184 0010 52000F40 		.word	1074724946
+ 185              		.cfi_endproc
+ 186              	.LFE6:
+ 187              		.size	motorControlPWM_ReadCounter, .-motorControlPWM_ReadCounter
+ 188              		.section	.text.motorControlPWM_WritePeriod,"ax",%progbits
+ 189              		.align	2
+ 190              		.global	motorControlPWM_WritePeriod
+ 191              		.code	16
+ 192              		.thumb_func
+ 193              		.type	motorControlPWM_WritePeriod, %function
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 12
+
+
+ 194              	motorControlPWM_WritePeriod:
+ 195              	.LFB7:
+ 435:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 436:Generated_Source\PSoC4/motorControlPWM.c ****     #if (motorControlPWM_UseStatus)
+ 437:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 438:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 439:Generated_Source\PSoC4/motorControlPWM.c ****         /*******************************************************************************
+ 440:Generated_Source\PSoC4/motorControlPWM.c ****         * Function Name: motorControlPWM_ClearFIFO
+ 441:Generated_Source\PSoC4/motorControlPWM.c ****         ********************************************************************************
+ 442:Generated_Source\PSoC4/motorControlPWM.c ****         *
+ 443:Generated_Source\PSoC4/motorControlPWM.c ****         * Summary:
+ 444:Generated_Source\PSoC4/motorControlPWM.c ****         *  This function clears all capture data from the capture FIFO
+ 445:Generated_Source\PSoC4/motorControlPWM.c ****         *
+ 446:Generated_Source\PSoC4/motorControlPWM.c ****         * Parameters:
+ 447:Generated_Source\PSoC4/motorControlPWM.c ****         *  None
+ 448:Generated_Source\PSoC4/motorControlPWM.c ****         *
+ 449:Generated_Source\PSoC4/motorControlPWM.c ****         * Return:
+ 450:Generated_Source\PSoC4/motorControlPWM.c ****         *  None
+ 451:Generated_Source\PSoC4/motorControlPWM.c ****         *
+ 452:Generated_Source\PSoC4/motorControlPWM.c ****         *******************************************************************************/
+ 453:Generated_Source\PSoC4/motorControlPWM.c ****         void motorControlPWM_ClearFIFO(void) 
+ 454:Generated_Source\PSoC4/motorControlPWM.c ****         {
+ 455:Generated_Source\PSoC4/motorControlPWM.c ****             while(0u != (motorControlPWM_ReadStatusRegister() & motorControlPWM_STATUS_FIFONEMPTY))
+ 456:Generated_Source\PSoC4/motorControlPWM.c ****             {
+ 457:Generated_Source\PSoC4/motorControlPWM.c ****                 (void)motorControlPWM_ReadCapture();
+ 458:Generated_Source\PSoC4/motorControlPWM.c ****             }
+ 459:Generated_Source\PSoC4/motorControlPWM.c ****         }
+ 460:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 461:Generated_Source\PSoC4/motorControlPWM.c ****     #endif /* motorControlPWM_UseStatus */
+ 462:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 463:Generated_Source\PSoC4/motorControlPWM.c **** #endif /* !motorControlPWM_UsingFixedFunction */
+ 464:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 465:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 466:Generated_Source\PSoC4/motorControlPWM.c **** /*******************************************************************************
+ 467:Generated_Source\PSoC4/motorControlPWM.c **** * Function Name: motorControlPWM_WritePeriod
+ 468:Generated_Source\PSoC4/motorControlPWM.c **** ********************************************************************************
+ 469:Generated_Source\PSoC4/motorControlPWM.c **** *
+ 470:Generated_Source\PSoC4/motorControlPWM.c **** * Summary:
+ 471:Generated_Source\PSoC4/motorControlPWM.c **** *  This function is used to change the period of the counter.  The new period
+ 472:Generated_Source\PSoC4/motorControlPWM.c **** *  will be loaded the next time terminal count is detected.
+ 473:Generated_Source\PSoC4/motorControlPWM.c **** *
+ 474:Generated_Source\PSoC4/motorControlPWM.c **** * Parameters:
+ 475:Generated_Source\PSoC4/motorControlPWM.c **** *  period:  Period value. May be between 1 and (2^Resolution)-1.  A value of 0
+ 476:Generated_Source\PSoC4/motorControlPWM.c **** *           will result in the counter remaining at zero.
+ 477:Generated_Source\PSoC4/motorControlPWM.c **** *
+ 478:Generated_Source\PSoC4/motorControlPWM.c **** * Return:
+ 479:Generated_Source\PSoC4/motorControlPWM.c **** *  None
+ 480:Generated_Source\PSoC4/motorControlPWM.c **** *
+ 481:Generated_Source\PSoC4/motorControlPWM.c **** *******************************************************************************/
+ 482:Generated_Source\PSoC4/motorControlPWM.c **** void motorControlPWM_WritePeriod(uint8 period) 
+ 483:Generated_Source\PSoC4/motorControlPWM.c **** {
+ 196              		.loc 1 483 0
+ 197              		.cfi_startproc
+ 198              		@ args = 0, pretend = 0, frame = 0
+ 199              		@ frame_needed = 0, uses_anonymous_args = 0
+ 200              		@ link register save eliminated.
+ 201              	.LVL6:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 13
+
+
+ 484:Generated_Source\PSoC4/motorControlPWM.c ****     #if(motorControlPWM_UsingFixedFunction)
+ 485:Generated_Source\PSoC4/motorControlPWM.c ****         CY_SET_REG16(motorControlPWM_PERIOD_LSB_PTR, (uint16)period);
+ 486:Generated_Source\PSoC4/motorControlPWM.c ****     #else
+ 487:Generated_Source\PSoC4/motorControlPWM.c ****         CY_SET_REG8(motorControlPWM_PERIOD_LSB_PTR, period);
+ 202              		.loc 1 487 0
+ 203 0000 014B     		ldr	r3, .L17
+ 204 0002 1870     		strb	r0, [r3]
+ 488:Generated_Source\PSoC4/motorControlPWM.c ****     #endif /* (motorControlPWM_UsingFixedFunction) */
+ 489:Generated_Source\PSoC4/motorControlPWM.c **** }
+ 205              		.loc 1 489 0
+ 206              		@ sp needed
+ 207 0004 7047     		bx	lr
+ 208              	.L18:
+ 209 0006 C046     		.align	2
+ 210              	.L17:
+ 211 0008 42000F40 		.word	1074724930
+ 212              		.cfi_endproc
+ 213              	.LFE7:
+ 214              		.size	motorControlPWM_WritePeriod, .-motorControlPWM_WritePeriod
+ 215              		.section	.text.motorControlPWM_WriteCompare,"ax",%progbits
+ 216              		.align	2
+ 217              		.global	motorControlPWM_WriteCompare
+ 218              		.code	16
+ 219              		.thumb_func
+ 220              		.type	motorControlPWM_WriteCompare, %function
+ 221              	motorControlPWM_WriteCompare:
+ 222              	.LFB8:
+ 490:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 491:Generated_Source\PSoC4/motorControlPWM.c **** #if (motorControlPWM_UseOneCompareMode)
+ 492:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 493:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 494:Generated_Source\PSoC4/motorControlPWM.c ****     /*******************************************************************************
+ 495:Generated_Source\PSoC4/motorControlPWM.c ****     * Function Name: motorControlPWM_WriteCompare
+ 496:Generated_Source\PSoC4/motorControlPWM.c ****     ********************************************************************************
+ 497:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 498:Generated_Source\PSoC4/motorControlPWM.c ****     * Summary:
+ 499:Generated_Source\PSoC4/motorControlPWM.c ****     *  This funtion is used to change the compare1 value when the PWM is in Dither
+ 500:Generated_Source\PSoC4/motorControlPWM.c ****     *  mode. The compare output will reflect the new value on the next UDB clock.
+ 501:Generated_Source\PSoC4/motorControlPWM.c ****     *  The compare output will be driven high when the present counter value is
+ 502:Generated_Source\PSoC4/motorControlPWM.c ****     *  compared to the compare value based on the compare mode defined in
+ 503:Generated_Source\PSoC4/motorControlPWM.c ****     *  Dither Mode.
+ 504:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 505:Generated_Source\PSoC4/motorControlPWM.c ****     * Parameters:
+ 506:Generated_Source\PSoC4/motorControlPWM.c ****     *  compare:  New compare value.
+ 507:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 508:Generated_Source\PSoC4/motorControlPWM.c ****     * Return:
+ 509:Generated_Source\PSoC4/motorControlPWM.c ****     *  None
+ 510:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 511:Generated_Source\PSoC4/motorControlPWM.c ****     * Side Effects:
+ 512:Generated_Source\PSoC4/motorControlPWM.c ****     *  This function is only available if the PWM mode parameter is set to
+ 513:Generated_Source\PSoC4/motorControlPWM.c ****     *  Dither Mode, Center Aligned Mode or One Output Mode
+ 514:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 515:Generated_Source\PSoC4/motorControlPWM.c ****     *******************************************************************************/
+ 516:Generated_Source\PSoC4/motorControlPWM.c ****     void motorControlPWM_WriteCompare(uint8 compare) \
+ 517:Generated_Source\PSoC4/motorControlPWM.c ****                                        
+ 518:Generated_Source\PSoC4/motorControlPWM.c ****     {
+ 223              		.loc 1 518 0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 14
+
+
+ 224              		.cfi_startproc
+ 225              		@ args = 0, pretend = 0, frame = 0
+ 226              		@ frame_needed = 0, uses_anonymous_args = 0
+ 227              		@ link register save eliminated.
+ 228              	.LVL7:
+ 519:Generated_Source\PSoC4/motorControlPWM.c ****         #if(motorControlPWM_UsingFixedFunction)
+ 520:Generated_Source\PSoC4/motorControlPWM.c ****             CY_SET_REG16(motorControlPWM_COMPARE1_LSB_PTR, (uint16)compare);
+ 521:Generated_Source\PSoC4/motorControlPWM.c ****         #else
+ 522:Generated_Source\PSoC4/motorControlPWM.c ****             CY_SET_REG8(motorControlPWM_COMPARE1_LSB_PTR, compare);
+ 229              		.loc 1 522 0
+ 230 0000 014B     		ldr	r3, .L20
+ 231 0002 1870     		strb	r0, [r3]
+ 523:Generated_Source\PSoC4/motorControlPWM.c ****         #endif /* (motorControlPWM_UsingFixedFunction) */
+ 524:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 525:Generated_Source\PSoC4/motorControlPWM.c ****         #if (motorControlPWM_PWMMode == motorControlPWM__B_PWM__DITHER)
+ 526:Generated_Source\PSoC4/motorControlPWM.c ****             #if(motorControlPWM_UsingFixedFunction)
+ 527:Generated_Source\PSoC4/motorControlPWM.c ****                 CY_SET_REG16(motorControlPWM_COMPARE2_LSB_PTR, (uint16)(compare + 1u));
+ 528:Generated_Source\PSoC4/motorControlPWM.c ****             #else
+ 529:Generated_Source\PSoC4/motorControlPWM.c ****                 CY_SET_REG8(motorControlPWM_COMPARE2_LSB_PTR, (compare + 1u));
+ 530:Generated_Source\PSoC4/motorControlPWM.c ****             #endif /* (motorControlPWM_UsingFixedFunction) */
+ 531:Generated_Source\PSoC4/motorControlPWM.c ****         #endif /* (motorControlPWM_PWMMode == motorControlPWM__B_PWM__DITHER) */
+ 532:Generated_Source\PSoC4/motorControlPWM.c ****     }
+ 232              		.loc 1 532 0
+ 233              		@ sp needed
+ 234 0004 7047     		bx	lr
+ 235              	.L21:
+ 236 0006 C046     		.align	2
+ 237              	.L20:
+ 238 0008 22000F40 		.word	1074724898
+ 239              		.cfi_endproc
+ 240              	.LFE8:
+ 241              		.size	motorControlPWM_WriteCompare, .-motorControlPWM_WriteCompare
+ 242              		.section	.text.motorControlPWM_Init,"ax",%progbits
+ 243              		.align	2
+ 244              		.global	motorControlPWM_Init
+ 245              		.code	16
+ 246              		.thumb_func
+ 247              		.type	motorControlPWM_Init, %function
+ 248              	motorControlPWM_Init:
+ 249              	.LFB1:
+  85:Generated_Source\PSoC4/motorControlPWM.c ****     #if (motorControlPWM_UsingFixedFunction || motorControlPWM_UseControl)
+ 250              		.loc 1 85 0
+ 251              		.cfi_startproc
+ 252              		@ args = 0, pretend = 0, frame = 0
+ 253              		@ frame_needed = 0, uses_anonymous_args = 0
+ 254 0000 10B5     		push	{r4, lr}
+ 255              		.cfi_def_cfa_offset 8
+ 256              		.cfi_offset 4, -8
+ 257              		.cfi_offset 14, -4
+ 117:Generated_Source\PSoC4/motorControlPWM.c ****                 ((uint8)(~motorControlPWM_CTRL_CMPMODE1_MASK));
+ 258              		.loc 1 117 0
+ 259 0002 0C49     		ldr	r1, .L23
+ 260 0004 0B78     		ldrb	r3, [r1]
+ 261 0006 3F22     		movs	r2, #63
+ 262 0008 9343     		bics	r3, r2
+ 263              	.LVL8:
+ 119:Generated_Source\PSoC4/motorControlPWM.c ****                                    motorControlPWM_DEFAULT_COMPARE1_MODE;
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 15
+
+
+ 264              		.loc 1 119 0
+ 265 000a 0D22     		movs	r2, #13
+ 266 000c 1343     		orrs	r3, r2
+ 267              	.LVL9:
+ 268 000e DBB2     		uxtb	r3, r3
+ 269 0010 0B70     		strb	r3, [r1]
+ 126:Generated_Source\PSoC4/motorControlPWM.c ****         #else /* (motorControlPWM_Resolution == 16)*/
+ 270              		.loc 1 126 0
+ 271 0012 094A     		ldr	r2, .L23+4
+ 272 0014 1178     		ldrb	r1, [r2]
+ 273 0016 0123     		movs	r3, #1
+ 274 0018 0B43     		orrs	r3, r1
+ 275 001a DBB2     		uxtb	r3, r3
+ 276 001c 1370     		strb	r3, [r2]
+ 133:Generated_Source\PSoC4/motorControlPWM.c ****     #endif /* (!motorControlPWM_UsingFixedFunction) */
+ 277              		.loc 1 133 0
+ 278 001e FF20     		movs	r0, #255
+ 279 0020 FFF7FEFF 		bl	motorControlPWM_WriteCounter
+ 280              	.LVL10:
+ 136:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 281              		.loc 1 136 0
+ 282 0024 FF20     		movs	r0, #255
+ 283 0026 FFF7FEFF 		bl	motorControlPWM_WritePeriod
+ 284              	.LVL11:
+ 139:Generated_Source\PSoC4/motorControlPWM.c ****         #else
+ 285              		.loc 1 139 0
+ 286 002a 8020     		movs	r0, #128
+ 287 002c FFF7FEFF 		bl	motorControlPWM_WriteCompare
+ 288              	.LVL12:
+ 179:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 289              		.loc 1 179 0
+ 290              		@ sp needed
+ 291 0030 10BD     		pop	{r4, pc}
+ 292              	.L24:
+ 293 0032 C046     		.align	2
+ 294              	.L23:
+ 295 0034 72000F40 		.word	1074724978
+ 296 0038 92000F40 		.word	1074725010
+ 297              		.cfi_endproc
+ 298              	.LFE1:
+ 299              		.size	motorControlPWM_Init, .-motorControlPWM_Init
+ 300              		.section	.text.motorControlPWM_Start,"ax",%progbits
+ 301              		.align	2
+ 302              		.global	motorControlPWM_Start
+ 303              		.code	16
+ 304              		.thumb_func
+ 305              		.type	motorControlPWM_Start, %function
+ 306              	motorControlPWM_Start:
+ 307              	.LFB0:
+  56:Generated_Source\PSoC4/motorControlPWM.c ****     /* If not Initialized then initialize all required hardware and software */
+ 308              		.loc 1 56 0
+ 309              		.cfi_startproc
+ 310              		@ args = 0, pretend = 0, frame = 0
+ 311              		@ frame_needed = 0, uses_anonymous_args = 0
+ 312 0000 10B5     		push	{r4, lr}
+ 313              		.cfi_def_cfa_offset 8
+ 314              		.cfi_offset 4, -8
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 16
+
+
+ 315              		.cfi_offset 14, -4
+  58:Generated_Source\PSoC4/motorControlPWM.c ****     {
+ 316              		.loc 1 58 0
+ 317 0002 064B     		ldr	r3, .L27
+ 318 0004 1B78     		ldrb	r3, [r3]
+ 319 0006 002B     		cmp	r3, #0
+ 320 0008 04D1     		bne	.L26
+  60:Generated_Source\PSoC4/motorControlPWM.c ****         motorControlPWM_initVar = 1u;
+ 321              		.loc 1 60 0
+ 322 000a FFF7FEFF 		bl	motorControlPWM_Init
+ 323              	.LVL13:
+  61:Generated_Source\PSoC4/motorControlPWM.c ****     }
+ 324              		.loc 1 61 0
+ 325 000e 0122     		movs	r2, #1
+ 326 0010 024B     		ldr	r3, .L27
+ 327 0012 1A70     		strb	r2, [r3]
+ 328              	.L26:
+  63:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 329              		.loc 1 63 0
+ 330 0014 FFF7FEFF 		bl	motorControlPWM_Enable
+ 331              	.LVL14:
+  65:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 332              		.loc 1 65 0
+ 333              		@ sp needed
+ 334 0018 10BD     		pop	{r4, pc}
+ 335              	.L28:
+ 336 001a C046     		.align	2
+ 337              	.L27:
+ 338 001c 00000000 		.word	.LANCHOR0
+ 339              		.cfi_endproc
+ 340              	.LFE0:
+ 341              		.size	motorControlPWM_Start, .-motorControlPWM_Start
+ 342              		.section	.text.motorControlPWM_ReadControlRegister,"ax",%progbits
+ 343              		.align	2
+ 344              		.global	motorControlPWM_ReadControlRegister
+ 345              		.code	16
+ 346              		.thumb_func
+ 347              		.type	motorControlPWM_ReadControlRegister, %function
+ 348              	motorControlPWM_ReadControlRegister:
+ 349              	.LFB9:
+ 533:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 534:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 535:Generated_Source\PSoC4/motorControlPWM.c **** #else
+ 536:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 537:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 538:Generated_Source\PSoC4/motorControlPWM.c ****     /*******************************************************************************
+ 539:Generated_Source\PSoC4/motorControlPWM.c ****     * Function Name: motorControlPWM_WriteCompare1
+ 540:Generated_Source\PSoC4/motorControlPWM.c ****     ********************************************************************************
+ 541:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 542:Generated_Source\PSoC4/motorControlPWM.c ****     * Summary:
+ 543:Generated_Source\PSoC4/motorControlPWM.c ****     *  This funtion is used to change the compare1 value.  The compare output will
+ 544:Generated_Source\PSoC4/motorControlPWM.c ****     *  reflect the new value on the next UDB clock.  The compare output will be
+ 545:Generated_Source\PSoC4/motorControlPWM.c ****     *  driven high when the present counter value is less than or less than or
+ 546:Generated_Source\PSoC4/motorControlPWM.c ****     *  equal to the compare register, depending on the mode.
+ 547:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 548:Generated_Source\PSoC4/motorControlPWM.c ****     * Parameters:
+ 549:Generated_Source\PSoC4/motorControlPWM.c ****     *  compare:  New compare value.
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 17
+
+
+ 550:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 551:Generated_Source\PSoC4/motorControlPWM.c ****     * Return:
+ 552:Generated_Source\PSoC4/motorControlPWM.c ****     *  None
+ 553:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 554:Generated_Source\PSoC4/motorControlPWM.c ****     *******************************************************************************/
+ 555:Generated_Source\PSoC4/motorControlPWM.c ****     void motorControlPWM_WriteCompare1(uint8 compare) \
+ 556:Generated_Source\PSoC4/motorControlPWM.c ****                                         
+ 557:Generated_Source\PSoC4/motorControlPWM.c ****     {
+ 558:Generated_Source\PSoC4/motorControlPWM.c ****         #if(motorControlPWM_UsingFixedFunction)
+ 559:Generated_Source\PSoC4/motorControlPWM.c ****             CY_SET_REG16(motorControlPWM_COMPARE1_LSB_PTR, (uint16)compare);
+ 560:Generated_Source\PSoC4/motorControlPWM.c ****         #else
+ 561:Generated_Source\PSoC4/motorControlPWM.c ****             CY_SET_REG8(motorControlPWM_COMPARE1_LSB_PTR, compare);
+ 562:Generated_Source\PSoC4/motorControlPWM.c ****         #endif /* (motorControlPWM_UsingFixedFunction) */
+ 563:Generated_Source\PSoC4/motorControlPWM.c ****     }
+ 564:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 565:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 566:Generated_Source\PSoC4/motorControlPWM.c ****     /*******************************************************************************
+ 567:Generated_Source\PSoC4/motorControlPWM.c ****     * Function Name: motorControlPWM_WriteCompare2
+ 568:Generated_Source\PSoC4/motorControlPWM.c ****     ********************************************************************************
+ 569:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 570:Generated_Source\PSoC4/motorControlPWM.c ****     * Summary:
+ 571:Generated_Source\PSoC4/motorControlPWM.c ****     *  This funtion is used to change the compare value, for compare1 output.
+ 572:Generated_Source\PSoC4/motorControlPWM.c ****     *  The compare output will reflect the new value on the next UDB clock.
+ 573:Generated_Source\PSoC4/motorControlPWM.c ****     *  The compare output will be driven high when the present counter value is
+ 574:Generated_Source\PSoC4/motorControlPWM.c ****     *  less than or less than or equal to the compare register, depending on the
+ 575:Generated_Source\PSoC4/motorControlPWM.c ****     *  mode.
+ 576:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 577:Generated_Source\PSoC4/motorControlPWM.c ****     * Parameters:
+ 578:Generated_Source\PSoC4/motorControlPWM.c ****     *  compare:  New compare value.
+ 579:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 580:Generated_Source\PSoC4/motorControlPWM.c ****     * Return:
+ 581:Generated_Source\PSoC4/motorControlPWM.c ****     *  None
+ 582:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 583:Generated_Source\PSoC4/motorControlPWM.c ****     *******************************************************************************/
+ 584:Generated_Source\PSoC4/motorControlPWM.c ****     void motorControlPWM_WriteCompare2(uint8 compare) \
+ 585:Generated_Source\PSoC4/motorControlPWM.c ****                                         
+ 586:Generated_Source\PSoC4/motorControlPWM.c ****     {
+ 587:Generated_Source\PSoC4/motorControlPWM.c ****         #if(motorControlPWM_UsingFixedFunction)
+ 588:Generated_Source\PSoC4/motorControlPWM.c ****             CY_SET_REG16(motorControlPWM_COMPARE2_LSB_PTR, compare);
+ 589:Generated_Source\PSoC4/motorControlPWM.c ****         #else
+ 590:Generated_Source\PSoC4/motorControlPWM.c ****             CY_SET_REG8(motorControlPWM_COMPARE2_LSB_PTR, compare);
+ 591:Generated_Source\PSoC4/motorControlPWM.c ****         #endif /* (motorControlPWM_UsingFixedFunction) */
+ 592:Generated_Source\PSoC4/motorControlPWM.c ****     }
+ 593:Generated_Source\PSoC4/motorControlPWM.c **** #endif /* UseOneCompareMode */
+ 594:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 595:Generated_Source\PSoC4/motorControlPWM.c **** #if (motorControlPWM_DeadBandUsed)
+ 596:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 597:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 598:Generated_Source\PSoC4/motorControlPWM.c ****     /*******************************************************************************
+ 599:Generated_Source\PSoC4/motorControlPWM.c ****     * Function Name: motorControlPWM_WriteDeadTime
+ 600:Generated_Source\PSoC4/motorControlPWM.c ****     ********************************************************************************
+ 601:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 602:Generated_Source\PSoC4/motorControlPWM.c ****     * Summary:
+ 603:Generated_Source\PSoC4/motorControlPWM.c ****     *  This function writes the dead-band counts to the corresponding register
+ 604:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 605:Generated_Source\PSoC4/motorControlPWM.c ****     * Parameters:
+ 606:Generated_Source\PSoC4/motorControlPWM.c ****     *  deadtime:  Number of counts for dead time
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 18
+
+
+ 607:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 608:Generated_Source\PSoC4/motorControlPWM.c ****     * Return:
+ 609:Generated_Source\PSoC4/motorControlPWM.c ****     *  None
+ 610:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 611:Generated_Source\PSoC4/motorControlPWM.c ****     *******************************************************************************/
+ 612:Generated_Source\PSoC4/motorControlPWM.c ****     void motorControlPWM_WriteDeadTime(uint8 deadtime) 
+ 613:Generated_Source\PSoC4/motorControlPWM.c ****     {
+ 614:Generated_Source\PSoC4/motorControlPWM.c ****         /* If using the Dead Band 1-255 mode then just write the register */
+ 615:Generated_Source\PSoC4/motorControlPWM.c ****         #if(!motorControlPWM_DeadBand2_4)
+ 616:Generated_Source\PSoC4/motorControlPWM.c ****             CY_SET_REG8(motorControlPWM_DEADBAND_COUNT_PTR, deadtime);
+ 617:Generated_Source\PSoC4/motorControlPWM.c ****         #else
+ 618:Generated_Source\PSoC4/motorControlPWM.c ****             /* Otherwise the data has to be masked and offset */
+ 619:Generated_Source\PSoC4/motorControlPWM.c ****             /* Clear existing data */
+ 620:Generated_Source\PSoC4/motorControlPWM.c ****             motorControlPWM_DEADBAND_COUNT &= ((uint8)(~motorControlPWM_DEADBAND_COUNT_MASK));
+ 621:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 622:Generated_Source\PSoC4/motorControlPWM.c ****             /* Set new dead time */
+ 623:Generated_Source\PSoC4/motorControlPWM.c ****             #if(motorControlPWM_DEADBAND_COUNT_SHIFT)
+ 624:Generated_Source\PSoC4/motorControlPWM.c ****                 motorControlPWM_DEADBAND_COUNT |= ((uint8)((uint8)deadtime << motorControlPWM_DEADB
+ 625:Generated_Source\PSoC4/motorControlPWM.c ****                                                     motorControlPWM_DEADBAND_COUNT_MASK;
+ 626:Generated_Source\PSoC4/motorControlPWM.c ****             #else
+ 627:Generated_Source\PSoC4/motorControlPWM.c ****                 motorControlPWM_DEADBAND_COUNT |= deadtime & motorControlPWM_DEADBAND_COUNT_MASK;
+ 628:Generated_Source\PSoC4/motorControlPWM.c ****             #endif /* (motorControlPWM_DEADBAND_COUNT_SHIFT) */
+ 629:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 630:Generated_Source\PSoC4/motorControlPWM.c ****         #endif /* (!motorControlPWM_DeadBand2_4) */
+ 631:Generated_Source\PSoC4/motorControlPWM.c ****     }
+ 632:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 633:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 634:Generated_Source\PSoC4/motorControlPWM.c ****     /*******************************************************************************
+ 635:Generated_Source\PSoC4/motorControlPWM.c ****     * Function Name: motorControlPWM_ReadDeadTime
+ 636:Generated_Source\PSoC4/motorControlPWM.c ****     ********************************************************************************
+ 637:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 638:Generated_Source\PSoC4/motorControlPWM.c ****     * Summary:
+ 639:Generated_Source\PSoC4/motorControlPWM.c ****     *  This function reads the dead-band counts from the corresponding register
+ 640:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 641:Generated_Source\PSoC4/motorControlPWM.c ****     * Parameters:
+ 642:Generated_Source\PSoC4/motorControlPWM.c ****     *  None
+ 643:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 644:Generated_Source\PSoC4/motorControlPWM.c ****     * Return:
+ 645:Generated_Source\PSoC4/motorControlPWM.c ****     *  Dead Band Counts
+ 646:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 647:Generated_Source\PSoC4/motorControlPWM.c ****     *******************************************************************************/
+ 648:Generated_Source\PSoC4/motorControlPWM.c ****     uint8 motorControlPWM_ReadDeadTime(void) 
+ 649:Generated_Source\PSoC4/motorControlPWM.c ****     {
+ 650:Generated_Source\PSoC4/motorControlPWM.c ****         /* If using the Dead Band 1-255 mode then just read the register */
+ 651:Generated_Source\PSoC4/motorControlPWM.c ****         #if(!motorControlPWM_DeadBand2_4)
+ 652:Generated_Source\PSoC4/motorControlPWM.c ****             return (CY_GET_REG8(motorControlPWM_DEADBAND_COUNT_PTR));
+ 653:Generated_Source\PSoC4/motorControlPWM.c ****         #else
+ 654:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 655:Generated_Source\PSoC4/motorControlPWM.c ****             /* Otherwise the data has to be masked and offset */
+ 656:Generated_Source\PSoC4/motorControlPWM.c ****             #if(motorControlPWM_DEADBAND_COUNT_SHIFT)
+ 657:Generated_Source\PSoC4/motorControlPWM.c ****                 return ((uint8)(((uint8)(motorControlPWM_DEADBAND_COUNT & motorControlPWM_DEADBAND_
+ 658:Generated_Source\PSoC4/motorControlPWM.c ****                                                                            motorControlPWM_DEADBAND
+ 659:Generated_Source\PSoC4/motorControlPWM.c ****             #else
+ 660:Generated_Source\PSoC4/motorControlPWM.c ****                 return (motorControlPWM_DEADBAND_COUNT & motorControlPWM_DEADBAND_COUNT_MASK);
+ 661:Generated_Source\PSoC4/motorControlPWM.c ****             #endif /* (motorControlPWM_DEADBAND_COUNT_SHIFT) */
+ 662:Generated_Source\PSoC4/motorControlPWM.c ****         #endif /* (!motorControlPWM_DeadBand2_4) */
+ 663:Generated_Source\PSoC4/motorControlPWM.c ****     }
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 19
+
+
+ 664:Generated_Source\PSoC4/motorControlPWM.c **** #endif /* DeadBandUsed */
+ 665:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 666:Generated_Source\PSoC4/motorControlPWM.c **** #if (motorControlPWM_UseStatus || motorControlPWM_UsingFixedFunction)
+ 667:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 668:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 669:Generated_Source\PSoC4/motorControlPWM.c ****     /*******************************************************************************
+ 670:Generated_Source\PSoC4/motorControlPWM.c ****     * Function Name: motorControlPWM_SetInterruptMode
+ 671:Generated_Source\PSoC4/motorControlPWM.c ****     ********************************************************************************
+ 672:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 673:Generated_Source\PSoC4/motorControlPWM.c ****     * Summary:
+ 674:Generated_Source\PSoC4/motorControlPWM.c ****     *  This function configures the interrupts mask control of theinterrupt
+ 675:Generated_Source\PSoC4/motorControlPWM.c ****     *  source status register.
+ 676:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 677:Generated_Source\PSoC4/motorControlPWM.c ****     * Parameters:
+ 678:Generated_Source\PSoC4/motorControlPWM.c ****     *  uint8 interruptMode: Bit field containing the interrupt sources enabled
+ 679:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 680:Generated_Source\PSoC4/motorControlPWM.c ****     * Return:
+ 681:Generated_Source\PSoC4/motorControlPWM.c ****     *  None
+ 682:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 683:Generated_Source\PSoC4/motorControlPWM.c ****     *******************************************************************************/
+ 684:Generated_Source\PSoC4/motorControlPWM.c ****     void motorControlPWM_SetInterruptMode(uint8 interruptMode) 
+ 685:Generated_Source\PSoC4/motorControlPWM.c ****     {
+ 686:Generated_Source\PSoC4/motorControlPWM.c ****         CY_SET_REG8(motorControlPWM_STATUS_MASK_PTR, interruptMode);
+ 687:Generated_Source\PSoC4/motorControlPWM.c ****     }
+ 688:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 689:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 690:Generated_Source\PSoC4/motorControlPWM.c ****     /*******************************************************************************
+ 691:Generated_Source\PSoC4/motorControlPWM.c ****     * Function Name: motorControlPWM_ReadStatusRegister
+ 692:Generated_Source\PSoC4/motorControlPWM.c ****     ********************************************************************************
+ 693:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 694:Generated_Source\PSoC4/motorControlPWM.c ****     * Summary:
+ 695:Generated_Source\PSoC4/motorControlPWM.c ****     *  This function returns the current state of the status register.
+ 696:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 697:Generated_Source\PSoC4/motorControlPWM.c ****     * Parameters:
+ 698:Generated_Source\PSoC4/motorControlPWM.c ****     *  None
+ 699:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 700:Generated_Source\PSoC4/motorControlPWM.c ****     * Return:
+ 701:Generated_Source\PSoC4/motorControlPWM.c ****     *  uint8 : Current status register value. The status register bits are:
+ 702:Generated_Source\PSoC4/motorControlPWM.c ****     *  [7:6] : Unused(0)
+ 703:Generated_Source\PSoC4/motorControlPWM.c ****     *  [5]   : Kill event output
+ 704:Generated_Source\PSoC4/motorControlPWM.c ****     *  [4]   : FIFO not empty
+ 705:Generated_Source\PSoC4/motorControlPWM.c ****     *  [3]   : FIFO full
+ 706:Generated_Source\PSoC4/motorControlPWM.c ****     *  [2]   : Terminal count
+ 707:Generated_Source\PSoC4/motorControlPWM.c ****     *  [1]   : Compare output 2
+ 708:Generated_Source\PSoC4/motorControlPWM.c ****     *  [0]   : Compare output 1
+ 709:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 710:Generated_Source\PSoC4/motorControlPWM.c ****     *******************************************************************************/
+ 711:Generated_Source\PSoC4/motorControlPWM.c ****     uint8 motorControlPWM_ReadStatusRegister(void) 
+ 712:Generated_Source\PSoC4/motorControlPWM.c ****     {
+ 713:Generated_Source\PSoC4/motorControlPWM.c ****         return (CY_GET_REG8(motorControlPWM_STATUS_PTR));
+ 714:Generated_Source\PSoC4/motorControlPWM.c ****     }
+ 715:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 716:Generated_Source\PSoC4/motorControlPWM.c **** #endif /* (motorControlPWM_UseStatus || motorControlPWM_UsingFixedFunction) */
+ 717:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 718:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 719:Generated_Source\PSoC4/motorControlPWM.c **** #if (motorControlPWM_UseControl)
+ 720:Generated_Source\PSoC4/motorControlPWM.c **** 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 20
+
+
+ 721:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 722:Generated_Source\PSoC4/motorControlPWM.c ****     /*******************************************************************************
+ 723:Generated_Source\PSoC4/motorControlPWM.c ****     * Function Name: motorControlPWM_ReadControlRegister
+ 724:Generated_Source\PSoC4/motorControlPWM.c ****     ********************************************************************************
+ 725:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 726:Generated_Source\PSoC4/motorControlPWM.c ****     * Summary:
+ 727:Generated_Source\PSoC4/motorControlPWM.c ****     *  Returns the current state of the control register. This API is available
+ 728:Generated_Source\PSoC4/motorControlPWM.c ****     *  only if the control register is not removed.
+ 729:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 730:Generated_Source\PSoC4/motorControlPWM.c ****     * Parameters:
+ 731:Generated_Source\PSoC4/motorControlPWM.c ****     *  None
+ 732:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 733:Generated_Source\PSoC4/motorControlPWM.c ****     * Return:
+ 734:Generated_Source\PSoC4/motorControlPWM.c ****     *  uint8 : Current control register value
+ 735:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 736:Generated_Source\PSoC4/motorControlPWM.c ****     *******************************************************************************/
+ 737:Generated_Source\PSoC4/motorControlPWM.c ****     uint8 motorControlPWM_ReadControlRegister(void) 
+ 738:Generated_Source\PSoC4/motorControlPWM.c ****     {
+ 350              		.loc 1 738 0
+ 351              		.cfi_startproc
+ 352              		@ args = 0, pretend = 0, frame = 0
+ 353              		@ frame_needed = 0, uses_anonymous_args = 0
+ 354              		@ link register save eliminated.
+ 739:Generated_Source\PSoC4/motorControlPWM.c ****         uint8 result;
+ 740:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 741:Generated_Source\PSoC4/motorControlPWM.c ****         result = CY_GET_REG8(motorControlPWM_CONTROL_PTR);
+ 355              		.loc 1 741 0
+ 356 0000 014B     		ldr	r3, .L30
+ 357 0002 1878     		ldrb	r0, [r3]
+ 358 0004 C0B2     		uxtb	r0, r0
+ 359              	.LVL15:
+ 742:Generated_Source\PSoC4/motorControlPWM.c ****         return (result);
+ 743:Generated_Source\PSoC4/motorControlPWM.c ****     }
+ 360              		.loc 1 743 0
+ 361              		@ sp needed
+ 362 0006 7047     		bx	lr
+ 363              	.L31:
+ 364              		.align	2
+ 365              	.L30:
+ 366 0008 72000F40 		.word	1074724978
+ 367              		.cfi_endproc
+ 368              	.LFE9:
+ 369              		.size	motorControlPWM_ReadControlRegister, .-motorControlPWM_ReadControlRegister
+ 370              		.section	.text.motorControlPWM_WriteControlRegister,"ax",%progbits
+ 371              		.align	2
+ 372              		.global	motorControlPWM_WriteControlRegister
+ 373              		.code	16
+ 374              		.thumb_func
+ 375              		.type	motorControlPWM_WriteControlRegister, %function
+ 376              	motorControlPWM_WriteControlRegister:
+ 377              	.LFB10:
+ 744:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 745:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 746:Generated_Source\PSoC4/motorControlPWM.c ****     /*******************************************************************************
+ 747:Generated_Source\PSoC4/motorControlPWM.c ****     * Function Name: motorControlPWM_WriteControlRegister
+ 748:Generated_Source\PSoC4/motorControlPWM.c ****     ********************************************************************************
+ 749:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 21
+
+
+ 750:Generated_Source\PSoC4/motorControlPWM.c ****     * Summary:
+ 751:Generated_Source\PSoC4/motorControlPWM.c ****     *  Sets the bit field of the control register. This API is available only if
+ 752:Generated_Source\PSoC4/motorControlPWM.c ****     *  the control register is not removed.
+ 753:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 754:Generated_Source\PSoC4/motorControlPWM.c ****     * Parameters:
+ 755:Generated_Source\PSoC4/motorControlPWM.c ****     *  uint8 control: Control register bit field, The status register bits are:
+ 756:Generated_Source\PSoC4/motorControlPWM.c ****     *  [7]   : PWM Enable
+ 757:Generated_Source\PSoC4/motorControlPWM.c ****     *  [6]   : Reset
+ 758:Generated_Source\PSoC4/motorControlPWM.c ****     *  [5:3] : Compare Mode2
+ 759:Generated_Source\PSoC4/motorControlPWM.c ****     *  [2:0] : Compare Mode2
+ 760:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 761:Generated_Source\PSoC4/motorControlPWM.c ****     * Return:
+ 762:Generated_Source\PSoC4/motorControlPWM.c ****     *  None
+ 763:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 764:Generated_Source\PSoC4/motorControlPWM.c ****     *******************************************************************************/
+ 765:Generated_Source\PSoC4/motorControlPWM.c ****     void motorControlPWM_WriteControlRegister(uint8 control) 
+ 766:Generated_Source\PSoC4/motorControlPWM.c ****     {
+ 378              		.loc 1 766 0
+ 379              		.cfi_startproc
+ 380              		@ args = 0, pretend = 0, frame = 0
+ 381              		@ frame_needed = 0, uses_anonymous_args = 0
+ 382              		@ link register save eliminated.
+ 383              	.LVL16:
+ 767:Generated_Source\PSoC4/motorControlPWM.c ****         CY_SET_REG8(motorControlPWM_CONTROL_PTR, control);
+ 384              		.loc 1 767 0
+ 385 0000 014B     		ldr	r3, .L33
+ 386 0002 1870     		strb	r0, [r3]
+ 768:Generated_Source\PSoC4/motorControlPWM.c ****     }
+ 387              		.loc 1 768 0
+ 388              		@ sp needed
+ 389 0004 7047     		bx	lr
+ 390              	.L34:
+ 391 0006 C046     		.align	2
+ 392              	.L33:
+ 393 0008 72000F40 		.word	1074724978
+ 394              		.cfi_endproc
+ 395              	.LFE10:
+ 396              		.size	motorControlPWM_WriteControlRegister, .-motorControlPWM_WriteControlRegister
+ 397              		.section	.text.motorControlPWM_ReadCapture,"ax",%progbits
+ 398              		.align	2
+ 399              		.global	motorControlPWM_ReadCapture
+ 400              		.code	16
+ 401              		.thumb_func
+ 402              		.type	motorControlPWM_ReadCapture, %function
+ 403              	motorControlPWM_ReadCapture:
+ 404              	.LFB11:
+ 769:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 770:Generated_Source\PSoC4/motorControlPWM.c **** #endif /* (motorControlPWM_UseControl) */
+ 771:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 772:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 773:Generated_Source\PSoC4/motorControlPWM.c **** #if (!motorControlPWM_UsingFixedFunction)
+ 774:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 775:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 776:Generated_Source\PSoC4/motorControlPWM.c ****     /*******************************************************************************
+ 777:Generated_Source\PSoC4/motorControlPWM.c ****     * Function Name: motorControlPWM_ReadCapture
+ 778:Generated_Source\PSoC4/motorControlPWM.c ****     ********************************************************************************
+ 779:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 22
+
+
+ 780:Generated_Source\PSoC4/motorControlPWM.c ****     * Summary:
+ 781:Generated_Source\PSoC4/motorControlPWM.c ****     *  Reads the capture value from the capture FIFO.
+ 782:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 783:Generated_Source\PSoC4/motorControlPWM.c ****     * Parameters:
+ 784:Generated_Source\PSoC4/motorControlPWM.c ****     *  None
+ 785:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 786:Generated_Source\PSoC4/motorControlPWM.c ****     * Return:
+ 787:Generated_Source\PSoC4/motorControlPWM.c ****     *  uint8/uint16: The current capture value
+ 788:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 789:Generated_Source\PSoC4/motorControlPWM.c ****     *******************************************************************************/
+ 790:Generated_Source\PSoC4/motorControlPWM.c ****     uint8 motorControlPWM_ReadCapture(void) 
+ 791:Generated_Source\PSoC4/motorControlPWM.c ****     {
+ 405              		.loc 1 791 0
+ 406              		.cfi_startproc
+ 407              		@ args = 0, pretend = 0, frame = 0
+ 408              		@ frame_needed = 0, uses_anonymous_args = 0
+ 409              		@ link register save eliminated.
+ 792:Generated_Source\PSoC4/motorControlPWM.c ****         return (CY_GET_REG8(motorControlPWM_CAPTURE_LSB_PTR));
+ 410              		.loc 1 792 0
+ 411 0000 014B     		ldr	r3, .L36
+ 412 0002 1878     		ldrb	r0, [r3]
+ 413 0004 C0B2     		uxtb	r0, r0
+ 793:Generated_Source\PSoC4/motorControlPWM.c ****     }
+ 414              		.loc 1 793 0
+ 415              		@ sp needed
+ 416 0006 7047     		bx	lr
+ 417              	.L37:
+ 418              		.align	2
+ 419              	.L36:
+ 420 0008 52000F40 		.word	1074724946
+ 421              		.cfi_endproc
+ 422              	.LFE11:
+ 423              		.size	motorControlPWM_ReadCapture, .-motorControlPWM_ReadCapture
+ 424              		.section	.text.motorControlPWM_ReadCompare,"ax",%progbits
+ 425              		.align	2
+ 426              		.global	motorControlPWM_ReadCompare
+ 427              		.code	16
+ 428              		.thumb_func
+ 429              		.type	motorControlPWM_ReadCompare, %function
+ 430              	motorControlPWM_ReadCompare:
+ 431              	.LFB12:
+ 794:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 795:Generated_Source\PSoC4/motorControlPWM.c **** #endif /* (!motorControlPWM_UsingFixedFunction) */
+ 796:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 797:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 798:Generated_Source\PSoC4/motorControlPWM.c **** #if (motorControlPWM_UseOneCompareMode)
+ 799:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 800:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 801:Generated_Source\PSoC4/motorControlPWM.c ****     /*******************************************************************************
+ 802:Generated_Source\PSoC4/motorControlPWM.c ****     * Function Name: motorControlPWM_ReadCompare
+ 803:Generated_Source\PSoC4/motorControlPWM.c ****     ********************************************************************************
+ 804:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 805:Generated_Source\PSoC4/motorControlPWM.c ****     * Summary:
+ 806:Generated_Source\PSoC4/motorControlPWM.c ****     *  Reads the compare value for the compare output when the PWM Mode parameter is
+ 807:Generated_Source\PSoC4/motorControlPWM.c ****     *  set to Dither mode, Center Aligned mode, or One Output mode.
+ 808:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 809:Generated_Source\PSoC4/motorControlPWM.c ****     * Parameters:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 23
+
+
+ 810:Generated_Source\PSoC4/motorControlPWM.c ****     *  None
+ 811:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 812:Generated_Source\PSoC4/motorControlPWM.c ****     * Return:
+ 813:Generated_Source\PSoC4/motorControlPWM.c ****     *  uint8/uint16: Current compare value
+ 814:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 815:Generated_Source\PSoC4/motorControlPWM.c ****     *******************************************************************************/
+ 816:Generated_Source\PSoC4/motorControlPWM.c ****     uint8 motorControlPWM_ReadCompare(void) 
+ 817:Generated_Source\PSoC4/motorControlPWM.c ****     {
+ 432              		.loc 1 817 0
+ 433              		.cfi_startproc
+ 434              		@ args = 0, pretend = 0, frame = 0
+ 435              		@ frame_needed = 0, uses_anonymous_args = 0
+ 436              		@ link register save eliminated.
+ 818:Generated_Source\PSoC4/motorControlPWM.c ****         #if(motorControlPWM_UsingFixedFunction)
+ 819:Generated_Source\PSoC4/motorControlPWM.c ****             return ((uint8)CY_GET_REG16(motorControlPWM_COMPARE1_LSB_PTR));
+ 820:Generated_Source\PSoC4/motorControlPWM.c ****         #else
+ 821:Generated_Source\PSoC4/motorControlPWM.c ****             return (CY_GET_REG8(motorControlPWM_COMPARE1_LSB_PTR));
+ 437              		.loc 1 821 0
+ 438 0000 014B     		ldr	r3, .L39
+ 439 0002 1878     		ldrb	r0, [r3]
+ 440 0004 C0B2     		uxtb	r0, r0
+ 822:Generated_Source\PSoC4/motorControlPWM.c ****         #endif /* (motorControlPWM_UsingFixedFunction) */
+ 823:Generated_Source\PSoC4/motorControlPWM.c ****     }
+ 441              		.loc 1 823 0
+ 442              		@ sp needed
+ 443 0006 7047     		bx	lr
+ 444              	.L40:
+ 445              		.align	2
+ 446              	.L39:
+ 447 0008 22000F40 		.word	1074724898
+ 448              		.cfi_endproc
+ 449              	.LFE12:
+ 450              		.size	motorControlPWM_ReadCompare, .-motorControlPWM_ReadCompare
+ 451              		.section	.text.motorControlPWM_ReadPeriod,"ax",%progbits
+ 452              		.align	2
+ 453              		.global	motorControlPWM_ReadPeriod
+ 454              		.code	16
+ 455              		.thumb_func
+ 456              		.type	motorControlPWM_ReadPeriod, %function
+ 457              	motorControlPWM_ReadPeriod:
+ 458              	.LFB13:
+ 824:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 825:Generated_Source\PSoC4/motorControlPWM.c **** #else
+ 826:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 827:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 828:Generated_Source\PSoC4/motorControlPWM.c ****     /*******************************************************************************
+ 829:Generated_Source\PSoC4/motorControlPWM.c ****     * Function Name: motorControlPWM_ReadCompare1
+ 830:Generated_Source\PSoC4/motorControlPWM.c ****     ********************************************************************************
+ 831:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 832:Generated_Source\PSoC4/motorControlPWM.c ****     * Summary:
+ 833:Generated_Source\PSoC4/motorControlPWM.c ****     *  Reads the compare value for the compare1 output.
+ 834:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 835:Generated_Source\PSoC4/motorControlPWM.c ****     * Parameters:
+ 836:Generated_Source\PSoC4/motorControlPWM.c ****     *  None
+ 837:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 838:Generated_Source\PSoC4/motorControlPWM.c ****     * Return:
+ 839:Generated_Source\PSoC4/motorControlPWM.c ****     *  uint8/uint16: Current compare value.
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 24
+
+
+ 840:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 841:Generated_Source\PSoC4/motorControlPWM.c ****     *******************************************************************************/
+ 842:Generated_Source\PSoC4/motorControlPWM.c ****     uint8 motorControlPWM_ReadCompare1(void) 
+ 843:Generated_Source\PSoC4/motorControlPWM.c ****     {
+ 844:Generated_Source\PSoC4/motorControlPWM.c ****         return (CY_GET_REG8(motorControlPWM_COMPARE1_LSB_PTR));
+ 845:Generated_Source\PSoC4/motorControlPWM.c ****     }
+ 846:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 847:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 848:Generated_Source\PSoC4/motorControlPWM.c ****     /*******************************************************************************
+ 849:Generated_Source\PSoC4/motorControlPWM.c ****     * Function Name: motorControlPWM_ReadCompare2
+ 850:Generated_Source\PSoC4/motorControlPWM.c ****     ********************************************************************************
+ 851:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 852:Generated_Source\PSoC4/motorControlPWM.c ****     * Summary:
+ 853:Generated_Source\PSoC4/motorControlPWM.c ****     *  Reads the compare value for the compare2 output.
+ 854:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 855:Generated_Source\PSoC4/motorControlPWM.c ****     * Parameters:
+ 856:Generated_Source\PSoC4/motorControlPWM.c ****     *  None
+ 857:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 858:Generated_Source\PSoC4/motorControlPWM.c ****     * Return:
+ 859:Generated_Source\PSoC4/motorControlPWM.c ****     *  uint8/uint16: Current compare value.
+ 860:Generated_Source\PSoC4/motorControlPWM.c ****     *
+ 861:Generated_Source\PSoC4/motorControlPWM.c ****     *******************************************************************************/
+ 862:Generated_Source\PSoC4/motorControlPWM.c ****     uint8 motorControlPWM_ReadCompare2(void) 
+ 863:Generated_Source\PSoC4/motorControlPWM.c ****     {
+ 864:Generated_Source\PSoC4/motorControlPWM.c ****         return (CY_GET_REG8(motorControlPWM_COMPARE2_LSB_PTR));
+ 865:Generated_Source\PSoC4/motorControlPWM.c ****     }
+ 866:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 867:Generated_Source\PSoC4/motorControlPWM.c **** #endif /* (motorControlPWM_UseOneCompareMode) */
+ 868:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 869:Generated_Source\PSoC4/motorControlPWM.c **** 
+ 870:Generated_Source\PSoC4/motorControlPWM.c **** /*******************************************************************************
+ 871:Generated_Source\PSoC4/motorControlPWM.c **** * Function Name: motorControlPWM_ReadPeriod
+ 872:Generated_Source\PSoC4/motorControlPWM.c **** ********************************************************************************
+ 873:Generated_Source\PSoC4/motorControlPWM.c **** *
+ 874:Generated_Source\PSoC4/motorControlPWM.c **** * Summary:
+ 875:Generated_Source\PSoC4/motorControlPWM.c **** *  Reads the period value used by the PWM hardware.
+ 876:Generated_Source\PSoC4/motorControlPWM.c **** *
+ 877:Generated_Source\PSoC4/motorControlPWM.c **** * Parameters:
+ 878:Generated_Source\PSoC4/motorControlPWM.c **** *  None
+ 879:Generated_Source\PSoC4/motorControlPWM.c **** *
+ 880:Generated_Source\PSoC4/motorControlPWM.c **** * Return:
+ 881:Generated_Source\PSoC4/motorControlPWM.c **** *  uint8/16: Period value
+ 882:Generated_Source\PSoC4/motorControlPWM.c **** *
+ 883:Generated_Source\PSoC4/motorControlPWM.c **** *******************************************************************************/
+ 884:Generated_Source\PSoC4/motorControlPWM.c **** uint8 motorControlPWM_ReadPeriod(void) 
+ 885:Generated_Source\PSoC4/motorControlPWM.c **** {
+ 459              		.loc 1 885 0
+ 460              		.cfi_startproc
+ 461              		@ args = 0, pretend = 0, frame = 0
+ 462              		@ frame_needed = 0, uses_anonymous_args = 0
+ 463              		@ link register save eliminated.
+ 886:Generated_Source\PSoC4/motorControlPWM.c ****     #if(motorControlPWM_UsingFixedFunction)
+ 887:Generated_Source\PSoC4/motorControlPWM.c ****         return ((uint8)CY_GET_REG16(motorControlPWM_PERIOD_LSB_PTR));
+ 888:Generated_Source\PSoC4/motorControlPWM.c ****     #else
+ 889:Generated_Source\PSoC4/motorControlPWM.c ****         return (CY_GET_REG8(motorControlPWM_PERIOD_LSB_PTR));
+ 464              		.loc 1 889 0
+ 465 0000 014B     		ldr	r3, .L42
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 25
+
+
+ 466 0002 1878     		ldrb	r0, [r3]
+ 467 0004 C0B2     		uxtb	r0, r0
+ 890:Generated_Source\PSoC4/motorControlPWM.c ****     #endif /* (motorControlPWM_UsingFixedFunction) */
+ 891:Generated_Source\PSoC4/motorControlPWM.c **** }
+ 468              		.loc 1 891 0
+ 469              		@ sp needed
+ 470 0006 7047     		bx	lr
+ 471              	.L43:
+ 472              		.align	2
+ 473              	.L42:
+ 474 0008 42000F40 		.word	1074724930
+ 475              		.cfi_endproc
+ 476              	.LFE13:
+ 477              		.size	motorControlPWM_ReadPeriod, .-motorControlPWM_ReadPeriod
+ 478              		.global	motorControlPWM_initVar
+ 479              		.bss
+ 480              		.set	.LANCHOR0,. + 0
+ 481              		.type	motorControlPWM_initVar, %object
+ 482              		.size	motorControlPWM_initVar, 1
+ 483              	motorControlPWM_initVar:
+ 484 0000 00       		.space	1
+ 485              		.text
+ 486              	.Letext0:
+ 487              		.file 2 "Generated_Source\\PSoC4\\cytypes.h"
+ 488              		.section	.debug_info,"",%progbits
+ 489              	.Ldebug_info0:
+ 490 0000 BA020000 		.4byte	0x2ba
+ 491 0004 0400     		.2byte	0x4
+ 492 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 493 000a 04       		.byte	0x4
+ 494 000b 01       		.uleb128 0x1
+ 495 000c B7010000 		.4byte	.LASF38
+ 496 0010 0C       		.byte	0xc
+ 497 0011 95020000 		.4byte	.LASF39
+ 498 0015 66030000 		.4byte	.LASF40
+ 499 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 500 001d 00000000 		.4byte	0
+ 501 0021 00000000 		.4byte	.Ldebug_line0
+ 502 0025 02       		.uleb128 0x2
+ 503 0026 01       		.byte	0x1
+ 504 0027 06       		.byte	0x6
+ 505 0028 36030000 		.4byte	.LASF0
+ 506 002c 02       		.uleb128 0x2
+ 507 002d 01       		.byte	0x1
+ 508 002e 08       		.byte	0x8
+ 509 002f 83000000 		.4byte	.LASF1
+ 510 0033 02       		.uleb128 0x2
+ 511 0034 02       		.byte	0x2
+ 512 0035 05       		.byte	0x5
+ 513 0036 F6020000 		.4byte	.LASF2
+ 514 003a 02       		.uleb128 0x2
+ 515 003b 02       		.byte	0x2
+ 516 003c 07       		.byte	0x7
+ 517 003d 30000000 		.4byte	.LASF3
+ 518 0041 02       		.uleb128 0x2
+ 519 0042 04       		.byte	0x4
+ 520 0043 05       		.byte	0x5
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 26
+
+
+ 521 0044 21030000 		.4byte	.LASF4
+ 522 0048 02       		.uleb128 0x2
+ 523 0049 04       		.byte	0x4
+ 524 004a 07       		.byte	0x7
+ 525 004b AC000000 		.4byte	.LASF5
+ 526 004f 02       		.uleb128 0x2
+ 527 0050 08       		.byte	0x8
+ 528 0051 05       		.byte	0x5
+ 529 0052 00000000 		.4byte	.LASF6
+ 530 0056 02       		.uleb128 0x2
+ 531 0057 08       		.byte	0x8
+ 532 0058 07       		.byte	0x7
+ 533 0059 5D010000 		.4byte	.LASF7
+ 534 005d 03       		.uleb128 0x3
+ 535 005e 04       		.byte	0x4
+ 536 005f 05       		.byte	0x5
+ 537 0060 696E7400 		.ascii	"int\000"
+ 538 0064 02       		.uleb128 0x2
+ 539 0065 04       		.byte	0x4
+ 540 0066 07       		.byte	0x7
+ 541 0067 19010000 		.4byte	.LASF8
+ 542 006b 04       		.uleb128 0x4
+ 543 006c BE000000 		.4byte	.LASF12
+ 544 0070 02       		.byte	0x2
+ 545 0071 D201     		.2byte	0x1d2
+ 546 0073 2C000000 		.4byte	0x2c
+ 547 0077 02       		.uleb128 0x2
+ 548 0078 04       		.byte	0x4
+ 549 0079 04       		.byte	0x4
+ 550 007a 75000000 		.4byte	.LASF9
+ 551 007e 02       		.uleb128 0x2
+ 552 007f 08       		.byte	0x8
+ 553 0080 04       		.byte	0x4
+ 554 0081 E8000000 		.4byte	.LASF10
+ 555 0085 02       		.uleb128 0x2
+ 556 0086 01       		.byte	0x1
+ 557 0087 08       		.byte	0x8
+ 558 0088 90020000 		.4byte	.LASF11
+ 559 008c 04       		.uleb128 0x4
+ 560 008d A7000000 		.4byte	.LASF13
+ 561 0091 02       		.byte	0x2
+ 562 0092 7C02     		.2byte	0x27c
+ 563 0094 98000000 		.4byte	0x98
+ 564 0098 05       		.uleb128 0x5
+ 565 0099 6B000000 		.4byte	0x6b
+ 566 009d 02       		.uleb128 0x2
+ 567 009e 08       		.byte	0x8
+ 568 009f 04       		.byte	0x4
+ 569 00a0 2A030000 		.4byte	.LASF14
+ 570 00a4 02       		.uleb128 0x2
+ 571 00a5 04       		.byte	0x4
+ 572 00a6 07       		.byte	0x7
+ 573 00a7 62020000 		.4byte	.LASF15
+ 574 00ab 06       		.uleb128 0x6
+ 575 00ac EF000000 		.4byte	.LASF16
+ 576 00b0 01       		.byte	0x1
+ 577 00b1 C7       		.byte	0xc7
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 27
+
+
+ 578 00b2 00000000 		.4byte	.LFB2
+ 579 00b6 14000000 		.4byte	.LFE2-.LFB2
+ 580 00ba 01       		.uleb128 0x1
+ 581 00bb 9C       		.byte	0x9c
+ 582 00bc 06       		.uleb128 0x6
+ 583 00bd 43000000 		.4byte	.LASF17
+ 584 00c1 01       		.byte	0x1
+ 585 00c2 E9       		.byte	0xe9
+ 586 00c3 00000000 		.4byte	.LFB3
+ 587 00c7 10000000 		.4byte	.LFE3-.LFB3
+ 588 00cb 01       		.uleb128 0x1
+ 589 00cc 9C       		.byte	0x9c
+ 590 00cd 07       		.uleb128 0x7
+ 591 00ce 98010000 		.4byte	.LASF20
+ 592 00d2 01       		.byte	0x1
+ 593 00d3 0A01     		.2byte	0x10a
+ 594 00d5 00000000 		.4byte	.LFB4
+ 595 00d9 28000000 		.4byte	.LFE4-.LFB4
+ 596 00dd 01       		.uleb128 0x1
+ 597 00de 9C       		.byte	0x9c
+ 598 00df 12010000 		.4byte	0x112
+ 599 00e3 08       		.uleb128 0x8
+ 600 00e4 15030000 		.4byte	.LASF22
+ 601 00e8 01       		.byte	0x1
+ 602 00e9 0A01     		.2byte	0x10a
+ 603 00eb 6B000000 		.4byte	0x6b
+ 604 00ef 00000000 		.4byte	.LLST0
+ 605 00f3 09       		.uleb128 0x9
+ 606 00f4 06010000 		.4byte	.LASF18
+ 607 00f8 01       		.byte	0x1
+ 608 00f9 1D01     		.2byte	0x11d
+ 609 00fb 6B000000 		.4byte	0x6b
+ 610 00ff 21000000 		.4byte	.LLST1
+ 611 0103 0A       		.uleb128 0xa
+ 612 0104 4A010000 		.4byte	.LASF19
+ 613 0108 01       		.byte	0x1
+ 614 0109 2101     		.2byte	0x121
+ 615 010b 6B000000 		.4byte	0x6b
+ 616 010f 01       		.uleb128 0x1
+ 617 0110 53       		.byte	0x53
+ 618 0111 00       		.byte	0
+ 619 0112 07       		.uleb128 0x7
+ 620 0113 74010000 		.4byte	.LASF21
+ 621 0117 01       		.byte	0x1
+ 622 0118 9301     		.2byte	0x193
+ 623 011a 00000000 		.4byte	.LFB5
+ 624 011e 0C000000 		.4byte	.LFE5-.LFB5
+ 625 0122 01       		.uleb128 0x1
+ 626 0123 9C       		.byte	0x9c
+ 627 0124 37010000 		.4byte	0x137
+ 628 0128 0B       		.uleb128 0xb
+ 629 0129 7B000000 		.4byte	.LASF23
+ 630 012d 01       		.byte	0x1
+ 631 012e 9301     		.2byte	0x193
+ 632 0130 6B000000 		.4byte	0x6b
+ 633 0134 01       		.uleb128 0x1
+ 634 0135 50       		.byte	0x50
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 28
+
+
+ 635 0136 00       		.byte	0
+ 636 0137 0C       		.uleb128 0xc
+ 637 0138 DA020000 		.4byte	.LASF34
+ 638 013c 01       		.byte	0x1
+ 639 013d A901     		.2byte	0x1a9
+ 640 013f 6B000000 		.4byte	0x6b
+ 641 0143 00000000 		.4byte	.LFB6
+ 642 0147 14000000 		.4byte	.LFE6-.LFB6
+ 643 014b 01       		.uleb128 0x1
+ 644 014c 9C       		.byte	0x9c
+ 645 014d 07       		.uleb128 0x7
+ 646 014e CC000000 		.4byte	.LASF24
+ 647 0152 01       		.byte	0x1
+ 648 0153 E201     		.2byte	0x1e2
+ 649 0155 00000000 		.4byte	.LFB7
+ 650 0159 0C000000 		.4byte	.LFE7-.LFB7
+ 651 015d 01       		.uleb128 0x1
+ 652 015e 9C       		.byte	0x9c
+ 653 015f 72010000 		.4byte	0x172
+ 654 0163 0B       		.uleb128 0xb
+ 655 0164 29000000 		.4byte	.LASF25
+ 656 0168 01       		.byte	0x1
+ 657 0169 E201     		.2byte	0x1e2
+ 658 016b 6B000000 		.4byte	0x6b
+ 659 016f 01       		.uleb128 0x1
+ 660 0170 50       		.byte	0x50
+ 661 0171 00       		.byte	0
+ 662 0172 07       		.uleb128 0x7
+ 663 0173 58000000 		.4byte	.LASF26
+ 664 0177 01       		.byte	0x1
+ 665 0178 0402     		.2byte	0x204
+ 666 017a 00000000 		.4byte	.LFB8
+ 667 017e 0C000000 		.4byte	.LFE8-.LFB8
+ 668 0182 01       		.uleb128 0x1
+ 669 0183 9C       		.byte	0x9c
+ 670 0184 97010000 		.4byte	0x197
+ 671 0188 0B       		.uleb128 0xb
+ 672 0189 42030000 		.4byte	.LASF27
+ 673 018d 01       		.byte	0x1
+ 674 018e 0402     		.2byte	0x204
+ 675 0190 6B000000 		.4byte	0x6b
+ 676 0194 01       		.uleb128 0x1
+ 677 0195 50       		.byte	0x50
+ 678 0196 00       		.byte	0
+ 679 0197 0D       		.uleb128 0xd
+ 680 0198 00030000 		.4byte	.LASF28
+ 681 019c 01       		.byte	0x1
+ 682 019d 54       		.byte	0x54
+ 683 019e 00000000 		.4byte	.LFB1
+ 684 01a2 3C000000 		.4byte	.LFE1-.LFB1
+ 685 01a6 01       		.uleb128 0x1
+ 686 01a7 9C       		.byte	0x9c
+ 687 01a8 F4010000 		.4byte	0x1f4
+ 688 01ac 0E       		.uleb128 0xe
+ 689 01ad 45020000 		.4byte	.LASF29
+ 690 01b1 01       		.byte	0x1
+ 691 01b2 57       		.byte	0x57
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 29
+
+
+ 692 01b3 6B000000 		.4byte	0x6b
+ 693 01b7 34000000 		.4byte	.LLST2
+ 694 01bb 0F       		.uleb128 0xf
+ 695 01bc 24000000 		.4byte	.LVL10
+ 696 01c0 12010000 		.4byte	0x112
+ 697 01c4 CF010000 		.4byte	0x1cf
+ 698 01c8 10       		.uleb128 0x10
+ 699 01c9 01       		.uleb128 0x1
+ 700 01ca 50       		.byte	0x50
+ 701 01cb 02       		.uleb128 0x2
+ 702 01cc 09       		.byte	0x9
+ 703 01cd FF       		.byte	0xff
+ 704 01ce 00       		.byte	0
+ 705 01cf 0F       		.uleb128 0xf
+ 706 01d0 2A000000 		.4byte	.LVL11
+ 707 01d4 4D010000 		.4byte	0x14d
+ 708 01d8 E3010000 		.4byte	0x1e3
+ 709 01dc 10       		.uleb128 0x10
+ 710 01dd 01       		.uleb128 0x1
+ 711 01de 50       		.byte	0x50
+ 712 01df 02       		.uleb128 0x2
+ 713 01e0 09       		.byte	0x9
+ 714 01e1 FF       		.byte	0xff
+ 715 01e2 00       		.byte	0
+ 716 01e3 11       		.uleb128 0x11
+ 717 01e4 30000000 		.4byte	.LVL12
+ 718 01e8 72010000 		.4byte	0x172
+ 719 01ec 10       		.uleb128 0x10
+ 720 01ed 01       		.uleb128 0x1
+ 721 01ee 50       		.byte	0x50
+ 722 01ef 02       		.uleb128 0x2
+ 723 01f0 09       		.byte	0x9
+ 724 01f1 80       		.byte	0x80
+ 725 01f2 00       		.byte	0
+ 726 01f3 00       		.byte	0
+ 727 01f4 0D       		.uleb128 0xd
+ 728 01f5 91000000 		.4byte	.LASF30
+ 729 01f9 01       		.byte	0x1
+ 730 01fa 37       		.byte	0x37
+ 731 01fb 00000000 		.4byte	.LFB0
+ 732 01ff 20000000 		.4byte	.LFE0-.LFB0
+ 733 0203 01       		.uleb128 0x1
+ 734 0204 9C       		.byte	0x9c
+ 735 0205 1C020000 		.4byte	0x21c
+ 736 0209 12       		.uleb128 0x12
+ 737 020a 0E000000 		.4byte	.LVL13
+ 738 020e 97010000 		.4byte	0x197
+ 739 0212 12       		.uleb128 0x12
+ 740 0213 18000000 		.4byte	.LVL14
+ 741 0217 AB000000 		.4byte	0xab
+ 742 021b 00       		.byte	0
+ 743 021c 13       		.uleb128 0x13
+ 744 021d 26010000 		.4byte	.LASF41
+ 745 0221 01       		.byte	0x1
+ 746 0222 E102     		.2byte	0x2e1
+ 747 0224 6B000000 		.4byte	0x6b
+ 748 0228 00000000 		.4byte	.LFB9
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 30
+
+
+ 749 022c 0C000000 		.4byte	.LFE9-.LFB9
+ 750 0230 01       		.uleb128 0x1
+ 751 0231 9C       		.byte	0x9c
+ 752 0232 45020000 		.4byte	0x245
+ 753 0236 0A       		.uleb128 0xa
+ 754 0237 91010000 		.4byte	.LASF31
+ 755 023b 01       		.byte	0x1
+ 756 023c E302     		.2byte	0x2e3
+ 757 023e 6B000000 		.4byte	0x6b
+ 758 0242 01       		.uleb128 0x1
+ 759 0243 50       		.byte	0x50
+ 760 0244 00       		.byte	0
+ 761 0245 07       		.uleb128 0x7
+ 762 0246 6B020000 		.4byte	.LASF32
+ 763 024a 01       		.byte	0x1
+ 764 024b FD02     		.2byte	0x2fd
+ 765 024d 00000000 		.4byte	.LFB10
+ 766 0251 0C000000 		.4byte	.LFE10-.LFB10
+ 767 0255 01       		.uleb128 0x1
+ 768 0256 9C       		.byte	0x9c
+ 769 0257 6A020000 		.4byte	0x26a
+ 770 025b 0B       		.uleb128 0xb
+ 771 025c C4000000 		.4byte	.LASF33
+ 772 0260 01       		.byte	0x1
+ 773 0261 FD02     		.2byte	0x2fd
+ 774 0263 6B000000 		.4byte	0x6b
+ 775 0267 01       		.uleb128 0x1
+ 776 0268 50       		.byte	0x50
+ 777 0269 00       		.byte	0
+ 778 026a 0C       		.uleb128 0xc
+ 779 026b 4A030000 		.4byte	.LASF35
+ 780 026f 01       		.byte	0x1
+ 781 0270 1603     		.2byte	0x316
+ 782 0272 6B000000 		.4byte	0x6b
+ 783 0276 00000000 		.4byte	.LFB11
+ 784 027a 0C000000 		.4byte	.LFE11-.LFB11
+ 785 027e 01       		.uleb128 0x1
+ 786 027f 9C       		.byte	0x9c
+ 787 0280 0C       		.uleb128 0xc
+ 788 0281 BE020000 		.4byte	.LASF36
+ 789 0285 01       		.byte	0x1
+ 790 0286 3003     		.2byte	0x330
+ 791 0288 6B000000 		.4byte	0x6b
+ 792 028c 00000000 		.4byte	.LFB12
+ 793 0290 0C000000 		.4byte	.LFE12-.LFB12
+ 794 0294 01       		.uleb128 0x1
+ 795 0295 9C       		.byte	0x9c
+ 796 0296 0C       		.uleb128 0xc
+ 797 0297 0E000000 		.4byte	.LASF37
+ 798 029b 01       		.byte	0x1
+ 799 029c 7403     		.2byte	0x374
+ 800 029e 6B000000 		.4byte	0x6b
+ 801 02a2 00000000 		.4byte	.LFB13
+ 802 02a6 0C000000 		.4byte	.LFE13-.LFB13
+ 803 02aa 01       		.uleb128 0x1
+ 804 02ab 9C       		.byte	0x9c
+ 805 02ac 14       		.uleb128 0x14
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 31
+
+
+ 806 02ad 4A020000 		.4byte	.LASF42
+ 807 02b1 01       		.byte	0x1
+ 808 02b2 20       		.byte	0x20
+ 809 02b3 6B000000 		.4byte	0x6b
+ 810 02b7 05       		.uleb128 0x5
+ 811 02b8 03       		.byte	0x3
+ 812 02b9 00000000 		.4byte	motorControlPWM_initVar
+ 813 02bd 00       		.byte	0
+ 814              		.section	.debug_abbrev,"",%progbits
+ 815              	.Ldebug_abbrev0:
+ 816 0000 01       		.uleb128 0x1
+ 817 0001 11       		.uleb128 0x11
+ 818 0002 01       		.byte	0x1
+ 819 0003 25       		.uleb128 0x25
+ 820 0004 0E       		.uleb128 0xe
+ 821 0005 13       		.uleb128 0x13
+ 822 0006 0B       		.uleb128 0xb
+ 823 0007 03       		.uleb128 0x3
+ 824 0008 0E       		.uleb128 0xe
+ 825 0009 1B       		.uleb128 0x1b
+ 826 000a 0E       		.uleb128 0xe
+ 827 000b 55       		.uleb128 0x55
+ 828 000c 17       		.uleb128 0x17
+ 829 000d 11       		.uleb128 0x11
+ 830 000e 01       		.uleb128 0x1
+ 831 000f 10       		.uleb128 0x10
+ 832 0010 17       		.uleb128 0x17
+ 833 0011 00       		.byte	0
+ 834 0012 00       		.byte	0
+ 835 0013 02       		.uleb128 0x2
+ 836 0014 24       		.uleb128 0x24
+ 837 0015 00       		.byte	0
+ 838 0016 0B       		.uleb128 0xb
+ 839 0017 0B       		.uleb128 0xb
+ 840 0018 3E       		.uleb128 0x3e
+ 841 0019 0B       		.uleb128 0xb
+ 842 001a 03       		.uleb128 0x3
+ 843 001b 0E       		.uleb128 0xe
+ 844 001c 00       		.byte	0
+ 845 001d 00       		.byte	0
+ 846 001e 03       		.uleb128 0x3
+ 847 001f 24       		.uleb128 0x24
+ 848 0020 00       		.byte	0
+ 849 0021 0B       		.uleb128 0xb
+ 850 0022 0B       		.uleb128 0xb
+ 851 0023 3E       		.uleb128 0x3e
+ 852 0024 0B       		.uleb128 0xb
+ 853 0025 03       		.uleb128 0x3
+ 854 0026 08       		.uleb128 0x8
+ 855 0027 00       		.byte	0
+ 856 0028 00       		.byte	0
+ 857 0029 04       		.uleb128 0x4
+ 858 002a 16       		.uleb128 0x16
+ 859 002b 00       		.byte	0
+ 860 002c 03       		.uleb128 0x3
+ 861 002d 0E       		.uleb128 0xe
+ 862 002e 3A       		.uleb128 0x3a
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 32
+
+
+ 863 002f 0B       		.uleb128 0xb
+ 864 0030 3B       		.uleb128 0x3b
+ 865 0031 05       		.uleb128 0x5
+ 866 0032 49       		.uleb128 0x49
+ 867 0033 13       		.uleb128 0x13
+ 868 0034 00       		.byte	0
+ 869 0035 00       		.byte	0
+ 870 0036 05       		.uleb128 0x5
+ 871 0037 35       		.uleb128 0x35
+ 872 0038 00       		.byte	0
+ 873 0039 49       		.uleb128 0x49
+ 874 003a 13       		.uleb128 0x13
+ 875 003b 00       		.byte	0
+ 876 003c 00       		.byte	0
+ 877 003d 06       		.uleb128 0x6
+ 878 003e 2E       		.uleb128 0x2e
+ 879 003f 00       		.byte	0
+ 880 0040 3F       		.uleb128 0x3f
+ 881 0041 19       		.uleb128 0x19
+ 882 0042 03       		.uleb128 0x3
+ 883 0043 0E       		.uleb128 0xe
+ 884 0044 3A       		.uleb128 0x3a
+ 885 0045 0B       		.uleb128 0xb
+ 886 0046 3B       		.uleb128 0x3b
+ 887 0047 0B       		.uleb128 0xb
+ 888 0048 27       		.uleb128 0x27
+ 889 0049 19       		.uleb128 0x19
+ 890 004a 11       		.uleb128 0x11
+ 891 004b 01       		.uleb128 0x1
+ 892 004c 12       		.uleb128 0x12
+ 893 004d 06       		.uleb128 0x6
+ 894 004e 40       		.uleb128 0x40
+ 895 004f 18       		.uleb128 0x18
+ 896 0050 9742     		.uleb128 0x2117
+ 897 0052 19       		.uleb128 0x19
+ 898 0053 00       		.byte	0
+ 899 0054 00       		.byte	0
+ 900 0055 07       		.uleb128 0x7
+ 901 0056 2E       		.uleb128 0x2e
+ 902 0057 01       		.byte	0x1
+ 903 0058 3F       		.uleb128 0x3f
+ 904 0059 19       		.uleb128 0x19
+ 905 005a 03       		.uleb128 0x3
+ 906 005b 0E       		.uleb128 0xe
+ 907 005c 3A       		.uleb128 0x3a
+ 908 005d 0B       		.uleb128 0xb
+ 909 005e 3B       		.uleb128 0x3b
+ 910 005f 05       		.uleb128 0x5
+ 911 0060 27       		.uleb128 0x27
+ 912 0061 19       		.uleb128 0x19
+ 913 0062 11       		.uleb128 0x11
+ 914 0063 01       		.uleb128 0x1
+ 915 0064 12       		.uleb128 0x12
+ 916 0065 06       		.uleb128 0x6
+ 917 0066 40       		.uleb128 0x40
+ 918 0067 18       		.uleb128 0x18
+ 919 0068 9742     		.uleb128 0x2117
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 33
+
+
+ 920 006a 19       		.uleb128 0x19
+ 921 006b 01       		.uleb128 0x1
+ 922 006c 13       		.uleb128 0x13
+ 923 006d 00       		.byte	0
+ 924 006e 00       		.byte	0
+ 925 006f 08       		.uleb128 0x8
+ 926 0070 05       		.uleb128 0x5
+ 927 0071 00       		.byte	0
+ 928 0072 03       		.uleb128 0x3
+ 929 0073 0E       		.uleb128 0xe
+ 930 0074 3A       		.uleb128 0x3a
+ 931 0075 0B       		.uleb128 0xb
+ 932 0076 3B       		.uleb128 0x3b
+ 933 0077 05       		.uleb128 0x5
+ 934 0078 49       		.uleb128 0x49
+ 935 0079 13       		.uleb128 0x13
+ 936 007a 02       		.uleb128 0x2
+ 937 007b 17       		.uleb128 0x17
+ 938 007c 00       		.byte	0
+ 939 007d 00       		.byte	0
+ 940 007e 09       		.uleb128 0x9
+ 941 007f 34       		.uleb128 0x34
+ 942 0080 00       		.byte	0
+ 943 0081 03       		.uleb128 0x3
+ 944 0082 0E       		.uleb128 0xe
+ 945 0083 3A       		.uleb128 0x3a
+ 946 0084 0B       		.uleb128 0xb
+ 947 0085 3B       		.uleb128 0x3b
+ 948 0086 05       		.uleb128 0x5
+ 949 0087 49       		.uleb128 0x49
+ 950 0088 13       		.uleb128 0x13
+ 951 0089 02       		.uleb128 0x2
+ 952 008a 17       		.uleb128 0x17
+ 953 008b 00       		.byte	0
+ 954 008c 00       		.byte	0
+ 955 008d 0A       		.uleb128 0xa
+ 956 008e 34       		.uleb128 0x34
+ 957 008f 00       		.byte	0
+ 958 0090 03       		.uleb128 0x3
+ 959 0091 0E       		.uleb128 0xe
+ 960 0092 3A       		.uleb128 0x3a
+ 961 0093 0B       		.uleb128 0xb
+ 962 0094 3B       		.uleb128 0x3b
+ 963 0095 05       		.uleb128 0x5
+ 964 0096 49       		.uleb128 0x49
+ 965 0097 13       		.uleb128 0x13
+ 966 0098 02       		.uleb128 0x2
+ 967 0099 18       		.uleb128 0x18
+ 968 009a 00       		.byte	0
+ 969 009b 00       		.byte	0
+ 970 009c 0B       		.uleb128 0xb
+ 971 009d 05       		.uleb128 0x5
+ 972 009e 00       		.byte	0
+ 973 009f 03       		.uleb128 0x3
+ 974 00a0 0E       		.uleb128 0xe
+ 975 00a1 3A       		.uleb128 0x3a
+ 976 00a2 0B       		.uleb128 0xb
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 34
+
+
+ 977 00a3 3B       		.uleb128 0x3b
+ 978 00a4 05       		.uleb128 0x5
+ 979 00a5 49       		.uleb128 0x49
+ 980 00a6 13       		.uleb128 0x13
+ 981 00a7 02       		.uleb128 0x2
+ 982 00a8 18       		.uleb128 0x18
+ 983 00a9 00       		.byte	0
+ 984 00aa 00       		.byte	0
+ 985 00ab 0C       		.uleb128 0xc
+ 986 00ac 2E       		.uleb128 0x2e
+ 987 00ad 00       		.byte	0
+ 988 00ae 3F       		.uleb128 0x3f
+ 989 00af 19       		.uleb128 0x19
+ 990 00b0 03       		.uleb128 0x3
+ 991 00b1 0E       		.uleb128 0xe
+ 992 00b2 3A       		.uleb128 0x3a
+ 993 00b3 0B       		.uleb128 0xb
+ 994 00b4 3B       		.uleb128 0x3b
+ 995 00b5 05       		.uleb128 0x5
+ 996 00b6 27       		.uleb128 0x27
+ 997 00b7 19       		.uleb128 0x19
+ 998 00b8 49       		.uleb128 0x49
+ 999 00b9 13       		.uleb128 0x13
+ 1000 00ba 11       		.uleb128 0x11
+ 1001 00bb 01       		.uleb128 0x1
+ 1002 00bc 12       		.uleb128 0x12
+ 1003 00bd 06       		.uleb128 0x6
+ 1004 00be 40       		.uleb128 0x40
+ 1005 00bf 18       		.uleb128 0x18
+ 1006 00c0 9742     		.uleb128 0x2117
+ 1007 00c2 19       		.uleb128 0x19
+ 1008 00c3 00       		.byte	0
+ 1009 00c4 00       		.byte	0
+ 1010 00c5 0D       		.uleb128 0xd
+ 1011 00c6 2E       		.uleb128 0x2e
+ 1012 00c7 01       		.byte	0x1
+ 1013 00c8 3F       		.uleb128 0x3f
+ 1014 00c9 19       		.uleb128 0x19
+ 1015 00ca 03       		.uleb128 0x3
+ 1016 00cb 0E       		.uleb128 0xe
+ 1017 00cc 3A       		.uleb128 0x3a
+ 1018 00cd 0B       		.uleb128 0xb
+ 1019 00ce 3B       		.uleb128 0x3b
+ 1020 00cf 0B       		.uleb128 0xb
+ 1021 00d0 27       		.uleb128 0x27
+ 1022 00d1 19       		.uleb128 0x19
+ 1023 00d2 11       		.uleb128 0x11
+ 1024 00d3 01       		.uleb128 0x1
+ 1025 00d4 12       		.uleb128 0x12
+ 1026 00d5 06       		.uleb128 0x6
+ 1027 00d6 40       		.uleb128 0x40
+ 1028 00d7 18       		.uleb128 0x18
+ 1029 00d8 9742     		.uleb128 0x2117
+ 1030 00da 19       		.uleb128 0x19
+ 1031 00db 01       		.uleb128 0x1
+ 1032 00dc 13       		.uleb128 0x13
+ 1033 00dd 00       		.byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 35
+
+
+ 1034 00de 00       		.byte	0
+ 1035 00df 0E       		.uleb128 0xe
+ 1036 00e0 34       		.uleb128 0x34
+ 1037 00e1 00       		.byte	0
+ 1038 00e2 03       		.uleb128 0x3
+ 1039 00e3 0E       		.uleb128 0xe
+ 1040 00e4 3A       		.uleb128 0x3a
+ 1041 00e5 0B       		.uleb128 0xb
+ 1042 00e6 3B       		.uleb128 0x3b
+ 1043 00e7 0B       		.uleb128 0xb
+ 1044 00e8 49       		.uleb128 0x49
+ 1045 00e9 13       		.uleb128 0x13
+ 1046 00ea 02       		.uleb128 0x2
+ 1047 00eb 17       		.uleb128 0x17
+ 1048 00ec 00       		.byte	0
+ 1049 00ed 00       		.byte	0
+ 1050 00ee 0F       		.uleb128 0xf
+ 1051 00ef 898201   		.uleb128 0x4109
+ 1052 00f2 01       		.byte	0x1
+ 1053 00f3 11       		.uleb128 0x11
+ 1054 00f4 01       		.uleb128 0x1
+ 1055 00f5 31       		.uleb128 0x31
+ 1056 00f6 13       		.uleb128 0x13
+ 1057 00f7 01       		.uleb128 0x1
+ 1058 00f8 13       		.uleb128 0x13
+ 1059 00f9 00       		.byte	0
+ 1060 00fa 00       		.byte	0
+ 1061 00fb 10       		.uleb128 0x10
+ 1062 00fc 8A8201   		.uleb128 0x410a
+ 1063 00ff 00       		.byte	0
+ 1064 0100 02       		.uleb128 0x2
+ 1065 0101 18       		.uleb128 0x18
+ 1066 0102 9142     		.uleb128 0x2111
+ 1067 0104 18       		.uleb128 0x18
+ 1068 0105 00       		.byte	0
+ 1069 0106 00       		.byte	0
+ 1070 0107 11       		.uleb128 0x11
+ 1071 0108 898201   		.uleb128 0x4109
+ 1072 010b 01       		.byte	0x1
+ 1073 010c 11       		.uleb128 0x11
+ 1074 010d 01       		.uleb128 0x1
+ 1075 010e 31       		.uleb128 0x31
+ 1076 010f 13       		.uleb128 0x13
+ 1077 0110 00       		.byte	0
+ 1078 0111 00       		.byte	0
+ 1079 0112 12       		.uleb128 0x12
+ 1080 0113 898201   		.uleb128 0x4109
+ 1081 0116 00       		.byte	0
+ 1082 0117 11       		.uleb128 0x11
+ 1083 0118 01       		.uleb128 0x1
+ 1084 0119 31       		.uleb128 0x31
+ 1085 011a 13       		.uleb128 0x13
+ 1086 011b 00       		.byte	0
+ 1087 011c 00       		.byte	0
+ 1088 011d 13       		.uleb128 0x13
+ 1089 011e 2E       		.uleb128 0x2e
+ 1090 011f 01       		.byte	0x1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 36
+
+
+ 1091 0120 3F       		.uleb128 0x3f
+ 1092 0121 19       		.uleb128 0x19
+ 1093 0122 03       		.uleb128 0x3
+ 1094 0123 0E       		.uleb128 0xe
+ 1095 0124 3A       		.uleb128 0x3a
+ 1096 0125 0B       		.uleb128 0xb
+ 1097 0126 3B       		.uleb128 0x3b
+ 1098 0127 05       		.uleb128 0x5
+ 1099 0128 27       		.uleb128 0x27
+ 1100 0129 19       		.uleb128 0x19
+ 1101 012a 49       		.uleb128 0x49
+ 1102 012b 13       		.uleb128 0x13
+ 1103 012c 11       		.uleb128 0x11
+ 1104 012d 01       		.uleb128 0x1
+ 1105 012e 12       		.uleb128 0x12
+ 1106 012f 06       		.uleb128 0x6
+ 1107 0130 40       		.uleb128 0x40
+ 1108 0131 18       		.uleb128 0x18
+ 1109 0132 9742     		.uleb128 0x2117
+ 1110 0134 19       		.uleb128 0x19
+ 1111 0135 01       		.uleb128 0x1
+ 1112 0136 13       		.uleb128 0x13
+ 1113 0137 00       		.byte	0
+ 1114 0138 00       		.byte	0
+ 1115 0139 14       		.uleb128 0x14
+ 1116 013a 34       		.uleb128 0x34
+ 1117 013b 00       		.byte	0
+ 1118 013c 03       		.uleb128 0x3
+ 1119 013d 0E       		.uleb128 0xe
+ 1120 013e 3A       		.uleb128 0x3a
+ 1121 013f 0B       		.uleb128 0xb
+ 1122 0140 3B       		.uleb128 0x3b
+ 1123 0141 0B       		.uleb128 0xb
+ 1124 0142 49       		.uleb128 0x49
+ 1125 0143 13       		.uleb128 0x13
+ 1126 0144 3F       		.uleb128 0x3f
+ 1127 0145 19       		.uleb128 0x19
+ 1128 0146 02       		.uleb128 0x2
+ 1129 0147 18       		.uleb128 0x18
+ 1130 0148 00       		.byte	0
+ 1131 0149 00       		.byte	0
+ 1132 014a 00       		.byte	0
+ 1133              		.section	.debug_loc,"",%progbits
+ 1134              	.Ldebug_loc0:
+ 1135              	.LLST0:
+ 1136 0000 00000000 		.4byte	.LVL0
+ 1137 0004 06000000 		.4byte	.LVL1
+ 1138 0008 0100     		.2byte	0x1
+ 1139 000a 50       		.byte	0x50
+ 1140 000b 06000000 		.4byte	.LVL1
+ 1141 000f 28000000 		.4byte	.LFE4
+ 1142 0013 0400     		.2byte	0x4
+ 1143 0015 F3       		.byte	0xf3
+ 1144 0016 01       		.uleb128 0x1
+ 1145 0017 50       		.byte	0x50
+ 1146 0018 9F       		.byte	0x9f
+ 1147 0019 00000000 		.4byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 37
+
+
+ 1148 001d 00000000 		.4byte	0
+ 1149              	.LLST1:
+ 1150 0021 08000000 		.4byte	.LVL2
+ 1151 0025 1C000000 		.4byte	.LVL4
+ 1152 0029 0100     		.2byte	0x1
+ 1153 002b 50       		.byte	0x50
+ 1154 002c 00000000 		.4byte	0
+ 1155 0030 00000000 		.4byte	0
+ 1156              	.LLST2:
+ 1157 0034 0A000000 		.4byte	.LVL8
+ 1158 0038 0E000000 		.4byte	.LVL9
+ 1159 003c 0100     		.2byte	0x1
+ 1160 003e 53       		.byte	0x53
+ 1161 003f 00000000 		.4byte	0
+ 1162 0043 00000000 		.4byte	0
+ 1163              		.section	.debug_aranges,"",%progbits
+ 1164 0000 84000000 		.4byte	0x84
+ 1165 0004 0200     		.2byte	0x2
+ 1166 0006 00000000 		.4byte	.Ldebug_info0
+ 1167 000a 04       		.byte	0x4
+ 1168 000b 00       		.byte	0
+ 1169 000c 0000     		.2byte	0
+ 1170 000e 0000     		.2byte	0
+ 1171 0010 00000000 		.4byte	.LFB2
+ 1172 0014 14000000 		.4byte	.LFE2-.LFB2
+ 1173 0018 00000000 		.4byte	.LFB3
+ 1174 001c 10000000 		.4byte	.LFE3-.LFB3
+ 1175 0020 00000000 		.4byte	.LFB4
+ 1176 0024 28000000 		.4byte	.LFE4-.LFB4
+ 1177 0028 00000000 		.4byte	.LFB5
+ 1178 002c 0C000000 		.4byte	.LFE5-.LFB5
+ 1179 0030 00000000 		.4byte	.LFB6
+ 1180 0034 14000000 		.4byte	.LFE6-.LFB6
+ 1181 0038 00000000 		.4byte	.LFB7
+ 1182 003c 0C000000 		.4byte	.LFE7-.LFB7
+ 1183 0040 00000000 		.4byte	.LFB8
+ 1184 0044 0C000000 		.4byte	.LFE8-.LFB8
+ 1185 0048 00000000 		.4byte	.LFB1
+ 1186 004c 3C000000 		.4byte	.LFE1-.LFB1
+ 1187 0050 00000000 		.4byte	.LFB0
+ 1188 0054 20000000 		.4byte	.LFE0-.LFB0
+ 1189 0058 00000000 		.4byte	.LFB9
+ 1190 005c 0C000000 		.4byte	.LFE9-.LFB9
+ 1191 0060 00000000 		.4byte	.LFB10
+ 1192 0064 0C000000 		.4byte	.LFE10-.LFB10
+ 1193 0068 00000000 		.4byte	.LFB11
+ 1194 006c 0C000000 		.4byte	.LFE11-.LFB11
+ 1195 0070 00000000 		.4byte	.LFB12
+ 1196 0074 0C000000 		.4byte	.LFE12-.LFB12
+ 1197 0078 00000000 		.4byte	.LFB13
+ 1198 007c 0C000000 		.4byte	.LFE13-.LFB13
+ 1199 0080 00000000 		.4byte	0
+ 1200 0084 00000000 		.4byte	0
+ 1201              		.section	.debug_ranges,"",%progbits
+ 1202              	.Ldebug_ranges0:
+ 1203 0000 00000000 		.4byte	.LFB2
+ 1204 0004 14000000 		.4byte	.LFE2
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 38
+
+
+ 1205 0008 00000000 		.4byte	.LFB3
+ 1206 000c 10000000 		.4byte	.LFE3
+ 1207 0010 00000000 		.4byte	.LFB4
+ 1208 0014 28000000 		.4byte	.LFE4
+ 1209 0018 00000000 		.4byte	.LFB5
+ 1210 001c 0C000000 		.4byte	.LFE5
+ 1211 0020 00000000 		.4byte	.LFB6
+ 1212 0024 14000000 		.4byte	.LFE6
+ 1213 0028 00000000 		.4byte	.LFB7
+ 1214 002c 0C000000 		.4byte	.LFE7
+ 1215 0030 00000000 		.4byte	.LFB8
+ 1216 0034 0C000000 		.4byte	.LFE8
+ 1217 0038 00000000 		.4byte	.LFB1
+ 1218 003c 3C000000 		.4byte	.LFE1
+ 1219 0040 00000000 		.4byte	.LFB0
+ 1220 0044 20000000 		.4byte	.LFE0
+ 1221 0048 00000000 		.4byte	.LFB9
+ 1222 004c 0C000000 		.4byte	.LFE9
+ 1223 0050 00000000 		.4byte	.LFB10
+ 1224 0054 0C000000 		.4byte	.LFE10
+ 1225 0058 00000000 		.4byte	.LFB11
+ 1226 005c 0C000000 		.4byte	.LFE11
+ 1227 0060 00000000 		.4byte	.LFB12
+ 1228 0064 0C000000 		.4byte	.LFE12
+ 1229 0068 00000000 		.4byte	.LFB13
+ 1230 006c 0C000000 		.4byte	.LFE13
+ 1231 0070 00000000 		.4byte	0
+ 1232 0074 00000000 		.4byte	0
+ 1233              		.section	.debug_line,"",%progbits
+ 1234              	.Ldebug_line0:
+ 1235 0000 63010000 		.section	.debug_str,"MS",%progbits,1
+ 1235      02004C00 
+ 1235      00000201 
+ 1235      FB0E0D00 
+ 1235      01010101 
+ 1236              	.LASF6:
+ 1237 0000 6C6F6E67 		.ascii	"long long int\000"
+ 1237      206C6F6E 
+ 1237      6720696E 
+ 1237      7400
+ 1238              	.LASF37:
+ 1239 000e 6D6F746F 		.ascii	"motorControlPWM_ReadPeriod\000"
+ 1239      72436F6E 
+ 1239      74726F6C 
+ 1239      50574D5F 
+ 1239      52656164 
+ 1240              	.LASF25:
+ 1241 0029 70657269 		.ascii	"period\000"
+ 1241      6F6400
+ 1242              	.LASF3:
+ 1243 0030 73686F72 		.ascii	"short unsigned int\000"
+ 1243      7420756E 
+ 1243      7369676E 
+ 1243      65642069 
+ 1243      6E7400
+ 1244              	.LASF17:
+ 1245 0043 6D6F746F 		.ascii	"motorControlPWM_Stop\000"
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 39
+
+
+ 1245      72436F6E 
+ 1245      74726F6C 
+ 1245      50574D5F 
+ 1245      53746F70 
+ 1246              	.LASF26:
+ 1247 0058 6D6F746F 		.ascii	"motorControlPWM_WriteCompare\000"
+ 1247      72436F6E 
+ 1247      74726F6C 
+ 1247      50574D5F 
+ 1247      57726974 
+ 1248              	.LASF9:
+ 1249 0075 666C6F61 		.ascii	"float\000"
+ 1249      7400
+ 1250              	.LASF23:
+ 1251 007b 636F756E 		.ascii	"counter\000"
+ 1251      74657200 
+ 1252              	.LASF1:
+ 1253 0083 756E7369 		.ascii	"unsigned char\000"
+ 1253      676E6564 
+ 1253      20636861 
+ 1253      7200
+ 1254              	.LASF30:
+ 1255 0091 6D6F746F 		.ascii	"motorControlPWM_Start\000"
+ 1255      72436F6E 
+ 1255      74726F6C 
+ 1255      50574D5F 
+ 1255      53746172 
+ 1256              	.LASF13:
+ 1257 00a7 72656738 		.ascii	"reg8\000"
+ 1257      00
+ 1258              	.LASF5:
+ 1259 00ac 6C6F6E67 		.ascii	"long unsigned int\000"
+ 1259      20756E73 
+ 1259      69676E65 
+ 1259      6420696E 
+ 1259      7400
+ 1260              	.LASF12:
+ 1261 00be 75696E74 		.ascii	"uint8\000"
+ 1261      3800
+ 1262              	.LASF33:
+ 1263 00c4 636F6E74 		.ascii	"control\000"
+ 1263      726F6C00 
+ 1264              	.LASF24:
+ 1265 00cc 6D6F746F 		.ascii	"motorControlPWM_WritePeriod\000"
+ 1265      72436F6E 
+ 1265      74726F6C 
+ 1265      50574D5F 
+ 1265      57726974 
+ 1266              	.LASF10:
+ 1267 00e8 646F7562 		.ascii	"double\000"
+ 1267      6C6500
+ 1268              	.LASF16:
+ 1269 00ef 6D6F746F 		.ascii	"motorControlPWM_Enable\000"
+ 1269      72436F6E 
+ 1269      74726F6C 
+ 1269      50574D5F 
+ 1269      456E6162 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 40
+
+
+ 1270              	.LASF18:
+ 1271 0106 636F6D70 		.ascii	"comparemode1masked\000"
+ 1271      6172656D 
+ 1271      6F646531 
+ 1271      6D61736B 
+ 1271      656400
+ 1272              	.LASF8:
+ 1273 0119 756E7369 		.ascii	"unsigned int\000"
+ 1273      676E6564 
+ 1273      20696E74 
+ 1273      00
+ 1274              	.LASF41:
+ 1275 0126 6D6F746F 		.ascii	"motorControlPWM_ReadControlRegister\000"
+ 1275      72436F6E 
+ 1275      74726F6C 
+ 1275      50574D5F 
+ 1275      52656164 
+ 1276              	.LASF19:
+ 1277 014a 636F6D70 		.ascii	"comparemode2masked\000"
+ 1277      6172656D 
+ 1277      6F646532 
+ 1277      6D61736B 
+ 1277      656400
+ 1278              	.LASF7:
+ 1279 015d 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 1279      206C6F6E 
+ 1279      6720756E 
+ 1279      7369676E 
+ 1279      65642069 
+ 1280              	.LASF21:
+ 1281 0174 6D6F746F 		.ascii	"motorControlPWM_WriteCounter\000"
+ 1281      72436F6E 
+ 1281      74726F6C 
+ 1281      50574D5F 
+ 1281      57726974 
+ 1282              	.LASF31:
+ 1283 0191 72657375 		.ascii	"result\000"
+ 1283      6C7400
+ 1284              	.LASF20:
+ 1285 0198 6D6F746F 		.ascii	"motorControlPWM_SetCompareMode\000"
+ 1285      72436F6E 
+ 1285      74726F6C 
+ 1285      50574D5F 
+ 1285      53657443 
+ 1286              	.LASF38:
+ 1287 01b7 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 1287      43313120 
+ 1287      352E342E 
+ 1287      31203230 
+ 1287      31363036 
+ 1288 01ea 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m0 -mthumb -g -O"
+ 1288      20726576 
+ 1288      6973696F 
+ 1288      6E203233 
+ 1288      37373135 
+ 1289 021d 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 1289      66756E63 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 41
+
+
+ 1289      74696F6E 
+ 1289      2D736563 
+ 1289      74696F6E 
+ 1290              	.LASF29:
+ 1291 0245 6374726C 		.ascii	"ctrl\000"
+ 1291      00
+ 1292              	.LASF42:
+ 1293 024a 6D6F746F 		.ascii	"motorControlPWM_initVar\000"
+ 1293      72436F6E 
+ 1293      74726F6C 
+ 1293      50574D5F 
+ 1293      696E6974 
+ 1294              	.LASF15:
+ 1295 0262 73697A65 		.ascii	"sizetype\000"
+ 1295      74797065 
+ 1295      00
+ 1296              	.LASF32:
+ 1297 026b 6D6F746F 		.ascii	"motorControlPWM_WriteControlRegister\000"
+ 1297      72436F6E 
+ 1297      74726F6C 
+ 1297      50574D5F 
+ 1297      57726974 
+ 1298              	.LASF11:
+ 1299 0290 63686172 		.ascii	"char\000"
+ 1299      00
+ 1300              	.LASF39:
+ 1301 0295 47656E65 		.ascii	"Generated_Source\\PSoC4\\motorControlPWM.c\000"
+ 1301      72617465 
+ 1301      645F536F 
+ 1301      75726365 
+ 1301      5C50536F 
+ 1302              	.LASF36:
+ 1303 02be 6D6F746F 		.ascii	"motorControlPWM_ReadCompare\000"
+ 1303      72436F6E 
+ 1303      74726F6C 
+ 1303      50574D5F 
+ 1303      52656164 
+ 1304              	.LASF34:
+ 1305 02da 6D6F746F 		.ascii	"motorControlPWM_ReadCounter\000"
+ 1305      72436F6E 
+ 1305      74726F6C 
+ 1305      50574D5F 
+ 1305      52656164 
+ 1306              	.LASF2:
+ 1307 02f6 73686F72 		.ascii	"short int\000"
+ 1307      7420696E 
+ 1307      7400
+ 1308              	.LASF28:
+ 1309 0300 6D6F746F 		.ascii	"motorControlPWM_Init\000"
+ 1309      72436F6E 
+ 1309      74726F6C 
+ 1309      50574D5F 
+ 1309      496E6974 
+ 1310              	.LASF22:
+ 1311 0315 636F6D70 		.ascii	"comparemode\000"
+ 1311      6172656D 
+ 1311      6F646500 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccgZEwxP.s 			page 42
+
+
+ 1312              	.LASF4:
+ 1313 0321 6C6F6E67 		.ascii	"long int\000"
+ 1313      20696E74 
+ 1313      00
+ 1314              	.LASF14:
+ 1315 032a 6C6F6E67 		.ascii	"long double\000"
+ 1315      20646F75 
+ 1315      626C6500 
+ 1316              	.LASF0:
+ 1317 0336 7369676E 		.ascii	"signed char\000"
+ 1317      65642063 
+ 1317      68617200 
+ 1318              	.LASF27:
+ 1319 0342 636F6D70 		.ascii	"compare\000"
+ 1319      61726500 
+ 1320              	.LASF35:
+ 1321 034a 6D6F746F 		.ascii	"motorControlPWM_ReadCapture\000"
+ 1321      72436F6E 
+ 1321      74726F6C 
+ 1321      50574D5F 
+ 1321      52656164 
+ 1322              	.LASF40:
+ 1323 0366 433A5C55 		.ascii	"C:\\Users\\kylep\\Box Sync\\Box Sync\\Feniex Electr"
+ 1323      73657273 
+ 1323      5C6B796C 
+ 1323      65705C42 
+ 1323      6F782053 
+ 1324 0394 6963616C 		.ascii	"ical Files\\WorkingFolder-Kyle\\Firm-AI-Cube\\81-00"
+ 1324      2046696C 
+ 1324      65735C57 
+ 1324      6F726B69 
+ 1324      6E67466F 
+ 1325 03c4 3032342D 		.ascii	"024-01.cydsn\000"
+ 1325      30312E63 
+ 1325      7964736E 
+ 1325      00
+ 1326              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

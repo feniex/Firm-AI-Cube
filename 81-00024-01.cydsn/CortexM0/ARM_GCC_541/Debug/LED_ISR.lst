@@ -1,0 +1,2033 @@
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"LED_ISR.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.LED_ISR_Interrupt,"ax",%progbits
+  20              		.align	2
+  21              		.global	LED_ISR_Interrupt
+  22              		.code	16
+  23              		.thumb_func
+  24              		.type	LED_ISR_Interrupt, %function
+  25              	LED_ISR_Interrupt:
+  26              	.LFB35:
+  27              		.file 1 "Generated_Source\\PSoC4\\LED_ISR.c"
+   1:Generated_Source\PSoC4/LED_ISR.c **** /*******************************************************************************
+   2:Generated_Source\PSoC4/LED_ISR.c **** * File Name: LED_ISR.c  
+   3:Generated_Source\PSoC4/LED_ISR.c **** * Version 1.70
+   4:Generated_Source\PSoC4/LED_ISR.c **** *
+   5:Generated_Source\PSoC4/LED_ISR.c **** *  Description:
+   6:Generated_Source\PSoC4/LED_ISR.c **** *   API for controlling the state of an interrupt.
+   7:Generated_Source\PSoC4/LED_ISR.c **** *
+   8:Generated_Source\PSoC4/LED_ISR.c **** *
+   9:Generated_Source\PSoC4/LED_ISR.c **** *  Note:
+  10:Generated_Source\PSoC4/LED_ISR.c **** *
+  11:Generated_Source\PSoC4/LED_ISR.c **** ********************************************************************************
+  12:Generated_Source\PSoC4/LED_ISR.c **** * Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+  13:Generated_Source\PSoC4/LED_ISR.c **** * You may use this file only in accordance with the license, terms, conditions, 
+  14:Generated_Source\PSoC4/LED_ISR.c **** * disclaimers, and limitations in the end user license agreement accompanying 
+  15:Generated_Source\PSoC4/LED_ISR.c **** * the software package with which this file was provided.
+  16:Generated_Source\PSoC4/LED_ISR.c **** *******************************************************************************/
+  17:Generated_Source\PSoC4/LED_ISR.c **** 
+  18:Generated_Source\PSoC4/LED_ISR.c **** 
+  19:Generated_Source\PSoC4/LED_ISR.c **** #include <cydevice_trm.h>
+  20:Generated_Source\PSoC4/LED_ISR.c **** #include <CyLib.h>
+  21:Generated_Source\PSoC4/LED_ISR.c **** #include <LED_ISR.h>
+  22:Generated_Source\PSoC4/LED_ISR.c **** 
+  23:Generated_Source\PSoC4/LED_ISR.c **** 
+  24:Generated_Source\PSoC4/LED_ISR.c **** #if !defined(LED_ISR__REMOVED) /* Check for removal by optimization */
+  25:Generated_Source\PSoC4/LED_ISR.c **** 
+  26:Generated_Source\PSoC4/LED_ISR.c **** /*******************************************************************************
+  27:Generated_Source\PSoC4/LED_ISR.c **** *  Place your includes, defines and code here 
+  28:Generated_Source\PSoC4/LED_ISR.c **** ********************************************************************************/
+  29:Generated_Source\PSoC4/LED_ISR.c **** /* `#START LED_ISR_intc` */
+  30:Generated_Source\PSoC4/LED_ISR.c **** 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 2
+
+
+  31:Generated_Source\PSoC4/LED_ISR.c **** #include "DriverControl.h"    
+  32:Generated_Source\PSoC4/LED_ISR.c ****     
+  33:Generated_Source\PSoC4/LED_ISR.c **** /* `#END` */
+  34:Generated_Source\PSoC4/LED_ISR.c **** 
+  35:Generated_Source\PSoC4/LED_ISR.c **** extern cyisraddress CyRamVectors[CYINT_IRQ_BASE + CY_NUM_INTERRUPTS];
+  36:Generated_Source\PSoC4/LED_ISR.c **** 
+  37:Generated_Source\PSoC4/LED_ISR.c **** /* Declared in startup, used to set unused interrupts to. */
+  38:Generated_Source\PSoC4/LED_ISR.c **** CY_ISR_PROTO(IntDefaultHandler);
+  39:Generated_Source\PSoC4/LED_ISR.c **** 
+  40:Generated_Source\PSoC4/LED_ISR.c **** 
+  41:Generated_Source\PSoC4/LED_ISR.c **** /*******************************************************************************
+  42:Generated_Source\PSoC4/LED_ISR.c **** * Function Name: LED_ISR_Start
+  43:Generated_Source\PSoC4/LED_ISR.c **** ********************************************************************************
+  44:Generated_Source\PSoC4/LED_ISR.c **** *
+  45:Generated_Source\PSoC4/LED_ISR.c **** * Summary:
+  46:Generated_Source\PSoC4/LED_ISR.c **** *  Set up the interrupt and enable it. This function disables the interrupt, 
+  47:Generated_Source\PSoC4/LED_ISR.c **** *  sets the default interrupt vector, sets the priority from the value in the
+  48:Generated_Source\PSoC4/LED_ISR.c **** *  Design Wide Resources Interrupt Editor, then enables the interrupt to the 
+  49:Generated_Source\PSoC4/LED_ISR.c **** *  interrupt controller.
+  50:Generated_Source\PSoC4/LED_ISR.c **** *
+  51:Generated_Source\PSoC4/LED_ISR.c **** * Parameters:  
+  52:Generated_Source\PSoC4/LED_ISR.c **** *   None
+  53:Generated_Source\PSoC4/LED_ISR.c **** *
+  54:Generated_Source\PSoC4/LED_ISR.c **** * Return:
+  55:Generated_Source\PSoC4/LED_ISR.c **** *   None
+  56:Generated_Source\PSoC4/LED_ISR.c **** *
+  57:Generated_Source\PSoC4/LED_ISR.c **** *******************************************************************************/
+  58:Generated_Source\PSoC4/LED_ISR.c **** void LED_ISR_Start(void)
+  59:Generated_Source\PSoC4/LED_ISR.c **** {
+  60:Generated_Source\PSoC4/LED_ISR.c ****     /* For all we know the interrupt is active. */
+  61:Generated_Source\PSoC4/LED_ISR.c ****     LED_ISR_Disable();
+  62:Generated_Source\PSoC4/LED_ISR.c **** 
+  63:Generated_Source\PSoC4/LED_ISR.c ****     /* Set the ISR to point to the LED_ISR Interrupt. */
+  64:Generated_Source\PSoC4/LED_ISR.c ****     LED_ISR_SetVector(&LED_ISR_Interrupt);
+  65:Generated_Source\PSoC4/LED_ISR.c **** 
+  66:Generated_Source\PSoC4/LED_ISR.c ****     /* Set the priority. */
+  67:Generated_Source\PSoC4/LED_ISR.c ****     LED_ISR_SetPriority((uint8)LED_ISR_INTC_PRIOR_NUMBER);
+  68:Generated_Source\PSoC4/LED_ISR.c **** 
+  69:Generated_Source\PSoC4/LED_ISR.c ****     /* Enable it. */
+  70:Generated_Source\PSoC4/LED_ISR.c ****     LED_ISR_Enable();
+  71:Generated_Source\PSoC4/LED_ISR.c **** }
+  72:Generated_Source\PSoC4/LED_ISR.c **** 
+  73:Generated_Source\PSoC4/LED_ISR.c **** 
+  74:Generated_Source\PSoC4/LED_ISR.c **** /*******************************************************************************
+  75:Generated_Source\PSoC4/LED_ISR.c **** * Function Name: LED_ISR_StartEx
+  76:Generated_Source\PSoC4/LED_ISR.c **** ********************************************************************************
+  77:Generated_Source\PSoC4/LED_ISR.c **** *
+  78:Generated_Source\PSoC4/LED_ISR.c **** * Summary:
+  79:Generated_Source\PSoC4/LED_ISR.c **** *  Sets up the interrupt and enables it. This function disables the interrupt,
+  80:Generated_Source\PSoC4/LED_ISR.c **** *  sets the interrupt vector based on the address passed in, sets the priority 
+  81:Generated_Source\PSoC4/LED_ISR.c **** *  from the value in the Design Wide Resources Interrupt Editor, then enables 
+  82:Generated_Source\PSoC4/LED_ISR.c **** *  the interrupt to the interrupt controller.
+  83:Generated_Source\PSoC4/LED_ISR.c **** *  
+  84:Generated_Source\PSoC4/LED_ISR.c **** *  When defining ISR functions, the CY_ISR and CY_ISR_PROTO macros should be 
+  85:Generated_Source\PSoC4/LED_ISR.c **** *  used to provide consistent definition across compilers:
+  86:Generated_Source\PSoC4/LED_ISR.c **** *  
+  87:Generated_Source\PSoC4/LED_ISR.c **** *  Function definition example:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 3
+
+
+  88:Generated_Source\PSoC4/LED_ISR.c **** *   CY_ISR(MyISR)
+  89:Generated_Source\PSoC4/LED_ISR.c **** *   {
+  90:Generated_Source\PSoC4/LED_ISR.c **** *   }
+  91:Generated_Source\PSoC4/LED_ISR.c **** *   Function prototype example:
+  92:Generated_Source\PSoC4/LED_ISR.c **** *   CY_ISR_PROTO(MyISR);
+  93:Generated_Source\PSoC4/LED_ISR.c **** *
+  94:Generated_Source\PSoC4/LED_ISR.c **** * Parameters:  
+  95:Generated_Source\PSoC4/LED_ISR.c **** *   address: Address of the ISR to set in the interrupt vector table.
+  96:Generated_Source\PSoC4/LED_ISR.c **** *
+  97:Generated_Source\PSoC4/LED_ISR.c **** * Return:
+  98:Generated_Source\PSoC4/LED_ISR.c **** *   None
+  99:Generated_Source\PSoC4/LED_ISR.c **** *
+ 100:Generated_Source\PSoC4/LED_ISR.c **** *******************************************************************************/
+ 101:Generated_Source\PSoC4/LED_ISR.c **** void LED_ISR_StartEx(cyisraddress address)
+ 102:Generated_Source\PSoC4/LED_ISR.c **** {
+ 103:Generated_Source\PSoC4/LED_ISR.c ****     /* For all we know the interrupt is active. */
+ 104:Generated_Source\PSoC4/LED_ISR.c ****     LED_ISR_Disable();
+ 105:Generated_Source\PSoC4/LED_ISR.c **** 
+ 106:Generated_Source\PSoC4/LED_ISR.c ****     /* Set the ISR to point to the LED_ISR Interrupt. */
+ 107:Generated_Source\PSoC4/LED_ISR.c ****     LED_ISR_SetVector(address);
+ 108:Generated_Source\PSoC4/LED_ISR.c **** 
+ 109:Generated_Source\PSoC4/LED_ISR.c ****     /* Set the priority. */
+ 110:Generated_Source\PSoC4/LED_ISR.c ****     LED_ISR_SetPriority((uint8)LED_ISR_INTC_PRIOR_NUMBER);
+ 111:Generated_Source\PSoC4/LED_ISR.c **** 
+ 112:Generated_Source\PSoC4/LED_ISR.c ****     /* Enable it. */
+ 113:Generated_Source\PSoC4/LED_ISR.c ****     LED_ISR_Enable();
+ 114:Generated_Source\PSoC4/LED_ISR.c **** }
+ 115:Generated_Source\PSoC4/LED_ISR.c **** 
+ 116:Generated_Source\PSoC4/LED_ISR.c **** 
+ 117:Generated_Source\PSoC4/LED_ISR.c **** /*******************************************************************************
+ 118:Generated_Source\PSoC4/LED_ISR.c **** * Function Name: LED_ISR_Stop
+ 119:Generated_Source\PSoC4/LED_ISR.c **** ********************************************************************************
+ 120:Generated_Source\PSoC4/LED_ISR.c **** *
+ 121:Generated_Source\PSoC4/LED_ISR.c **** * Summary:
+ 122:Generated_Source\PSoC4/LED_ISR.c **** *   Disables and removes the interrupt.
+ 123:Generated_Source\PSoC4/LED_ISR.c **** *
+ 124:Generated_Source\PSoC4/LED_ISR.c **** * Parameters:  
+ 125:Generated_Source\PSoC4/LED_ISR.c **** *   None
+ 126:Generated_Source\PSoC4/LED_ISR.c **** *
+ 127:Generated_Source\PSoC4/LED_ISR.c **** * Return:
+ 128:Generated_Source\PSoC4/LED_ISR.c **** *   None
+ 129:Generated_Source\PSoC4/LED_ISR.c **** *
+ 130:Generated_Source\PSoC4/LED_ISR.c **** *******************************************************************************/
+ 131:Generated_Source\PSoC4/LED_ISR.c **** void LED_ISR_Stop(void)
+ 132:Generated_Source\PSoC4/LED_ISR.c **** {
+ 133:Generated_Source\PSoC4/LED_ISR.c ****     /* Disable this interrupt. */
+ 134:Generated_Source\PSoC4/LED_ISR.c ****     LED_ISR_Disable();
+ 135:Generated_Source\PSoC4/LED_ISR.c **** 
+ 136:Generated_Source\PSoC4/LED_ISR.c ****     /* Set the ISR to point to the passive one. */
+ 137:Generated_Source\PSoC4/LED_ISR.c ****     LED_ISR_SetVector(&IntDefaultHandler);
+ 138:Generated_Source\PSoC4/LED_ISR.c **** }
+ 139:Generated_Source\PSoC4/LED_ISR.c **** 
+ 140:Generated_Source\PSoC4/LED_ISR.c **** 
+ 141:Generated_Source\PSoC4/LED_ISR.c **** /*******************************************************************************
+ 142:Generated_Source\PSoC4/LED_ISR.c **** * Function Name: LED_ISR_Interrupt
+ 143:Generated_Source\PSoC4/LED_ISR.c **** ********************************************************************************
+ 144:Generated_Source\PSoC4/LED_ISR.c **** *
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 4
+
+
+ 145:Generated_Source\PSoC4/LED_ISR.c **** * Summary:
+ 146:Generated_Source\PSoC4/LED_ISR.c **** *   The default Interrupt Service Routine for LED_ISR.
+ 147:Generated_Source\PSoC4/LED_ISR.c **** *
+ 148:Generated_Source\PSoC4/LED_ISR.c **** *   Add custom code between the START and END comments to keep the next version
+ 149:Generated_Source\PSoC4/LED_ISR.c **** *   of this file from over-writing your code.
+ 150:Generated_Source\PSoC4/LED_ISR.c **** *
+ 151:Generated_Source\PSoC4/LED_ISR.c **** *   Note You may use either the default ISR by using this API, or you may define
+ 152:Generated_Source\PSoC4/LED_ISR.c **** *   your own separate ISR through ISR_StartEx().
+ 153:Generated_Source\PSoC4/LED_ISR.c **** *
+ 154:Generated_Source\PSoC4/LED_ISR.c **** * Parameters:  
+ 155:Generated_Source\PSoC4/LED_ISR.c **** *   None
+ 156:Generated_Source\PSoC4/LED_ISR.c **** *
+ 157:Generated_Source\PSoC4/LED_ISR.c **** * Return:
+ 158:Generated_Source\PSoC4/LED_ISR.c **** *   None
+ 159:Generated_Source\PSoC4/LED_ISR.c **** *
+ 160:Generated_Source\PSoC4/LED_ISR.c **** *******************************************************************************/
+ 161:Generated_Source\PSoC4/LED_ISR.c **** CY_ISR(LED_ISR_Interrupt)
+ 162:Generated_Source\PSoC4/LED_ISR.c **** {
+  28              		.loc 1 162 0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32 0000 10B5     		push	{r4, lr}
+  33              		.cfi_def_cfa_offset 8
+  34              		.cfi_offset 4, -8
+  35              		.cfi_offset 14, -4
+ 163:Generated_Source\PSoC4/LED_ISR.c ****     #ifdef LED_ISR_INTERRUPT_INTERRUPT_CALLBACK
+ 164:Generated_Source\PSoC4/LED_ISR.c ****         LED_ISR_Interrupt_InterruptCallback();
+ 165:Generated_Source\PSoC4/LED_ISR.c ****     #endif /* LED_ISR_INTERRUPT_INTERRUPT_CALLBACK */ 
+ 166:Generated_Source\PSoC4/LED_ISR.c **** 
+ 167:Generated_Source\PSoC4/LED_ISR.c ****     /*  Place your Interrupt code here. */
+ 168:Generated_Source\PSoC4/LED_ISR.c ****     /* `#START LED_ISR_Interrupt` */
+ 169:Generated_Source\PSoC4/LED_ISR.c **** 
+ 170:Generated_Source\PSoC4/LED_ISR.c ****     processSoftStart();
+  36              		.loc 1 170 0
+  37 0002 FFF7FEFF 		bl	processSoftStart
+  38              	.LVL0:
+ 171:Generated_Source\PSoC4/LED_ISR.c ****     
+ 172:Generated_Source\PSoC4/LED_ISR.c ****     /* `#END` */
+ 173:Generated_Source\PSoC4/LED_ISR.c **** }
+  39              		.loc 1 173 0
+  40              		@ sp needed
+  41 0006 10BD     		pop	{r4, pc}
+  42              		.cfi_endproc
+  43              	.LFE35:
+  44              		.size	LED_ISR_Interrupt, .-LED_ISR_Interrupt
+  45              		.section	.text.LED_ISR_SetVector,"ax",%progbits
+  46              		.align	2
+  47              		.global	LED_ISR_SetVector
+  48              		.code	16
+  49              		.thumb_func
+  50              		.type	LED_ISR_SetVector, %function
+  51              	LED_ISR_SetVector:
+  52              	.LFB36:
+ 174:Generated_Source\PSoC4/LED_ISR.c **** 
+ 175:Generated_Source\PSoC4/LED_ISR.c **** 
+ 176:Generated_Source\PSoC4/LED_ISR.c **** /*******************************************************************************
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 5
+
+
+ 177:Generated_Source\PSoC4/LED_ISR.c **** * Function Name: LED_ISR_SetVector
+ 178:Generated_Source\PSoC4/LED_ISR.c **** ********************************************************************************
+ 179:Generated_Source\PSoC4/LED_ISR.c **** *
+ 180:Generated_Source\PSoC4/LED_ISR.c **** * Summary:
+ 181:Generated_Source\PSoC4/LED_ISR.c **** *   Change the ISR vector for the Interrupt. Note calling LED_ISR_Start
+ 182:Generated_Source\PSoC4/LED_ISR.c **** *   will override any effect this method would have had. To set the vector 
+ 183:Generated_Source\PSoC4/LED_ISR.c **** *   before the component has been started use LED_ISR_StartEx instead.
+ 184:Generated_Source\PSoC4/LED_ISR.c **** * 
+ 185:Generated_Source\PSoC4/LED_ISR.c **** *   When defining ISR functions, the CY_ISR and CY_ISR_PROTO macros should be 
+ 186:Generated_Source\PSoC4/LED_ISR.c **** *   used to provide consistent definition across compilers:
+ 187:Generated_Source\PSoC4/LED_ISR.c **** *
+ 188:Generated_Source\PSoC4/LED_ISR.c **** *   Function definition example:
+ 189:Generated_Source\PSoC4/LED_ISR.c **** *   CY_ISR(MyISR)
+ 190:Generated_Source\PSoC4/LED_ISR.c **** *   {
+ 191:Generated_Source\PSoC4/LED_ISR.c **** *   }
+ 192:Generated_Source\PSoC4/LED_ISR.c **** *
+ 193:Generated_Source\PSoC4/LED_ISR.c **** *   Function prototype example:
+ 194:Generated_Source\PSoC4/LED_ISR.c **** *     CY_ISR_PROTO(MyISR);
+ 195:Generated_Source\PSoC4/LED_ISR.c **** *
+ 196:Generated_Source\PSoC4/LED_ISR.c **** * Parameters:
+ 197:Generated_Source\PSoC4/LED_ISR.c **** *   address: Address of the ISR to set in the interrupt vector table.
+ 198:Generated_Source\PSoC4/LED_ISR.c **** *
+ 199:Generated_Source\PSoC4/LED_ISR.c **** * Return:
+ 200:Generated_Source\PSoC4/LED_ISR.c **** *   None
+ 201:Generated_Source\PSoC4/LED_ISR.c **** *
+ 202:Generated_Source\PSoC4/LED_ISR.c **** *******************************************************************************/
+ 203:Generated_Source\PSoC4/LED_ISR.c **** void LED_ISR_SetVector(cyisraddress address)
+ 204:Generated_Source\PSoC4/LED_ISR.c **** {
+  53              		.loc 1 204 0
+  54              		.cfi_startproc
+  55              		@ args = 0, pretend = 0, frame = 0
+  56              		@ frame_needed = 0, uses_anonymous_args = 0
+  57              		@ link register save eliminated.
+  58              	.LVL1:
+ 205:Generated_Source\PSoC4/LED_ISR.c ****     CyRamVectors[CYINT_IRQ_BASE + LED_ISR__INTC_NUMBER] = address;
+  59              		.loc 1 205 0
+  60 0000 014B     		ldr	r3, .L3
+  61 0002 D864     		str	r0, [r3, #76]
+ 206:Generated_Source\PSoC4/LED_ISR.c **** }
+  62              		.loc 1 206 0
+  63              		@ sp needed
+  64 0004 7047     		bx	lr
+  65              	.L4:
+  66 0006 C046     		.align	2
+  67              	.L3:
+  68 0008 00000000 		.word	CyRamVectors
+  69              		.cfi_endproc
+  70              	.LFE36:
+  71              		.size	LED_ISR_SetVector, .-LED_ISR_SetVector
+  72              		.section	.text.LED_ISR_GetVector,"ax",%progbits
+  73              		.align	2
+  74              		.global	LED_ISR_GetVector
+  75              		.code	16
+  76              		.thumb_func
+  77              		.type	LED_ISR_GetVector, %function
+  78              	LED_ISR_GetVector:
+  79              	.LFB37:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 6
+
+
+ 207:Generated_Source\PSoC4/LED_ISR.c **** 
+ 208:Generated_Source\PSoC4/LED_ISR.c **** 
+ 209:Generated_Source\PSoC4/LED_ISR.c **** /*******************************************************************************
+ 210:Generated_Source\PSoC4/LED_ISR.c **** * Function Name: LED_ISR_GetVector
+ 211:Generated_Source\PSoC4/LED_ISR.c **** ********************************************************************************
+ 212:Generated_Source\PSoC4/LED_ISR.c **** *
+ 213:Generated_Source\PSoC4/LED_ISR.c **** * Summary:
+ 214:Generated_Source\PSoC4/LED_ISR.c **** *   Gets the "address" of the current ISR vector for the Interrupt.
+ 215:Generated_Source\PSoC4/LED_ISR.c **** *
+ 216:Generated_Source\PSoC4/LED_ISR.c **** * Parameters:
+ 217:Generated_Source\PSoC4/LED_ISR.c **** *   None
+ 218:Generated_Source\PSoC4/LED_ISR.c **** *
+ 219:Generated_Source\PSoC4/LED_ISR.c **** * Return:
+ 220:Generated_Source\PSoC4/LED_ISR.c **** *   Address of the ISR in the interrupt vector table.
+ 221:Generated_Source\PSoC4/LED_ISR.c **** *
+ 222:Generated_Source\PSoC4/LED_ISR.c **** *******************************************************************************/
+ 223:Generated_Source\PSoC4/LED_ISR.c **** cyisraddress LED_ISR_GetVector(void)
+ 224:Generated_Source\PSoC4/LED_ISR.c **** {
+  80              		.loc 1 224 0
+  81              		.cfi_startproc
+  82              		@ args = 0, pretend = 0, frame = 0
+  83              		@ frame_needed = 0, uses_anonymous_args = 0
+  84              		@ link register save eliminated.
+ 225:Generated_Source\PSoC4/LED_ISR.c ****     return CyRamVectors[CYINT_IRQ_BASE + LED_ISR__INTC_NUMBER];
+  85              		.loc 1 225 0
+  86 0000 014B     		ldr	r3, .L6
+  87 0002 D86C     		ldr	r0, [r3, #76]
+ 226:Generated_Source\PSoC4/LED_ISR.c **** }
+  88              		.loc 1 226 0
+  89              		@ sp needed
+  90 0004 7047     		bx	lr
+  91              	.L7:
+  92 0006 C046     		.align	2
+  93              	.L6:
+  94 0008 00000000 		.word	CyRamVectors
+  95              		.cfi_endproc
+  96              	.LFE37:
+  97              		.size	LED_ISR_GetVector, .-LED_ISR_GetVector
+  98              		.section	.text.LED_ISR_SetPriority,"ax",%progbits
+  99              		.align	2
+ 100              		.global	LED_ISR_SetPriority
+ 101              		.code	16
+ 102              		.thumb_func
+ 103              		.type	LED_ISR_SetPriority, %function
+ 104              	LED_ISR_SetPriority:
+ 105              	.LFB38:
+ 227:Generated_Source\PSoC4/LED_ISR.c **** 
+ 228:Generated_Source\PSoC4/LED_ISR.c **** 
+ 229:Generated_Source\PSoC4/LED_ISR.c **** /*******************************************************************************
+ 230:Generated_Source\PSoC4/LED_ISR.c **** * Function Name: LED_ISR_SetPriority
+ 231:Generated_Source\PSoC4/LED_ISR.c **** ********************************************************************************
+ 232:Generated_Source\PSoC4/LED_ISR.c **** *
+ 233:Generated_Source\PSoC4/LED_ISR.c **** * Summary:
+ 234:Generated_Source\PSoC4/LED_ISR.c **** *   Sets the Priority of the Interrupt. 
+ 235:Generated_Source\PSoC4/LED_ISR.c **** *
+ 236:Generated_Source\PSoC4/LED_ISR.c **** *   Note calling LED_ISR_Start or LED_ISR_StartEx will 
+ 237:Generated_Source\PSoC4/LED_ISR.c **** *   override any effect this API would have had. This API should only be called
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 7
+
+
+ 238:Generated_Source\PSoC4/LED_ISR.c **** *   after LED_ISR_Start or LED_ISR_StartEx has been called. 
+ 239:Generated_Source\PSoC4/LED_ISR.c **** *   To set the initial priority for the component, use the Design-Wide Resources
+ 240:Generated_Source\PSoC4/LED_ISR.c **** *   Interrupt Editor.
+ 241:Generated_Source\PSoC4/LED_ISR.c **** *
+ 242:Generated_Source\PSoC4/LED_ISR.c **** *   Note This API has no effect on Non-maskable interrupt NMI).
+ 243:Generated_Source\PSoC4/LED_ISR.c **** *
+ 244:Generated_Source\PSoC4/LED_ISR.c **** * Parameters:
+ 245:Generated_Source\PSoC4/LED_ISR.c **** *   priority: Priority of the interrupt, 0 being the highest priority
+ 246:Generated_Source\PSoC4/LED_ISR.c **** *             PSoC 3 and PSoC 5LP: Priority is from 0 to 7.
+ 247:Generated_Source\PSoC4/LED_ISR.c **** *             PSoC 4: Priority is from 0 to 3.
+ 248:Generated_Source\PSoC4/LED_ISR.c **** *
+ 249:Generated_Source\PSoC4/LED_ISR.c **** * Return:
+ 250:Generated_Source\PSoC4/LED_ISR.c **** *   None
+ 251:Generated_Source\PSoC4/LED_ISR.c **** *
+ 252:Generated_Source\PSoC4/LED_ISR.c **** *******************************************************************************/
+ 253:Generated_Source\PSoC4/LED_ISR.c **** void LED_ISR_SetPriority(uint8 priority)
+ 254:Generated_Source\PSoC4/LED_ISR.c **** {
+ 106              		.loc 1 254 0
+ 107              		.cfi_startproc
+ 108              		@ args = 0, pretend = 0, frame = 0
+ 109              		@ frame_needed = 0, uses_anonymous_args = 0
+ 110              	.LVL2:
+ 111 0000 10B5     		push	{r4, lr}
+ 112              		.cfi_def_cfa_offset 8
+ 113              		.cfi_offset 4, -8
+ 114              		.cfi_offset 14, -4
+ 115 0002 0400     		movs	r4, r0
+ 116              	.LVL3:
+ 255:Generated_Source\PSoC4/LED_ISR.c **** 	uint8 interruptState;
+ 256:Generated_Source\PSoC4/LED_ISR.c ****     uint32 priorityOffset = ((LED_ISR__INTC_NUMBER % 4u) * 8u) + 6u;
+ 257:Generated_Source\PSoC4/LED_ISR.c ****     
+ 258:Generated_Source\PSoC4/LED_ISR.c **** 	interruptState = CyEnterCriticalSection();
+ 117              		.loc 1 258 0
+ 118 0004 FFF7FEFF 		bl	CyEnterCriticalSection
+ 119              	.LVL4:
+ 259:Generated_Source\PSoC4/LED_ISR.c ****     *LED_ISR_INTC_PRIOR = (*LED_ISR_INTC_PRIOR & (uint32)(~LED_ISR__INTC_PRIOR_MASK)) |
+ 120              		.loc 1 259 0
+ 121 0008 044A     		ldr	r2, .L9
+ 122 000a 1368     		ldr	r3, [r2]
+ 123 000c 9B00     		lsls	r3, r3, #2
+ 124 000e 9B08     		lsrs	r3, r3, #2
+ 260:Generated_Source\PSoC4/LED_ISR.c ****                                     ((uint32)priority << priorityOffset);
+ 125              		.loc 1 260 0
+ 126 0010 A407     		lsls	r4, r4, #30
+ 259:Generated_Source\PSoC4/LED_ISR.c ****     *LED_ISR_INTC_PRIOR = (*LED_ISR_INTC_PRIOR & (uint32)(~LED_ISR__INTC_PRIOR_MASK)) |
+ 127              		.loc 1 259 0
+ 128 0012 1C43     		orrs	r4, r3
+ 129 0014 1460     		str	r4, [r2]
+ 261:Generated_Source\PSoC4/LED_ISR.c **** 	CyExitCriticalSection(interruptState);
+ 130              		.loc 1 261 0
+ 131 0016 FFF7FEFF 		bl	CyExitCriticalSection
+ 132              	.LVL5:
+ 262:Generated_Source\PSoC4/LED_ISR.c **** }
+ 133              		.loc 1 262 0
+ 134              		@ sp needed
+ 135 001a 10BD     		pop	{r4, pc}
+ 136              	.L10:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 8
+
+
+ 137              		.align	2
+ 138              	.L9:
+ 139 001c 00E400E0 		.word	-536812544
+ 140              		.cfi_endproc
+ 141              	.LFE38:
+ 142              		.size	LED_ISR_SetPriority, .-LED_ISR_SetPriority
+ 143              		.section	.text.LED_ISR_GetPriority,"ax",%progbits
+ 144              		.align	2
+ 145              		.global	LED_ISR_GetPriority
+ 146              		.code	16
+ 147              		.thumb_func
+ 148              		.type	LED_ISR_GetPriority, %function
+ 149              	LED_ISR_GetPriority:
+ 150              	.LFB39:
+ 263:Generated_Source\PSoC4/LED_ISR.c **** 
+ 264:Generated_Source\PSoC4/LED_ISR.c **** 
+ 265:Generated_Source\PSoC4/LED_ISR.c **** /*******************************************************************************
+ 266:Generated_Source\PSoC4/LED_ISR.c **** * Function Name: LED_ISR_GetPriority
+ 267:Generated_Source\PSoC4/LED_ISR.c **** ********************************************************************************
+ 268:Generated_Source\PSoC4/LED_ISR.c **** *
+ 269:Generated_Source\PSoC4/LED_ISR.c **** * Summary:
+ 270:Generated_Source\PSoC4/LED_ISR.c **** *   Gets the Priority of the Interrupt.
+ 271:Generated_Source\PSoC4/LED_ISR.c **** *
+ 272:Generated_Source\PSoC4/LED_ISR.c **** * Parameters:
+ 273:Generated_Source\PSoC4/LED_ISR.c **** *   None
+ 274:Generated_Source\PSoC4/LED_ISR.c **** *
+ 275:Generated_Source\PSoC4/LED_ISR.c **** * Return:
+ 276:Generated_Source\PSoC4/LED_ISR.c **** *   Priority of the interrupt, 0 being the highest priority
+ 277:Generated_Source\PSoC4/LED_ISR.c **** *    PSoC 3 and PSoC 5LP: Priority is from 0 to 7.
+ 278:Generated_Source\PSoC4/LED_ISR.c **** *    PSoC 4: Priority is from 0 to 3.
+ 279:Generated_Source\PSoC4/LED_ISR.c **** *
+ 280:Generated_Source\PSoC4/LED_ISR.c **** *******************************************************************************/
+ 281:Generated_Source\PSoC4/LED_ISR.c **** uint8 LED_ISR_GetPriority(void)
+ 282:Generated_Source\PSoC4/LED_ISR.c **** {
+ 151              		.loc 1 282 0
+ 152              		.cfi_startproc
+ 153              		@ args = 0, pretend = 0, frame = 0
+ 154              		@ frame_needed = 0, uses_anonymous_args = 0
+ 155              		@ link register save eliminated.
+ 156              	.LVL6:
+ 283:Generated_Source\PSoC4/LED_ISR.c ****     uint32 priority;
+ 284:Generated_Source\PSoC4/LED_ISR.c **** 	uint32 priorityOffset = ((LED_ISR__INTC_NUMBER % 4u) * 8u) + 6u;
+ 285:Generated_Source\PSoC4/LED_ISR.c **** 
+ 286:Generated_Source\PSoC4/LED_ISR.c ****     priority = (*LED_ISR_INTC_PRIOR & LED_ISR__INTC_PRIOR_MASK) >> priorityOffset;
+ 157              		.loc 1 286 0
+ 158 0000 014B     		ldr	r3, .L12
+ 159 0002 1868     		ldr	r0, [r3]
+ 160              	.LVL7:
+ 287:Generated_Source\PSoC4/LED_ISR.c **** 
+ 288:Generated_Source\PSoC4/LED_ISR.c ****     return (uint8)priority;
+ 161              		.loc 1 288 0
+ 162 0004 800F     		lsrs	r0, r0, #30
+ 163              	.LVL8:
+ 289:Generated_Source\PSoC4/LED_ISR.c **** }
+ 164              		.loc 1 289 0
+ 165              		@ sp needed
+ 166 0006 7047     		bx	lr
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 9
+
+
+ 167              	.L13:
+ 168              		.align	2
+ 169              	.L12:
+ 170 0008 00E400E0 		.word	-536812544
+ 171              		.cfi_endproc
+ 172              	.LFE39:
+ 173              		.size	LED_ISR_GetPriority, .-LED_ISR_GetPriority
+ 174              		.section	.text.LED_ISR_Enable,"ax",%progbits
+ 175              		.align	2
+ 176              		.global	LED_ISR_Enable
+ 177              		.code	16
+ 178              		.thumb_func
+ 179              		.type	LED_ISR_Enable, %function
+ 180              	LED_ISR_Enable:
+ 181              	.LFB40:
+ 290:Generated_Source\PSoC4/LED_ISR.c **** 
+ 291:Generated_Source\PSoC4/LED_ISR.c **** 
+ 292:Generated_Source\PSoC4/LED_ISR.c **** /*******************************************************************************
+ 293:Generated_Source\PSoC4/LED_ISR.c **** * Function Name: LED_ISR_Enable
+ 294:Generated_Source\PSoC4/LED_ISR.c **** ********************************************************************************
+ 295:Generated_Source\PSoC4/LED_ISR.c **** *
+ 296:Generated_Source\PSoC4/LED_ISR.c **** * Summary:
+ 297:Generated_Source\PSoC4/LED_ISR.c **** *   Enables the interrupt to the interrupt controller. Do not call this function
+ 298:Generated_Source\PSoC4/LED_ISR.c **** *   unless ISR_Start() has been called or the functionality of the ISR_Start() 
+ 299:Generated_Source\PSoC4/LED_ISR.c **** *   function, which sets the vector and the priority, has been called.
+ 300:Generated_Source\PSoC4/LED_ISR.c **** *
+ 301:Generated_Source\PSoC4/LED_ISR.c **** * Parameters:
+ 302:Generated_Source\PSoC4/LED_ISR.c **** *   None
+ 303:Generated_Source\PSoC4/LED_ISR.c **** *
+ 304:Generated_Source\PSoC4/LED_ISR.c **** * Return:
+ 305:Generated_Source\PSoC4/LED_ISR.c **** *   None
+ 306:Generated_Source\PSoC4/LED_ISR.c **** *
+ 307:Generated_Source\PSoC4/LED_ISR.c **** *******************************************************************************/
+ 308:Generated_Source\PSoC4/LED_ISR.c **** void LED_ISR_Enable(void)
+ 309:Generated_Source\PSoC4/LED_ISR.c **** {
+ 182              		.loc 1 309 0
+ 183              		.cfi_startproc
+ 184              		@ args = 0, pretend = 0, frame = 0
+ 185              		@ frame_needed = 0, uses_anonymous_args = 0
+ 186              		@ link register save eliminated.
+ 310:Generated_Source\PSoC4/LED_ISR.c ****     /* Enable the general interrupt. */
+ 311:Generated_Source\PSoC4/LED_ISR.c ****     *LED_ISR_INTC_SET_EN = LED_ISR__INTC_MASK;
+ 187              		.loc 1 311 0
+ 188 0000 0822     		movs	r2, #8
+ 189 0002 014B     		ldr	r3, .L15
+ 190 0004 1A60     		str	r2, [r3]
+ 312:Generated_Source\PSoC4/LED_ISR.c **** }
+ 191              		.loc 1 312 0
+ 192              		@ sp needed
+ 193 0006 7047     		bx	lr
+ 194              	.L16:
+ 195              		.align	2
+ 196              	.L15:
+ 197 0008 00E100E0 		.word	-536813312
+ 198              		.cfi_endproc
+ 199              	.LFE40:
+ 200              		.size	LED_ISR_Enable, .-LED_ISR_Enable
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 10
+
+
+ 201              		.section	.text.LED_ISR_GetState,"ax",%progbits
+ 202              		.align	2
+ 203              		.global	LED_ISR_GetState
+ 204              		.code	16
+ 205              		.thumb_func
+ 206              		.type	LED_ISR_GetState, %function
+ 207              	LED_ISR_GetState:
+ 208              	.LFB41:
+ 313:Generated_Source\PSoC4/LED_ISR.c **** 
+ 314:Generated_Source\PSoC4/LED_ISR.c **** 
+ 315:Generated_Source\PSoC4/LED_ISR.c **** /*******************************************************************************
+ 316:Generated_Source\PSoC4/LED_ISR.c **** * Function Name: LED_ISR_GetState
+ 317:Generated_Source\PSoC4/LED_ISR.c **** ********************************************************************************
+ 318:Generated_Source\PSoC4/LED_ISR.c **** *
+ 319:Generated_Source\PSoC4/LED_ISR.c **** * Summary:
+ 320:Generated_Source\PSoC4/LED_ISR.c **** *   Gets the state (enabled, disabled) of the Interrupt.
+ 321:Generated_Source\PSoC4/LED_ISR.c **** *
+ 322:Generated_Source\PSoC4/LED_ISR.c **** * Parameters:
+ 323:Generated_Source\PSoC4/LED_ISR.c **** *   None
+ 324:Generated_Source\PSoC4/LED_ISR.c **** *
+ 325:Generated_Source\PSoC4/LED_ISR.c **** * Return:
+ 326:Generated_Source\PSoC4/LED_ISR.c **** *   1 if enabled, 0 if disabled.
+ 327:Generated_Source\PSoC4/LED_ISR.c **** *
+ 328:Generated_Source\PSoC4/LED_ISR.c **** *******************************************************************************/
+ 329:Generated_Source\PSoC4/LED_ISR.c **** uint8 LED_ISR_GetState(void)
+ 330:Generated_Source\PSoC4/LED_ISR.c **** {
+ 209              		.loc 1 330 0
+ 210              		.cfi_startproc
+ 211              		@ args = 0, pretend = 0, frame = 0
+ 212              		@ frame_needed = 0, uses_anonymous_args = 0
+ 213              		@ link register save eliminated.
+ 331:Generated_Source\PSoC4/LED_ISR.c ****     /* Get the state of the general interrupt. */
+ 332:Generated_Source\PSoC4/LED_ISR.c ****     return ((*LED_ISR_INTC_SET_EN & (uint32)LED_ISR__INTC_MASK) != 0u) ? 1u:0u;
+ 214              		.loc 1 332 0
+ 215 0000 034B     		ldr	r3, .L20
+ 216 0002 1B68     		ldr	r3, [r3]
+ 217 0004 1B07     		lsls	r3, r3, #28
+ 218 0006 01D5     		bpl	.L19
+ 219 0008 0120     		movs	r0, #1
+ 220 000a 00E0     		b	.L18
+ 221              	.L19:
+ 222 000c 0020     		movs	r0, #0
+ 223              	.L18:
+ 333:Generated_Source\PSoC4/LED_ISR.c **** }
+ 224              		.loc 1 333 0 discriminator 4
+ 225              		@ sp needed
+ 226 000e 7047     		bx	lr
+ 227              	.L21:
+ 228              		.align	2
+ 229              	.L20:
+ 230 0010 00E100E0 		.word	-536813312
+ 231              		.cfi_endproc
+ 232              	.LFE41:
+ 233              		.size	LED_ISR_GetState, .-LED_ISR_GetState
+ 234              		.section	.text.LED_ISR_Disable,"ax",%progbits
+ 235              		.align	2
+ 236              		.global	LED_ISR_Disable
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 11
+
+
+ 237              		.code	16
+ 238              		.thumb_func
+ 239              		.type	LED_ISR_Disable, %function
+ 240              	LED_ISR_Disable:
+ 241              	.LFB42:
+ 334:Generated_Source\PSoC4/LED_ISR.c **** 
+ 335:Generated_Source\PSoC4/LED_ISR.c **** 
+ 336:Generated_Source\PSoC4/LED_ISR.c **** /*******************************************************************************
+ 337:Generated_Source\PSoC4/LED_ISR.c **** * Function Name: LED_ISR_Disable
+ 338:Generated_Source\PSoC4/LED_ISR.c **** ********************************************************************************
+ 339:Generated_Source\PSoC4/LED_ISR.c **** *
+ 340:Generated_Source\PSoC4/LED_ISR.c **** * Summary:
+ 341:Generated_Source\PSoC4/LED_ISR.c **** *   Disables the Interrupt in the interrupt controller.
+ 342:Generated_Source\PSoC4/LED_ISR.c **** *
+ 343:Generated_Source\PSoC4/LED_ISR.c **** * Parameters:
+ 344:Generated_Source\PSoC4/LED_ISR.c **** *   None
+ 345:Generated_Source\PSoC4/LED_ISR.c **** *
+ 346:Generated_Source\PSoC4/LED_ISR.c **** * Return:
+ 347:Generated_Source\PSoC4/LED_ISR.c **** *   None
+ 348:Generated_Source\PSoC4/LED_ISR.c **** *
+ 349:Generated_Source\PSoC4/LED_ISR.c **** *******************************************************************************/
+ 350:Generated_Source\PSoC4/LED_ISR.c **** void LED_ISR_Disable(void)
+ 351:Generated_Source\PSoC4/LED_ISR.c **** {
+ 242              		.loc 1 351 0
+ 243              		.cfi_startproc
+ 244              		@ args = 0, pretend = 0, frame = 0
+ 245              		@ frame_needed = 0, uses_anonymous_args = 0
+ 246              		@ link register save eliminated.
+ 352:Generated_Source\PSoC4/LED_ISR.c ****     /* Disable the general interrupt. */
+ 353:Generated_Source\PSoC4/LED_ISR.c ****     *LED_ISR_INTC_CLR_EN = LED_ISR__INTC_MASK;
+ 247              		.loc 1 353 0
+ 248 0000 0822     		movs	r2, #8
+ 249 0002 014B     		ldr	r3, .L23
+ 250 0004 1A60     		str	r2, [r3]
+ 354:Generated_Source\PSoC4/LED_ISR.c **** }
+ 251              		.loc 1 354 0
+ 252              		@ sp needed
+ 253 0006 7047     		bx	lr
+ 254              	.L24:
+ 255              		.align	2
+ 256              	.L23:
+ 257 0008 80E100E0 		.word	-536813184
+ 258              		.cfi_endproc
+ 259              	.LFE42:
+ 260              		.size	LED_ISR_Disable, .-LED_ISR_Disable
+ 261              		.section	.text.LED_ISR_Start,"ax",%progbits
+ 262              		.align	2
+ 263              		.global	LED_ISR_Start
+ 264              		.code	16
+ 265              		.thumb_func
+ 266              		.type	LED_ISR_Start, %function
+ 267              	LED_ISR_Start:
+ 268              	.LFB32:
+  59:Generated_Source\PSoC4/LED_ISR.c ****     /* For all we know the interrupt is active. */
+ 269              		.loc 1 59 0
+ 270              		.cfi_startproc
+ 271              		@ args = 0, pretend = 0, frame = 0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 12
+
+
+ 272              		@ frame_needed = 0, uses_anonymous_args = 0
+ 273 0000 10B5     		push	{r4, lr}
+ 274              		.cfi_def_cfa_offset 8
+ 275              		.cfi_offset 4, -8
+ 276              		.cfi_offset 14, -4
+  61:Generated_Source\PSoC4/LED_ISR.c **** 
+ 277              		.loc 1 61 0
+ 278 0002 FFF7FEFF 		bl	LED_ISR_Disable
+ 279              	.LVL9:
+  64:Generated_Source\PSoC4/LED_ISR.c **** 
+ 280              		.loc 1 64 0
+ 281 0006 0448     		ldr	r0, .L26
+ 282 0008 FFF7FEFF 		bl	LED_ISR_SetVector
+ 283              	.LVL10:
+  67:Generated_Source\PSoC4/LED_ISR.c **** 
+ 284              		.loc 1 67 0
+ 285 000c 0320     		movs	r0, #3
+ 286 000e FFF7FEFF 		bl	LED_ISR_SetPriority
+ 287              	.LVL11:
+  70:Generated_Source\PSoC4/LED_ISR.c **** }
+ 288              		.loc 1 70 0
+ 289 0012 FFF7FEFF 		bl	LED_ISR_Enable
+ 290              	.LVL12:
+  71:Generated_Source\PSoC4/LED_ISR.c **** 
+ 291              		.loc 1 71 0
+ 292              		@ sp needed
+ 293 0016 10BD     		pop	{r4, pc}
+ 294              	.L27:
+ 295              		.align	2
+ 296              	.L26:
+ 297 0018 00000000 		.word	LED_ISR_Interrupt
+ 298              		.cfi_endproc
+ 299              	.LFE32:
+ 300              		.size	LED_ISR_Start, .-LED_ISR_Start
+ 301              		.section	.text.LED_ISR_StartEx,"ax",%progbits
+ 302              		.align	2
+ 303              		.global	LED_ISR_StartEx
+ 304              		.code	16
+ 305              		.thumb_func
+ 306              		.type	LED_ISR_StartEx, %function
+ 307              	LED_ISR_StartEx:
+ 308              	.LFB33:
+ 102:Generated_Source\PSoC4/LED_ISR.c ****     /* For all we know the interrupt is active. */
+ 309              		.loc 1 102 0
+ 310              		.cfi_startproc
+ 311              		@ args = 0, pretend = 0, frame = 0
+ 312              		@ frame_needed = 0, uses_anonymous_args = 0
+ 313              	.LVL13:
+ 314 0000 10B5     		push	{r4, lr}
+ 315              		.cfi_def_cfa_offset 8
+ 316              		.cfi_offset 4, -8
+ 317              		.cfi_offset 14, -4
+ 318 0002 0400     		movs	r4, r0
+ 104:Generated_Source\PSoC4/LED_ISR.c **** 
+ 319              		.loc 1 104 0
+ 320 0004 FFF7FEFF 		bl	LED_ISR_Disable
+ 321              	.LVL14:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 13
+
+
+ 107:Generated_Source\PSoC4/LED_ISR.c **** 
+ 322              		.loc 1 107 0
+ 323 0008 2000     		movs	r0, r4
+ 324 000a FFF7FEFF 		bl	LED_ISR_SetVector
+ 325              	.LVL15:
+ 110:Generated_Source\PSoC4/LED_ISR.c **** 
+ 326              		.loc 1 110 0
+ 327 000e 0320     		movs	r0, #3
+ 328 0010 FFF7FEFF 		bl	LED_ISR_SetPriority
+ 329              	.LVL16:
+ 113:Generated_Source\PSoC4/LED_ISR.c **** }
+ 330              		.loc 1 113 0
+ 331 0014 FFF7FEFF 		bl	LED_ISR_Enable
+ 332              	.LVL17:
+ 114:Generated_Source\PSoC4/LED_ISR.c **** 
+ 333              		.loc 1 114 0
+ 334              		@ sp needed
+ 335              	.LVL18:
+ 336 0018 10BD     		pop	{r4, pc}
+ 337              		.cfi_endproc
+ 338              	.LFE33:
+ 339              		.size	LED_ISR_StartEx, .-LED_ISR_StartEx
+ 340 001a C046     		.section	.text.LED_ISR_Stop,"ax",%progbits
+ 341              		.align	2
+ 342              		.global	LED_ISR_Stop
+ 343              		.code	16
+ 344              		.thumb_func
+ 345              		.type	LED_ISR_Stop, %function
+ 346              	LED_ISR_Stop:
+ 347              	.LFB34:
+ 132:Generated_Source\PSoC4/LED_ISR.c ****     /* Disable this interrupt. */
+ 348              		.loc 1 132 0
+ 349              		.cfi_startproc
+ 350              		@ args = 0, pretend = 0, frame = 0
+ 351              		@ frame_needed = 0, uses_anonymous_args = 0
+ 352 0000 10B5     		push	{r4, lr}
+ 353              		.cfi_def_cfa_offset 8
+ 354              		.cfi_offset 4, -8
+ 355              		.cfi_offset 14, -4
+ 134:Generated_Source\PSoC4/LED_ISR.c **** 
+ 356              		.loc 1 134 0
+ 357 0002 FFF7FEFF 		bl	LED_ISR_Disable
+ 358              	.LVL19:
+ 137:Generated_Source\PSoC4/LED_ISR.c **** }
+ 359              		.loc 1 137 0
+ 360 0006 0248     		ldr	r0, .L30
+ 361 0008 FFF7FEFF 		bl	LED_ISR_SetVector
+ 362              	.LVL20:
+ 138:Generated_Source\PSoC4/LED_ISR.c **** 
+ 363              		.loc 1 138 0
+ 364              		@ sp needed
+ 365 000c 10BD     		pop	{r4, pc}
+ 366              	.L31:
+ 367 000e C046     		.align	2
+ 368              	.L30:
+ 369 0010 00000000 		.word	IntDefaultHandler
+ 370              		.cfi_endproc
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 14
+
+
+ 371              	.LFE34:
+ 372              		.size	LED_ISR_Stop, .-LED_ISR_Stop
+ 373              		.section	.text.LED_ISR_SetPending,"ax",%progbits
+ 374              		.align	2
+ 375              		.global	LED_ISR_SetPending
+ 376              		.code	16
+ 377              		.thumb_func
+ 378              		.type	LED_ISR_SetPending, %function
+ 379              	LED_ISR_SetPending:
+ 380              	.LFB43:
+ 355:Generated_Source\PSoC4/LED_ISR.c **** 
+ 356:Generated_Source\PSoC4/LED_ISR.c **** 
+ 357:Generated_Source\PSoC4/LED_ISR.c **** /*******************************************************************************
+ 358:Generated_Source\PSoC4/LED_ISR.c **** * Function Name: LED_ISR_SetPending
+ 359:Generated_Source\PSoC4/LED_ISR.c **** ********************************************************************************
+ 360:Generated_Source\PSoC4/LED_ISR.c **** *
+ 361:Generated_Source\PSoC4/LED_ISR.c **** * Summary:
+ 362:Generated_Source\PSoC4/LED_ISR.c **** *   Causes the Interrupt to enter the pending state, a software method of
+ 363:Generated_Source\PSoC4/LED_ISR.c **** *   generating the interrupt.
+ 364:Generated_Source\PSoC4/LED_ISR.c **** *
+ 365:Generated_Source\PSoC4/LED_ISR.c **** * Parameters:
+ 366:Generated_Source\PSoC4/LED_ISR.c **** *   None
+ 367:Generated_Source\PSoC4/LED_ISR.c **** *
+ 368:Generated_Source\PSoC4/LED_ISR.c **** * Return:
+ 369:Generated_Source\PSoC4/LED_ISR.c **** *   None
+ 370:Generated_Source\PSoC4/LED_ISR.c **** *
+ 371:Generated_Source\PSoC4/LED_ISR.c **** * Side Effects:
+ 372:Generated_Source\PSoC4/LED_ISR.c **** *   If interrupts are enabled and the interrupt is set up properly, the ISR is
+ 373:Generated_Source\PSoC4/LED_ISR.c **** *   entered (depending on the priority of this interrupt and other pending 
+ 374:Generated_Source\PSoC4/LED_ISR.c **** *   interrupts).
+ 375:Generated_Source\PSoC4/LED_ISR.c **** *
+ 376:Generated_Source\PSoC4/LED_ISR.c **** *******************************************************************************/
+ 377:Generated_Source\PSoC4/LED_ISR.c **** void LED_ISR_SetPending(void)
+ 378:Generated_Source\PSoC4/LED_ISR.c **** {
+ 381              		.loc 1 378 0
+ 382              		.cfi_startproc
+ 383              		@ args = 0, pretend = 0, frame = 0
+ 384              		@ frame_needed = 0, uses_anonymous_args = 0
+ 385              		@ link register save eliminated.
+ 379:Generated_Source\PSoC4/LED_ISR.c ****     *LED_ISR_INTC_SET_PD = LED_ISR__INTC_MASK;
+ 386              		.loc 1 379 0
+ 387 0000 0822     		movs	r2, #8
+ 388 0002 014B     		ldr	r3, .L33
+ 389 0004 1A60     		str	r2, [r3]
+ 380:Generated_Source\PSoC4/LED_ISR.c **** }
+ 390              		.loc 1 380 0
+ 391              		@ sp needed
+ 392 0006 7047     		bx	lr
+ 393              	.L34:
+ 394              		.align	2
+ 395              	.L33:
+ 396 0008 00E200E0 		.word	-536813056
+ 397              		.cfi_endproc
+ 398              	.LFE43:
+ 399              		.size	LED_ISR_SetPending, .-LED_ISR_SetPending
+ 400              		.section	.text.LED_ISR_ClearPending,"ax",%progbits
+ 401              		.align	2
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 15
+
+
+ 402              		.global	LED_ISR_ClearPending
+ 403              		.code	16
+ 404              		.thumb_func
+ 405              		.type	LED_ISR_ClearPending, %function
+ 406              	LED_ISR_ClearPending:
+ 407              	.LFB44:
+ 381:Generated_Source\PSoC4/LED_ISR.c **** 
+ 382:Generated_Source\PSoC4/LED_ISR.c **** 
+ 383:Generated_Source\PSoC4/LED_ISR.c **** /*******************************************************************************
+ 384:Generated_Source\PSoC4/LED_ISR.c **** * Function Name: LED_ISR_ClearPending
+ 385:Generated_Source\PSoC4/LED_ISR.c **** ********************************************************************************
+ 386:Generated_Source\PSoC4/LED_ISR.c **** *
+ 387:Generated_Source\PSoC4/LED_ISR.c **** * Summary:
+ 388:Generated_Source\PSoC4/LED_ISR.c **** *   Clears a pending interrupt in the interrupt controller.
+ 389:Generated_Source\PSoC4/LED_ISR.c **** *
+ 390:Generated_Source\PSoC4/LED_ISR.c **** *   Note Some interrupt sources are clear-on-read and require the block 
+ 391:Generated_Source\PSoC4/LED_ISR.c **** *   interrupt/status register to be read/cleared with the appropriate block API 
+ 392:Generated_Source\PSoC4/LED_ISR.c **** *   (GPIO, UART, and so on). Otherwise the ISR will continue to remain in 
+ 393:Generated_Source\PSoC4/LED_ISR.c **** *   pending state even though the interrupt itself is cleared using this API.
+ 394:Generated_Source\PSoC4/LED_ISR.c **** *
+ 395:Generated_Source\PSoC4/LED_ISR.c **** * Parameters:
+ 396:Generated_Source\PSoC4/LED_ISR.c **** *   None
+ 397:Generated_Source\PSoC4/LED_ISR.c **** *
+ 398:Generated_Source\PSoC4/LED_ISR.c **** * Return:
+ 399:Generated_Source\PSoC4/LED_ISR.c **** *   None
+ 400:Generated_Source\PSoC4/LED_ISR.c **** *
+ 401:Generated_Source\PSoC4/LED_ISR.c **** *******************************************************************************/
+ 402:Generated_Source\PSoC4/LED_ISR.c **** void LED_ISR_ClearPending(void)
+ 403:Generated_Source\PSoC4/LED_ISR.c **** {
+ 408              		.loc 1 403 0
+ 409              		.cfi_startproc
+ 410              		@ args = 0, pretend = 0, frame = 0
+ 411              		@ frame_needed = 0, uses_anonymous_args = 0
+ 412              		@ link register save eliminated.
+ 404:Generated_Source\PSoC4/LED_ISR.c ****     *LED_ISR_INTC_CLR_PD = LED_ISR__INTC_MASK;
+ 413              		.loc 1 404 0
+ 414 0000 0822     		movs	r2, #8
+ 415 0002 014B     		ldr	r3, .L36
+ 416 0004 1A60     		str	r2, [r3]
+ 405:Generated_Source\PSoC4/LED_ISR.c **** }
+ 417              		.loc 1 405 0
+ 418              		@ sp needed
+ 419 0006 7047     		bx	lr
+ 420              	.L37:
+ 421              		.align	2
+ 422              	.L36:
+ 423 0008 80E200E0 		.word	-536812928
+ 424              		.cfi_endproc
+ 425              	.LFE44:
+ 426              		.size	LED_ISR_ClearPending, .-LED_ISR_ClearPending
+ 427              		.text
+ 428              	.Letext0:
+ 429              		.file 2 "Generated_Source\\PSoC4/cytypes.h"
+ 430              		.file 3 "./DriverControl.h"
+ 431              		.file 4 "Generated_Source\\PSoC4/CyLib.h"
+ 432              		.section	.debug_info,"",%progbits
+ 433              	.Ldebug_info0:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 16
+
+
+ 434 0000 1B030000 		.4byte	0x31b
+ 435 0004 0400     		.2byte	0x4
+ 436 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 437 000a 04       		.byte	0x4
+ 438 000b 01       		.uleb128 0x1
+ 439 000c 83010000 		.4byte	.LASF37
+ 440 0010 0C       		.byte	0xc
+ 441 0011 57000000 		.4byte	.LASF38
+ 442 0015 D5020000 		.4byte	.LASF39
+ 443 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 444 001d 00000000 		.4byte	0
+ 445 0021 00000000 		.4byte	.Ldebug_line0
+ 446 0025 02       		.uleb128 0x2
+ 447 0026 01       		.byte	0x1
+ 448 0027 06       		.byte	0x6
+ 449 0028 C9020000 		.4byte	.LASF0
+ 450 002c 02       		.uleb128 0x2
+ 451 002d 01       		.byte	0x1
+ 452 002e 08       		.byte	0x8
+ 453 002f A0000000 		.4byte	.LASF1
+ 454 0033 02       		.uleb128 0x2
+ 455 0034 02       		.byte	0x2
+ 456 0035 05       		.byte	0x5
+ 457 0036 64020000 		.4byte	.LASF2
+ 458 003a 02       		.uleb128 0x2
+ 459 003b 02       		.byte	0x2
+ 460 003c 07       		.byte	0x7
+ 461 003d E4000000 		.4byte	.LASF3
+ 462 0041 02       		.uleb128 0x2
+ 463 0042 04       		.byte	0x4
+ 464 0043 05       		.byte	0x5
+ 465 0044 A6020000 		.4byte	.LASF4
+ 466 0048 02       		.uleb128 0x2
+ 467 0049 04       		.byte	0x4
+ 468 004a 07       		.byte	0x7
+ 469 004b D2000000 		.4byte	.LASF5
+ 470 004f 02       		.uleb128 0x2
+ 471 0050 08       		.byte	0x8
+ 472 0051 05       		.byte	0x5
+ 473 0052 1A020000 		.4byte	.LASF6
+ 474 0056 02       		.uleb128 0x2
+ 475 0057 08       		.byte	0x8
+ 476 0058 07       		.byte	0x7
+ 477 0059 5F010000 		.4byte	.LASF7
+ 478 005d 03       		.uleb128 0x3
+ 479 005e 04       		.byte	0x4
+ 480 005f 05       		.byte	0x5
+ 481 0060 696E7400 		.ascii	"int\000"
+ 482 0064 02       		.uleb128 0x2
+ 483 0065 04       		.byte	0x4
+ 484 0066 07       		.byte	0x7
+ 485 0067 4A010000 		.4byte	.LASF8
+ 486 006b 04       		.uleb128 0x4
+ 487 006c 6E020000 		.4byte	.LASF9
+ 488 0070 02       		.byte	0x2
+ 489 0071 D201     		.2byte	0x1d2
+ 490 0073 2C000000 		.4byte	0x2c
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 17
+
+
+ 491 0077 04       		.uleb128 0x4
+ 492 0078 2C010000 		.4byte	.LASF10
+ 493 007c 02       		.byte	0x2
+ 494 007d D401     		.2byte	0x1d4
+ 495 007f 48000000 		.4byte	0x48
+ 496 0083 02       		.uleb128 0x2
+ 497 0084 04       		.byte	0x4
+ 498 0085 04       		.byte	0x4
+ 499 0086 8A000000 		.4byte	.LASF11
+ 500 008a 02       		.uleb128 0x2
+ 501 008b 08       		.byte	0x8
+ 502 008c 04       		.byte	0x4
+ 503 008d 13010000 		.4byte	.LASF12
+ 504 0091 02       		.uleb128 0x2
+ 505 0092 01       		.byte	0x1
+ 506 0093 08       		.byte	0x8
+ 507 0094 28020000 		.4byte	.LASF13
+ 508 0098 04       		.uleb128 0x4
+ 509 0099 00000000 		.4byte	.LASF14
+ 510 009d 02       		.byte	0x2
+ 511 009e 7E02     		.2byte	0x27e
+ 512 00a0 A4000000 		.4byte	0xa4
+ 513 00a4 05       		.uleb128 0x5
+ 514 00a5 77000000 		.4byte	0x77
+ 515 00a9 04       		.uleb128 0x4
+ 516 00aa 76010000 		.4byte	.LASF15
+ 517 00ae 02       		.byte	0x2
+ 518 00af 8E02     		.2byte	0x28e
+ 519 00b1 B5000000 		.4byte	0xb5
+ 520 00b5 06       		.uleb128 0x6
+ 521 00b6 04       		.byte	0x4
+ 522 00b7 BB000000 		.4byte	0xbb
+ 523 00bb 07       		.uleb128 0x7
+ 524 00bc 02       		.uleb128 0x2
+ 525 00bd 08       		.byte	0x8
+ 526 00be 04       		.byte	0x4
+ 527 00bf BD020000 		.4byte	.LASF16
+ 528 00c3 02       		.uleb128 0x2
+ 529 00c4 04       		.byte	0x4
+ 530 00c5 07       		.byte	0x7
+ 531 00c6 11020000 		.4byte	.LASF17
+ 532 00ca 08       		.uleb128 0x8
+ 533 00cb 78000000 		.4byte	.LASF18
+ 534 00cf 01       		.byte	0x1
+ 535 00d0 A1       		.byte	0xa1
+ 536 00d1 00000000 		.4byte	.LFB35
+ 537 00d5 08000000 		.4byte	.LFE35-.LFB35
+ 538 00d9 01       		.uleb128 0x1
+ 539 00da 9C       		.byte	0x9c
+ 540 00db E9000000 		.4byte	0xe9
+ 541 00df 09       		.uleb128 0x9
+ 542 00e0 06000000 		.4byte	.LVL0
+ 543 00e4 FD020000 		.4byte	0x2fd
+ 544 00e8 00       		.byte	0
+ 545 00e9 08       		.uleb128 0x8
+ 546 00ea 1A010000 		.4byte	.LASF19
+ 547 00ee 01       		.byte	0x1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 18
+
+
+ 548 00ef CB       		.byte	0xcb
+ 549 00f0 00000000 		.4byte	.LFB36
+ 550 00f4 0C000000 		.4byte	.LFE36-.LFB36
+ 551 00f8 01       		.uleb128 0x1
+ 552 00f9 9C       		.byte	0x9c
+ 553 00fa 0C010000 		.4byte	0x10c
+ 554 00fe 0A       		.uleb128 0xa
+ 555 00ff 57010000 		.4byte	.LASF21
+ 556 0103 01       		.byte	0x1
+ 557 0104 CB       		.byte	0xcb
+ 558 0105 A9000000 		.4byte	0xa9
+ 559 0109 01       		.uleb128 0x1
+ 560 010a 50       		.byte	0x50
+ 561 010b 00       		.byte	0
+ 562 010c 0B       		.uleb128 0xb
+ 563 010d 2D020000 		.4byte	.LASF25
+ 564 0111 01       		.byte	0x1
+ 565 0112 DF       		.byte	0xdf
+ 566 0113 A9000000 		.4byte	0xa9
+ 567 0117 00000000 		.4byte	.LFB37
+ 568 011b 0C000000 		.4byte	.LFE37-.LFB37
+ 569 011f 01       		.uleb128 0x1
+ 570 0120 9C       		.byte	0x9c
+ 571 0121 08       		.uleb128 0x8
+ 572 0122 06000000 		.4byte	.LASF20
+ 573 0126 01       		.byte	0x1
+ 574 0127 FD       		.byte	0xfd
+ 575 0128 00000000 		.4byte	.LFB38
+ 576 012c 20000000 		.4byte	.LFE38-.LFB38
+ 577 0130 01       		.uleb128 0x1
+ 578 0131 9C       		.byte	0x9c
+ 579 0132 74010000 		.4byte	0x174
+ 580 0136 0C       		.uleb128 0xc
+ 581 0137 0A010000 		.4byte	.LASF22
+ 582 013b 01       		.byte	0x1
+ 583 013c FD       		.byte	0xfd
+ 584 013d 6B000000 		.4byte	0x6b
+ 585 0141 00000000 		.4byte	.LLST0
+ 586 0145 0D       		.uleb128 0xd
+ 587 0146 C3000000 		.4byte	.LASF23
+ 588 014a 01       		.byte	0x1
+ 589 014b FF       		.byte	0xff
+ 590 014c 6B000000 		.4byte	0x6b
+ 591 0150 21000000 		.4byte	.LLST1
+ 592 0154 0E       		.uleb128 0xe
+ 593 0155 97020000 		.4byte	.LASF24
+ 594 0159 01       		.byte	0x1
+ 595 015a 0001     		.2byte	0x100
+ 596 015c 77000000 		.4byte	0x77
+ 597 0160 1E       		.byte	0x1e
+ 598 0161 09       		.uleb128 0x9
+ 599 0162 08000000 		.4byte	.LVL4
+ 600 0166 08030000 		.4byte	0x308
+ 601 016a 09       		.uleb128 0x9
+ 602 016b 1A000000 		.4byte	.LVL5
+ 603 016f 13030000 		.4byte	0x313
+ 604 0173 00       		.byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 19
+
+
+ 605 0174 0F       		.uleb128 0xf
+ 606 0175 50020000 		.4byte	.LASF40
+ 607 0179 01       		.byte	0x1
+ 608 017a 1901     		.2byte	0x119
+ 609 017c 6B000000 		.4byte	0x6b
+ 610 0180 00000000 		.4byte	.LFB39
+ 611 0184 0C000000 		.4byte	.LFE39-.LFB39
+ 612 0188 01       		.uleb128 0x1
+ 613 0189 9C       		.byte	0x9c
+ 614 018a AC010000 		.4byte	0x1ac
+ 615 018e 10       		.uleb128 0x10
+ 616 018f 0A010000 		.4byte	.LASF22
+ 617 0193 01       		.byte	0x1
+ 618 0194 1B01     		.2byte	0x11b
+ 619 0196 77000000 		.4byte	0x77
+ 620 019a 34000000 		.4byte	.LLST2
+ 621 019e 0E       		.uleb128 0xe
+ 622 019f 97020000 		.4byte	.LASF24
+ 623 01a3 01       		.byte	0x1
+ 624 01a4 1C01     		.2byte	0x11c
+ 625 01a6 77000000 		.4byte	0x77
+ 626 01aa 1E       		.byte	0x1e
+ 627 01ab 00       		.byte	0
+ 628 01ac 11       		.uleb128 0x11
+ 629 01ad 48000000 		.4byte	.LASF27
+ 630 01b1 01       		.byte	0x1
+ 631 01b2 3401     		.2byte	0x134
+ 632 01b4 00000000 		.4byte	.LFB40
+ 633 01b8 0C000000 		.4byte	.LFE40-.LFB40
+ 634 01bc 01       		.uleb128 0x1
+ 635 01bd 9C       		.byte	0x9c
+ 636 01be 12       		.uleb128 0x12
+ 637 01bf 3F020000 		.4byte	.LASF26
+ 638 01c3 01       		.byte	0x1
+ 639 01c4 4901     		.2byte	0x149
+ 640 01c6 6B000000 		.4byte	0x6b
+ 641 01ca 00000000 		.4byte	.LFB41
+ 642 01ce 14000000 		.4byte	.LFE41-.LFB41
+ 643 01d2 01       		.uleb128 0x1
+ 644 01d3 9C       		.byte	0x9c
+ 645 01d4 11       		.uleb128 0x11
+ 646 01d5 90000000 		.4byte	.LASF28
+ 647 01d9 01       		.byte	0x1
+ 648 01da 5E01     		.2byte	0x15e
+ 649 01dc 00000000 		.4byte	.LFB42
+ 650 01e0 0C000000 		.4byte	.LFE42-.LFB42
+ 651 01e4 01       		.uleb128 0x1
+ 652 01e5 9C       		.byte	0x9c
+ 653 01e6 08       		.uleb128 0x8
+ 654 01e7 AF020000 		.4byte	.LASF29
+ 655 01eb 01       		.byte	0x1
+ 656 01ec 3A       		.byte	0x3a
+ 657 01ed 00000000 		.4byte	.LFB32
+ 658 01f1 1C000000 		.4byte	.LFE32-.LFB32
+ 659 01f5 01       		.uleb128 0x1
+ 660 01f6 9C       		.byte	0x9c
+ 661 01f7 38020000 		.4byte	0x238
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 20
+
+
+ 662 01fb 09       		.uleb128 0x9
+ 663 01fc 06000000 		.4byte	.LVL9
+ 664 0200 D4010000 		.4byte	0x1d4
+ 665 0204 13       		.uleb128 0x13
+ 666 0205 0C000000 		.4byte	.LVL10
+ 667 0209 E9000000 		.4byte	0xe9
+ 668 020d 1B020000 		.4byte	0x21b
+ 669 0211 14       		.uleb128 0x14
+ 670 0212 01       		.uleb128 0x1
+ 671 0213 50       		.byte	0x50
+ 672 0214 05       		.uleb128 0x5
+ 673 0215 03       		.byte	0x3
+ 674 0216 00000000 		.4byte	LED_ISR_Interrupt
+ 675 021a 00       		.byte	0
+ 676 021b 13       		.uleb128 0x13
+ 677 021c 12000000 		.4byte	.LVL11
+ 678 0220 21010000 		.4byte	0x121
+ 679 0224 2E020000 		.4byte	0x22e
+ 680 0228 14       		.uleb128 0x14
+ 681 0229 01       		.uleb128 0x1
+ 682 022a 50       		.byte	0x50
+ 683 022b 01       		.uleb128 0x1
+ 684 022c 33       		.byte	0x33
+ 685 022d 00       		.byte	0
+ 686 022e 09       		.uleb128 0x9
+ 687 022f 16000000 		.4byte	.LVL12
+ 688 0233 AC010000 		.4byte	0x1ac
+ 689 0237 00       		.byte	0
+ 690 0238 08       		.uleb128 0x8
+ 691 0239 38000000 		.4byte	.LASF30
+ 692 023d 01       		.byte	0x1
+ 693 023e 65       		.byte	0x65
+ 694 023f 00000000 		.4byte	.LFB33
+ 695 0243 1A000000 		.4byte	.LFE33-.LFB33
+ 696 0247 01       		.uleb128 0x1
+ 697 0248 9C       		.byte	0x9c
+ 698 0249 96020000 		.4byte	0x296
+ 699 024d 0C       		.uleb128 0xc
+ 700 024e 57010000 		.4byte	.LASF21
+ 701 0252 01       		.byte	0x1
+ 702 0253 65       		.byte	0x65
+ 703 0254 A9000000 		.4byte	0xa9
+ 704 0258 56000000 		.4byte	.LLST3
+ 705 025c 09       		.uleb128 0x9
+ 706 025d 08000000 		.4byte	.LVL14
+ 707 0261 D4010000 		.4byte	0x1d4
+ 708 0265 13       		.uleb128 0x13
+ 709 0266 0E000000 		.4byte	.LVL15
+ 710 026a E9000000 		.4byte	0xe9
+ 711 026e 79020000 		.4byte	0x279
+ 712 0272 14       		.uleb128 0x14
+ 713 0273 01       		.uleb128 0x1
+ 714 0274 50       		.byte	0x50
+ 715 0275 02       		.uleb128 0x2
+ 716 0276 74       		.byte	0x74
+ 717 0277 00       		.sleb128 0
+ 718 0278 00       		.byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 21
+
+
+ 719 0279 13       		.uleb128 0x13
+ 720 027a 14000000 		.4byte	.LVL16
+ 721 027e 21010000 		.4byte	0x121
+ 722 0282 8C020000 		.4byte	0x28c
+ 723 0286 14       		.uleb128 0x14
+ 724 0287 01       		.uleb128 0x1
+ 725 0288 50       		.byte	0x50
+ 726 0289 01       		.uleb128 0x1
+ 727 028a 33       		.byte	0x33
+ 728 028b 00       		.byte	0
+ 729 028c 09       		.uleb128 0x9
+ 730 028d 18000000 		.4byte	.LVL17
+ 731 0291 AC010000 		.4byte	0x1ac
+ 732 0295 00       		.byte	0
+ 733 0296 08       		.uleb128 0x8
+ 734 0297 74020000 		.4byte	.LASF31
+ 735 029b 01       		.byte	0x1
+ 736 029c 83       		.byte	0x83
+ 737 029d 00000000 		.4byte	.LFB34
+ 738 02a1 14000000 		.4byte	.LFE34-.LFB34
+ 739 02a5 01       		.uleb128 0x1
+ 740 02a6 9C       		.byte	0x9c
+ 741 02a7 BE020000 		.4byte	0x2be
+ 742 02ab 09       		.uleb128 0x9
+ 743 02ac 06000000 		.4byte	.LVL19
+ 744 02b0 D4010000 		.4byte	0x1d4
+ 745 02b4 09       		.uleb128 0x9
+ 746 02b5 0C000000 		.4byte	.LVL20
+ 747 02b9 E9000000 		.4byte	0xe9
+ 748 02bd 00       		.byte	0
+ 749 02be 11       		.uleb128 0x11
+ 750 02bf F7000000 		.4byte	.LASF32
+ 751 02c3 01       		.byte	0x1
+ 752 02c4 7901     		.2byte	0x179
+ 753 02c6 00000000 		.4byte	.LFB43
+ 754 02ca 0C000000 		.4byte	.LFE43-.LFB43
+ 755 02ce 01       		.uleb128 0x1
+ 756 02cf 9C       		.byte	0x9c
+ 757 02d0 11       		.uleb128 0x11
+ 758 02d1 AE000000 		.4byte	.LASF33
+ 759 02d5 01       		.byte	0x1
+ 760 02d6 9201     		.2byte	0x192
+ 761 02d8 00000000 		.4byte	.LFB44
+ 762 02dc 0C000000 		.4byte	.LFE44-.LFB44
+ 763 02e0 01       		.uleb128 0x1
+ 764 02e1 9C       		.byte	0x9c
+ 765 02e2 15       		.uleb128 0x15
+ 766 02e3 A9000000 		.4byte	0xa9
+ 767 02e7 F2020000 		.4byte	0x2f2
+ 768 02eb 16       		.uleb128 0x16
+ 769 02ec C3000000 		.4byte	0xc3
+ 770 02f0 2F       		.byte	0x2f
+ 771 02f1 00       		.byte	0
+ 772 02f2 17       		.uleb128 0x17
+ 773 02f3 1A000000 		.4byte	.LASF41
+ 774 02f7 01       		.byte	0x1
+ 775 02f8 23       		.byte	0x23
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 22
+
+
+ 776 02f9 E2020000 		.4byte	0x2e2
+ 777 02fd 18       		.uleb128 0x18
+ 778 02fe 27000000 		.4byte	.LASF34
+ 779 0302 27000000 		.4byte	.LASF34
+ 780 0306 03       		.byte	0x3
+ 781 0307 2C       		.byte	0x2c
+ 782 0308 18       		.uleb128 0x18
+ 783 0309 33010000 		.4byte	.LASF35
+ 784 030d 33010000 		.4byte	.LASF35
+ 785 0311 04       		.byte	0x4
+ 786 0312 E5       		.byte	0xe5
+ 787 0313 18       		.uleb128 0x18
+ 788 0314 81020000 		.4byte	.LASF36
+ 789 0318 81020000 		.4byte	.LASF36
+ 790 031c 04       		.byte	0x4
+ 791 031d E6       		.byte	0xe6
+ 792 031e 00       		.byte	0
+ 793              		.section	.debug_abbrev,"",%progbits
+ 794              	.Ldebug_abbrev0:
+ 795 0000 01       		.uleb128 0x1
+ 796 0001 11       		.uleb128 0x11
+ 797 0002 01       		.byte	0x1
+ 798 0003 25       		.uleb128 0x25
+ 799 0004 0E       		.uleb128 0xe
+ 800 0005 13       		.uleb128 0x13
+ 801 0006 0B       		.uleb128 0xb
+ 802 0007 03       		.uleb128 0x3
+ 803 0008 0E       		.uleb128 0xe
+ 804 0009 1B       		.uleb128 0x1b
+ 805 000a 0E       		.uleb128 0xe
+ 806 000b 55       		.uleb128 0x55
+ 807 000c 17       		.uleb128 0x17
+ 808 000d 11       		.uleb128 0x11
+ 809 000e 01       		.uleb128 0x1
+ 810 000f 10       		.uleb128 0x10
+ 811 0010 17       		.uleb128 0x17
+ 812 0011 00       		.byte	0
+ 813 0012 00       		.byte	0
+ 814 0013 02       		.uleb128 0x2
+ 815 0014 24       		.uleb128 0x24
+ 816 0015 00       		.byte	0
+ 817 0016 0B       		.uleb128 0xb
+ 818 0017 0B       		.uleb128 0xb
+ 819 0018 3E       		.uleb128 0x3e
+ 820 0019 0B       		.uleb128 0xb
+ 821 001a 03       		.uleb128 0x3
+ 822 001b 0E       		.uleb128 0xe
+ 823 001c 00       		.byte	0
+ 824 001d 00       		.byte	0
+ 825 001e 03       		.uleb128 0x3
+ 826 001f 24       		.uleb128 0x24
+ 827 0020 00       		.byte	0
+ 828 0021 0B       		.uleb128 0xb
+ 829 0022 0B       		.uleb128 0xb
+ 830 0023 3E       		.uleb128 0x3e
+ 831 0024 0B       		.uleb128 0xb
+ 832 0025 03       		.uleb128 0x3
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 23
+
+
+ 833 0026 08       		.uleb128 0x8
+ 834 0027 00       		.byte	0
+ 835 0028 00       		.byte	0
+ 836 0029 04       		.uleb128 0x4
+ 837 002a 16       		.uleb128 0x16
+ 838 002b 00       		.byte	0
+ 839 002c 03       		.uleb128 0x3
+ 840 002d 0E       		.uleb128 0xe
+ 841 002e 3A       		.uleb128 0x3a
+ 842 002f 0B       		.uleb128 0xb
+ 843 0030 3B       		.uleb128 0x3b
+ 844 0031 05       		.uleb128 0x5
+ 845 0032 49       		.uleb128 0x49
+ 846 0033 13       		.uleb128 0x13
+ 847 0034 00       		.byte	0
+ 848 0035 00       		.byte	0
+ 849 0036 05       		.uleb128 0x5
+ 850 0037 35       		.uleb128 0x35
+ 851 0038 00       		.byte	0
+ 852 0039 49       		.uleb128 0x49
+ 853 003a 13       		.uleb128 0x13
+ 854 003b 00       		.byte	0
+ 855 003c 00       		.byte	0
+ 856 003d 06       		.uleb128 0x6
+ 857 003e 0F       		.uleb128 0xf
+ 858 003f 00       		.byte	0
+ 859 0040 0B       		.uleb128 0xb
+ 860 0041 0B       		.uleb128 0xb
+ 861 0042 49       		.uleb128 0x49
+ 862 0043 13       		.uleb128 0x13
+ 863 0044 00       		.byte	0
+ 864 0045 00       		.byte	0
+ 865 0046 07       		.uleb128 0x7
+ 866 0047 15       		.uleb128 0x15
+ 867 0048 00       		.byte	0
+ 868 0049 27       		.uleb128 0x27
+ 869 004a 19       		.uleb128 0x19
+ 870 004b 00       		.byte	0
+ 871 004c 00       		.byte	0
+ 872 004d 08       		.uleb128 0x8
+ 873 004e 2E       		.uleb128 0x2e
+ 874 004f 01       		.byte	0x1
+ 875 0050 3F       		.uleb128 0x3f
+ 876 0051 19       		.uleb128 0x19
+ 877 0052 03       		.uleb128 0x3
+ 878 0053 0E       		.uleb128 0xe
+ 879 0054 3A       		.uleb128 0x3a
+ 880 0055 0B       		.uleb128 0xb
+ 881 0056 3B       		.uleb128 0x3b
+ 882 0057 0B       		.uleb128 0xb
+ 883 0058 27       		.uleb128 0x27
+ 884 0059 19       		.uleb128 0x19
+ 885 005a 11       		.uleb128 0x11
+ 886 005b 01       		.uleb128 0x1
+ 887 005c 12       		.uleb128 0x12
+ 888 005d 06       		.uleb128 0x6
+ 889 005e 40       		.uleb128 0x40
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 24
+
+
+ 890 005f 18       		.uleb128 0x18
+ 891 0060 9742     		.uleb128 0x2117
+ 892 0062 19       		.uleb128 0x19
+ 893 0063 01       		.uleb128 0x1
+ 894 0064 13       		.uleb128 0x13
+ 895 0065 00       		.byte	0
+ 896 0066 00       		.byte	0
+ 897 0067 09       		.uleb128 0x9
+ 898 0068 898201   		.uleb128 0x4109
+ 899 006b 00       		.byte	0
+ 900 006c 11       		.uleb128 0x11
+ 901 006d 01       		.uleb128 0x1
+ 902 006e 31       		.uleb128 0x31
+ 903 006f 13       		.uleb128 0x13
+ 904 0070 00       		.byte	0
+ 905 0071 00       		.byte	0
+ 906 0072 0A       		.uleb128 0xa
+ 907 0073 05       		.uleb128 0x5
+ 908 0074 00       		.byte	0
+ 909 0075 03       		.uleb128 0x3
+ 910 0076 0E       		.uleb128 0xe
+ 911 0077 3A       		.uleb128 0x3a
+ 912 0078 0B       		.uleb128 0xb
+ 913 0079 3B       		.uleb128 0x3b
+ 914 007a 0B       		.uleb128 0xb
+ 915 007b 49       		.uleb128 0x49
+ 916 007c 13       		.uleb128 0x13
+ 917 007d 02       		.uleb128 0x2
+ 918 007e 18       		.uleb128 0x18
+ 919 007f 00       		.byte	0
+ 920 0080 00       		.byte	0
+ 921 0081 0B       		.uleb128 0xb
+ 922 0082 2E       		.uleb128 0x2e
+ 923 0083 00       		.byte	0
+ 924 0084 3F       		.uleb128 0x3f
+ 925 0085 19       		.uleb128 0x19
+ 926 0086 03       		.uleb128 0x3
+ 927 0087 0E       		.uleb128 0xe
+ 928 0088 3A       		.uleb128 0x3a
+ 929 0089 0B       		.uleb128 0xb
+ 930 008a 3B       		.uleb128 0x3b
+ 931 008b 0B       		.uleb128 0xb
+ 932 008c 27       		.uleb128 0x27
+ 933 008d 19       		.uleb128 0x19
+ 934 008e 49       		.uleb128 0x49
+ 935 008f 13       		.uleb128 0x13
+ 936 0090 11       		.uleb128 0x11
+ 937 0091 01       		.uleb128 0x1
+ 938 0092 12       		.uleb128 0x12
+ 939 0093 06       		.uleb128 0x6
+ 940 0094 40       		.uleb128 0x40
+ 941 0095 18       		.uleb128 0x18
+ 942 0096 9742     		.uleb128 0x2117
+ 943 0098 19       		.uleb128 0x19
+ 944 0099 00       		.byte	0
+ 945 009a 00       		.byte	0
+ 946 009b 0C       		.uleb128 0xc
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 25
+
+
+ 947 009c 05       		.uleb128 0x5
+ 948 009d 00       		.byte	0
+ 949 009e 03       		.uleb128 0x3
+ 950 009f 0E       		.uleb128 0xe
+ 951 00a0 3A       		.uleb128 0x3a
+ 952 00a1 0B       		.uleb128 0xb
+ 953 00a2 3B       		.uleb128 0x3b
+ 954 00a3 0B       		.uleb128 0xb
+ 955 00a4 49       		.uleb128 0x49
+ 956 00a5 13       		.uleb128 0x13
+ 957 00a6 02       		.uleb128 0x2
+ 958 00a7 17       		.uleb128 0x17
+ 959 00a8 00       		.byte	0
+ 960 00a9 00       		.byte	0
+ 961 00aa 0D       		.uleb128 0xd
+ 962 00ab 34       		.uleb128 0x34
+ 963 00ac 00       		.byte	0
+ 964 00ad 03       		.uleb128 0x3
+ 965 00ae 0E       		.uleb128 0xe
+ 966 00af 3A       		.uleb128 0x3a
+ 967 00b0 0B       		.uleb128 0xb
+ 968 00b1 3B       		.uleb128 0x3b
+ 969 00b2 0B       		.uleb128 0xb
+ 970 00b3 49       		.uleb128 0x49
+ 971 00b4 13       		.uleb128 0x13
+ 972 00b5 02       		.uleb128 0x2
+ 973 00b6 17       		.uleb128 0x17
+ 974 00b7 00       		.byte	0
+ 975 00b8 00       		.byte	0
+ 976 00b9 0E       		.uleb128 0xe
+ 977 00ba 34       		.uleb128 0x34
+ 978 00bb 00       		.byte	0
+ 979 00bc 03       		.uleb128 0x3
+ 980 00bd 0E       		.uleb128 0xe
+ 981 00be 3A       		.uleb128 0x3a
+ 982 00bf 0B       		.uleb128 0xb
+ 983 00c0 3B       		.uleb128 0x3b
+ 984 00c1 05       		.uleb128 0x5
+ 985 00c2 49       		.uleb128 0x49
+ 986 00c3 13       		.uleb128 0x13
+ 987 00c4 1C       		.uleb128 0x1c
+ 988 00c5 0B       		.uleb128 0xb
+ 989 00c6 00       		.byte	0
+ 990 00c7 00       		.byte	0
+ 991 00c8 0F       		.uleb128 0xf
+ 992 00c9 2E       		.uleb128 0x2e
+ 993 00ca 01       		.byte	0x1
+ 994 00cb 3F       		.uleb128 0x3f
+ 995 00cc 19       		.uleb128 0x19
+ 996 00cd 03       		.uleb128 0x3
+ 997 00ce 0E       		.uleb128 0xe
+ 998 00cf 3A       		.uleb128 0x3a
+ 999 00d0 0B       		.uleb128 0xb
+ 1000 00d1 3B       		.uleb128 0x3b
+ 1001 00d2 05       		.uleb128 0x5
+ 1002 00d3 27       		.uleb128 0x27
+ 1003 00d4 19       		.uleb128 0x19
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 26
+
+
+ 1004 00d5 49       		.uleb128 0x49
+ 1005 00d6 13       		.uleb128 0x13
+ 1006 00d7 11       		.uleb128 0x11
+ 1007 00d8 01       		.uleb128 0x1
+ 1008 00d9 12       		.uleb128 0x12
+ 1009 00da 06       		.uleb128 0x6
+ 1010 00db 40       		.uleb128 0x40
+ 1011 00dc 18       		.uleb128 0x18
+ 1012 00dd 9742     		.uleb128 0x2117
+ 1013 00df 19       		.uleb128 0x19
+ 1014 00e0 01       		.uleb128 0x1
+ 1015 00e1 13       		.uleb128 0x13
+ 1016 00e2 00       		.byte	0
+ 1017 00e3 00       		.byte	0
+ 1018 00e4 10       		.uleb128 0x10
+ 1019 00e5 34       		.uleb128 0x34
+ 1020 00e6 00       		.byte	0
+ 1021 00e7 03       		.uleb128 0x3
+ 1022 00e8 0E       		.uleb128 0xe
+ 1023 00e9 3A       		.uleb128 0x3a
+ 1024 00ea 0B       		.uleb128 0xb
+ 1025 00eb 3B       		.uleb128 0x3b
+ 1026 00ec 05       		.uleb128 0x5
+ 1027 00ed 49       		.uleb128 0x49
+ 1028 00ee 13       		.uleb128 0x13
+ 1029 00ef 02       		.uleb128 0x2
+ 1030 00f0 17       		.uleb128 0x17
+ 1031 00f1 00       		.byte	0
+ 1032 00f2 00       		.byte	0
+ 1033 00f3 11       		.uleb128 0x11
+ 1034 00f4 2E       		.uleb128 0x2e
+ 1035 00f5 00       		.byte	0
+ 1036 00f6 3F       		.uleb128 0x3f
+ 1037 00f7 19       		.uleb128 0x19
+ 1038 00f8 03       		.uleb128 0x3
+ 1039 00f9 0E       		.uleb128 0xe
+ 1040 00fa 3A       		.uleb128 0x3a
+ 1041 00fb 0B       		.uleb128 0xb
+ 1042 00fc 3B       		.uleb128 0x3b
+ 1043 00fd 05       		.uleb128 0x5
+ 1044 00fe 27       		.uleb128 0x27
+ 1045 00ff 19       		.uleb128 0x19
+ 1046 0100 11       		.uleb128 0x11
+ 1047 0101 01       		.uleb128 0x1
+ 1048 0102 12       		.uleb128 0x12
+ 1049 0103 06       		.uleb128 0x6
+ 1050 0104 40       		.uleb128 0x40
+ 1051 0105 18       		.uleb128 0x18
+ 1052 0106 9742     		.uleb128 0x2117
+ 1053 0108 19       		.uleb128 0x19
+ 1054 0109 00       		.byte	0
+ 1055 010a 00       		.byte	0
+ 1056 010b 12       		.uleb128 0x12
+ 1057 010c 2E       		.uleb128 0x2e
+ 1058 010d 00       		.byte	0
+ 1059 010e 3F       		.uleb128 0x3f
+ 1060 010f 19       		.uleb128 0x19
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 27
+
+
+ 1061 0110 03       		.uleb128 0x3
+ 1062 0111 0E       		.uleb128 0xe
+ 1063 0112 3A       		.uleb128 0x3a
+ 1064 0113 0B       		.uleb128 0xb
+ 1065 0114 3B       		.uleb128 0x3b
+ 1066 0115 05       		.uleb128 0x5
+ 1067 0116 27       		.uleb128 0x27
+ 1068 0117 19       		.uleb128 0x19
+ 1069 0118 49       		.uleb128 0x49
+ 1070 0119 13       		.uleb128 0x13
+ 1071 011a 11       		.uleb128 0x11
+ 1072 011b 01       		.uleb128 0x1
+ 1073 011c 12       		.uleb128 0x12
+ 1074 011d 06       		.uleb128 0x6
+ 1075 011e 40       		.uleb128 0x40
+ 1076 011f 18       		.uleb128 0x18
+ 1077 0120 9742     		.uleb128 0x2117
+ 1078 0122 19       		.uleb128 0x19
+ 1079 0123 00       		.byte	0
+ 1080 0124 00       		.byte	0
+ 1081 0125 13       		.uleb128 0x13
+ 1082 0126 898201   		.uleb128 0x4109
+ 1083 0129 01       		.byte	0x1
+ 1084 012a 11       		.uleb128 0x11
+ 1085 012b 01       		.uleb128 0x1
+ 1086 012c 31       		.uleb128 0x31
+ 1087 012d 13       		.uleb128 0x13
+ 1088 012e 01       		.uleb128 0x1
+ 1089 012f 13       		.uleb128 0x13
+ 1090 0130 00       		.byte	0
+ 1091 0131 00       		.byte	0
+ 1092 0132 14       		.uleb128 0x14
+ 1093 0133 8A8201   		.uleb128 0x410a
+ 1094 0136 00       		.byte	0
+ 1095 0137 02       		.uleb128 0x2
+ 1096 0138 18       		.uleb128 0x18
+ 1097 0139 9142     		.uleb128 0x2111
+ 1098 013b 18       		.uleb128 0x18
+ 1099 013c 00       		.byte	0
+ 1100 013d 00       		.byte	0
+ 1101 013e 15       		.uleb128 0x15
+ 1102 013f 01       		.uleb128 0x1
+ 1103 0140 01       		.byte	0x1
+ 1104 0141 49       		.uleb128 0x49
+ 1105 0142 13       		.uleb128 0x13
+ 1106 0143 01       		.uleb128 0x1
+ 1107 0144 13       		.uleb128 0x13
+ 1108 0145 00       		.byte	0
+ 1109 0146 00       		.byte	0
+ 1110 0147 16       		.uleb128 0x16
+ 1111 0148 21       		.uleb128 0x21
+ 1112 0149 00       		.byte	0
+ 1113 014a 49       		.uleb128 0x49
+ 1114 014b 13       		.uleb128 0x13
+ 1115 014c 2F       		.uleb128 0x2f
+ 1116 014d 0B       		.uleb128 0xb
+ 1117 014e 00       		.byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 28
+
+
+ 1118 014f 00       		.byte	0
+ 1119 0150 17       		.uleb128 0x17
+ 1120 0151 34       		.uleb128 0x34
+ 1121 0152 00       		.byte	0
+ 1122 0153 03       		.uleb128 0x3
+ 1123 0154 0E       		.uleb128 0xe
+ 1124 0155 3A       		.uleb128 0x3a
+ 1125 0156 0B       		.uleb128 0xb
+ 1126 0157 3B       		.uleb128 0x3b
+ 1127 0158 0B       		.uleb128 0xb
+ 1128 0159 49       		.uleb128 0x49
+ 1129 015a 13       		.uleb128 0x13
+ 1130 015b 3F       		.uleb128 0x3f
+ 1131 015c 19       		.uleb128 0x19
+ 1132 015d 3C       		.uleb128 0x3c
+ 1133 015e 19       		.uleb128 0x19
+ 1134 015f 00       		.byte	0
+ 1135 0160 00       		.byte	0
+ 1136 0161 18       		.uleb128 0x18
+ 1137 0162 2E       		.uleb128 0x2e
+ 1138 0163 00       		.byte	0
+ 1139 0164 3F       		.uleb128 0x3f
+ 1140 0165 19       		.uleb128 0x19
+ 1141 0166 3C       		.uleb128 0x3c
+ 1142 0167 19       		.uleb128 0x19
+ 1143 0168 6E       		.uleb128 0x6e
+ 1144 0169 0E       		.uleb128 0xe
+ 1145 016a 03       		.uleb128 0x3
+ 1146 016b 0E       		.uleb128 0xe
+ 1147 016c 3A       		.uleb128 0x3a
+ 1148 016d 0B       		.uleb128 0xb
+ 1149 016e 3B       		.uleb128 0x3b
+ 1150 016f 0B       		.uleb128 0xb
+ 1151 0170 00       		.byte	0
+ 1152 0171 00       		.byte	0
+ 1153 0172 00       		.byte	0
+ 1154              		.section	.debug_loc,"",%progbits
+ 1155              	.Ldebug_loc0:
+ 1156              	.LLST0:
+ 1157 0000 00000000 		.4byte	.LVL2
+ 1158 0004 07000000 		.4byte	.LVL4-1
+ 1159 0008 0100     		.2byte	0x1
+ 1160 000a 50       		.byte	0x50
+ 1161 000b 07000000 		.4byte	.LVL4-1
+ 1162 000f 20000000 		.4byte	.LFE38
+ 1163 0013 0400     		.2byte	0x4
+ 1164 0015 F3       		.byte	0xf3
+ 1165 0016 01       		.uleb128 0x1
+ 1166 0017 50       		.byte	0x50
+ 1167 0018 9F       		.byte	0x9f
+ 1168 0019 00000000 		.4byte	0
+ 1169 001d 00000000 		.4byte	0
+ 1170              	.LLST1:
+ 1171 0021 08000000 		.4byte	.LVL4
+ 1172 0025 19000000 		.4byte	.LVL5-1
+ 1173 0029 0100     		.2byte	0x1
+ 1174 002b 50       		.byte	0x50
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 29
+
+
+ 1175 002c 00000000 		.4byte	0
+ 1176 0030 00000000 		.4byte	0
+ 1177              	.LLST2:
+ 1178 0034 04000000 		.4byte	.LVL7
+ 1179 0038 06000000 		.4byte	.LVL8
+ 1180 003c 0500     		.2byte	0x5
+ 1181 003e 70       		.byte	0x70
+ 1182 003f 00       		.sleb128 0
+ 1183 0040 4E       		.byte	0x4e
+ 1184 0041 25       		.byte	0x25
+ 1185 0042 9F       		.byte	0x9f
+ 1186 0043 06000000 		.4byte	.LVL8
+ 1187 0047 0C000000 		.4byte	.LFE39
+ 1188 004b 0100     		.2byte	0x1
+ 1189 004d 50       		.byte	0x50
+ 1190 004e 00000000 		.4byte	0
+ 1191 0052 00000000 		.4byte	0
+ 1192              	.LLST3:
+ 1193 0056 00000000 		.4byte	.LVL13
+ 1194 005a 07000000 		.4byte	.LVL14-1
+ 1195 005e 0100     		.2byte	0x1
+ 1196 0060 50       		.byte	0x50
+ 1197 0061 07000000 		.4byte	.LVL14-1
+ 1198 0065 18000000 		.4byte	.LVL18
+ 1199 0069 0100     		.2byte	0x1
+ 1200 006b 54       		.byte	0x54
+ 1201 006c 18000000 		.4byte	.LVL18
+ 1202 0070 1A000000 		.4byte	.LFE33
+ 1203 0074 0400     		.2byte	0x4
+ 1204 0076 F3       		.byte	0xf3
+ 1205 0077 01       		.uleb128 0x1
+ 1206 0078 50       		.byte	0x50
+ 1207 0079 9F       		.byte	0x9f
+ 1208 007a 00000000 		.4byte	0
+ 1209 007e 00000000 		.4byte	0
+ 1210              		.section	.debug_aranges,"",%progbits
+ 1211 0000 7C000000 		.4byte	0x7c
+ 1212 0004 0200     		.2byte	0x2
+ 1213 0006 00000000 		.4byte	.Ldebug_info0
+ 1214 000a 04       		.byte	0x4
+ 1215 000b 00       		.byte	0
+ 1216 000c 0000     		.2byte	0
+ 1217 000e 0000     		.2byte	0
+ 1218 0010 00000000 		.4byte	.LFB35
+ 1219 0014 08000000 		.4byte	.LFE35-.LFB35
+ 1220 0018 00000000 		.4byte	.LFB36
+ 1221 001c 0C000000 		.4byte	.LFE36-.LFB36
+ 1222 0020 00000000 		.4byte	.LFB37
+ 1223 0024 0C000000 		.4byte	.LFE37-.LFB37
+ 1224 0028 00000000 		.4byte	.LFB38
+ 1225 002c 20000000 		.4byte	.LFE38-.LFB38
+ 1226 0030 00000000 		.4byte	.LFB39
+ 1227 0034 0C000000 		.4byte	.LFE39-.LFB39
+ 1228 0038 00000000 		.4byte	.LFB40
+ 1229 003c 0C000000 		.4byte	.LFE40-.LFB40
+ 1230 0040 00000000 		.4byte	.LFB41
+ 1231 0044 14000000 		.4byte	.LFE41-.LFB41
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 30
+
+
+ 1232 0048 00000000 		.4byte	.LFB42
+ 1233 004c 0C000000 		.4byte	.LFE42-.LFB42
+ 1234 0050 00000000 		.4byte	.LFB32
+ 1235 0054 1C000000 		.4byte	.LFE32-.LFB32
+ 1236 0058 00000000 		.4byte	.LFB33
+ 1237 005c 1A000000 		.4byte	.LFE33-.LFB33
+ 1238 0060 00000000 		.4byte	.LFB34
+ 1239 0064 14000000 		.4byte	.LFE34-.LFB34
+ 1240 0068 00000000 		.4byte	.LFB43
+ 1241 006c 0C000000 		.4byte	.LFE43-.LFB43
+ 1242 0070 00000000 		.4byte	.LFB44
+ 1243 0074 0C000000 		.4byte	.LFE44-.LFB44
+ 1244 0078 00000000 		.4byte	0
+ 1245 007c 00000000 		.4byte	0
+ 1246              		.section	.debug_ranges,"",%progbits
+ 1247              	.Ldebug_ranges0:
+ 1248 0000 00000000 		.4byte	.LFB35
+ 1249 0004 08000000 		.4byte	.LFE35
+ 1250 0008 00000000 		.4byte	.LFB36
+ 1251 000c 0C000000 		.4byte	.LFE36
+ 1252 0010 00000000 		.4byte	.LFB37
+ 1253 0014 0C000000 		.4byte	.LFE37
+ 1254 0018 00000000 		.4byte	.LFB38
+ 1255 001c 20000000 		.4byte	.LFE38
+ 1256 0020 00000000 		.4byte	.LFB39
+ 1257 0024 0C000000 		.4byte	.LFE39
+ 1258 0028 00000000 		.4byte	.LFB40
+ 1259 002c 0C000000 		.4byte	.LFE40
+ 1260 0030 00000000 		.4byte	.LFB41
+ 1261 0034 14000000 		.4byte	.LFE41
+ 1262 0038 00000000 		.4byte	.LFB42
+ 1263 003c 0C000000 		.4byte	.LFE42
+ 1264 0040 00000000 		.4byte	.LFB32
+ 1265 0044 1C000000 		.4byte	.LFE32
+ 1266 0048 00000000 		.4byte	.LFB33
+ 1267 004c 1A000000 		.4byte	.LFE33
+ 1268 0050 00000000 		.4byte	.LFB34
+ 1269 0054 14000000 		.4byte	.LFE34
+ 1270 0058 00000000 		.4byte	.LFB43
+ 1271 005c 0C000000 		.4byte	.LFE43
+ 1272 0060 00000000 		.4byte	.LFB44
+ 1273 0064 0C000000 		.4byte	.LFE44
+ 1274 0068 00000000 		.4byte	0
+ 1275 006c 00000000 		.4byte	0
+ 1276              		.section	.debug_line,"",%progbits
+ 1277              	.Ldebug_line0:
+ 1278 0000 63010000 		.section	.debug_str,"MS",%progbits,1
+ 1278      02006400 
+ 1278      00000201 
+ 1278      FB0E0D00 
+ 1278      01010101 
+ 1279              	.LASF14:
+ 1280 0000 72656733 		.ascii	"reg32\000"
+ 1280      3200
+ 1281              	.LASF20:
+ 1282 0006 4C45445F 		.ascii	"LED_ISR_SetPriority\000"
+ 1282      4953525F 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 31
+
+
+ 1282      53657450 
+ 1282      72696F72 
+ 1282      69747900 
+ 1283              	.LASF41:
+ 1284 001a 43795261 		.ascii	"CyRamVectors\000"
+ 1284      6D566563 
+ 1284      746F7273 
+ 1284      00
+ 1285              	.LASF34:
+ 1286 0027 70726F63 		.ascii	"processSoftStart\000"
+ 1286      65737353 
+ 1286      6F667453 
+ 1286      74617274 
+ 1286      00
+ 1287              	.LASF30:
+ 1288 0038 4C45445F 		.ascii	"LED_ISR_StartEx\000"
+ 1288      4953525F 
+ 1288      53746172 
+ 1288      74457800 
+ 1289              	.LASF27:
+ 1290 0048 4C45445F 		.ascii	"LED_ISR_Enable\000"
+ 1290      4953525F 
+ 1290      456E6162 
+ 1290      6C6500
+ 1291              	.LASF38:
+ 1292 0057 47656E65 		.ascii	"Generated_Source\\PSoC4\\LED_ISR.c\000"
+ 1292      72617465 
+ 1292      645F536F 
+ 1292      75726365 
+ 1292      5C50536F 
+ 1293              	.LASF18:
+ 1294 0078 4C45445F 		.ascii	"LED_ISR_Interrupt\000"
+ 1294      4953525F 
+ 1294      496E7465 
+ 1294      72727570 
+ 1294      7400
+ 1295              	.LASF11:
+ 1296 008a 666C6F61 		.ascii	"float\000"
+ 1296      7400
+ 1297              	.LASF28:
+ 1298 0090 4C45445F 		.ascii	"LED_ISR_Disable\000"
+ 1298      4953525F 
+ 1298      44697361 
+ 1298      626C6500 
+ 1299              	.LASF1:
+ 1300 00a0 756E7369 		.ascii	"unsigned char\000"
+ 1300      676E6564 
+ 1300      20636861 
+ 1300      7200
+ 1301              	.LASF33:
+ 1302 00ae 4C45445F 		.ascii	"LED_ISR_ClearPending\000"
+ 1302      4953525F 
+ 1302      436C6561 
+ 1302      7250656E 
+ 1302      64696E67 
+ 1303              	.LASF23:
+ 1304 00c3 696E7465 		.ascii	"interruptState\000"
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 32
+
+
+ 1304      72727570 
+ 1304      74537461 
+ 1304      746500
+ 1305              	.LASF5:
+ 1306 00d2 6C6F6E67 		.ascii	"long unsigned int\000"
+ 1306      20756E73 
+ 1306      69676E65 
+ 1306      6420696E 
+ 1306      7400
+ 1307              	.LASF3:
+ 1308 00e4 73686F72 		.ascii	"short unsigned int\000"
+ 1308      7420756E 
+ 1308      7369676E 
+ 1308      65642069 
+ 1308      6E7400
+ 1309              	.LASF32:
+ 1310 00f7 4C45445F 		.ascii	"LED_ISR_SetPending\000"
+ 1310      4953525F 
+ 1310      53657450 
+ 1310      656E6469 
+ 1310      6E6700
+ 1311              	.LASF22:
+ 1312 010a 7072696F 		.ascii	"priority\000"
+ 1312      72697479 
+ 1312      00
+ 1313              	.LASF12:
+ 1314 0113 646F7562 		.ascii	"double\000"
+ 1314      6C6500
+ 1315              	.LASF19:
+ 1316 011a 4C45445F 		.ascii	"LED_ISR_SetVector\000"
+ 1316      4953525F 
+ 1316      53657456 
+ 1316      6563746F 
+ 1316      7200
+ 1317              	.LASF10:
+ 1318 012c 75696E74 		.ascii	"uint32\000"
+ 1318      333200
+ 1319              	.LASF35:
+ 1320 0133 4379456E 		.ascii	"CyEnterCriticalSection\000"
+ 1320      74657243 
+ 1320      72697469 
+ 1320      63616C53 
+ 1320      65637469 
+ 1321              	.LASF8:
+ 1322 014a 756E7369 		.ascii	"unsigned int\000"
+ 1322      676E6564 
+ 1322      20696E74 
+ 1322      00
+ 1323              	.LASF21:
+ 1324 0157 61646472 		.ascii	"address\000"
+ 1324      65737300 
+ 1325              	.LASF7:
+ 1326 015f 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 1326      206C6F6E 
+ 1326      6720756E 
+ 1326      7369676E 
+ 1326      65642069 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 33
+
+
+ 1327              	.LASF15:
+ 1328 0176 63796973 		.ascii	"cyisraddress\000"
+ 1328      72616464 
+ 1328      72657373 
+ 1328      00
+ 1329              	.LASF37:
+ 1330 0183 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 1330      43313120 
+ 1330      352E342E 
+ 1330      31203230 
+ 1330      31363036 
+ 1331 01b6 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m0 -mthumb -g -O"
+ 1331      20726576 
+ 1331      6973696F 
+ 1331      6E203233 
+ 1331      37373135 
+ 1332 01e9 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 1332      66756E63 
+ 1332      74696F6E 
+ 1332      2D736563 
+ 1332      74696F6E 
+ 1333              	.LASF17:
+ 1334 0211 73697A65 		.ascii	"sizetype\000"
+ 1334      74797065 
+ 1334      00
+ 1335              	.LASF6:
+ 1336 021a 6C6F6E67 		.ascii	"long long int\000"
+ 1336      206C6F6E 
+ 1336      6720696E 
+ 1336      7400
+ 1337              	.LASF13:
+ 1338 0228 63686172 		.ascii	"char\000"
+ 1338      00
+ 1339              	.LASF25:
+ 1340 022d 4C45445F 		.ascii	"LED_ISR_GetVector\000"
+ 1340      4953525F 
+ 1340      47657456 
+ 1340      6563746F 
+ 1340      7200
+ 1341              	.LASF26:
+ 1342 023f 4C45445F 		.ascii	"LED_ISR_GetState\000"
+ 1342      4953525F 
+ 1342      47657453 
+ 1342      74617465 
+ 1342      00
+ 1343              	.LASF40:
+ 1344 0250 4C45445F 		.ascii	"LED_ISR_GetPriority\000"
+ 1344      4953525F 
+ 1344      47657450 
+ 1344      72696F72 
+ 1344      69747900 
+ 1345              	.LASF2:
+ 1346 0264 73686F72 		.ascii	"short int\000"
+ 1346      7420696E 
+ 1346      7400
+ 1347              	.LASF9:
+ 1348 026e 75696E74 		.ascii	"uint8\000"
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccVpdkJX.s 			page 34
+
+
+ 1348      3800
+ 1349              	.LASF31:
+ 1350 0274 4C45445F 		.ascii	"LED_ISR_Stop\000"
+ 1350      4953525F 
+ 1350      53746F70 
+ 1350      00
+ 1351              	.LASF36:
+ 1352 0281 43794578 		.ascii	"CyExitCriticalSection\000"
+ 1352      69744372 
+ 1352      69746963 
+ 1352      616C5365 
+ 1352      6374696F 
+ 1353              	.LASF24:
+ 1354 0297 7072696F 		.ascii	"priorityOffset\000"
+ 1354      72697479 
+ 1354      4F666673 
+ 1354      657400
+ 1355              	.LASF4:
+ 1356 02a6 6C6F6E67 		.ascii	"long int\000"
+ 1356      20696E74 
+ 1356      00
+ 1357              	.LASF29:
+ 1358 02af 4C45445F 		.ascii	"LED_ISR_Start\000"
+ 1358      4953525F 
+ 1358      53746172 
+ 1358      7400
+ 1359              	.LASF16:
+ 1360 02bd 6C6F6E67 		.ascii	"long double\000"
+ 1360      20646F75 
+ 1360      626C6500 
+ 1361              	.LASF0:
+ 1362 02c9 7369676E 		.ascii	"signed char\000"
+ 1362      65642063 
+ 1362      68617200 
+ 1363              	.LASF39:
+ 1364 02d5 433A5C55 		.ascii	"C:\\Users\\kylep\\Box Sync\\Box Sync\\Feniex Electr"
+ 1364      73657273 
+ 1364      5C6B796C 
+ 1364      65705C42 
+ 1364      6F782053 
+ 1365 0303 6963616C 		.ascii	"ical Files\\WorkingFolder-Kyle\\Firm-AI-Cube\\81-00"
+ 1365      2046696C 
+ 1365      65735C57 
+ 1365      6F726B69 
+ 1365      6E67466F 
+ 1366 0333 3032342D 		.ascii	"024-01.cydsn\000"
+ 1366      30312E63 
+ 1366      7964736E 
+ 1366      00
+ 1367              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

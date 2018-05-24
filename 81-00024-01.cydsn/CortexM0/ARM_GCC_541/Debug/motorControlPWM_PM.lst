@@ -1,0 +1,1098 @@
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMrJ2z7.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"motorControlPWM_PM.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.motorControlPWM_SaveConfig,"ax",%progbits
+  20              		.align	2
+  21              		.global	motorControlPWM_SaveConfig
+  22              		.code	16
+  23              		.thumb_func
+  24              		.type	motorControlPWM_SaveConfig, %function
+  25              	motorControlPWM_SaveConfig:
+  26              	.LFB0:
+  27              		.file 1 "Generated_Source\\PSoC4\\motorControlPWM_PM.c"
+   1:Generated_Source\PSoC4/motorControlPWM_PM.c **** /*******************************************************************************
+   2:Generated_Source\PSoC4/motorControlPWM_PM.c **** * File Name: motorControlPWM_PM.c
+   3:Generated_Source\PSoC4/motorControlPWM_PM.c **** * Version 3.30
+   4:Generated_Source\PSoC4/motorControlPWM_PM.c **** *
+   5:Generated_Source\PSoC4/motorControlPWM_PM.c **** * Description:
+   6:Generated_Source\PSoC4/motorControlPWM_PM.c **** *  This file provides the power management source code to API for the
+   7:Generated_Source\PSoC4/motorControlPWM_PM.c **** *  PWM.
+   8:Generated_Source\PSoC4/motorControlPWM_PM.c **** *
+   9:Generated_Source\PSoC4/motorControlPWM_PM.c **** * Note:
+  10:Generated_Source\PSoC4/motorControlPWM_PM.c **** *
+  11:Generated_Source\PSoC4/motorControlPWM_PM.c **** ********************************************************************************
+  12:Generated_Source\PSoC4/motorControlPWM_PM.c **** * Copyright 2008-2014, Cypress Semiconductor Corporation.  All rights reserved.
+  13:Generated_Source\PSoC4/motorControlPWM_PM.c **** * You may use this file only in accordance with the license, terms, conditions,
+  14:Generated_Source\PSoC4/motorControlPWM_PM.c **** * disclaimers, and limitations in the end user license agreement accompanying
+  15:Generated_Source\PSoC4/motorControlPWM_PM.c **** * the software package with which this file was provided.
+  16:Generated_Source\PSoC4/motorControlPWM_PM.c **** *******************************************************************************/
+  17:Generated_Source\PSoC4/motorControlPWM_PM.c **** 
+  18:Generated_Source\PSoC4/motorControlPWM_PM.c **** #include "motorControlPWM.h"
+  19:Generated_Source\PSoC4/motorControlPWM_PM.c **** 
+  20:Generated_Source\PSoC4/motorControlPWM_PM.c **** static motorControlPWM_backupStruct motorControlPWM_backup;
+  21:Generated_Source\PSoC4/motorControlPWM_PM.c **** 
+  22:Generated_Source\PSoC4/motorControlPWM_PM.c **** 
+  23:Generated_Source\PSoC4/motorControlPWM_PM.c **** /*******************************************************************************
+  24:Generated_Source\PSoC4/motorControlPWM_PM.c **** * Function Name: motorControlPWM_SaveConfig
+  25:Generated_Source\PSoC4/motorControlPWM_PM.c **** ********************************************************************************
+  26:Generated_Source\PSoC4/motorControlPWM_PM.c **** *
+  27:Generated_Source\PSoC4/motorControlPWM_PM.c **** * Summary:
+  28:Generated_Source\PSoC4/motorControlPWM_PM.c **** *  Saves the current user configuration of the component.
+  29:Generated_Source\PSoC4/motorControlPWM_PM.c **** *
+  30:Generated_Source\PSoC4/motorControlPWM_PM.c **** * Parameters:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMrJ2z7.s 			page 2
+
+
+  31:Generated_Source\PSoC4/motorControlPWM_PM.c **** *  None
+  32:Generated_Source\PSoC4/motorControlPWM_PM.c **** *
+  33:Generated_Source\PSoC4/motorControlPWM_PM.c **** * Return:
+  34:Generated_Source\PSoC4/motorControlPWM_PM.c **** *  None
+  35:Generated_Source\PSoC4/motorControlPWM_PM.c **** *
+  36:Generated_Source\PSoC4/motorControlPWM_PM.c **** * Global variables:
+  37:Generated_Source\PSoC4/motorControlPWM_PM.c **** *  motorControlPWM_backup:  Variables of this global structure are modified to
+  38:Generated_Source\PSoC4/motorControlPWM_PM.c **** *  store the values of non retention configuration registers when Sleep() API is
+  39:Generated_Source\PSoC4/motorControlPWM_PM.c **** *  called.
+  40:Generated_Source\PSoC4/motorControlPWM_PM.c **** *
+  41:Generated_Source\PSoC4/motorControlPWM_PM.c **** *******************************************************************************/
+  42:Generated_Source\PSoC4/motorControlPWM_PM.c **** void motorControlPWM_SaveConfig(void) 
+  43:Generated_Source\PSoC4/motorControlPWM_PM.c **** {
+  28              		.loc 1 43 0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32 0000 10B5     		push	{r4, lr}
+  33              		.cfi_def_cfa_offset 8
+  34              		.cfi_offset 4, -8
+  35              		.cfi_offset 14, -4
+  44:Generated_Source\PSoC4/motorControlPWM_PM.c **** 
+  45:Generated_Source\PSoC4/motorControlPWM_PM.c ****     #if(!motorControlPWM_UsingFixedFunction)
+  46:Generated_Source\PSoC4/motorControlPWM_PM.c ****         #if(!motorControlPWM_PWMModeIsCenterAligned)
+  47:Generated_Source\PSoC4/motorControlPWM_PM.c ****             motorControlPWM_backup.PWMPeriod = motorControlPWM_ReadPeriod();
+  36              		.loc 1 47 0
+  37 0002 FFF7FEFF 		bl	motorControlPWM_ReadPeriod
+  38              	.LVL0:
+  39 0006 044C     		ldr	r4, .L2
+  40 0008 A070     		strb	r0, [r4, #2]
+  48:Generated_Source\PSoC4/motorControlPWM_PM.c ****         #endif /* (!motorControlPWM_PWMModeIsCenterAligned) */
+  49:Generated_Source\PSoC4/motorControlPWM_PM.c ****         motorControlPWM_backup.PWMUdb = motorControlPWM_ReadCounter();
+  41              		.loc 1 49 0
+  42 000a FFF7FEFF 		bl	motorControlPWM_ReadCounter
+  43              	.LVL1:
+  44 000e 6070     		strb	r0, [r4, #1]
+  50:Generated_Source\PSoC4/motorControlPWM_PM.c ****         #if (motorControlPWM_UseStatus)
+  51:Generated_Source\PSoC4/motorControlPWM_PM.c ****             motorControlPWM_backup.InterruptMaskValue = motorControlPWM_STATUS_MASK;
+  52:Generated_Source\PSoC4/motorControlPWM_PM.c ****         #endif /* (motorControlPWM_UseStatus) */
+  53:Generated_Source\PSoC4/motorControlPWM_PM.c **** 
+  54:Generated_Source\PSoC4/motorControlPWM_PM.c ****         #if(motorControlPWM_DeadBandMode == motorControlPWM__B_PWM__DBM_256_CLOCKS || \
+  55:Generated_Source\PSoC4/motorControlPWM_PM.c ****             motorControlPWM_DeadBandMode == motorControlPWM__B_PWM__DBM_2_4_CLOCKS)
+  56:Generated_Source\PSoC4/motorControlPWM_PM.c ****             motorControlPWM_backup.PWMdeadBandValue = motorControlPWM_ReadDeadTime();
+  57:Generated_Source\PSoC4/motorControlPWM_PM.c ****         #endif /*  deadband count is either 2-4 clocks or 256 clocks */
+  58:Generated_Source\PSoC4/motorControlPWM_PM.c **** 
+  59:Generated_Source\PSoC4/motorControlPWM_PM.c ****         #if(motorControlPWM_KillModeMinTime)
+  60:Generated_Source\PSoC4/motorControlPWM_PM.c ****              motorControlPWM_backup.PWMKillCounterPeriod = motorControlPWM_ReadKillTime();
+  61:Generated_Source\PSoC4/motorControlPWM_PM.c ****         #endif /* (motorControlPWM_KillModeMinTime) */
+  62:Generated_Source\PSoC4/motorControlPWM_PM.c **** 
+  63:Generated_Source\PSoC4/motorControlPWM_PM.c ****         #if(motorControlPWM_UseControl)
+  64:Generated_Source\PSoC4/motorControlPWM_PM.c ****             motorControlPWM_backup.PWMControlRegister = motorControlPWM_ReadControlRegister();
+  45              		.loc 1 64 0
+  46 0010 FFF7FEFF 		bl	motorControlPWM_ReadControlRegister
+  47              	.LVL2:
+  48 0014 E070     		strb	r0, [r4, #3]
+  65:Generated_Source\PSoC4/motorControlPWM_PM.c ****         #endif /* (motorControlPWM_UseControl) */
+  66:Generated_Source\PSoC4/motorControlPWM_PM.c ****     #endif  /* (!motorControlPWM_UsingFixedFunction) */
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMrJ2z7.s 			page 3
+
+
+  67:Generated_Source\PSoC4/motorControlPWM_PM.c **** }
+  49              		.loc 1 67 0
+  50              		@ sp needed
+  51 0016 10BD     		pop	{r4, pc}
+  52              	.L3:
+  53              		.align	2
+  54              	.L2:
+  55 0018 00000000 		.word	.LANCHOR0
+  56              		.cfi_endproc
+  57              	.LFE0:
+  58              		.size	motorControlPWM_SaveConfig, .-motorControlPWM_SaveConfig
+  59              		.section	.text.motorControlPWM_RestoreConfig,"ax",%progbits
+  60              		.align	2
+  61              		.global	motorControlPWM_RestoreConfig
+  62              		.code	16
+  63              		.thumb_func
+  64              		.type	motorControlPWM_RestoreConfig, %function
+  65              	motorControlPWM_RestoreConfig:
+  66              	.LFB1:
+  68:Generated_Source\PSoC4/motorControlPWM_PM.c **** 
+  69:Generated_Source\PSoC4/motorControlPWM_PM.c **** 
+  70:Generated_Source\PSoC4/motorControlPWM_PM.c **** /*******************************************************************************
+  71:Generated_Source\PSoC4/motorControlPWM_PM.c **** * Function Name: motorControlPWM_RestoreConfig
+  72:Generated_Source\PSoC4/motorControlPWM_PM.c **** ********************************************************************************
+  73:Generated_Source\PSoC4/motorControlPWM_PM.c **** *
+  74:Generated_Source\PSoC4/motorControlPWM_PM.c **** * Summary:
+  75:Generated_Source\PSoC4/motorControlPWM_PM.c **** *  Restores the current user configuration of the component.
+  76:Generated_Source\PSoC4/motorControlPWM_PM.c **** *
+  77:Generated_Source\PSoC4/motorControlPWM_PM.c **** * Parameters:
+  78:Generated_Source\PSoC4/motorControlPWM_PM.c **** *  None
+  79:Generated_Source\PSoC4/motorControlPWM_PM.c **** *
+  80:Generated_Source\PSoC4/motorControlPWM_PM.c **** * Return:
+  81:Generated_Source\PSoC4/motorControlPWM_PM.c **** *  None
+  82:Generated_Source\PSoC4/motorControlPWM_PM.c **** *
+  83:Generated_Source\PSoC4/motorControlPWM_PM.c **** * Global variables:
+  84:Generated_Source\PSoC4/motorControlPWM_PM.c **** *  motorControlPWM_backup:  Variables of this global structure are used to
+  85:Generated_Source\PSoC4/motorControlPWM_PM.c **** *  restore the values of non retention registers on wakeup from sleep mode.
+  86:Generated_Source\PSoC4/motorControlPWM_PM.c **** *
+  87:Generated_Source\PSoC4/motorControlPWM_PM.c **** *******************************************************************************/
+  88:Generated_Source\PSoC4/motorControlPWM_PM.c **** void motorControlPWM_RestoreConfig(void) 
+  89:Generated_Source\PSoC4/motorControlPWM_PM.c **** {
+  67              		.loc 1 89 0
+  68              		.cfi_startproc
+  69              		@ args = 0, pretend = 0, frame = 0
+  70              		@ frame_needed = 0, uses_anonymous_args = 0
+  71 0000 10B5     		push	{r4, lr}
+  72              		.cfi_def_cfa_offset 8
+  73              		.cfi_offset 4, -8
+  74              		.cfi_offset 14, -4
+  90:Generated_Source\PSoC4/motorControlPWM_PM.c ****         #if(!motorControlPWM_UsingFixedFunction)
+  91:Generated_Source\PSoC4/motorControlPWM_PM.c ****             #if(!motorControlPWM_PWMModeIsCenterAligned)
+  92:Generated_Source\PSoC4/motorControlPWM_PM.c ****                 motorControlPWM_WritePeriod(motorControlPWM_backup.PWMPeriod);
+  75              		.loc 1 92 0
+  76 0002 054C     		ldr	r4, .L5
+  77 0004 A078     		ldrb	r0, [r4, #2]
+  78 0006 FFF7FEFF 		bl	motorControlPWM_WritePeriod
+  79              	.LVL3:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMrJ2z7.s 			page 4
+
+
+  93:Generated_Source\PSoC4/motorControlPWM_PM.c ****             #endif /* (!motorControlPWM_PWMModeIsCenterAligned) */
+  94:Generated_Source\PSoC4/motorControlPWM_PM.c **** 
+  95:Generated_Source\PSoC4/motorControlPWM_PM.c ****             motorControlPWM_WriteCounter(motorControlPWM_backup.PWMUdb);
+  80              		.loc 1 95 0
+  81 000a 6078     		ldrb	r0, [r4, #1]
+  82 000c FFF7FEFF 		bl	motorControlPWM_WriteCounter
+  83              	.LVL4:
+  96:Generated_Source\PSoC4/motorControlPWM_PM.c **** 
+  97:Generated_Source\PSoC4/motorControlPWM_PM.c ****             #if (motorControlPWM_UseStatus)
+  98:Generated_Source\PSoC4/motorControlPWM_PM.c ****                 motorControlPWM_STATUS_MASK = motorControlPWM_backup.InterruptMaskValue;
+  99:Generated_Source\PSoC4/motorControlPWM_PM.c ****             #endif /* (motorControlPWM_UseStatus) */
+ 100:Generated_Source\PSoC4/motorControlPWM_PM.c **** 
+ 101:Generated_Source\PSoC4/motorControlPWM_PM.c ****             #if(motorControlPWM_DeadBandMode == motorControlPWM__B_PWM__DBM_256_CLOCKS || \
+ 102:Generated_Source\PSoC4/motorControlPWM_PM.c ****                 motorControlPWM_DeadBandMode == motorControlPWM__B_PWM__DBM_2_4_CLOCKS)
+ 103:Generated_Source\PSoC4/motorControlPWM_PM.c ****                 motorControlPWM_WriteDeadTime(motorControlPWM_backup.PWMdeadBandValue);
+ 104:Generated_Source\PSoC4/motorControlPWM_PM.c ****             #endif /* deadband count is either 2-4 clocks or 256 clocks */
+ 105:Generated_Source\PSoC4/motorControlPWM_PM.c **** 
+ 106:Generated_Source\PSoC4/motorControlPWM_PM.c ****             #if(motorControlPWM_KillModeMinTime)
+ 107:Generated_Source\PSoC4/motorControlPWM_PM.c ****                 motorControlPWM_WriteKillTime(motorControlPWM_backup.PWMKillCounterPeriod);
+ 108:Generated_Source\PSoC4/motorControlPWM_PM.c ****             #endif /* (motorControlPWM_KillModeMinTime) */
+ 109:Generated_Source\PSoC4/motorControlPWM_PM.c **** 
+ 110:Generated_Source\PSoC4/motorControlPWM_PM.c ****             #if(motorControlPWM_UseControl)
+ 111:Generated_Source\PSoC4/motorControlPWM_PM.c ****                 motorControlPWM_WriteControlRegister(motorControlPWM_backup.PWMControlRegister);
+  84              		.loc 1 111 0
+  85 0010 E078     		ldrb	r0, [r4, #3]
+  86 0012 FFF7FEFF 		bl	motorControlPWM_WriteControlRegister
+  87              	.LVL5:
+ 112:Generated_Source\PSoC4/motorControlPWM_PM.c ****             #endif /* (motorControlPWM_UseControl) */
+ 113:Generated_Source\PSoC4/motorControlPWM_PM.c ****         #endif  /* (!motorControlPWM_UsingFixedFunction) */
+ 114:Generated_Source\PSoC4/motorControlPWM_PM.c ****     }
+  88              		.loc 1 114 0
+  89              		@ sp needed
+  90 0016 10BD     		pop	{r4, pc}
+  91              	.L6:
+  92              		.align	2
+  93              	.L5:
+  94 0018 00000000 		.word	.LANCHOR0
+  95              		.cfi_endproc
+  96              	.LFE1:
+  97              		.size	motorControlPWM_RestoreConfig, .-motorControlPWM_RestoreConfig
+  98              		.section	.text.motorControlPWM_Sleep,"ax",%progbits
+  99              		.align	2
+ 100              		.global	motorControlPWM_Sleep
+ 101              		.code	16
+ 102              		.thumb_func
+ 103              		.type	motorControlPWM_Sleep, %function
+ 104              	motorControlPWM_Sleep:
+ 105              	.LFB2:
+ 115:Generated_Source\PSoC4/motorControlPWM_PM.c **** 
+ 116:Generated_Source\PSoC4/motorControlPWM_PM.c **** 
+ 117:Generated_Source\PSoC4/motorControlPWM_PM.c **** /*******************************************************************************
+ 118:Generated_Source\PSoC4/motorControlPWM_PM.c **** * Function Name: motorControlPWM_Sleep
+ 119:Generated_Source\PSoC4/motorControlPWM_PM.c **** ********************************************************************************
+ 120:Generated_Source\PSoC4/motorControlPWM_PM.c **** *
+ 121:Generated_Source\PSoC4/motorControlPWM_PM.c **** * Summary:
+ 122:Generated_Source\PSoC4/motorControlPWM_PM.c **** *  Disables block's operation and saves the user configuration. Should be called
+ 123:Generated_Source\PSoC4/motorControlPWM_PM.c **** *  just prior to entering sleep.
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMrJ2z7.s 			page 5
+
+
+ 124:Generated_Source\PSoC4/motorControlPWM_PM.c **** *
+ 125:Generated_Source\PSoC4/motorControlPWM_PM.c **** * Parameters:
+ 126:Generated_Source\PSoC4/motorControlPWM_PM.c **** *  None
+ 127:Generated_Source\PSoC4/motorControlPWM_PM.c **** *
+ 128:Generated_Source\PSoC4/motorControlPWM_PM.c **** * Return:
+ 129:Generated_Source\PSoC4/motorControlPWM_PM.c **** *  None
+ 130:Generated_Source\PSoC4/motorControlPWM_PM.c **** *
+ 131:Generated_Source\PSoC4/motorControlPWM_PM.c **** * Global variables:
+ 132:Generated_Source\PSoC4/motorControlPWM_PM.c **** *  motorControlPWM_backup.PWMEnableState:  Is modified depending on the enable
+ 133:Generated_Source\PSoC4/motorControlPWM_PM.c **** *  state of the block before entering sleep mode.
+ 134:Generated_Source\PSoC4/motorControlPWM_PM.c **** *
+ 135:Generated_Source\PSoC4/motorControlPWM_PM.c **** *******************************************************************************/
+ 136:Generated_Source\PSoC4/motorControlPWM_PM.c **** void motorControlPWM_Sleep(void) 
+ 137:Generated_Source\PSoC4/motorControlPWM_PM.c **** {
+ 106              		.loc 1 137 0
+ 107              		.cfi_startproc
+ 108              		@ args = 0, pretend = 0, frame = 0
+ 109              		@ frame_needed = 0, uses_anonymous_args = 0
+ 110 0000 10B5     		push	{r4, lr}
+ 111              		.cfi_def_cfa_offset 8
+ 112              		.cfi_offset 4, -8
+ 113              		.cfi_offset 14, -4
+ 138:Generated_Source\PSoC4/motorControlPWM_PM.c ****     #if(motorControlPWM_UseControl)
+ 139:Generated_Source\PSoC4/motorControlPWM_PM.c ****         if(motorControlPWM_CTRL_ENABLE == (motorControlPWM_CONTROL & motorControlPWM_CTRL_ENABLE))
+ 114              		.loc 1 139 0
+ 115 0002 084B     		ldr	r3, .L10
+ 116 0004 1B78     		ldrb	r3, [r3]
+ 117 0006 5BB2     		sxtb	r3, r3
+ 118 0008 002B     		cmp	r3, #0
+ 119 000a 03DA     		bge	.L8
+ 140:Generated_Source\PSoC4/motorControlPWM_PM.c ****         {
+ 141:Generated_Source\PSoC4/motorControlPWM_PM.c ****             /*Component is enabled */
+ 142:Generated_Source\PSoC4/motorControlPWM_PM.c ****             motorControlPWM_backup.PWMEnableState = 1u;
+ 120              		.loc 1 142 0
+ 121 000c 0122     		movs	r2, #1
+ 122 000e 064B     		ldr	r3, .L10+4
+ 123 0010 1A70     		strb	r2, [r3]
+ 124 0012 02E0     		b	.L9
+ 125              	.L8:
+ 143:Generated_Source\PSoC4/motorControlPWM_PM.c ****         }
+ 144:Generated_Source\PSoC4/motorControlPWM_PM.c ****         else
+ 145:Generated_Source\PSoC4/motorControlPWM_PM.c ****         {
+ 146:Generated_Source\PSoC4/motorControlPWM_PM.c ****             /* Component is disabled */
+ 147:Generated_Source\PSoC4/motorControlPWM_PM.c ****             motorControlPWM_backup.PWMEnableState = 0u;
+ 126              		.loc 1 147 0
+ 127 0014 0022     		movs	r2, #0
+ 128 0016 044B     		ldr	r3, .L10+4
+ 129 0018 1A70     		strb	r2, [r3]
+ 130              	.L9:
+ 148:Generated_Source\PSoC4/motorControlPWM_PM.c ****         }
+ 149:Generated_Source\PSoC4/motorControlPWM_PM.c ****     #endif /* (motorControlPWM_UseControl) */
+ 150:Generated_Source\PSoC4/motorControlPWM_PM.c **** 
+ 151:Generated_Source\PSoC4/motorControlPWM_PM.c ****     /* Stop component */
+ 152:Generated_Source\PSoC4/motorControlPWM_PM.c ****     motorControlPWM_Stop();
+ 131              		.loc 1 152 0
+ 132 001a FFF7FEFF 		bl	motorControlPWM_Stop
+ 133              	.LVL6:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMrJ2z7.s 			page 6
+
+
+ 153:Generated_Source\PSoC4/motorControlPWM_PM.c **** 
+ 154:Generated_Source\PSoC4/motorControlPWM_PM.c ****     /* Save registers configuration */
+ 155:Generated_Source\PSoC4/motorControlPWM_PM.c ****     motorControlPWM_SaveConfig();
+ 134              		.loc 1 155 0
+ 135 001e FFF7FEFF 		bl	motorControlPWM_SaveConfig
+ 136              	.LVL7:
+ 156:Generated_Source\PSoC4/motorControlPWM_PM.c **** }
+ 137              		.loc 1 156 0
+ 138              		@ sp needed
+ 139 0022 10BD     		pop	{r4, pc}
+ 140              	.L11:
+ 141              		.align	2
+ 142              	.L10:
+ 143 0024 72000F40 		.word	1074724978
+ 144 0028 00000000 		.word	.LANCHOR0
+ 145              		.cfi_endproc
+ 146              	.LFE2:
+ 147              		.size	motorControlPWM_Sleep, .-motorControlPWM_Sleep
+ 148              		.section	.text.motorControlPWM_Wakeup,"ax",%progbits
+ 149              		.align	2
+ 150              		.global	motorControlPWM_Wakeup
+ 151              		.code	16
+ 152              		.thumb_func
+ 153              		.type	motorControlPWM_Wakeup, %function
+ 154              	motorControlPWM_Wakeup:
+ 155              	.LFB3:
+ 157:Generated_Source\PSoC4/motorControlPWM_PM.c **** 
+ 158:Generated_Source\PSoC4/motorControlPWM_PM.c **** 
+ 159:Generated_Source\PSoC4/motorControlPWM_PM.c **** /*******************************************************************************
+ 160:Generated_Source\PSoC4/motorControlPWM_PM.c **** * Function Name: motorControlPWM_Wakeup
+ 161:Generated_Source\PSoC4/motorControlPWM_PM.c **** ********************************************************************************
+ 162:Generated_Source\PSoC4/motorControlPWM_PM.c **** *
+ 163:Generated_Source\PSoC4/motorControlPWM_PM.c **** * Summary:
+ 164:Generated_Source\PSoC4/motorControlPWM_PM.c **** *  Restores and enables the user configuration. Should be called just after
+ 165:Generated_Source\PSoC4/motorControlPWM_PM.c **** *  awaking from sleep.
+ 166:Generated_Source\PSoC4/motorControlPWM_PM.c **** *
+ 167:Generated_Source\PSoC4/motorControlPWM_PM.c **** * Parameters:
+ 168:Generated_Source\PSoC4/motorControlPWM_PM.c **** *  None
+ 169:Generated_Source\PSoC4/motorControlPWM_PM.c **** *
+ 170:Generated_Source\PSoC4/motorControlPWM_PM.c **** * Return:
+ 171:Generated_Source\PSoC4/motorControlPWM_PM.c **** *  None
+ 172:Generated_Source\PSoC4/motorControlPWM_PM.c **** *
+ 173:Generated_Source\PSoC4/motorControlPWM_PM.c **** * Global variables:
+ 174:Generated_Source\PSoC4/motorControlPWM_PM.c **** *  motorControlPWM_backup.pwmEnable:  Is used to restore the enable state of
+ 175:Generated_Source\PSoC4/motorControlPWM_PM.c **** *  block on wakeup from sleep mode.
+ 176:Generated_Source\PSoC4/motorControlPWM_PM.c **** *
+ 177:Generated_Source\PSoC4/motorControlPWM_PM.c **** *******************************************************************************/
+ 178:Generated_Source\PSoC4/motorControlPWM_PM.c **** void motorControlPWM_Wakeup(void) 
+ 179:Generated_Source\PSoC4/motorControlPWM_PM.c **** {
+ 156              		.loc 1 179 0
+ 157              		.cfi_startproc
+ 158              		@ args = 0, pretend = 0, frame = 0
+ 159              		@ frame_needed = 0, uses_anonymous_args = 0
+ 160 0000 10B5     		push	{r4, lr}
+ 161              		.cfi_def_cfa_offset 8
+ 162              		.cfi_offset 4, -8
+ 163              		.cfi_offset 14, -4
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMrJ2z7.s 			page 7
+
+
+ 180:Generated_Source\PSoC4/motorControlPWM_PM.c ****      /* Restore registers values */
+ 181:Generated_Source\PSoC4/motorControlPWM_PM.c ****     motorControlPWM_RestoreConfig();
+ 164              		.loc 1 181 0
+ 165 0002 FFF7FEFF 		bl	motorControlPWM_RestoreConfig
+ 166              	.LVL8:
+ 182:Generated_Source\PSoC4/motorControlPWM_PM.c **** 
+ 183:Generated_Source\PSoC4/motorControlPWM_PM.c ****     if(motorControlPWM_backup.PWMEnableState != 0u)
+ 167              		.loc 1 183 0
+ 168 0006 034B     		ldr	r3, .L14
+ 169 0008 1B78     		ldrb	r3, [r3]
+ 170 000a 002B     		cmp	r3, #0
+ 171 000c 01D0     		beq	.L12
+ 184:Generated_Source\PSoC4/motorControlPWM_PM.c ****     {
+ 185:Generated_Source\PSoC4/motorControlPWM_PM.c ****         /* Enable component's operation */
+ 186:Generated_Source\PSoC4/motorControlPWM_PM.c ****         motorControlPWM_Enable();
+ 172              		.loc 1 186 0
+ 173 000e FFF7FEFF 		bl	motorControlPWM_Enable
+ 174              	.LVL9:
+ 175              	.L12:
+ 187:Generated_Source\PSoC4/motorControlPWM_PM.c ****     } /* Do nothing if component's block was disabled before */
+ 188:Generated_Source\PSoC4/motorControlPWM_PM.c **** 
+ 189:Generated_Source\PSoC4/motorControlPWM_PM.c **** }
+ 176              		.loc 1 189 0
+ 177              		@ sp needed
+ 178 0012 10BD     		pop	{r4, pc}
+ 179              	.L15:
+ 180              		.align	2
+ 181              	.L14:
+ 182 0014 00000000 		.word	.LANCHOR0
+ 183              		.cfi_endproc
+ 184              	.LFE3:
+ 185              		.size	motorControlPWM_Wakeup, .-motorControlPWM_Wakeup
+ 186              		.bss
+ 187              		.align	2
+ 188              		.set	.LANCHOR0,. + 0
+ 189              		.type	motorControlPWM_backup, %object
+ 190              		.size	motorControlPWM_backup, 4
+ 191              	motorControlPWM_backup:
+ 192 0000 00000000 		.space	4
+ 193              		.text
+ 194              	.Letext0:
+ 195              		.file 2 "Generated_Source\\PSoC4\\cytypes.h"
+ 196              		.file 3 "Generated_Source\\PSoC4\\motorControlPWM.h"
+ 197              		.section	.debug_info,"",%progbits
+ 198              	.Ldebug_info0:
+ 199 0000 07020000 		.4byte	0x207
+ 200 0004 0400     		.2byte	0x4
+ 201 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 202 000a 04       		.byte	0x4
+ 203 000b 01       		.uleb128 0x1
+ 204 000c FF010000 		.4byte	.LASF33
+ 205 0010 0C       		.byte	0xc
+ 206 0011 50000000 		.4byte	.LASF34
+ 207 0015 22030000 		.4byte	.LASF35
+ 208 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 209 001d 00000000 		.4byte	0
+ 210 0021 00000000 		.4byte	.Ldebug_line0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMrJ2z7.s 			page 8
+
+
+ 211 0025 02       		.uleb128 0x2
+ 212 0026 01       		.byte	0x1
+ 213 0027 06       		.byte	0x6
+ 214 0028 16030000 		.4byte	.LASF0
+ 215 002c 02       		.uleb128 0x2
+ 216 002d 01       		.byte	0x1
+ 217 002e 08       		.byte	0x8
+ 218 002f FA000000 		.4byte	.LASF1
+ 219 0033 02       		.uleb128 0x2
+ 220 0034 02       		.byte	0x2
+ 221 0035 05       		.byte	0x5
+ 222 0036 E0020000 		.4byte	.LASF2
+ 223 003a 02       		.uleb128 0x2
+ 224 003b 02       		.byte	0x2
+ 225 003c 07       		.byte	0x7
+ 226 003d AE000000 		.4byte	.LASF3
+ 227 0041 02       		.uleb128 0x2
+ 228 0042 04       		.byte	0x4
+ 229 0043 05       		.byte	0x5
+ 230 0044 01030000 		.4byte	.LASF4
+ 231 0048 02       		.uleb128 0x2
+ 232 0049 04       		.byte	0x4
+ 233 004a 07       		.byte	0x7
+ 234 004b 17010000 		.4byte	.LASF5
+ 235 004f 02       		.uleb128 0x2
+ 236 0050 08       		.byte	0x8
+ 237 0051 05       		.byte	0x5
+ 238 0052 00000000 		.4byte	.LASF6
+ 239 0056 02       		.uleb128 0x2
+ 240 0057 08       		.byte	0x8
+ 241 0058 07       		.byte	0x7
+ 242 0059 CB010000 		.4byte	.LASF7
+ 243 005d 03       		.uleb128 0x3
+ 244 005e 04       		.byte	0x4
+ 245 005f 05       		.byte	0x5
+ 246 0060 696E7400 		.ascii	"int\000"
+ 247 0064 02       		.uleb128 0x2
+ 248 0065 04       		.byte	0x4
+ 249 0066 07       		.byte	0x7
+ 250 0067 9A010000 		.4byte	.LASF8
+ 251 006b 04       		.uleb128 0x4
+ 252 006c 29010000 		.4byte	.LASF12
+ 253 0070 02       		.byte	0x2
+ 254 0071 D201     		.2byte	0x1d2
+ 255 0073 2C000000 		.4byte	0x2c
+ 256 0077 02       		.uleb128 0x2
+ 257 0078 04       		.byte	0x4
+ 258 0079 04       		.byte	0x4
+ 259 007a D6000000 		.4byte	.LASF9
+ 260 007e 02       		.uleb128 0x2
+ 261 007f 08       		.byte	0x8
+ 262 0080 04       		.byte	0x4
+ 263 0081 7C010000 		.4byte	.LASF10
+ 264 0085 02       		.uleb128 0x2
+ 265 0086 01       		.byte	0x1
+ 266 0087 08       		.byte	0x8
+ 267 0088 DB020000 		.4byte	.LASF11
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMrJ2z7.s 			page 9
+
+
+ 268 008c 04       		.uleb128 0x4
+ 269 008d 8D020000 		.4byte	.LASF13
+ 270 0091 02       		.byte	0x2
+ 271 0092 7C02     		.2byte	0x27c
+ 272 0094 98000000 		.4byte	0x98
+ 273 0098 05       		.uleb128 0x5
+ 274 0099 6B000000 		.4byte	0x6b
+ 275 009d 02       		.uleb128 0x2
+ 276 009e 08       		.byte	0x8
+ 277 009f 04       		.byte	0x4
+ 278 00a0 0A030000 		.4byte	.LASF14
+ 279 00a4 02       		.uleb128 0x2
+ 280 00a5 04       		.byte	0x4
+ 281 00a6 07       		.byte	0x7
+ 282 00a7 92020000 		.4byte	.LASF15
+ 283 00ab 06       		.uleb128 0x6
+ 284 00ac 04       		.byte	0x4
+ 285 00ad 03       		.byte	0x3
+ 286 00ae 6B       		.byte	0x6b
+ 287 00af E4000000 		.4byte	0xe4
+ 288 00b3 07       		.uleb128 0x7
+ 289 00b4 08010000 		.4byte	.LASF16
+ 290 00b8 03       		.byte	0x3
+ 291 00b9 6E       		.byte	0x6e
+ 292 00ba 6B000000 		.4byte	0x6b
+ 293 00be 00       		.byte	0
+ 294 00bf 07       		.uleb128 0x7
+ 295 00c0 DC000000 		.4byte	.LASF17
+ 296 00c4 03       		.byte	0x3
+ 297 00c5 71       		.byte	0x71
+ 298 00c6 6B000000 		.4byte	0x6b
+ 299 00ca 01       		.byte	0x1
+ 300 00cb 07       		.uleb128 0x7
+ 301 00cc 46000000 		.4byte	.LASF18
+ 302 00d0 03       		.byte	0x3
+ 303 00d1 73       		.byte	0x73
+ 304 00d2 6B000000 		.4byte	0x6b
+ 305 00d6 02       		.byte	0x2
+ 306 00d7 07       		.uleb128 0x7
+ 307 00d8 2F010000 		.4byte	.LASF19
+ 308 00dc 03       		.byte	0x3
+ 309 00dd 86       		.byte	0x86
+ 310 00de 6B000000 		.4byte	0x6b
+ 311 00e2 03       		.byte	0x3
+ 312 00e3 00       		.byte	0
+ 313 00e4 08       		.uleb128 0x8
+ 314 00e5 29000000 		.4byte	.LASF20
+ 315 00e9 03       		.byte	0x3
+ 316 00ea 8B       		.byte	0x8b
+ 317 00eb AB000000 		.4byte	0xab
+ 318 00ef 09       		.uleb128 0x9
+ 319 00f0 9B020000 		.4byte	.LASF21
+ 320 00f4 01       		.byte	0x1
+ 321 00f5 2A       		.byte	0x2a
+ 322 00f6 00000000 		.4byte	.LFB0
+ 323 00fa 1C000000 		.4byte	.LFE0-.LFB0
+ 324 00fe 01       		.uleb128 0x1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMrJ2z7.s 			page 10
+
+
+ 325 00ff 9C       		.byte	0x9c
+ 326 0100 20010000 		.4byte	0x120
+ 327 0104 0A       		.uleb128 0xa
+ 328 0105 06000000 		.4byte	.LVL0
+ 329 0109 B2010000 		.4byte	0x1b2
+ 330 010d 0A       		.uleb128 0xa
+ 331 010e 0E000000 		.4byte	.LVL1
+ 332 0112 BD010000 		.4byte	0x1bd
+ 333 0116 0A       		.uleb128 0xa
+ 334 0117 14000000 		.4byte	.LVL2
+ 335 011b C8010000 		.4byte	0x1c8
+ 336 011f 00       		.byte	0
+ 337 0120 09       		.uleb128 0x9
+ 338 0121 42010000 		.4byte	.LASF22
+ 339 0125 01       		.byte	0x1
+ 340 0126 58       		.byte	0x58
+ 341 0127 00000000 		.4byte	.LFB1
+ 342 012b 1C000000 		.4byte	.LFE1-.LFB1
+ 343 012f 01       		.uleb128 0x1
+ 344 0130 9C       		.byte	0x9c
+ 345 0131 51010000 		.4byte	0x151
+ 346 0135 0A       		.uleb128 0xa
+ 347 0136 0A000000 		.4byte	.LVL3
+ 348 013a D3010000 		.4byte	0x1d3
+ 349 013e 0A       		.uleb128 0xa
+ 350 013f 10000000 		.4byte	.LVL4
+ 351 0143 DE010000 		.4byte	0x1de
+ 352 0147 0A       		.uleb128 0xa
+ 353 0148 16000000 		.4byte	.LVL5
+ 354 014c E9010000 		.4byte	0x1e9
+ 355 0150 00       		.byte	0
+ 356 0151 09       		.uleb128 0x9
+ 357 0152 7C000000 		.4byte	.LASF23
+ 358 0156 01       		.byte	0x1
+ 359 0157 88       		.byte	0x88
+ 360 0158 00000000 		.4byte	.LFB2
+ 361 015c 2C000000 		.4byte	.LFE2-.LFB2
+ 362 0160 01       		.uleb128 0x1
+ 363 0161 9C       		.byte	0x9c
+ 364 0162 79010000 		.4byte	0x179
+ 365 0166 0A       		.uleb128 0xa
+ 366 0167 1E000000 		.4byte	.LVL6
+ 367 016b F4010000 		.4byte	0x1f4
+ 368 016f 0A       		.uleb128 0xa
+ 369 0170 22000000 		.4byte	.LVL7
+ 370 0174 EF000000 		.4byte	0xef
+ 371 0178 00       		.byte	0
+ 372 0179 09       		.uleb128 0x9
+ 373 017a E3000000 		.4byte	.LASF24
+ 374 017e 01       		.byte	0x1
+ 375 017f B2       		.byte	0xb2
+ 376 0180 00000000 		.4byte	.LFB3
+ 377 0184 18000000 		.4byte	.LFE3-.LFB3
+ 378 0188 01       		.uleb128 0x1
+ 379 0189 9C       		.byte	0x9c
+ 380 018a A1010000 		.4byte	0x1a1
+ 381 018e 0A       		.uleb128 0xa
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMrJ2z7.s 			page 11
+
+
+ 382 018f 06000000 		.4byte	.LVL8
+ 383 0193 20010000 		.4byte	0x120
+ 384 0197 0A       		.uleb128 0xa
+ 385 0198 12000000 		.4byte	.LVL9
+ 386 019c FF010000 		.4byte	0x1ff
+ 387 01a0 00       		.byte	0
+ 388 01a1 0B       		.uleb128 0xb
+ 389 01a2 EA020000 		.4byte	.LASF36
+ 390 01a6 01       		.byte	0x1
+ 391 01a7 14       		.byte	0x14
+ 392 01a8 E4000000 		.4byte	0xe4
+ 393 01ac 05       		.uleb128 0x5
+ 394 01ad 03       		.byte	0x3
+ 395 01ae 00000000 		.4byte	motorControlPWM_backup
+ 396 01b2 0C       		.uleb128 0xc
+ 397 01b3 0E000000 		.4byte	.LASF25
+ 398 01b7 0E000000 		.4byte	.LASF25
+ 399 01bb 03       		.byte	0x3
+ 400 01bc C0       		.byte	0xc0
+ 401 01bd 0C       		.uleb128 0xc
+ 402 01be 92000000 		.4byte	.LASF26
+ 403 01c2 92000000 		.4byte	.LASF26
+ 404 01c6 03       		.byte	0x3
+ 405 01c7 B3       		.byte	0xb3
+ 406 01c8 0C       		.uleb128 0xc
+ 407 01c9 A7010000 		.4byte	.LASF27
+ 408 01cd A7010000 		.4byte	.LASF27
+ 409 01d1 03       		.byte	0x3
+ 410 01d2 9D       		.byte	0x9d
+ 411 01d3 0C       		.uleb128 0xc
+ 412 01d4 60010000 		.4byte	.LASF28
+ 413 01d8 60010000 		.4byte	.LASF28
+ 414 01dc 03       		.byte	0x3
+ 415 01dd BE       		.byte	0xbe
+ 416 01de 0C       		.uleb128 0xc
+ 417 01df E2010000 		.4byte	.LASF29
+ 418 01e3 E2010000 		.4byte	.LASF29
+ 419 01e7 03       		.byte	0x3
+ 420 01e8 BA       		.byte	0xba
+ 421 01e9 0C       		.uleb128 0xc
+ 422 01ea B6020000 		.4byte	.LASF30
+ 423 01ee B6020000 		.4byte	.LASF30
+ 424 01f2 03       		.byte	0x3
+ 425 01f3 9E       		.byte	0x9e
+ 426 01f4 0C       		.uleb128 0xc
+ 427 01f5 C1000000 		.4byte	.LASF31
+ 428 01f9 C1000000 		.4byte	.LASF31
+ 429 01fd 03       		.byte	0x3
+ 430 01fe 93       		.byte	0x93
+ 431 01ff 0C       		.uleb128 0xc
+ 432 0200 83010000 		.4byte	.LASF32
+ 433 0204 83010000 		.4byte	.LASF32
+ 434 0208 03       		.byte	0x3
+ 435 0209 DB       		.byte	0xdb
+ 436 020a 00       		.byte	0
+ 437              		.section	.debug_abbrev,"",%progbits
+ 438              	.Ldebug_abbrev0:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMrJ2z7.s 			page 12
+
+
+ 439 0000 01       		.uleb128 0x1
+ 440 0001 11       		.uleb128 0x11
+ 441 0002 01       		.byte	0x1
+ 442 0003 25       		.uleb128 0x25
+ 443 0004 0E       		.uleb128 0xe
+ 444 0005 13       		.uleb128 0x13
+ 445 0006 0B       		.uleb128 0xb
+ 446 0007 03       		.uleb128 0x3
+ 447 0008 0E       		.uleb128 0xe
+ 448 0009 1B       		.uleb128 0x1b
+ 449 000a 0E       		.uleb128 0xe
+ 450 000b 55       		.uleb128 0x55
+ 451 000c 17       		.uleb128 0x17
+ 452 000d 11       		.uleb128 0x11
+ 453 000e 01       		.uleb128 0x1
+ 454 000f 10       		.uleb128 0x10
+ 455 0010 17       		.uleb128 0x17
+ 456 0011 00       		.byte	0
+ 457 0012 00       		.byte	0
+ 458 0013 02       		.uleb128 0x2
+ 459 0014 24       		.uleb128 0x24
+ 460 0015 00       		.byte	0
+ 461 0016 0B       		.uleb128 0xb
+ 462 0017 0B       		.uleb128 0xb
+ 463 0018 3E       		.uleb128 0x3e
+ 464 0019 0B       		.uleb128 0xb
+ 465 001a 03       		.uleb128 0x3
+ 466 001b 0E       		.uleb128 0xe
+ 467 001c 00       		.byte	0
+ 468 001d 00       		.byte	0
+ 469 001e 03       		.uleb128 0x3
+ 470 001f 24       		.uleb128 0x24
+ 471 0020 00       		.byte	0
+ 472 0021 0B       		.uleb128 0xb
+ 473 0022 0B       		.uleb128 0xb
+ 474 0023 3E       		.uleb128 0x3e
+ 475 0024 0B       		.uleb128 0xb
+ 476 0025 03       		.uleb128 0x3
+ 477 0026 08       		.uleb128 0x8
+ 478 0027 00       		.byte	0
+ 479 0028 00       		.byte	0
+ 480 0029 04       		.uleb128 0x4
+ 481 002a 16       		.uleb128 0x16
+ 482 002b 00       		.byte	0
+ 483 002c 03       		.uleb128 0x3
+ 484 002d 0E       		.uleb128 0xe
+ 485 002e 3A       		.uleb128 0x3a
+ 486 002f 0B       		.uleb128 0xb
+ 487 0030 3B       		.uleb128 0x3b
+ 488 0031 05       		.uleb128 0x5
+ 489 0032 49       		.uleb128 0x49
+ 490 0033 13       		.uleb128 0x13
+ 491 0034 00       		.byte	0
+ 492 0035 00       		.byte	0
+ 493 0036 05       		.uleb128 0x5
+ 494 0037 35       		.uleb128 0x35
+ 495 0038 00       		.byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMrJ2z7.s 			page 13
+
+
+ 496 0039 49       		.uleb128 0x49
+ 497 003a 13       		.uleb128 0x13
+ 498 003b 00       		.byte	0
+ 499 003c 00       		.byte	0
+ 500 003d 06       		.uleb128 0x6
+ 501 003e 13       		.uleb128 0x13
+ 502 003f 01       		.byte	0x1
+ 503 0040 0B       		.uleb128 0xb
+ 504 0041 0B       		.uleb128 0xb
+ 505 0042 3A       		.uleb128 0x3a
+ 506 0043 0B       		.uleb128 0xb
+ 507 0044 3B       		.uleb128 0x3b
+ 508 0045 0B       		.uleb128 0xb
+ 509 0046 01       		.uleb128 0x1
+ 510 0047 13       		.uleb128 0x13
+ 511 0048 00       		.byte	0
+ 512 0049 00       		.byte	0
+ 513 004a 07       		.uleb128 0x7
+ 514 004b 0D       		.uleb128 0xd
+ 515 004c 00       		.byte	0
+ 516 004d 03       		.uleb128 0x3
+ 517 004e 0E       		.uleb128 0xe
+ 518 004f 3A       		.uleb128 0x3a
+ 519 0050 0B       		.uleb128 0xb
+ 520 0051 3B       		.uleb128 0x3b
+ 521 0052 0B       		.uleb128 0xb
+ 522 0053 49       		.uleb128 0x49
+ 523 0054 13       		.uleb128 0x13
+ 524 0055 38       		.uleb128 0x38
+ 525 0056 0B       		.uleb128 0xb
+ 526 0057 00       		.byte	0
+ 527 0058 00       		.byte	0
+ 528 0059 08       		.uleb128 0x8
+ 529 005a 16       		.uleb128 0x16
+ 530 005b 00       		.byte	0
+ 531 005c 03       		.uleb128 0x3
+ 532 005d 0E       		.uleb128 0xe
+ 533 005e 3A       		.uleb128 0x3a
+ 534 005f 0B       		.uleb128 0xb
+ 535 0060 3B       		.uleb128 0x3b
+ 536 0061 0B       		.uleb128 0xb
+ 537 0062 49       		.uleb128 0x49
+ 538 0063 13       		.uleb128 0x13
+ 539 0064 00       		.byte	0
+ 540 0065 00       		.byte	0
+ 541 0066 09       		.uleb128 0x9
+ 542 0067 2E       		.uleb128 0x2e
+ 543 0068 01       		.byte	0x1
+ 544 0069 3F       		.uleb128 0x3f
+ 545 006a 19       		.uleb128 0x19
+ 546 006b 03       		.uleb128 0x3
+ 547 006c 0E       		.uleb128 0xe
+ 548 006d 3A       		.uleb128 0x3a
+ 549 006e 0B       		.uleb128 0xb
+ 550 006f 3B       		.uleb128 0x3b
+ 551 0070 0B       		.uleb128 0xb
+ 552 0071 27       		.uleb128 0x27
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMrJ2z7.s 			page 14
+
+
+ 553 0072 19       		.uleb128 0x19
+ 554 0073 11       		.uleb128 0x11
+ 555 0074 01       		.uleb128 0x1
+ 556 0075 12       		.uleb128 0x12
+ 557 0076 06       		.uleb128 0x6
+ 558 0077 40       		.uleb128 0x40
+ 559 0078 18       		.uleb128 0x18
+ 560 0079 9742     		.uleb128 0x2117
+ 561 007b 19       		.uleb128 0x19
+ 562 007c 01       		.uleb128 0x1
+ 563 007d 13       		.uleb128 0x13
+ 564 007e 00       		.byte	0
+ 565 007f 00       		.byte	0
+ 566 0080 0A       		.uleb128 0xa
+ 567 0081 898201   		.uleb128 0x4109
+ 568 0084 00       		.byte	0
+ 569 0085 11       		.uleb128 0x11
+ 570 0086 01       		.uleb128 0x1
+ 571 0087 31       		.uleb128 0x31
+ 572 0088 13       		.uleb128 0x13
+ 573 0089 00       		.byte	0
+ 574 008a 00       		.byte	0
+ 575 008b 0B       		.uleb128 0xb
+ 576 008c 34       		.uleb128 0x34
+ 577 008d 00       		.byte	0
+ 578 008e 03       		.uleb128 0x3
+ 579 008f 0E       		.uleb128 0xe
+ 580 0090 3A       		.uleb128 0x3a
+ 581 0091 0B       		.uleb128 0xb
+ 582 0092 3B       		.uleb128 0x3b
+ 583 0093 0B       		.uleb128 0xb
+ 584 0094 49       		.uleb128 0x49
+ 585 0095 13       		.uleb128 0x13
+ 586 0096 02       		.uleb128 0x2
+ 587 0097 18       		.uleb128 0x18
+ 588 0098 00       		.byte	0
+ 589 0099 00       		.byte	0
+ 590 009a 0C       		.uleb128 0xc
+ 591 009b 2E       		.uleb128 0x2e
+ 592 009c 00       		.byte	0
+ 593 009d 3F       		.uleb128 0x3f
+ 594 009e 19       		.uleb128 0x19
+ 595 009f 3C       		.uleb128 0x3c
+ 596 00a0 19       		.uleb128 0x19
+ 597 00a1 6E       		.uleb128 0x6e
+ 598 00a2 0E       		.uleb128 0xe
+ 599 00a3 03       		.uleb128 0x3
+ 600 00a4 0E       		.uleb128 0xe
+ 601 00a5 3A       		.uleb128 0x3a
+ 602 00a6 0B       		.uleb128 0xb
+ 603 00a7 3B       		.uleb128 0x3b
+ 604 00a8 0B       		.uleb128 0xb
+ 605 00a9 00       		.byte	0
+ 606 00aa 00       		.byte	0
+ 607 00ab 00       		.byte	0
+ 608              		.section	.debug_aranges,"",%progbits
+ 609 0000 34000000 		.4byte	0x34
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMrJ2z7.s 			page 15
+
+
+ 610 0004 0200     		.2byte	0x2
+ 611 0006 00000000 		.4byte	.Ldebug_info0
+ 612 000a 04       		.byte	0x4
+ 613 000b 00       		.byte	0
+ 614 000c 0000     		.2byte	0
+ 615 000e 0000     		.2byte	0
+ 616 0010 00000000 		.4byte	.LFB0
+ 617 0014 1C000000 		.4byte	.LFE0-.LFB0
+ 618 0018 00000000 		.4byte	.LFB1
+ 619 001c 1C000000 		.4byte	.LFE1-.LFB1
+ 620 0020 00000000 		.4byte	.LFB2
+ 621 0024 2C000000 		.4byte	.LFE2-.LFB2
+ 622 0028 00000000 		.4byte	.LFB3
+ 623 002c 18000000 		.4byte	.LFE3-.LFB3
+ 624 0030 00000000 		.4byte	0
+ 625 0034 00000000 		.4byte	0
+ 626              		.section	.debug_ranges,"",%progbits
+ 627              	.Ldebug_ranges0:
+ 628 0000 00000000 		.4byte	.LFB0
+ 629 0004 1C000000 		.4byte	.LFE0
+ 630 0008 00000000 		.4byte	.LFB1
+ 631 000c 1C000000 		.4byte	.LFE1
+ 632 0010 00000000 		.4byte	.LFB2
+ 633 0014 2C000000 		.4byte	.LFE2
+ 634 0018 00000000 		.4byte	.LFB3
+ 635 001c 18000000 		.4byte	.LFE3
+ 636 0020 00000000 		.4byte	0
+ 637 0024 00000000 		.4byte	0
+ 638              		.section	.debug_line,"",%progbits
+ 639              	.Ldebug_line0:
+ 640 0000 BF000000 		.section	.debug_str,"MS",%progbits,1
+ 640      02006400 
+ 640      00000201 
+ 640      FB0E0D00 
+ 640      01010101 
+ 641              	.LASF6:
+ 642 0000 6C6F6E67 		.ascii	"long long int\000"
+ 642      206C6F6E 
+ 642      6720696E 
+ 642      7400
+ 643              	.LASF25:
+ 644 000e 6D6F746F 		.ascii	"motorControlPWM_ReadPeriod\000"
+ 644      72436F6E 
+ 644      74726F6C 
+ 644      50574D5F 
+ 644      52656164 
+ 645              	.LASF20:
+ 646 0029 6D6F746F 		.ascii	"motorControlPWM_backupStruct\000"
+ 646      72436F6E 
+ 646      74726F6C 
+ 646      50574D5F 
+ 646      6261636B 
+ 647              	.LASF18:
+ 648 0046 50574D50 		.ascii	"PWMPeriod\000"
+ 648      6572696F 
+ 648      6400
+ 649              	.LASF34:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMrJ2z7.s 			page 16
+
+
+ 650 0050 47656E65 		.ascii	"Generated_Source\\PSoC4\\motorControlPWM_PM.c\000"
+ 650      72617465 
+ 650      645F536F 
+ 650      75726365 
+ 650      5C50536F 
+ 651              	.LASF23:
+ 652 007c 6D6F746F 		.ascii	"motorControlPWM_Sleep\000"
+ 652      72436F6E 
+ 652      74726F6C 
+ 652      50574D5F 
+ 652      536C6565 
+ 653              	.LASF26:
+ 654 0092 6D6F746F 		.ascii	"motorControlPWM_ReadCounter\000"
+ 654      72436F6E 
+ 654      74726F6C 
+ 654      50574D5F 
+ 654      52656164 
+ 655              	.LASF3:
+ 656 00ae 73686F72 		.ascii	"short unsigned int\000"
+ 656      7420756E 
+ 656      7369676E 
+ 656      65642069 
+ 656      6E7400
+ 657              	.LASF31:
+ 658 00c1 6D6F746F 		.ascii	"motorControlPWM_Stop\000"
+ 658      72436F6E 
+ 658      74726F6C 
+ 658      50574D5F 
+ 658      53746F70 
+ 659              	.LASF9:
+ 660 00d6 666C6F61 		.ascii	"float\000"
+ 660      7400
+ 661              	.LASF17:
+ 662 00dc 50574D55 		.ascii	"PWMUdb\000"
+ 662      646200
+ 663              	.LASF24:
+ 664 00e3 6D6F746F 		.ascii	"motorControlPWM_Wakeup\000"
+ 664      72436F6E 
+ 664      74726F6C 
+ 664      50574D5F 
+ 664      57616B65 
+ 665              	.LASF1:
+ 666 00fa 756E7369 		.ascii	"unsigned char\000"
+ 666      676E6564 
+ 666      20636861 
+ 666      7200
+ 667              	.LASF16:
+ 668 0108 50574D45 		.ascii	"PWMEnableState\000"
+ 668      6E61626C 
+ 668      65537461 
+ 668      746500
+ 669              	.LASF5:
+ 670 0117 6C6F6E67 		.ascii	"long unsigned int\000"
+ 670      20756E73 
+ 670      69676E65 
+ 670      6420696E 
+ 670      7400
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMrJ2z7.s 			page 17
+
+
+ 671              	.LASF12:
+ 672 0129 75696E74 		.ascii	"uint8\000"
+ 672      3800
+ 673              	.LASF19:
+ 674 012f 50574D43 		.ascii	"PWMControlRegister\000"
+ 674      6F6E7472 
+ 674      6F6C5265 
+ 674      67697374 
+ 674      657200
+ 675              	.LASF22:
+ 676 0142 6D6F746F 		.ascii	"motorControlPWM_RestoreConfig\000"
+ 676      72436F6E 
+ 676      74726F6C 
+ 676      50574D5F 
+ 676      52657374 
+ 677              	.LASF28:
+ 678 0160 6D6F746F 		.ascii	"motorControlPWM_WritePeriod\000"
+ 678      72436F6E 
+ 678      74726F6C 
+ 678      50574D5F 
+ 678      57726974 
+ 679              	.LASF10:
+ 680 017c 646F7562 		.ascii	"double\000"
+ 680      6C6500
+ 681              	.LASF32:
+ 682 0183 6D6F746F 		.ascii	"motorControlPWM_Enable\000"
+ 682      72436F6E 
+ 682      74726F6C 
+ 682      50574D5F 
+ 682      456E6162 
+ 683              	.LASF8:
+ 684 019a 756E7369 		.ascii	"unsigned int\000"
+ 684      676E6564 
+ 684      20696E74 
+ 684      00
+ 685              	.LASF27:
+ 686 01a7 6D6F746F 		.ascii	"motorControlPWM_ReadControlRegister\000"
+ 686      72436F6E 
+ 686      74726F6C 
+ 686      50574D5F 
+ 686      52656164 
+ 687              	.LASF7:
+ 688 01cb 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 688      206C6F6E 
+ 688      6720756E 
+ 688      7369676E 
+ 688      65642069 
+ 689              	.LASF29:
+ 690 01e2 6D6F746F 		.ascii	"motorControlPWM_WriteCounter\000"
+ 690      72436F6E 
+ 690      74726F6C 
+ 690      50574D5F 
+ 690      57726974 
+ 691              	.LASF33:
+ 692 01ff 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 692      43313120 
+ 692      352E342E 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMrJ2z7.s 			page 18
+
+
+ 692      31203230 
+ 692      31363036 
+ 693 0232 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m0 -mthumb -g -O"
+ 693      20726576 
+ 693      6973696F 
+ 693      6E203233 
+ 693      37373135 
+ 694 0265 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 694      66756E63 
+ 694      74696F6E 
+ 694      2D736563 
+ 694      74696F6E 
+ 695              	.LASF13:
+ 696 028d 72656738 		.ascii	"reg8\000"
+ 696      00
+ 697              	.LASF15:
+ 698 0292 73697A65 		.ascii	"sizetype\000"
+ 698      74797065 
+ 698      00
+ 699              	.LASF21:
+ 700 029b 6D6F746F 		.ascii	"motorControlPWM_SaveConfig\000"
+ 700      72436F6E 
+ 700      74726F6C 
+ 700      50574D5F 
+ 700      53617665 
+ 701              	.LASF30:
+ 702 02b6 6D6F746F 		.ascii	"motorControlPWM_WriteControlRegister\000"
+ 702      72436F6E 
+ 702      74726F6C 
+ 702      50574D5F 
+ 702      57726974 
+ 703              	.LASF11:
+ 704 02db 63686172 		.ascii	"char\000"
+ 704      00
+ 705              	.LASF2:
+ 706 02e0 73686F72 		.ascii	"short int\000"
+ 706      7420696E 
+ 706      7400
+ 707              	.LASF36:
+ 708 02ea 6D6F746F 		.ascii	"motorControlPWM_backup\000"
+ 708      72436F6E 
+ 708      74726F6C 
+ 708      50574D5F 
+ 708      6261636B 
+ 709              	.LASF4:
+ 710 0301 6C6F6E67 		.ascii	"long int\000"
+ 710      20696E74 
+ 710      00
+ 711              	.LASF14:
+ 712 030a 6C6F6E67 		.ascii	"long double\000"
+ 712      20646F75 
+ 712      626C6500 
+ 713              	.LASF0:
+ 714 0316 7369676E 		.ascii	"signed char\000"
+ 714      65642063 
+ 714      68617200 
+ 715              	.LASF35:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccMrJ2z7.s 			page 19
+
+
+ 716 0322 433A5C55 		.ascii	"C:\\Users\\kylep\\Box Sync\\Box Sync\\Feniex Electr"
+ 716      73657273 
+ 716      5C6B796C 
+ 716      65705C42 
+ 716      6F782053 
+ 717 0350 6963616C 		.ascii	"ical Files\\WorkingFolder-Kyle\\Firm-AI-Cube\\81-00"
+ 717      2046696C 
+ 717      65735C57 
+ 717      6F726B69 
+ 717      6E67466F 
+ 718 0380 3032342D 		.ascii	"024-01.cydsn\000"
+ 718      30312E63 
+ 718      7964736E 
+ 718      00
+ 719              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran
