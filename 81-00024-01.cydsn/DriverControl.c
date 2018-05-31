@@ -56,9 +56,9 @@ typedef struct
 
 static ThermalLimit ThermalLimitArray[ADC_SAMPLE_COUNT] = 
 {
-    {450, 100}, //LED
-    {400, 100}, //SwitchNode    
-    {100,  80}, //Micro
+    {200, 100}, //LED
+    {200, 100}, //SwitchNode    
+    {25,  5}, //Micro
     {300, 100}  //Ambient
 };
 
@@ -82,6 +82,7 @@ typedef struct
 }RegulationProperties;
 
 static RegulationProperties RegulationData = {0, 0, 0, STARTUP, 0xFF};
+static RegulationProperties RegulationDataFast = {0, 0, 0, STARTUP, 0xFF};
 
 typedef struct
 {
@@ -90,7 +91,7 @@ typedef struct
 }VoltageSenseProperties;
 
 static VoltageSenseProperties VoltageSenseData = {TRUE, 0xFF};
-
+uint8 regulateBrightnessFaster(int16* TemperatureData, uint8 length);
 /**********GLOBAL VARIABLES**********/
 
 
@@ -282,6 +283,9 @@ void processSoftStart(void)
 *******************************************************************************/
 uint8 updateBrightnessLevel(uint8 brightnessLevel, uint8 bRegulated)
 {
+    static uint8 tempBrightness = 0;
+    static uint8 tempPreviousRequestedBrightness = 0;
+    
     if(bRegulated != TRUE && bRegulated != FALSE)
     return 0;
     
@@ -312,17 +316,26 @@ uint8 updateBrightnessLevel(uint8 brightnessLevel, uint8 bRegulated)
     
     if(RegulationData.regulatedBrightness != RegulationData.previousBrightness)
     {
-        if(RegulationData.regulatedBrightness > 0)
+        if((RegulationData.requestedBrightness>RegulationData.regulatedBrightness)) //&& (RegulationData.currentState!=STARTUP||RegulationData.currentState!=NO_CHANGE))
+        {
+            tempBrightness = RegulationData.regulatedBrightness;
+        }
+        else
+        {
+            tempBrightness = RegulationData.requestedBrightness;
+        }
+        if(tempBrightness > 0)
         {
             PWM_Enable_Write(TRUE);
-            PWM_WriteCompare(RegulationData.regulatedBrightness);
+            PWM_WriteCompare(tempBrightness);
         }
         else
             PWM_Enable_Write(FALSE);
     }
     
-    RegulationData.previousBrightness = RegulationData.regulatedBrightness;    
-    return RegulationData.regulatedBrightness;
+    tempPreviousRequestedBrightness = RegulationData.requestedBrightness;
+    RegulationData.previousBrightness = tempBrightness;    
+    return tempBrightness;
 }
 
 /*******************************************************************************
@@ -554,6 +567,92 @@ uint8 regulateBrightness(int16* TemperatureData, uint8 length)
     return RegulationData.regulatedBrightness;    
 }
 
+uint8 regulateBrightnessFaster(int16* TemperatureData, uint8 length)
+{
+    static uint8 timerCountLocalFaster = 0;
+    enum TemperatureStatus temperatureStatusFaster = WITHIN_TOLERANCE;
+    
+    if(TemperatureData == NULL || length > ADC_SAMPLE_COUNT || PositionData.ID_Number != 1)
+        return 0;
+    
+    switch(RegulationDataFast.currentState)
+    {
+        case STARTUP:
+            if((timerCountLocalFaster % SAMPLE_COUNT_PER_CYCLE) == 0)
+            {
+                RegulationDataFast.scalingFactor = MAX_SCALING_FACTOR;
+                RegulationDataFast.regulatedBrightness = RegulationDataFast.requestedBrightness;
+            }
+            if((timerCountLocalFaster % (SAMPLE_COUNT_PER_CYCLE * BRIGHTNESS_CHANGE_PER_SAMPLE)) == 0)
+            {
+                temperatureStatusFaster = getTemperatureStatus(TemperatureData, length, 0);
+                if(temperatureStatusFaster == EXCEEDED_UPPER_BOUND)
+                    RegulationDataFast.currentState = STEADY_DECREASE;
+            }
+            break;            
+        case STEADY_DECREASE:  
+            if((timerCountLocalFaster % SAMPLE_COUNT_PER_CYCLE) == 0)
+            {
+                if(RegulationDataFast.scalingFactor > 0)
+                    RegulationDataFast.scalingFactor--;
+            
+                RegulationDataFast.regulatedBrightness = (uint8)((uint16)(RegulationDataFast.requestedBrightness) * 
+                    (uint16)(RegulationDataFast.scalingFactor) / MAX_SCALING_FACTOR);
+            }
+            if((timerCountLocalFaster % (SAMPLE_COUNT_PER_CYCLE * BRIGHTNESS_CHANGE_PER_SAMPLE)) == 0)
+            {
+                            temperatureStatusFaster = getTemperatureStatus(TemperatureData, length,
+                    SAFE_TEMPERATURE_TOLERANCE);
+                
+                if(temperatureStatusFaster == WITHIN_TOLERANCE)
+                    RegulationDataFast.currentState = NO_CHANGE;
+                else if(temperatureStatusFaster == EXCEEDED_LOWER_BOUND)
+                    RegulationDataFast.currentState = STEADY_INCREASE;
+            }
+            break;
+        case STEADY_INCREASE:
+            if((timerCountLocalFaster % SAMPLE_COUNT_PER_CYCLE) == 0)
+            {
+                if(RegulationDataFast.scalingFactor < MAX_SCALING_FACTOR)
+                    RegulationDataFast.scalingFactor++;
+            
+                RegulationDataFast.regulatedBrightness = (uint8)((uint16)(RegulationDataFast.requestedBrightness) * 
+                    (uint16)(RegulationDataFast.scalingFactor) / MAX_SCALING_FACTOR);
+            }
+            if((timerCountLocalFaster % (SAMPLE_COUNT_PER_CYCLE * BRIGHTNESS_CHANGE_PER_SAMPLE)) == 0)
+            {
+                temperatureStatusFaster = getTemperatureStatus(TemperatureData, length,
+                    SAFE_TEMPERATURE_TOLERANCE);
+                
+                if(temperatureStatusFaster == EXCEEDED_UPPER_BOUND)
+                    RegulationDataFast.currentState = STEADY_DECREASE;
+                else if(temperatureStatusFaster == WITHIN_TOLERANCE)
+                    RegulationDataFast.currentState = NO_CHANGE;
+            }
+            break;
+        case NO_CHANGE:
+            if((timerCountLocalFaster % SAMPLE_COUNT_PER_CYCLE) == 0)
+            {
+                RegulationDataFast.regulatedBrightness = (uint8)((uint16)(RegulationDataFast.requestedBrightness) * 
+                    (uint16)(RegulationDataFast.scalingFactor) / MAX_SCALING_FACTOR);
+            }
+            if((timerCountLocalFaster % (SAMPLE_COUNT_PER_CYCLE * BRIGHTNESS_CHANGE_PER_SAMPLE)) == 0)
+            {
+                temperatureStatusFaster = getTemperatureStatus(TemperatureData, length,
+                    SAFE_TEMPERATURE_TOLERANCE);
+                
+                if(temperatureStatusFaster == EXCEEDED_UPPER_BOUND)
+                    RegulationDataFast.currentState = STEADY_DECREASE;
+                else if(temperatureStatusFaster == EXCEEDED_LOWER_BOUND)
+                    RegulationDataFast.currentState = STEADY_INCREASE;
+            }
+            break;
+    }
+    
+    timerCountLocalFaster = (timerCountLocalFaster + 1) % (SAMPLE_COUNT_PER_CYCLE * BRIGHTNESS_CHANGE_PER_SAMPLE);   
+    return RegulationDataFast.regulatedBrightness;    
+}
+
 /**********DEFINED LOCAL FUNCTIONS**********/
 /*******************************************************************************
 * Function Name: getTemperatureStatus
@@ -602,8 +701,20 @@ static enum TemperatureStatus getTemperatureStatus(int16* TemperatureData,
 
 void setBrightness(unsigned char localBrightness)
 {
+    static uint8 previousBrightnessLocal = 0;
+    
     RegulationData.requestedBrightness = localBrightness;
-    updateBrightnessLevel(RegulationData.requestedBrightness, TRUE);
+    
+    if(previousBrightnessLocal != RegulationData.requestedBrightness)
+    {
+        updateBrightnessLevel(RegulationData.requestedBrightness, FALSE);
+    }
+    else
+    {
+        updateBrightnessLevel(RegulationData.requestedBrightness, TRUE);
+    }
+    
+    previousBrightnessLocal = localBrightness;
 }
 
 /* [] END OF FILE */

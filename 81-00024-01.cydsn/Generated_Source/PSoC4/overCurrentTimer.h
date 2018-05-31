@@ -168,7 +168,7 @@ void overCurrentTimer_Wakeup(void)        ;
 *    Initialial Parameter Constants
 ***************************************/
 
-#define overCurrentTimer_INIT_PERIOD             9999u
+#define overCurrentTimer_INIT_PERIOD             64999u
 #define overCurrentTimer_INIT_CAPTURE_MODE       ((uint8)((uint8)0u << overCurrentTimer_CTRL_CAP_MODE_SHIFT))
 #define overCurrentTimer_INIT_TRIGGER_MODE       ((uint8)((uint8)0u << overCurrentTimer_CTRL_TRIG_MODE_SHIFT))
 #if (overCurrentTimer_UsingFixedFunction)

@@ -64,7 +64,7 @@ int main()
     
      if(*(volatile uint8 *) &eepromBrightnessMotorPosition[3] == 0)
     {
-        calibrateMotor();
+        //calibrateMotor();
         ramBrightnessMotorPosition[3] = 1;
         ramBrightnessMotorPosition[2] = 0;
         ramBrightnessMotorPosition[1] = 0xFF;

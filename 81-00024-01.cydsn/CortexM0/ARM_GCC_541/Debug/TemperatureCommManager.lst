@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 1
 
 
    1              		.syntax unified
@@ -58,7 +58,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
   29:TemperatureCommManager.c **** #define TIMEOUT_LIMIT_IN_MILLISECONDS   30
   30:TemperatureCommManager.c ****     
   31:TemperatureCommManager.c **** /**********DEFINED CONSTANTS**********/
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 2
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 2
 
 
   32:TemperatureCommManager.c **** enum PacketState
@@ -118,7 +118,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
   86:TemperatureCommManager.c **** 
   87:TemperatureCommManager.c **** uint8 isReadyToSendNextBrightnessPacket(void)
   88:TemperatureCommManager.c **** {
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 3
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 3
 
 
   89:TemperatureCommManager.c ****    return bReadyToSendNextBrightnessTimeoutPacket;
@@ -178,7 +178,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  143:TemperatureCommManager.c ****     //interruptSource = UART_Temperature_GetRxInterruptSourceMasked();
  144:TemperatureCommManager.c ****     //UART_Temperature_ClearRxInterruptSource(interruptSource);
  145:TemperatureCommManager.c **** }
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 4
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 4
 
 
  146:TemperatureCommManager.c **** 
@@ -238,7 +238,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  200:TemperatureCommManager.c ****     }
  201:TemperatureCommManager.c ****     else
  202:TemperatureCommManager.c ****     {
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 5
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 5
 
 
  203:TemperatureCommManager.c ****         bLastDriverInChain = TRUE;
@@ -298,7 +298,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  257:TemperatureCommManager.c ****     memset(packet, 0, MAX_PACKET_SIZE);
  258:TemperatureCommManager.c ****     packet[HEADER_START_INDEX] = PacketList[channelNumber + 2].HEADER_BYTE;
  259:TemperatureCommManager.c ****     packet[HEADER_START_INDEX + 1] = PacketList[channelNumber + 2].PACKET_TYPE;
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 6
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 6
 
 
  260:TemperatureCommManager.c ****     packet[PAYLOAD_START_INDEX + PacketList[channelNumber + 2].PAYLOAD_SIZE] 
@@ -358,7 +358,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  314:TemperatureCommManager.c **** * Parameters:
  315:TemperatureCommManager.c **** *  dataByte: The next byte to check in the packet
  316:TemperatureCommManager.c **** *
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 7
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 7
 
 
  317:TemperatureCommManager.c **** * Return:
@@ -418,7 +418,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  371:TemperatureCommManager.c ****         case EOP_STATE:
  372:TemperatureCommManager.c ****             if((currentPacketIndex == (PAYLOAD_START_INDEX + PacketList[dataTypeIndex].PAYLOAD_SIZE
  373:TemperatureCommManager.c ****                 (dataByte == PacketList[dataTypeIndex].EOP_CARRIAGE_RETURN))
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 8
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 8
 
 
  374:TemperatureCommManager.c ****             {
@@ -478,7 +478,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  428:TemperatureCommManager.c ****     driverID = getDriverID();
  429:TemperatureCommManager.c ****     if((driverID < HEAD_MODULE_ID) || (driverID > MAX_DRIVER_COUNT))
  430:TemperatureCommManager.c ****         return FAILURE;
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 9
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 9
 
 
  431:TemperatureCommManager.c ****     
@@ -538,7 +538,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  485:TemperatureCommManager.c **** *
  486:TemperatureCommManager.c **** * Parameters:
  487:TemperatureCommManager.c **** *  packet: The reference to the ack packet.
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 10
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 10
 
 
  488:TemperatureCommManager.c **** *  length: The byte count for this packet.
@@ -598,7 +598,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
   42 0008 14D1     		bne	.L7
   43 000a 0023     		movs	r3, #0
   44 000c 0024     		movs	r4, #0
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 11
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 11
 
 
   45 000e 0BE0     		b	.L3
@@ -658,7 +658,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
   83              	.LVL10:
   84 0032 00E0     		b	.L2
   85              	.LVL11:
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 12
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 12
 
 
   86              	.L7:
@@ -718,7 +718,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
   94:TemperatureCommManager.c **** }
  135              		.loc 1 94 0
  136 0000 0022     		movs	r2, #0
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 13
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 13
 
 
  137 0002 014B     		ldr	r3, .L13
@@ -778,7 +778,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  186              		@ frame_needed = 0, uses_anonymous_args = 0
  187              		@ link register save eliminated.
  145:TemperatureCommManager.c **** 
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 14
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 14
 
 
  188              		.loc 1 145 0
@@ -838,7 +838,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  236              	.L22:
  237 001e 0120     		movs	r0, #1
  238              	.LVL20:
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 15
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 15
 
 
  239              	.L20:
@@ -898,7 +898,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  286 001e FFF7FEFF 		bl	AckTimer_Stop
  287              	.LVL22:
  206:TemperatureCommManager.c ****         setDriverCount(lastDriverPacket[PAYLOAD_START_INDEX]);
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 16
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 16
 
 
  288              		.loc 1 206 0
@@ -958,7 +958,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  338              		.cfi_offset 9, -28
  339              		.cfi_offset 10, -24
  340 000a 88B0     		sub	sp, sp, #32
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 17
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 17
 
 
  341              		.cfi_def_cfa_offset 64
@@ -1018,7 +1018,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  387 0050 FFF7FEFF 		bl	getDriverID
  388              	.LVL29:
  389 0054 0400     		movs	r4, r0
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 18
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 18
 
 
  390 0056 8046     		mov	r8, r0
@@ -1078,7 +1078,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  435              	.LVL33:
  436 009c 6400     		lsls	r4, r4, #1
  437 009e 5346     		mov	r3, r10
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 19
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 19
 
 
  438 00a0 1F0A     		lsrs	r7, r3, #8
@@ -1138,7 +1138,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  483 00de E55C     		ldrb	r5, [r4, r3]
  288:TemperatureCommManager.c ****     
  484              		.loc 1 288 0
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 20
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 20
 
 
  485 00e0 1221     		movs	r1, #18
@@ -1198,7 +1198,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  530              		.loc 1 303 0
  531 0126 08B0     		add	sp, sp, #32
  532              		@ sp needed
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 21
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 21
 
 
  533 0128 1CBC     		pop	{r2, r3, r4}
@@ -1258,7 +1258,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  587              		.set	.LANCHOR0,. + 0
  588              		.type	bReadyToSendNextBrightnessTimeoutPacket, %object
  589              		.size	bReadyToSendNextBrightnessTimeoutPacket, 1
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 22
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 22
 
 
  590              	bReadyToSendNextBrightnessTimeoutPacket:
@@ -1318,7 +1318,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  635              		.file 2 "Generated_Source\\PSoC4/cytypes.h"
  636              		.file 3 "Generated_Source\\PSoC4/AckTimer.h"
  637              		.file 4 "DriverControl.h"
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 23
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 23
 
 
  638              		.file 5 "Generated_Source\\PSoC4/SamplingTimer.h"
@@ -1378,7 +1378,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  692 0066 07       		.byte	0x7
  693 0067 23030000 		.4byte	.LASF8
  694 006b 04       		.uleb128 0x4
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 24
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 24
 
 
  695 006c 5C010000 		.4byte	.LASF9
@@ -1438,7 +1438,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  749 00df 01       		.byte	0x1
  750 00e0 08       		.uleb128 0x8
  751 00e1 8F030000 		.4byte	.LASF19
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 25
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 25
 
 
  752 00e5 02       		.byte	0x2
@@ -1498,7 +1498,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  806 014e 0802     		.2byte	0x208
  807 0150 8F000000 		.4byte	0x8f
  808 0154 00000000 		.4byte	.LFB43
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 26
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 26
 
 
  809 0158 38000000 		.4byte	.LFE43-.LFB43
@@ -1558,7 +1558,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  863 01de 01       		.byte	0x1
  864 01df 70       		.byte	0x70
  865 01e0 6B000000 		.4byte	0x6b
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 27
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 27
 
 
  866 01e4 00000000 		.4byte	.LFB34
@@ -1618,7 +1618,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  920 0256 01       		.byte	0x1
  921 0257 BF       		.byte	0xbf
  922 0258 00000000 		.4byte	.LFB37
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 28
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 28
 
 
  923 025c 3C000000 		.4byte	.LFE37-.LFB37
@@ -1678,7 +1678,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  977 02c2 05040000 		.4byte	0x405
  978 02c6 05       		.uleb128 0x5
  979 02c7 03       		.byte	0x3
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 29
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 29
 
 
  980 02c8 18000000 		.4byte	ADC_Data.6545
@@ -1738,7 +1738,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  1034 033d 49050000 		.4byte	0x549
  1035 0341 5B030000 		.4byte	0x35b
  1036 0345 15       		.uleb128 0x15
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 30
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 30
 
 
  1037 0346 01       		.uleb128 0x1
@@ -1798,7 +1798,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  1091 0394 02       		.sleb128 2
  1092 0395 15       		.uleb128 0x15
  1093 0396 01       		.uleb128 0x1
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 31
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 31
 
 
  1094 0397 51       		.byte	0x51
@@ -1858,7 +1858,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  1148 03e8 03       		.uleb128 0x3
  1149 03e9 74       		.byte	0x74
  1150 03ea DC00     		.sleb128 92
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 32
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 32
 
 
  1151 03ec 15       		.uleb128 0x15
@@ -1918,7 +1918,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  1205 0461 03       		.byte	0x3
  1206 0462 00000000 		.4byte	PacketList
  1207 0466 0B       		.uleb128 0xb
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 33
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 33
 
 
  1208 0467 45040000 		.4byte	0x445
@@ -1978,7 +1978,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  1262 04dc 6B000000 		.4byte	0x6b
  1263 04e0 05       		.uleb128 0x5
  1264 04e1 03       		.byte	0x3
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 34
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 34
 
 
  1265 04e2 00000000 		.4byte	bReadyToSendNextBrightnessTimeoutPacket
@@ -2038,7 +2038,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  1319 0560 CB010000 		.4byte	.LASF61
  1320 0564 CB010000 		.4byte	.LASF61
  1321 0568 04       		.byte	0x4
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 35
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 35
 
 
  1322 0569 2F       		.byte	0x2f
@@ -2098,7 +2098,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  1376 0023 3E       		.uleb128 0x3e
  1377 0024 0B       		.uleb128 0xb
  1378 0025 03       		.uleb128 0x3
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 36
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 36
 
 
  1379 0026 08       		.uleb128 0x8
@@ -2158,7 +2158,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  1433 005c 03       		.uleb128 0x3
  1434 005d 0E       		.uleb128 0xe
  1435 005e 1C       		.uleb128 0x1c
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 37
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 37
 
 
  1436 005f 0B       		.uleb128 0xb
@@ -2218,7 +2218,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  1490 0095 03       		.uleb128 0x3
  1491 0096 0E       		.uleb128 0xe
  1492 0097 3A       		.uleb128 0x3a
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 38
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 38
 
 
  1493 0098 0B       		.uleb128 0xb
@@ -2278,7 +2278,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  1547 00cf 03       		.uleb128 0x3
  1548 00d0 0E       		.uleb128 0xe
  1549 00d1 3A       		.uleb128 0x3a
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 39
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 39
 
 
  1550 00d2 0B       		.uleb128 0xb
@@ -2338,7 +2338,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  1604 010a 13       		.uleb128 0x13
  1605 010b 11       		.uleb128 0x11
  1606 010c 01       		.uleb128 0x1
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 40
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 40
 
 
  1607 010d 12       		.uleb128 0x12
@@ -2398,7 +2398,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  1661 0149 27       		.uleb128 0x27
  1662 014a 19       		.uleb128 0x19
  1663 014b 11       		.uleb128 0x11
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 41
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 41
 
 
  1664 014c 01       		.uleb128 0x1
@@ -2458,7 +2458,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  1718 0188 00       		.byte	0
  1719 0189 00       		.byte	0
  1720 018a 1A       		.uleb128 0x1a
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 42
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 42
 
 
  1721 018b 34       		.uleb128 0x34
@@ -2518,7 +2518,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  1775 01c1 49       		.uleb128 0x49
  1776 01c2 13       		.uleb128 0x13
  1777 01c3 2F       		.uleb128 0x2f
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 43
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 43
 
 
  1778 01c4 0B       		.uleb128 0xb
@@ -2578,7 +2578,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  1832 01fa 19       		.uleb128 0x19
  1833 01fb 3C       		.uleb128 0x3c
  1834 01fc 19       		.uleb128 0x19
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 44
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 44
 
 
  1835 01fd 6E       		.uleb128 0x6e
@@ -2638,7 +2638,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  1889 005e 10000000 		.4byte	.LVL2
  1890 0062 30000000 		.4byte	.LVL9
  1891 0066 0400     		.2byte	0x4
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 45
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 45
 
 
  1892 0068 F3       		.byte	0xf3
@@ -2698,7 +2698,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  1946 00eb 0200     		.2byte	0x2
  1947 00ed 30       		.byte	0x30
  1948 00ee 9F       		.byte	0x9f
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 46
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 46
 
 
  1949 00ef 10000000 		.4byte	.LVL2
@@ -2758,7 +2758,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  2003 0173 00000000 		.4byte	0
  2004              	.LLST6:
  2005 0177 00000000 		.4byte	.LVL13
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 47
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 47
 
 
  2006 017b 0E000000 		.4byte	.LVL14
@@ -2818,7 +2818,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  2060 0201 00000000 		.4byte	0
  2061              		.section	.debug_aranges,"",%progbits
  2062 0000 54000000 		.4byte	0x54
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 48
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 48
 
 
  2063 0004 0200     		.2byte	0x2
@@ -2878,7 +2878,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  2111      69766572 
  2111      00
  2112              	.LASF62:
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 49
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 49
 
 
  2113 000d 72656775 		.ascii	"regulateBrightness\000"
@@ -2938,7 +2938,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  2134      6973696F 
  2134      6E203233 
  2134      37373135 
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 50
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 50
 
 
  2135 0101 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
@@ -2998,7 +2998,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  2159 01cb 6765744D 		.ascii	"getMaxTemperature\000"
  2159      61785465 
  2159      6D706572 
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 51
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 51
 
 
  2159      61747572 
@@ -3058,7 +3058,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  2181      78427269 
  2181      6768746E 
  2181      65737300 
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 52
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 52
 
 
  2182              	.LASF27:
@@ -3118,7 +3118,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  2203      6C696E67 
  2203      54696D65 
  2203      725F436C 
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 53
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 53
 
 
  2203      65617249 
@@ -3178,7 +3178,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  2227      69676E65 
  2227      6420696E 
  2227      7400
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 54
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 54
 
 
  2228              	.LASF67:
@@ -3238,7 +3238,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 1
  2249 0508 73657444 		.ascii	"setDriverCount\000"
  2249      72697665 
  2249      72436F75 
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccPC18kz.s 			page 55
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbkaaW5.s 			page 55
 
 
  2249      6E7400
