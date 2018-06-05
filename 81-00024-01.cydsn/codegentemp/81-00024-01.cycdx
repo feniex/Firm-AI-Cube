@@ -17,13 +17,13 @@
       <field name="CTRL_TMODE" from="3" to="2" access="RW" resetVal="" desc="Trigger Mode" hidden="false" />
       <field name="CTRL_IC" from="1" to="0" access="RW" resetVal="" desc="Interrupt Count" hidden="false" />
     </register>
-    <register name="overCurrentTimer_STATUS_MASK" address="0x400F0081" bitWidth="8" desc="UDB Status bits Interrupt Mask Enable Register" hidden="false">
+    <register name="overCurrentTimer_STATUS_MASK" address="0x400F0080" bitWidth="8" desc="UDB Status bits Interrupt Mask Enable Register" hidden="false">
       <field name="TIMER_STS_TC" from="0" to="0" access="R" resetVal="" desc="Enables the Interrupt on TC" hidden="false" />
       <field name="TIMER_STS_CAPT" from="1" to="1" access="R" resetVal="" desc="Enables the Interrupt on Capture" hidden="false" />
       <field name="TIMER_STS_FIFO_FULL" from="2" to="2" access="R" resetVal="" desc="FIFO Full Status " hidden="false" />
       <field name="TIMER_STS_FIFO_NEMPTY" from="3" to="3" access="R" resetVal="" desc="FIFO Empty status " hidden="false" />
     </register>
-    <register name="overCurrentTimer_STATUS_AUX_CTRL" address="0x400F0091" bitWidth="8" desc="UDB Auxilliary Control Register" hidden="false">
+    <register name="overCurrentTimer_STATUS_AUX_CTRL" address="0x400F0090" bitWidth="8" desc="UDB Auxilliary Control Register" hidden="false">
       <field name="FIFO0_CLR" from="0" to="0" access="RW" resetVal="" desc="FIFO0 clear" hidden="false">
         <value name="E_FIFO_CLR_0" value="0" desc="Normal FIFO operation" />
         <value name="E_FIFO_CLR_1" value="1" desc="Clear FIFO state" />
@@ -69,7 +69,7 @@
     <register name="PERIOD_BUF" address="0x40050198" bitWidth="32" desc="Period buffer value" hidden="false" />
   </block>
   <block name="EmEEPROM" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="Pin_3" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="DIM_PLUS" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="AckTimer" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
     <block name="VMux_count" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="VMux_reload" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
@@ -86,19 +86,19 @@
   </block>
   <block name="overCurrentTimerISR" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="or_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="Pin_2" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="ZOOM_PLUS" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="modeChangeISR" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="cy_lfclk" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="cy_boot" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="Pin_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="Pin_4" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="DIM_MINUS" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="ZOOM_MINUS" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="ZeroTerminal_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="pwmClock_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="Clock_5" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="inputs" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
-    <register name="inputs_STATUS_REG" address="0x400F0060" bitWidth="8" desc="" hidden="false" />
-    <register name="inputs_MASK_REG" address="0x400F0080" bitWidth="8" desc="" hidden="false" />
-    <register name="inputs_STATUS_AUX_CTL_REG" address="0x400F0090" bitWidth="8" desc="" hidden="false">
+    <register name="inputs_STATUS_REG" address="0x400F0061" bitWidth="8" desc="" hidden="false" />
+    <register name="inputs_MASK_REG" address="0x400F0081" bitWidth="8" desc="" hidden="false" />
+    <register name="inputs_STATUS_AUX_CTL_REG" address="0x400F0091" bitWidth="8" desc="" hidden="false">
       <field name="FIFO0" from="5" to="5" access="RW" resetVal="" desc="FIFO0 clear" hidden="false">
         <value name="ENABLED" value="1" desc="Enable counter" />
         <value name="DISABLED" value="0" desc="Disable counter" />

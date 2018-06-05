@@ -82,14 +82,16 @@ typedef enum MotorConstants
 {
     MANIP_VARIABLE_MAX = 0x00FF,
     MANIP_VARIABLE_MIN = 0x0005,
-    HARDWARE_LIMIT_MAX = 0x00FF,
-    HARDWARE_LIMIT_MIN = 0x0000,
+    HARDWARE_LIMIT_MAX = 0xFF,
+    HARDWARE_LIMIT_MIN = 5,
     DESIRED_POSITION = 0
 }MotorConstants;
 
-#define Kp 0.75
-#define Ki 0.001
-#define Kd 4
+#define Kp 1//0.75
+#define Ki 0.93//0.001
+#define Kd 1//4
+
+#define TOLERANCE 5
 
 #define OVER_CURRENT_VALUE 500
 #define OVER_CURRENT_TIMER_THRESHOLD 500

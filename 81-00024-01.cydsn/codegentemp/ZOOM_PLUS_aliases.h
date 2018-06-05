@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: Pin_2.h  
+* File Name: ZOOM_PLUS.h  
 * Version 2.20
 *
 * Description:
@@ -15,8 +15,8 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#if !defined(CY_PINS_Pin_2_ALIASES_H) /* Pins Pin_2_ALIASES_H */
-#define CY_PINS_Pin_2_ALIASES_H
+#if !defined(CY_PINS_ZOOM_PLUS_ALIASES_H) /* Pins ZOOM_PLUS_ALIASES_H */
+#define CY_PINS_ZOOM_PLUS_ALIASES_H
 
 #include "cytypes.h"
 #include "cyfitter.h"
@@ -26,17 +26,17 @@
 /***************************************
 *              Constants        
 ***************************************/
-#define Pin_2_0			(Pin_2__0__PC)
-#define Pin_2_0_PS		(Pin_2__0__PS)
-#define Pin_2_0_PC		(Pin_2__0__PC)
-#define Pin_2_0_DR		(Pin_2__0__DR)
-#define Pin_2_0_SHIFT	(Pin_2__0__SHIFT)
-#define Pin_2_0_INTR	((uint16)((uint16)0x0003u << (Pin_2__0__SHIFT*2u)))
+#define ZOOM_PLUS_0			(ZOOM_PLUS__0__PC)
+#define ZOOM_PLUS_0_PS		(ZOOM_PLUS__0__PS)
+#define ZOOM_PLUS_0_PC		(ZOOM_PLUS__0__PC)
+#define ZOOM_PLUS_0_DR		(ZOOM_PLUS__0__DR)
+#define ZOOM_PLUS_0_SHIFT	(ZOOM_PLUS__0__SHIFT)
+#define ZOOM_PLUS_0_INTR	((uint16)((uint16)0x0003u << (ZOOM_PLUS__0__SHIFT*2u)))
 
-#define Pin_2_INTR_ALL	 ((uint16)(Pin_2_0_INTR))
+#define ZOOM_PLUS_INTR_ALL	 ((uint16)(ZOOM_PLUS_0_INTR))
 
 
-#endif /* End Pins Pin_2_ALIASES_H */
+#endif /* End Pins ZOOM_PLUS_ALIASES_H */
 
 
 /* [] END OF FILE */

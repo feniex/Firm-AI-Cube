@@ -63,7 +63,7 @@ static Packet PacketList[PACKET_TYPE_COUNT] =
 static uint8 bDriverCountReceived = FALSE;
 
 volatile uint8 bCommunicationTimeOut = FALSE;
-static uint8 stateOfLightBar = 0;
+static uint8 stateOfLightBar = 1;
 volatile uint16 timeOutCounter = 0;
 volatile uint8 bIsCommunicationTrigger = FALSE;
 /**********LOCAL FUNCTION PROTOTYPES**********/

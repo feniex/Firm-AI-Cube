@@ -2,7 +2,7 @@
 --	Conversion of 81-00024-01.v to vh2:
 --
 --	Cypress Semiconductor - WARP Version 6.3 IR 41
---	Thu May 31 08:28:27 2018
+--	Tue Jun 05 08:56:50 2018
 --
 
 USE cypress.cypress.all;
@@ -1007,11 +1007,11 @@ SIGNAL Net_3419 : bit;
 SIGNAL Net_3420 : bit;
 SIGNAL Net_3421 : bit;
 SIGNAL Net_3417 : bit;
-SIGNAL tmpOE__Pin_3_net_0 : bit;
+SIGNAL tmpOE__DIM_PLUS_net_0 : bit;
 SIGNAL Net_3327_2 : bit;
-SIGNAL tmpIO_0__Pin_3_net_0 : bit;
-TERMINAL tmpSIOVREF__Pin_3_net_0 : bit;
-SIGNAL tmpINTERRUPT_0__Pin_3_net_0 : bit;
+SIGNAL tmpIO_0__DIM_PLUS_net_0 : bit;
+TERMINAL tmpSIOVREF__DIM_PLUS_net_0 : bit;
+SIGNAL tmpINTERRUPT_0__DIM_PLUS_net_0 : bit;
 TERMINAL \DieTemp:Net_3\ : bit;
 SIGNAL tmpOE__limitSwitch_net_0 : bit;
 SIGNAL tmpFB_0__limitSwitch_net_0 : bit;
@@ -1205,11 +1205,11 @@ SIGNAL \overCurrentTimer:TimerUDB:sT16:timerdp:f1_bus_stat_reg_1\ : bit;
 ATTRIBUTE port_state_att of \overCurrentTimer:TimerUDB:sT16:timerdp:f1_bus_stat_reg_1\:SIGNAL IS 2;
 SIGNAL \overCurrentTimer:TimerUDB:sT16:timerdp:f1_blk_stat_reg_1\ : bit;
 ATTRIBUTE port_state_att of \overCurrentTimer:TimerUDB:sT16:timerdp:f1_blk_stat_reg_1\:SIGNAL IS 2;
-SIGNAL tmpOE__Pin_4_net_0 : bit;
+SIGNAL tmpOE__ZOOM_MINUS_net_0 : bit;
 SIGNAL Net_3327_3 : bit;
-SIGNAL tmpIO_0__Pin_4_net_0 : bit;
-TERMINAL tmpSIOVREF__Pin_4_net_0 : bit;
-SIGNAL tmpINTERRUPT_0__Pin_4_net_0 : bit;
+SIGNAL tmpIO_0__ZOOM_MINUS_net_0 : bit;
+TERMINAL tmpSIOVREF__ZOOM_MINUS_net_0 : bit;
+SIGNAL tmpINTERRUPT_0__ZOOM_MINUS_net_0 : bit;
 SIGNAL Net_3332 : bit;
 SIGNAL \Debouncer_1:op_clk\ : bit;
 SIGNAL \Debouncer_1:DEBOUNCER[0]:d_sync_0\ : bit;
@@ -1247,14 +1247,14 @@ SIGNAL \inputs:status_5\ : bit;
 SIGNAL \inputs:status_6\ : bit;
 SIGNAL \inputs:status_7\ : bit;
 SIGNAL Net_3629 : bit;
-SIGNAL tmpOE__Pin_2_net_0 : bit;
-SIGNAL tmpIO_0__Pin_2_net_0 : bit;
-TERMINAL tmpSIOVREF__Pin_2_net_0 : bit;
-SIGNAL tmpINTERRUPT_0__Pin_2_net_0 : bit;
-SIGNAL tmpOE__Pin_1_net_0 : bit;
-SIGNAL tmpIO_0__Pin_1_net_0 : bit;
-TERMINAL tmpSIOVREF__Pin_1_net_0 : bit;
-SIGNAL tmpINTERRUPT_0__Pin_1_net_0 : bit;
+SIGNAL tmpOE__ZOOM_PLUS_net_0 : bit;
+SIGNAL tmpIO_0__ZOOM_PLUS_net_0 : bit;
+TERMINAL tmpSIOVREF__ZOOM_PLUS_net_0 : bit;
+SIGNAL tmpINTERRUPT_0__ZOOM_PLUS_net_0 : bit;
+SIGNAL tmpOE__DIM_MINUS_net_0 : bit;
+SIGNAL tmpIO_0__DIM_MINUS_net_0 : bit;
+TERMINAL tmpSIOVREF__DIM_MINUS_net_0 : bit;
+SIGNAL tmpINTERRUPT_0__DIM_MINUS_net_0 : bit;
 SIGNAL \motorControlPWM:PWMUDB:min_kill_reg\\D\ : bit;
 SIGNAL \motorControlPWM:PWMUDB:prevCapture\\D\ : bit;
 SIGNAL \motorControlPWM:PWMUDB:trig_last\\D\ : bit;
@@ -2829,7 +2829,7 @@ AckTimeoutISR:cy_isr_v1_0
 		line_out=>Net_3420,
 		line_out_compl=>Net_3421,
 		interrupt=>Net_3417);
-Pin_3:cy_psoc3_pins_v1_10
+DIM_PLUS:cy_psoc3_pins_v1_10
 	GENERIC MAP(id=>"cfa916e2-3678-499e-8466-fce09ac23c23",
 		drive_mode=>"001",
 		ibuf_enabled=>"1",
@@ -2889,8 +2889,8 @@ Pin_3:cy_psoc3_pins_v1_10
 		y=>(zero),
 		fb=>Net_3327_2,
 		analog=>(open),
-		io=>(tmpIO_0__Pin_3_net_0),
-		siovref=>(tmpSIOVREF__Pin_3_net_0),
+		io=>(tmpIO_0__DIM_PLUS_net_0),
+		siovref=>(tmpSIOVREF__DIM_PLUS_net_0),
 		annotation=>(open),
 		in_clock=>zero,
 		in_clock_en=>tmpOE__HBridge_CS_net_0,
@@ -2898,7 +2898,7 @@ Pin_3:cy_psoc3_pins_v1_10
 		out_clock=>zero,
 		out_clock_en=>tmpOE__HBridge_CS_net_0,
 		out_reset=>zero,
-		interrupt=>tmpINTERRUPT_0__Pin_3_net_0);
+		interrupt=>tmpINTERRUPT_0__DIM_PLUS_net_0);
 pwmClock:cy_clock_v1_0
 	GENERIC MAP(cy_registers=>"",
 		id=>"b66e55a9-26f0-4da1-83d8-5d6724aa2904",
@@ -3204,7 +3204,7 @@ pwmClock_1:cy_clock_v1_0
 		is_digital=>'1')
 	PORT MAP(clock_out=>Net_3276,
 		dig_domain_out=>open);
-Pin_4:cy_psoc3_pins_v1_10
+ZOOM_MINUS:cy_psoc3_pins_v1_10
 	GENERIC MAP(id=>"133be337-9f48-4fbf-9b76-bc7c927f198f",
 		drive_mode=>"001",
 		ibuf_enabled=>"1",
@@ -3264,8 +3264,8 @@ Pin_4:cy_psoc3_pins_v1_10
 		y=>(zero),
 		fb=>Net_3327_3,
 		analog=>(open),
-		io=>(tmpIO_0__Pin_4_net_0),
-		siovref=>(tmpSIOVREF__Pin_4_net_0),
+		io=>(tmpIO_0__ZOOM_MINUS_net_0),
+		siovref=>(tmpSIOVREF__ZOOM_MINUS_net_0),
 		annotation=>(open),
 		in_clock=>zero,
 		in_clock_en=>tmpOE__HBridge_CS_net_0,
@@ -3273,7 +3273,7 @@ Pin_4:cy_psoc3_pins_v1_10
 		out_clock=>zero,
 		out_clock_en=>tmpOE__HBridge_CS_net_0,
 		out_reset=>zero,
-		interrupt=>tmpINTERRUPT_0__Pin_4_net_0);
+		interrupt=>tmpINTERRUPT_0__ZOOM_MINUS_net_0);
 \Debouncer_1:ClkSync\:cy_psoc3_udb_clock_enable_v1_0
 	GENERIC MAP(sync_mode=>'1')
 	PORT MAP(clock_in=>Net_3332,
@@ -3291,7 +3291,7 @@ Clock_5:cy_clock_v1_0
 		id=>"6d7c9926-fc3a-4a63-a0d7-8d3450816b71",
 		source_clock_id=>"",
 		divisor=>0,
-		period=>"50000000000000",
+		period=>"16666666666666.7",
 		is_direct=>'0',
 		is_digital=>'1')
 	PORT MAP(clock_out=>Net_3332,
@@ -3300,7 +3300,7 @@ modeChangeISR:cy_isr_v1_0
 	GENERIC MAP(int_type=>"10",
 		is_nmi=>'0')
 	PORT MAP(int_signal=>Net_3629);
-Pin_2:cy_psoc3_pins_v1_10
+ZOOM_PLUS:cy_psoc3_pins_v1_10
 	GENERIC MAP(id=>"cd577efb-3e27-4c54-9664-20ab99d648f7",
 		drive_mode=>"001",
 		ibuf_enabled=>"1",
@@ -3360,8 +3360,8 @@ Pin_2:cy_psoc3_pins_v1_10
 		y=>(zero),
 		fb=>Net_3327_1,
 		analog=>(open),
-		io=>(tmpIO_0__Pin_2_net_0),
-		siovref=>(tmpSIOVREF__Pin_2_net_0),
+		io=>(tmpIO_0__ZOOM_PLUS_net_0),
+		siovref=>(tmpSIOVREF__ZOOM_PLUS_net_0),
 		annotation=>(open),
 		in_clock=>zero,
 		in_clock_en=>tmpOE__HBridge_CS_net_0,
@@ -3369,8 +3369,8 @@ Pin_2:cy_psoc3_pins_v1_10
 		out_clock=>zero,
 		out_clock_en=>tmpOE__HBridge_CS_net_0,
 		out_reset=>zero,
-		interrupt=>tmpINTERRUPT_0__Pin_2_net_0);
-Pin_1:cy_psoc3_pins_v1_10
+		interrupt=>tmpINTERRUPT_0__ZOOM_PLUS_net_0);
+DIM_MINUS:cy_psoc3_pins_v1_10
 	GENERIC MAP(id=>"5348933a-bb79-4800-b64f-c22d83fe60ee",
 		drive_mode=>"001",
 		ibuf_enabled=>"1",
@@ -3430,8 +3430,8 @@ Pin_1:cy_psoc3_pins_v1_10
 		y=>(zero),
 		fb=>Net_3327_0,
 		analog=>(open),
-		io=>(tmpIO_0__Pin_1_net_0),
-		siovref=>(tmpSIOVREF__Pin_1_net_0),
+		io=>(tmpIO_0__DIM_MINUS_net_0),
+		siovref=>(tmpSIOVREF__DIM_MINUS_net_0),
 		annotation=>(open),
 		in_clock=>zero,
 		in_clock_en=>tmpOE__HBridge_CS_net_0,
@@ -3439,7 +3439,7 @@ Pin_1:cy_psoc3_pins_v1_10
 		out_clock=>zero,
 		out_clock_en=>tmpOE__HBridge_CS_net_0,
 		out_reset=>zero,
-		interrupt=>tmpINTERRUPT_0__Pin_1_net_0);
+		interrupt=>tmpINTERRUPT_0__DIM_MINUS_net_0);
 \motorControlPWM:PWMUDB:min_kill_reg\:cy_dsrff
 	PORT MAP(d=>tmpOE__HBridge_CS_net_0,
 		s=>zero,

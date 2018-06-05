@@ -45,6 +45,14 @@ CY_ISR(HALL_EFFECT_EDGE_DETECT_INTERRUPT)
     CyDelay(10);
     pMotor->forwardLimitCS = ADC_SAR_Seq_GetResult16(POT_FEEDBACK);
     pMotor->forwardLimitCS = pMotor->forwardLimitCS>>3;
+    if(pMotor->forwardLimitCS<60)
+    {
+        pMotor->backwardLimitCS=pMotor->forwardLimitCS-pMotor->forwardLimitCS;
+    }
+    else
+    {
+        pMotor->backwardLimitCS=pMotor->forwardLimitCS-60;
+    }
     pMotor->calibrated = DONE_CALIBRATING;
     limitSwitch_ClearInterrupt();
 }
@@ -161,10 +169,10 @@ int16 calibrateMotor(void)
     
     while(pMotor->calibrated!=1)
     {
-       while(bDoneMovingCalibrate == FALSE)
-       {
-            motorControlLoop(1);
-       }
+       //while(bDoneMovingCalibrate == FALSE)
+       //{
+            //motorControlLoop(1);
+       //}
        hallEffectISR_StartEx(HALL_EFFECT_EDGE_DETECT_INTERRUPT);
        CyDelay(5000);
        bDoneMovingCalibrate = FALSE;
@@ -174,6 +182,7 @@ int16 calibrateMotor(void)
             {
                 timeOutCalibrate = 0;
                 CyDelay(1);
+                setMotorOutputs(BRAKE,0xFF);
                 break;
             }
      
@@ -199,6 +208,7 @@ void loadLimitSwitchValue(void)
     static const uint8 * pLocalNonVolatileMemory;
     pLocalNonVolatileMemory = getNonVolatileBarStateMemory();
     pMotor->forwardLimitCS = pLocalNonVolatileMemory[4];
+    pMotor->backwardLimitCS = pLocalNonVolatileMemory[5];
 }
 
 void setMotorOutputs(Direction direction, Speed speed)
@@ -267,6 +277,12 @@ MotorIO * motorControlLoop(int16 manualDesiredPostion)
 
         }
         
+        if(pMotor->desiredPot<=pMotor->backwardLimitCS)//if(pMotor->desiredPot>=255)
+        {
+            pMotor->desiredPot = pMotor->backwardLimitCS;
+
+        }
+        
         if(pMotor->desiredPot>=HARDWARE_LIMIT_MAX)//if(pMotor->desiredPot>=255)
         {
             pMotor->desiredPot = HARDWARE_LIMIT_MAX;
@@ -312,13 +328,13 @@ MotorIO * motorControlLoop(int16 manualDesiredPostion)
         //pMotor->currentCS = getCurrentSense();
         
         
-        if(pMotor->MotorOutput >= DESIRED_POSITION-20 && pMotor->MotorOutput<= DESIRED_POSITION+20)
+        if(pMotor->MotorOutput >= DESIRED_POSITION-TOLERANCE && pMotor->MotorOutput<= DESIRED_POSITION+TOLERANCE)
         {
             setMotorOutputs(BRAKE,0xFF);
-            CyDelay(50);
+            CyDelay(5);
             bDoneMovingCalibrate = TRUE;
         }
-        else if(pMotor->MotorOutput>DESIRED_POSITION+20)
+        else if(pMotor->MotorOutput>DESIRED_POSITION+TOLERANCE)
         {
                 bDoneMovingCalibrate = FALSE;
                 setMotorOutputs(FORWARD,pMotor->MotorOutput);
@@ -331,7 +347,7 @@ MotorIO * motorControlLoop(int16 manualDesiredPostion)
                     setMotorOutputs(FORWARD,pMotor->MotorOutput);
                 }
         }
-        else if(pMotor->MotorOutput<DESIRED_POSITION-20)
+        else if(pMotor->MotorOutput<DESIRED_POSITION-TOLERANCE)
         {
             bDoneMovingCalibrate = FALSE;
             if(manualDesiredPostion!=0)
@@ -350,8 +366,8 @@ MotorIO * motorControlLoop(int16 manualDesiredPostion)
     else
     {
         setMotorOutputs(BRAKE,0xFF);
-        CyDelay(50);
-        setMotorOutputs(OFF_NOTHING,0x00);
+        //CyDelay(50);
+        //setMotorOutputs(OFF_NOTHING,0x00);
     }
     
     return pMotor;

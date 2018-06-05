@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: Pin_4.c  
+* File Name: ZOOM_PLUS.c  
 * Version 2.20
 *
 * Description:
@@ -13,35 +13,35 @@
 *******************************************************************************/
 
 #include "cytypes.h"
-#include "Pin_4.h"
+#include "ZOOM_PLUS.h"
 
 
-#if defined(Pin_4__PC)
-    #define Pin_4_SetP4PinDriveMode(shift, mode)  \
+#if defined(ZOOM_PLUS__PC)
+    #define ZOOM_PLUS_SetP4PinDriveMode(shift, mode)  \
     do { \
-        Pin_4_PC =   (Pin_4_PC & \
-                                (uint32)(~(uint32)(Pin_4_DRIVE_MODE_IND_MASK << \
-                                (Pin_4_DRIVE_MODE_BITS * (shift))))) | \
+        ZOOM_PLUS_PC =   (ZOOM_PLUS_PC & \
+                                (uint32)(~(uint32)(ZOOM_PLUS_DRIVE_MODE_IND_MASK << \
+                                (ZOOM_PLUS_DRIVE_MODE_BITS * (shift))))) | \
                                 (uint32)((uint32)(mode) << \
-                                (Pin_4_DRIVE_MODE_BITS * (shift))); \
+                                (ZOOM_PLUS_DRIVE_MODE_BITS * (shift))); \
     } while (0)
 #else
     #if (CY_PSOC4_4200L)
-        #define Pin_4_SetP4PinDriveMode(shift, mode)  \
+        #define ZOOM_PLUS_SetP4PinDriveMode(shift, mode)  \
         do { \
-            Pin_4_USBIO_CTRL_REG = (Pin_4_USBIO_CTRL_REG & \
-                                    (uint32)(~(uint32)(Pin_4_DRIVE_MODE_IND_MASK << \
-                                    (Pin_4_DRIVE_MODE_BITS * (shift))))) | \
+            ZOOM_PLUS_USBIO_CTRL_REG = (ZOOM_PLUS_USBIO_CTRL_REG & \
+                                    (uint32)(~(uint32)(ZOOM_PLUS_DRIVE_MODE_IND_MASK << \
+                                    (ZOOM_PLUS_DRIVE_MODE_BITS * (shift))))) | \
                                     (uint32)((uint32)(mode) << \
-                                    (Pin_4_DRIVE_MODE_BITS * (shift))); \
+                                    (ZOOM_PLUS_DRIVE_MODE_BITS * (shift))); \
         } while (0)
     #endif
 #endif
   
 
-#if defined(Pin_4__PC) || (CY_PSOC4_4200L) 
+#if defined(ZOOM_PLUS__PC) || (CY_PSOC4_4200L) 
     /*******************************************************************************
-    * Function Name: Pin_4_SetDriveMode
+    * Function Name: ZOOM_PLUS_SetDriveMode
     ****************************************************************************//**
     *
     * \brief Sets the drive mode for each of the Pins component's pins.
@@ -67,17 +67,17 @@
     *  APIs (primary method) or disable interrupts around this function.
     *
     * \funcusage
-    *  \snippet Pin_4_SUT.c usage_Pin_4_SetDriveMode
+    *  \snippet ZOOM_PLUS_SUT.c usage_ZOOM_PLUS_SetDriveMode
     *******************************************************************************/
-    void Pin_4_SetDriveMode(uint8 mode)
+    void ZOOM_PLUS_SetDriveMode(uint8 mode)
     {
-		Pin_4_SetP4PinDriveMode(Pin_4__0__SHIFT, mode);
+		ZOOM_PLUS_SetP4PinDriveMode(ZOOM_PLUS__0__SHIFT, mode);
     }
 #endif
 
 
 /*******************************************************************************
-* Function Name: Pin_4_Write
+* Function Name: ZOOM_PLUS_Write
 ****************************************************************************//**
 *
 * \brief Writes the value to the physical port (data output register), masking
@@ -106,18 +106,18 @@
 *  this function.
 *
 * \funcusage
-*  \snippet Pin_4_SUT.c usage_Pin_4_Write
+*  \snippet ZOOM_PLUS_SUT.c usage_ZOOM_PLUS_Write
 *******************************************************************************/
-void Pin_4_Write(uint8 value)
+void ZOOM_PLUS_Write(uint8 value)
 {
-    uint8 drVal = (uint8)(Pin_4_DR & (uint8)(~Pin_4_MASK));
-    drVal = (drVal | ((uint8)(value << Pin_4_SHIFT) & Pin_4_MASK));
-    Pin_4_DR = (uint32)drVal;
+    uint8 drVal = (uint8)(ZOOM_PLUS_DR & (uint8)(~ZOOM_PLUS_MASK));
+    drVal = (drVal | ((uint8)(value << ZOOM_PLUS_SHIFT) & ZOOM_PLUS_MASK));
+    ZOOM_PLUS_DR = (uint32)drVal;
 }
 
 
 /*******************************************************************************
-* Function Name: Pin_4_Read
+* Function Name: ZOOM_PLUS_Read
 ****************************************************************************//**
 *
 * \brief Reads the associated physical port (pin status register) and masks 
@@ -131,16 +131,16 @@ void Pin_4_Write(uint8 value)
 *  The current value for the pins in the component as a right justified number.
 *
 * \funcusage
-*  \snippet Pin_4_SUT.c usage_Pin_4_Read  
+*  \snippet ZOOM_PLUS_SUT.c usage_ZOOM_PLUS_Read  
 *******************************************************************************/
-uint8 Pin_4_Read(void)
+uint8 ZOOM_PLUS_Read(void)
 {
-    return (uint8)((Pin_4_PS & Pin_4_MASK) >> Pin_4_SHIFT);
+    return (uint8)((ZOOM_PLUS_PS & ZOOM_PLUS_MASK) >> ZOOM_PLUS_SHIFT);
 }
 
 
 /*******************************************************************************
-* Function Name: Pin_4_ReadDataReg
+* Function Name: ZOOM_PLUS_ReadDataReg
 ****************************************************************************//**
 *
 * \brief Reads the associated physical port's data output register and masks 
@@ -149,8 +149,8 @@ uint8 Pin_4_Read(void)
 *
 * The data output register controls the signal applied to the physical pin in 
 * conjunction with the drive mode parameter. This is not the same as the 
-* preferred Pin_4_Read() API because the 
-* Pin_4_ReadDataReg() reads the data register instead of the status 
+* preferred ZOOM_PLUS_Read() API because the 
+* ZOOM_PLUS_ReadDataReg() reads the data register instead of the status 
 * register. For output pins this is a useful function to determine the value 
 * just written to the pin.
 *
@@ -159,16 +159,16 @@ uint8 Pin_4_Read(void)
 *  justified number for the component instance.
 *
 * \funcusage
-*  \snippet Pin_4_SUT.c usage_Pin_4_ReadDataReg 
+*  \snippet ZOOM_PLUS_SUT.c usage_ZOOM_PLUS_ReadDataReg 
 *******************************************************************************/
-uint8 Pin_4_ReadDataReg(void)
+uint8 ZOOM_PLUS_ReadDataReg(void)
 {
-    return (uint8)((Pin_4_DR & Pin_4_MASK) >> Pin_4_SHIFT);
+    return (uint8)((ZOOM_PLUS_DR & ZOOM_PLUS_MASK) >> ZOOM_PLUS_SHIFT);
 }
 
 
 /*******************************************************************************
-* Function Name: Pin_4_SetInterruptMode
+* Function Name: ZOOM_PLUS_SetInterruptMode
 ****************************************************************************//**
 *
 * \brief Configures the interrupt mode for each of the Pins component's
@@ -181,12 +181,12 @@ uint8 Pin_4_ReadDataReg(void)
 * \param position
 *  The pin position as listed in the Pins component. You may OR these to be 
 *  able to configure the interrupt mode of multiple pins within a Pins 
-*  component. Or you may use Pin_4_INTR_ALL to configure the
+*  component. Or you may use ZOOM_PLUS_INTR_ALL to configure the
 *  interrupt mode of all the pins in the Pins component.       
-*  - Pin_4_0_INTR       (First pin in the list)
-*  - Pin_4_1_INTR       (Second pin in the list)
+*  - ZOOM_PLUS_0_INTR       (First pin in the list)
+*  - ZOOM_PLUS_1_INTR       (Second pin in the list)
 *  - ...
-*  - Pin_4_INTR_ALL     (All pins in Pins component)
+*  - ZOOM_PLUS_INTR_ALL     (All pins in Pins component)
 *
 * \param mode
 *  Interrupt mode for the selected pins. Valid options are documented in
@@ -202,19 +202,19 @@ uint8 Pin_4_ReadDataReg(void)
 *  port.
 *
 * \funcusage
-*  \snippet Pin_4_SUT.c usage_Pin_4_SetInterruptMode
+*  \snippet ZOOM_PLUS_SUT.c usage_ZOOM_PLUS_SetInterruptMode
 *******************************************************************************/
-void Pin_4_SetInterruptMode(uint16 position, uint16 mode)
+void ZOOM_PLUS_SetInterruptMode(uint16 position, uint16 mode)
 {
     uint32 intrCfg;
     
-    intrCfg =  Pin_4_INTCFG & (uint32)(~(uint32)position);
-    Pin_4_INTCFG = intrCfg | ((uint32)position & (uint32)mode);
+    intrCfg =  ZOOM_PLUS_INTCFG & (uint32)(~(uint32)position);
+    ZOOM_PLUS_INTCFG = intrCfg | ((uint32)position & (uint32)mode);
 }
 
 
 /*******************************************************************************
-* Function Name: Pin_4_ClearInterrupt
+* Function Name: ZOOM_PLUS_ClearInterrupt
 ****************************************************************************//**
 *
 * \brief Clears any active interrupts attached with the component and returns 
@@ -231,13 +231,13 @@ void Pin_4_SetInterruptMode(uint16 position, uint16 mode)
 *  those associated with the Pins component.
 *
 * \funcusage
-*  \snippet Pin_4_SUT.c usage_Pin_4_ClearInterrupt
+*  \snippet ZOOM_PLUS_SUT.c usage_ZOOM_PLUS_ClearInterrupt
 *******************************************************************************/
-uint8 Pin_4_ClearInterrupt(void)
+uint8 ZOOM_PLUS_ClearInterrupt(void)
 {
-	uint8 maskedStatus = (uint8)(Pin_4_INTSTAT & Pin_4_MASK);
-	Pin_4_INTSTAT = maskedStatus;
-    return maskedStatus >> Pin_4_SHIFT;
+	uint8 maskedStatus = (uint8)(ZOOM_PLUS_INTSTAT & ZOOM_PLUS_MASK);
+	ZOOM_PLUS_INTSTAT = maskedStatus;
+    return maskedStatus >> ZOOM_PLUS_SHIFT;
 }
 
 

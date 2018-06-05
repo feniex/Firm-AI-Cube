@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: Pin_3.c  
+* File Name: DIM_PLUS.c  
 * Version 2.20
 *
 * Description:
@@ -15,13 +15,13 @@
 *******************************************************************************/
 
 #include "cytypes.h"
-#include "Pin_3.h"
+#include "DIM_PLUS.h"
 
-static Pin_3_BACKUP_STRUCT  Pin_3_backup = {0u, 0u, 0u};
+static DIM_PLUS_BACKUP_STRUCT  DIM_PLUS_backup = {0u, 0u, 0u};
 
 
 /*******************************************************************************
-* Function Name: Pin_3_Sleep
+* Function Name: DIM_PLUS_Sleep
 ****************************************************************************//**
 *
 * \brief Stores the pin configuration and prepares the pin for entering chip 
@@ -39,30 +39,30 @@ static Pin_3_BACKUP_STRUCT  Pin_3_backup = {0u, 0u, 0u};
 *  deep-sleep/hibernate modes.
 *
 * \funcusage
-*  \snippet Pin_3_SUT.c usage_Pin_3_Sleep_Wakeup
+*  \snippet DIM_PLUS_SUT.c usage_DIM_PLUS_Sleep_Wakeup
 *******************************************************************************/
-void Pin_3_Sleep(void)
+void DIM_PLUS_Sleep(void)
 {
-    #if defined(Pin_3__PC)
-        Pin_3_backup.pcState = Pin_3_PC;
+    #if defined(DIM_PLUS__PC)
+        DIM_PLUS_backup.pcState = DIM_PLUS_PC;
     #else
         #if (CY_PSOC4_4200L)
             /* Save the regulator state and put the PHY into suspend mode */
-            Pin_3_backup.usbState = Pin_3_CR1_REG;
-            Pin_3_USB_POWER_REG |= Pin_3_USBIO_ENTER_SLEEP;
-            Pin_3_CR1_REG &= Pin_3_USBIO_CR1_OFF;
+            DIM_PLUS_backup.usbState = DIM_PLUS_CR1_REG;
+            DIM_PLUS_USB_POWER_REG |= DIM_PLUS_USBIO_ENTER_SLEEP;
+            DIM_PLUS_CR1_REG &= DIM_PLUS_USBIO_CR1_OFF;
         #endif
     #endif
-    #if defined(CYIPBLOCK_m0s8ioss_VERSION) && defined(Pin_3__SIO)
-        Pin_3_backup.sioState = Pin_3_SIO_REG;
+    #if defined(CYIPBLOCK_m0s8ioss_VERSION) && defined(DIM_PLUS__SIO)
+        DIM_PLUS_backup.sioState = DIM_PLUS_SIO_REG;
         /* SIO requires unregulated output buffer and single ended input buffer */
-        Pin_3_SIO_REG &= (uint32)(~Pin_3_SIO_LPM_MASK);
+        DIM_PLUS_SIO_REG &= (uint32)(~DIM_PLUS_SIO_LPM_MASK);
     #endif  
 }
 
 
 /*******************************************************************************
-* Function Name: Pin_3_Wakeup
+* Function Name: DIM_PLUS_Wakeup
 ****************************************************************************//**
 *
 * \brief Restores the pin configuration that was saved during Pin_Sleep(). This 
@@ -77,22 +77,22 @@ void Pin_3_Sleep(void)
 *  None
 *  
 * \funcusage
-*  Refer to Pin_3_Sleep() for an example usage.
+*  Refer to DIM_PLUS_Sleep() for an example usage.
 *******************************************************************************/
-void Pin_3_Wakeup(void)
+void DIM_PLUS_Wakeup(void)
 {
-    #if defined(Pin_3__PC)
-        Pin_3_PC = Pin_3_backup.pcState;
+    #if defined(DIM_PLUS__PC)
+        DIM_PLUS_PC = DIM_PLUS_backup.pcState;
     #else
         #if (CY_PSOC4_4200L)
             /* Restore the regulator state and come out of suspend mode */
-            Pin_3_USB_POWER_REG &= Pin_3_USBIO_EXIT_SLEEP_PH1;
-            Pin_3_CR1_REG = Pin_3_backup.usbState;
-            Pin_3_USB_POWER_REG &= Pin_3_USBIO_EXIT_SLEEP_PH2;
+            DIM_PLUS_USB_POWER_REG &= DIM_PLUS_USBIO_EXIT_SLEEP_PH1;
+            DIM_PLUS_CR1_REG = DIM_PLUS_backup.usbState;
+            DIM_PLUS_USB_POWER_REG &= DIM_PLUS_USBIO_EXIT_SLEEP_PH2;
         #endif
     #endif
-    #if defined(CYIPBLOCK_m0s8ioss_VERSION) && defined(Pin_3__SIO)
-        Pin_3_SIO_REG = Pin_3_backup.sioState;
+    #if defined(CYIPBLOCK_m0s8ioss_VERSION) && defined(DIM_PLUS__SIO)
+        DIM_PLUS_SIO_REG = DIM_PLUS_backup.sioState;
     #endif
 }
 

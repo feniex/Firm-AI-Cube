@@ -129,7 +129,7 @@ extern uint8  SamplingTimer_initVar;
 ***************************************/
 
 /* Timer/Counter Mode */
-#define SamplingTimer_TC_PERIOD_VALUE                (25lu)
+#define SamplingTimer_TC_PERIOD_VALUE                (12lu)
 #define SamplingTimer_TC_COMPARE_VALUE               (65535lu)
 #define SamplingTimer_TC_COMPARE_BUF_VALUE           (65535lu)
 #define SamplingTimer_TC_COMPARE_SWAP                (0lu)

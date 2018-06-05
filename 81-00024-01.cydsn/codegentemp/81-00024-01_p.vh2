@@ -1,5 +1,5 @@
 -- Project:   81-00024-01
--- Generated: 05/31/2018 08:28:28
+-- Generated: 06/05/2018 08:56:51
 -- PSoC Creator  4.1 Update 1
 
 ENTITY \81-00024-01\ IS
@@ -10,11 +10,11 @@ ENTITY \81-00024-01\ IS
         \UART_LED:rx(0)_PAD\ : IN std_ulogic;
         PWM_Output(0)_PAD : OUT std_ulogic;
         LED_Output(0)_PAD : OUT std_ulogic;
-        Pin_3(0)_PAD : IN std_ulogic;
+        DIM_PLUS(0)_PAD : IN std_ulogic;
         limitSwitch(0)_PAD : IN std_ulogic;
-        Pin_4(0)_PAD : IN std_ulogic;
-        Pin_2(0)_PAD : IN std_ulogic;
-        Pin_1(0)_PAD : IN std_ulogic);
+        ZOOM_MINUS(0)_PAD : IN std_ulogic;
+        ZOOM_PLUS(0)_PAD : IN std_ulogic;
+        DIM_MINUS(0)_PAD : IN std_ulogic);
     ATTRIBUTE voltage_VDDD OF __DEFAULT__ : ENTITY IS 5e0;
     ATTRIBUTE voltage_VDDA OF __DEFAULT__ : ENTITY IS 5e0;
 END \81-00024-01\;
@@ -28,6 +28,8 @@ ARCHITECTURE __DEFAULT__ OF \81-00024-01\ IS
     SIGNAL ClockBlock_LFCLK : bit;
     SIGNAL ClockBlock_Routed1 : bit;
     SIGNAL ClockBlock_SYSCLK : bit;
+    SIGNAL DIM_MINUS(0)__PA : bit;
+    SIGNAL DIM_PLUS(0)__PA : bit;
     SIGNAL HBridge_CS(0)__PA : bit;
     SIGNAL HBridge_INA(0)__PA : bit;
     SIGNAL HBridge_INB(0)__PA : bit;
@@ -103,12 +105,10 @@ ARCHITECTURE __DEFAULT__ OF \81-00024-01\ IS
     ATTRIBUTE global_signal OF Net_749_ff9 : SIGNAL IS true;
     SIGNAL Net_783 : bit;
     SIGNAL PWM_Output(0)__PA : bit;
-    SIGNAL Pin_1(0)__PA : bit;
-    SIGNAL Pin_2(0)__PA : bit;
-    SIGNAL Pin_3(0)__PA : bit;
-    SIGNAL Pin_4(0)__PA : bit;
     SIGNAL PotFeedBack(0)__PA : bit;
     SIGNAL SwitchNodeTempInput(0)__PA : bit;
+    SIGNAL ZOOM_MINUS(0)__PA : bit;
+    SIGNAL ZOOM_PLUS(0)__PA : bit;
     SIGNAL \ADC_SAR_Seq:Net_1845_ff7\ : bit;
     ATTRIBUTE global_signal OF \ADC_SAR_Seq:Net_1845_ff7\ : SIGNAL IS true;
     SIGNAL \ADC_SAR_Seq:Net_3108\ : bit;
@@ -235,11 +235,11 @@ ARCHITECTURE __DEFAULT__ OF \81-00024-01\ IS
     ATTRIBUTE lib_model OF LED_Output(0) : LABEL IS "iocell9";
     ATTRIBUTE lib_model OF PotFeedBack(0) : LABEL IS "iocell10";
     ATTRIBUTE Location OF PotFeedBack(0) : LABEL IS "P2[3]";
-    ATTRIBUTE lib_model OF Pin_3(0) : LABEL IS "iocell11";
+    ATTRIBUTE lib_model OF DIM_PLUS(0) : LABEL IS "iocell11";
     ATTRIBUTE lib_model OF limitSwitch(0) : LABEL IS "iocell12";
-    ATTRIBUTE lib_model OF Pin_4(0) : LABEL IS "iocell13";
-    ATTRIBUTE lib_model OF Pin_2(0) : LABEL IS "iocell14";
-    ATTRIBUTE lib_model OF Pin_1(0) : LABEL IS "iocell15";
+    ATTRIBUTE lib_model OF ZOOM_MINUS(0) : LABEL IS "iocell13";
+    ATTRIBUTE lib_model OF ZOOM_PLUS(0) : LABEL IS "iocell14";
+    ATTRIBUTE lib_model OF DIM_MINUS(0) : LABEL IS "iocell15";
     ATTRIBUTE lib_model OF Net_3450 : LABEL IS "macrocell1";
     ATTRIBUTE lib_model OF \PWM:PWMUDB:status_2\ : LABEL IS "macrocell2";
     ATTRIBUTE lib_model OF \overCurrentTimer:TimerUDB:status_tc\ : LABEL IS "macrocell3";
@@ -1665,7 +1665,7 @@ BEGIN
             out_clock_en => '1',
             out_reset => '0');
 
-    Pin_3:logicalport
+    DIM_PLUS:logicalport
         GENERIC MAP(
             drive_mode => "001",
             ibuf_enabled => "1",
@@ -1736,19 +1736,19 @@ BEGIN
             out_clock_en => open,
             out_reset => open);
 
-    Pin_3(0):iocell
+    DIM_PLUS(0):iocell
         GENERIC MAP(
             in_sync_mode => 0,
             out_sync_mode => 0,
             oe_sync_mode => 0,
-            logicalport => "Pin_3",
+            logicalport => "DIM_PLUS",
             logicalport_pin_id => 0,
             io_capabilities => "0000000000000000000000000000000000000000000000000000000000000101")
         PORT MAP(
-            pa_out => Pin_3(0)__PA,
+            pa_out => DIM_PLUS(0)__PA,
             oe => open,
             fb => Net_3327_2,
-            pad_in => Pin_3(0)_PAD,
+            pad_in => DIM_PLUS(0)_PAD,
             in_clock => open,
             in_clock_en => '1',
             in_reset => '0',
@@ -1847,7 +1847,7 @@ BEGIN
             out_clock_en => '1',
             out_reset => '0');
 
-    Pin_4:logicalport
+    ZOOM_MINUS:logicalport
         GENERIC MAP(
             drive_mode => "001",
             ibuf_enabled => "1",
@@ -1918,19 +1918,19 @@ BEGIN
             out_clock_en => open,
             out_reset => open);
 
-    Pin_4(0):iocell
+    ZOOM_MINUS(0):iocell
         GENERIC MAP(
             in_sync_mode => 0,
             out_sync_mode => 0,
             oe_sync_mode => 0,
-            logicalport => "Pin_4",
+            logicalport => "ZOOM_MINUS",
             logicalport_pin_id => 0,
             io_capabilities => "0000000000000000000000000000000000000000000000000000000000000101")
         PORT MAP(
-            pa_out => Pin_4(0)__PA,
+            pa_out => ZOOM_MINUS(0)__PA,
             oe => open,
             fb => Net_3327_3,
-            pad_in => Pin_4(0)_PAD,
+            pad_in => ZOOM_MINUS(0)_PAD,
             in_clock => open,
             in_clock_en => '1',
             in_reset => '0',
@@ -1938,7 +1938,7 @@ BEGIN
             out_clock_en => '1',
             out_reset => '0');
 
-    Pin_2:logicalport
+    ZOOM_PLUS:logicalport
         GENERIC MAP(
             drive_mode => "001",
             ibuf_enabled => "1",
@@ -2009,19 +2009,19 @@ BEGIN
             out_clock_en => open,
             out_reset => open);
 
-    Pin_2(0):iocell
+    ZOOM_PLUS(0):iocell
         GENERIC MAP(
             in_sync_mode => 0,
             out_sync_mode => 0,
             oe_sync_mode => 0,
-            logicalport => "Pin_2",
+            logicalport => "ZOOM_PLUS",
             logicalport_pin_id => 0,
             io_capabilities => "0000000000000000000000000000000000000000000000000000000000000101")
         PORT MAP(
-            pa_out => Pin_2(0)__PA,
+            pa_out => ZOOM_PLUS(0)__PA,
             oe => open,
             fb => Net_3327_1,
-            pad_in => Pin_2(0)_PAD,
+            pad_in => ZOOM_PLUS(0)_PAD,
             in_clock => open,
             in_clock_en => '1',
             in_reset => '0',
@@ -2029,7 +2029,7 @@ BEGIN
             out_clock_en => '1',
             out_reset => '0');
 
-    Pin_1:logicalport
+    DIM_MINUS:logicalport
         GENERIC MAP(
             drive_mode => "001",
             ibuf_enabled => "1",
@@ -2100,19 +2100,19 @@ BEGIN
             out_clock_en => open,
             out_reset => open);
 
-    Pin_1(0):iocell
+    DIM_MINUS(0):iocell
         GENERIC MAP(
             in_sync_mode => 0,
             out_sync_mode => 0,
             oe_sync_mode => 0,
-            logicalport => "Pin_1",
+            logicalport => "DIM_MINUS",
             logicalport_pin_id => 0,
             io_capabilities => "0000000000000000000000000000000000000000000000000000000000000101")
         PORT MAP(
-            pa_out => Pin_1(0)__PA,
+            pa_out => DIM_MINUS(0)__PA,
             oe => open,
             fb => Net_3327_0,
-            pad_in => Pin_1(0)_PAD,
+            pad_in => DIM_MINUS(0)_PAD,
             in_clock => open,
             in_clock_en => '1',
             in_reset => '0',

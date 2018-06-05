@@ -26,8 +26,8 @@
 
 
 /**********GLOBAL VARIABLES**********/
-static const uint8 CYCODE eepromBrightnessMotorPosition[5] = {0xFF, 0x00, 0x00, 0x00,0x00};   //Brightness Value, Motor Position Value, Current Board ID, Initialized Count Already 
-static uint8 ramBrightnessMotorPosition[5] ={0x00,0x00,0x00,0x00,00};
+static const uint8 CYCODE eepromBrightnessMotorPosition[6] = {0xFF, 0x00, 0x00, 0x00,0x00,0x00};   //Brightness Value, Motor Position Value, Current Board ID, Initialized Count Already 
+static uint8 ramBrightnessMotorPosition[6] ={0x00,0x00,0x00,0x00,00,00};
 static const uint8 bSetInitializedAlready = 1;
 static uint8 beepromCountAlreadyReset = 0;
 static const uint8 *peepromMemory;
@@ -62,14 +62,15 @@ int main()
     //inputIncrease_Start();
     //inputTimerISR_Start();
     
-     if(*(volatile uint8 *) &eepromBrightnessMotorPosition[3] == 0)
+    if(*(volatile uint8 *) &eepromBrightnessMotorPosition[3] == 0)
     {
-        //calibrateMotor();
+        calibrateMotor();
         ramBrightnessMotorPosition[3] = 1;
         ramBrightnessMotorPosition[2] = 0;
-        ramBrightnessMotorPosition[1] = 0xFF;
+        //ramBrightnessMotorPosition[1] = 0xFF;
         ramBrightnessMotorPosition[4] = pMotor->forwardLimitCS;
-        EmEEPROM_Write(&ramBrightnessMotorPosition[1],&eepromBrightnessMotorPosition[1],4);
+        ramBrightnessMotorPosition[5] = pMotor->backwardLimitCS;
+        EmEEPROM_Write(&ramBrightnessMotorPosition[1],&eepromBrightnessMotorPosition[1],5);
     }
     else
     {
@@ -120,21 +121,21 @@ void takeInputValues(void)
         
     if((readInputValues&ZOOM_PLUS) == ZOOM_PLUS)
     {
-        if(trackMotor>=253)
+        if(trackMotor>=251)
         {
-            trackMotor = 253;
+            trackMotor = 251;
         }
-        trackMotor+=2;
+        trackMotor+=4;
         setMotorPosition(trackMotor);
         test = 0;
     }
     else if((readInputValues&ZOOM_MINUS) == ZOOM_MINUS)  //DIMPLUS
     {
-        if(trackMotor<=2)
+        if(trackMotor<=4)
         {
-            trackMotor = 2;
+            trackMotor = 4;
         }
-        trackMotor-=2;
+        trackMotor-=4;
         setMotorPosition(trackMotor);
         test = 1;
     }
@@ -144,17 +145,17 @@ void takeInputValues(void)
         {
             trackBrightness = 247;
         }
-        trackBrightness+=8;
+        trackBrightness+=4;
         setBrightness(trackBrightness);
         test = 2;
     }
     else if((readInputValues&DIM_MINUS) == DIM_MINUS)    //DIMMINUS
     {
-        if(trackBrightness<=8)
+        if(trackBrightness<=4)
         {
-            trackBrightness = 8;
+            trackBrightness = 4;
         }
-        trackBrightness-=8;
+        trackBrightness-=4;
         setBrightness(trackBrightness);
         test = 3;
     }
