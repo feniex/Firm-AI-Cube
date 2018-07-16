@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 1
 
 
    1              		.syntax unified
@@ -58,7 +58,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
   29:DriverControl.c **** #define SAFE_TEMPERATURE_TOLERANCE      0
   30:DriverControl.c **** 
   31:DriverControl.c **** #define VOLTAGE_SENSE_LOWER_BOUND       670
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 2
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 2
 
 
   32:DriverControl.c **** #define VOLTAGE_SENSE_UPPER_BOUND       870
@@ -118,7 +118,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
   86:DriverControl.c **** 
   87:DriverControl.c **** typedef struct
   88:DriverControl.c **** {
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 3
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 3
 
 
   89:DriverControl.c ****     uint8 bEnable;
@@ -178,7 +178,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  143:DriverControl.c **** {
  144:DriverControl.c ****     if(positionNumber < HEAD_MODULE_ID || positionNumber > MAX_DRIVER_COUNT)
  145:DriverControl.c ****         return FAILURE;
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 4
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 4
 
 
  146:DriverControl.c ****     
@@ -238,7 +238,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  200:DriverControl.c **** *  At the start of the program, this driver is assumed to the be the last driver
  201:DriverControl.c **** *  in the chain. If an ACK packet is received at startup, this function is called
  202:DriverControl.c **** *  to update the status for not being in the last driver.
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 5
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 5
 
 
  203:DriverControl.c **** *
@@ -298,7 +298,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  257:DriverControl.c **** *
  258:DriverControl.c **** *******************************************************************************/
  259:DriverControl.c **** void processSoftStart(void)
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 6
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 6
 
 
  260:DriverControl.c **** {
@@ -358,7 +358,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  314:DriverControl.c ****         return RegulationData.requestedBrightness;
  315:DriverControl.c ****     }
  316:DriverControl.c ****     
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 7
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 7
 
 
  317:DriverControl.c ****     if(RegulationData.regulatedBrightness != RegulationData.previousBrightness)
@@ -418,7 +418,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  371:DriverControl.c **** * Parameters:
  372:DriverControl.c **** *  bSingleSample: TRUE for single sample, FALSE for multiple samples
  373:DriverControl.c **** *  channelNumber: Channel selection for single sample: LED, SWITCH_NODE, AMBIENT, or MICRO
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 8
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 8
 
 
  374:DriverControl.c **** *  sampleArray: Reference to the array that contains 4 temperature samples
@@ -478,7 +478,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  428:DriverControl.c ****     }
  429:DriverControl.c ****     else
  430:DriverControl.c ****     {   //Get 4 temperature samples
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 9
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 9
 
 
  431:DriverControl.c ****         for(channelIndex = 0; channelIndex < (ADC_SAMPLE_COUNT - 2); channelIndex++)
@@ -538,7 +538,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  485:DriverControl.c **** {
  486:DriverControl.c ****     static uint8 timerCountLocal = 0;
  487:DriverControl.c ****     enum TemperatureStatus temperatureStatus = WITHIN_TOLERANCE;
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 10
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 10
 
 
  488:DriverControl.c ****     
@@ -598,7 +598,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  542:DriverControl.c ****                     RegulationData.currentState = STEADY_DECREASE;
  543:DriverControl.c ****                 else if(temperatureStatus == WITHIN_TOLERANCE)
  544:DriverControl.c ****                     RegulationData.currentState = NO_CHANGE;
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 11
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 11
 
 
  545:DriverControl.c ****             }
@@ -658,7 +658,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  599:DriverControl.c ****                 RegulationDataFast.regulatedBrightness = (uint8)((uint16)(RegulationDataFast.reques
  600:DriverControl.c ****                     (uint16)(RegulationDataFast.scalingFactor) / MAX_SCALING_FACTOR);
  601:DriverControl.c ****             }
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 12
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 12
 
 
  602:DriverControl.c ****             if((timerCountLocalFaster % (SAMPLE_COUNT_PER_CYCLE * BRIGHTNESS_CHANGE_PER_SAMPLE)) ==
@@ -718,7 +718,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  656:DriverControl.c **** /**********DEFINED LOCAL FUNCTIONS**********/
  657:DriverControl.c **** /*******************************************************************************
  658:DriverControl.c **** * Function Name: getTemperatureStatus
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 13
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 13
 
 
  659:DriverControl.c **** ********************************************************************************
@@ -778,7 +778,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  688:DriverControl.c ****             (ThermalLimitArray[dataIndex].MAX_TEMPERATURE + tolerance))
   52              		.loc 1 688 0
   53 0012 9C00     		lsls	r4, r3, #2
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 14
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 14
 
 
   54 0014 104E     		ldr	r6, .L11
@@ -838,7 +838,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  697:DriverControl.c ****     }
  698:DriverControl.c ****     
  699:DriverControl.c ****     return WITHIN_TOLERANCE;
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 15
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 15
 
 
   94              		.loc 1 699 0 is_stmt 1
@@ -898,7 +898,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  142              		@ args = 0, pretend = 0, frame = 0
  143              		@ frame_needed = 0, uses_anonymous_args = 0
  144              		@ link register save eliminated.
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 16
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 16
 
 
  105:DriverControl.c **** }
@@ -958,7 +958,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  193              		.cfi_startproc
  194              		@ args = 0, pretend = 0, frame = 0
  195              		@ frame_needed = 0, uses_anonymous_args = 0
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 17
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 17
 
 
  196              		@ link register save eliminated.
@@ -1018,7 +1018,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  243 0004 072B     		cmp	r3, #7
  244 0006 03D8     		bhi	.L26
  171:DriverControl.c ****     
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 18
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 18
 
 
  245              		.loc 1 171 0
@@ -1078,7 +1078,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  293              		.size	isLastDriverInChain, .-isLastDriverInChain
  294              		.section	.text.setAsNotLastDriverInChain,"ax",%progbits
  295              		.align	2
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 19
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 19
 
 
  296              		.global	setAsNotLastDriverInChain
@@ -1138,7 +1138,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  232:DriverControl.c ****     {
  345              		.loc 1 232 0 is_stmt 0 discriminator 1
  346 000a 0B4A     		ldr	r2, .L38+4
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 20
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 20
 
 
  347 000c 9042     		cmp	r0, r2
@@ -1198,7 +1198,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  393              		.type	processSoftStart, %function
  394              	processSoftStart:
  395              	.LFB39:
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 21
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 21
 
 
  260:DriverControl.c ****     LED_Timer_ClearInterrupt(LED_Timer_INTR_MASK_TC);
@@ -1258,7 +1258,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  443              		@ args = 0, pretend = 0, frame = 0
  444              		@ frame_needed = 0, uses_anonymous_args = 0
  445              	.LVL32:
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 22
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 22
 
 
  446 0000 10B5     		push	{r4, lr}
@@ -1318,7 +1318,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  491              	.LVL36:
  492              	.L51:
  309:DriverControl.c ****             }
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 23
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 23
 
 
  493              		.loc 1 309 0
@@ -1378,7 +1378,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  538 0074 084B     		ldr	r3, .L57+4
  539 0076 1878     		ldrb	r0, [r3]
  540 0078 FFF7FEFF 		bl	PWM_WriteCompare
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 24
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 24
 
 
  541              	.LVL42:
@@ -1438,7 +1438,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  357:DriverControl.c ****         return 0;
  589              		.loc 1 357 0
  590 0000 0428     		cmp	r0, #4
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 25
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 25
 
 
  591 0002 03D8     		bhi	.L61
@@ -1498,7 +1498,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  640 0008 0128     		cmp	r0, #1
  641 000a 3AD8     		bhi	.L74
  392:DriverControl.c ****     {   //Input check for single sample
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 26
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 26
 
 
  642              		.loc 1 392 0
@@ -1558,7 +1558,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  415:DriverControl.c ****         {
  687              		.loc 1 415 0
  688 0044 042D     		cmp	r5, #4
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 27
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 27
 
 
  689 0046 04D1     		bne	.L71
@@ -1618,7 +1618,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  735              		.loc 1 431 0 is_stmt 0 discriminator 1
  736 007a 012C     		cmp	r4, #1
  737 007c F3D9     		bls	.L73
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 28
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 28
 
 
  738 007e 1800     		movs	r0, r3
@@ -1678,7 +1678,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  786              		@ args = 0, pretend = 0, frame = 0
  787              		@ frame_needed = 0, uses_anonymous_args = 0
  788              		@ link register save eliminated.
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 29
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 29
 
 
  465:DriverControl.c **** }
@@ -1738,7 +1738,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  836              		.loc 1 492 0 is_stmt 1
  837 0016 3D4B     		ldr	r3, .L98
  838 0018 DB78     		ldrb	r3, [r3, #3]
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 30
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 30
 
 
  839 001a 012B     		cmp	r3, #1
@@ -1798,7 +1798,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  884              		.loc 1 514 0
  885 005a 3379     		ldrb	r3, [r6, #4]
  513:DriverControl.c ****                     (uint16)(RegulationData.scalingFactor) / MAX_SCALING_FACTOR);
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 31
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 31
 
 
  886              		.loc 1 513 0
@@ -1858,7 +1858,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  930              		.loc 1 533 0
  931 0096 1D4E     		ldr	r6, .L98
  932 0098 3078     		ldrb	r0, [r6]
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 32
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 32
 
 
  933              	.LVL91:
@@ -1918,7 +1918,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  550:DriverControl.c ****                     (uint16)(RegulationData.scalingFactor) / MAX_SCALING_FACTOR);
  976              		.loc 1 550 0
  977 00ce 5843     		muls	r0, r3
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 33
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 33
 
 
  551:DriverControl.c ****             }
@@ -1978,7 +1978,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  1023 0104 00E0     		b	.L84
  1024              	.LVL105:
  1025              	.L97:
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 34
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 34
 
 
  1026 0106 0020     		movs	r0, #0
@@ -2038,7 +2038,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  1074 0016 3D4B     		ldr	r3, .L115
  1075 0018 DB7C     		ldrb	r3, [r3, #19]
  1076 001a 012B     		cmp	r3, #1
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 35
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 35
 
 
  1077 001c 34D0     		beq	.L103
@@ -2098,7 +2098,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  1122 005a 337D     		ldrb	r3, [r6, #20]
  599:DriverControl.c ****                     (uint16)(RegulationDataFast.scalingFactor) / MAX_SCALING_FACTOR);
  1123              		.loc 1 599 0
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 36
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 36
 
 
  1124 005c 5843     		muls	r0, r3
@@ -2158,7 +2158,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  1168 0096 1D4E     		ldr	r6, .L115
  1169 0098 307C     		ldrb	r0, [r6, #16]
  1170              	.LVL117:
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 37
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 37
 
 
  620:DriverControl.c ****             }
@@ -2218,7 +2218,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  1213              		.loc 1 636 0
  1214 00ce 5843     		muls	r0, r3
  637:DriverControl.c ****             }
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 38
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 38
 
 
  1215              		.loc 1 637 0
@@ -2278,7 +2278,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  1261              	.LVL131:
  1262              	.L114:
  1263 0106 0020     		movs	r0, #0
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 39
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 39
 
 
  1264              	.LVL132:
@@ -2338,7 +2338,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  1307 0016 02E0     		b	.L119
  1308              	.LVL136:
  1309              	.L118:
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 40
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 40
 
 
  711:DriverControl.c ****     }
@@ -2398,7 +2398,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  1356              		.size	PositionData, 3
  1357              	PositionData:
  1358 0008 00       		.byte	0
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 41
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 41
 
 
  1359 0009 00       		.byte	0
@@ -2458,7 +2458,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  1413 0028 2D040000 		.4byte	.LASF0
  1414 002c 02       		.uleb128 0x2
  1415 002d 01       		.byte	0x1
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 42
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 42
 
 
  1416 002e 08       		.byte	0x8
@@ -2518,7 +2518,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  1470 009b 04       		.uleb128 0x4
  1471 009c F7050000 		.4byte	.LASF13
  1472 00a0 02       		.byte	0x2
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 43
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 43
 
 
  1473 00a1 D701     		.2byte	0x1d7
@@ -2578,7 +2578,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  1527 010e 00       		.byte	0
  1528 010f 07       		.uleb128 0x7
  1529 0110 21070000 		.4byte	.LASF26
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 44
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 44
 
 
  1530 0114 01       		.byte	0x1
@@ -2638,7 +2638,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  1584 017d 03       		.byte	0x3
  1585 017e 01       		.byte	0x1
  1586 017f 42       		.byte	0x42
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 45
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 45
 
 
  1587 0180 A9010000 		.4byte	0x1a9
@@ -2698,7 +2698,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  1641 01ec 09       		.uleb128 0x9
  1642 01ed 29010000 		.4byte	.LASF45
  1643 01f1 01       		.byte	0x1
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 46
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 46
 
 
  1644 01f2 51       		.byte	0x51
@@ -2758,7 +2758,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  1698 0267 51       		.byte	0x51
  1699 0268 0E       		.uleb128 0xe
  1700 0269 60000000 		.4byte	.LASF51
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 47
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 47
 
 
  1701 026d 01       		.byte	0x1
@@ -2818,7 +2818,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  1755 02e7 6B000000 		.4byte	0x6b
  1756 02eb 00000000 		.4byte	.LFB35
  1757 02ef 18000000 		.4byte	.LFE35-.LFB35
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 48
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 48
 
 
  1758 02f3 01       		.uleb128 0x1
@@ -2878,7 +2878,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  1812 0372 24000000 		.4byte	.LFE39-.LFB39
  1813 0376 01       		.uleb128 0x1
  1814 0377 9C       		.byte	0x9c
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 49
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 49
 
 
  1815 0378 99030000 		.4byte	0x399
@@ -2938,7 +2938,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  1869 03fe 19       		.uleb128 0x19
  1870 03ff 01       		.uleb128 0x1
  1871 0400 50       		.byte	0x50
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 50
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 50
 
 
  1872 0401 01       		.uleb128 0x1
@@ -2998,7 +2998,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  1926 0472 96020000 		.4byte	.LLST7
  1927 0476 00       		.byte	0
  1928 0477 1A       		.uleb128 0x1a
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 51
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 51
 
 
  1929 0478 D6060000 		.4byte	.LASF69
@@ -3058,7 +3058,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  1983 0507 01       		.byte	0x1
  1984 0508 8301     		.2byte	0x183
  1985 050a 83000000 		.4byte	0x83
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 52
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 52
 
 
  1986 050e DD040000 		.4byte	.LLST14
@@ -3118,7 +3118,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  2040 0577 45080000 		.4byte	0x845
  2041 057b 19       		.uleb128 0x19
  2042 057c 01       		.uleb128 0x1
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 53
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 53
 
 
  2043 057d 50       		.byte	0x50
@@ -3178,7 +3178,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  2097 05fe 52       		.byte	0x52
  2098 05ff 01       		.uleb128 0x1
  2099 0600 30       		.byte	0x30
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 54
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 54
 
 
  2100 0601 00       		.byte	0
@@ -3238,7 +3238,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  2154 064f 19       		.uleb128 0x19
  2155 0650 01       		.uleb128 0x1
  2156 0651 51       		.byte	0x51
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 55
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 55
 
 
  2157 0652 02       		.uleb128 0x2
@@ -3298,7 +3298,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  2211 06c6 70000000 		.4byte	.LVL115
  2212 06ca 30020000 		.4byte	0x230
  2213 06ce E4060000 		.4byte	0x6e4
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 56
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 56
 
 
  2214 06d2 19       		.uleb128 0x19
@@ -3358,7 +3358,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  2268 0717 00       		.sleb128 0
  2269 0718 19       		.uleb128 0x19
  2270 0719 01       		.uleb128 0x1
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 57
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 57
 
 
  2271 071a 52       		.byte	0x52
@@ -3418,7 +3418,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  2325 0780 21       		.uleb128 0x21
  2326 0781 71010000 		.4byte	0x171
  2327 0785 90070000 		.4byte	0x790
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 58
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 58
 
 
  2328 0789 22       		.uleb128 0x22
@@ -3478,7 +3478,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  2382 07ff 04       		.byte	0x4
  2383 0800 3201     		.2byte	0x132
  2384 0802 24       		.uleb128 0x24
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 59
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 59
 
 
  2385 0803 54060000 		.4byte	.LASF94
@@ -3538,7 +3538,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  2439 0011 00       		.byte	0
  2440 0012 00       		.byte	0
  2441 0013 02       		.uleb128 0x2
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 60
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 60
 
 
  2442 0014 24       		.uleb128 0x24
@@ -3598,7 +3598,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  2496 004a 03       		.uleb128 0x3
  2497 004b 08       		.uleb128 0x8
  2498 004c 1C       		.uleb128 0x1c
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 61
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 61
 
 
  2499 004d 0B       		.uleb128 0xb
@@ -3658,7 +3658,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  2553 0083 3B       		.uleb128 0x3b
  2554 0084 0B       		.uleb128 0xb
  2555 0085 49       		.uleb128 0x49
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 62
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 62
 
 
  2556 0086 13       		.uleb128 0x13
@@ -3718,7 +3718,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  2610 00bd 02       		.uleb128 0x2
  2611 00be 18       		.uleb128 0x18
  2612 00bf 00       		.byte	0
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 63
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 63
 
 
  2613 00c0 00       		.byte	0
@@ -3778,7 +3778,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  2667 00f7 19       		.uleb128 0x19
  2668 00f8 03       		.uleb128 0x3
  2669 00f9 0E       		.uleb128 0xe
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 64
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 64
 
 
  2670 00fa 3A       		.uleb128 0x3a
@@ -3838,7 +3838,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  2724 0131 9742     		.uleb128 0x2117
  2725 0133 19       		.uleb128 0x19
  2726 0134 00       		.byte	0
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 65
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 65
 
 
  2727 0135 00       		.byte	0
@@ -3898,7 +3898,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  2781 016e 9742     		.uleb128 0x2117
  2782 0170 19       		.uleb128 0x19
  2783 0171 01       		.uleb128 0x1
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 66
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 66
 
 
  2784 0172 13       		.uleb128 0x13
@@ -3958,7 +3958,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  2838 01ae 0E       		.uleb128 0xe
  2839 01af 3A       		.uleb128 0x3a
  2840 01b0 0B       		.uleb128 0xb
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 67
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 67
 
 
  2841 01b1 3B       		.uleb128 0x3b
@@ -4018,7 +4018,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  2895 01e9 3B       		.uleb128 0x3b
  2896 01ea 05       		.uleb128 0x5
  2897 01eb 27       		.uleb128 0x27
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 68
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 68
 
 
  2898 01ec 19       		.uleb128 0x19
@@ -4078,7 +4078,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  2952 0224 2F       		.uleb128 0x2f
  2953 0225 0B       		.uleb128 0xb
  2954 0226 00       		.byte	0
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 69
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 69
 
 
  2955 0227 00       		.byte	0
@@ -4138,7 +4138,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  3009 0000 00000000 		.4byte	.LVL0
  3010 0004 44000000 		.4byte	.LVL9
  3011 0008 0100     		.2byte	0x1
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 70
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 70
 
 
  3012 000a 50       		.byte	0x50
@@ -4198,7 +4198,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  3066              	.LLST1:
  3067 0085 02000000 		.4byte	.LVL1
  3068 0089 0E000000 		.4byte	.LVL2
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 71
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 71
 
 
  3069 008d 0200     		.2byte	0x2
@@ -4258,7 +4258,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  3123 0117 00000000 		.4byte	.LVL22
  3124 011b 0E000000 		.4byte	.LVL23
  3125 011f 0100     		.2byte	0x1
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 72
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 72
 
 
  3126 0121 50       		.byte	0x50
@@ -4318,7 +4318,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  3180 01a3 50       		.byte	0x50
  3181 01a4 9F       		.byte	0x9f
  3182 01a5 3C000000 		.4byte	.LVL36
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 73
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 73
 
 
  3183 01a9 3E000000 		.4byte	.LVL37
@@ -4378,7 +4378,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  3237 0227 01       		.uleb128 0x1
  3238 0228 51       		.byte	0x51
  3239 0229 9F       		.byte	0x9f
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 74
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 74
 
 
  3240 022a 3C000000 		.4byte	.LVL36
@@ -4438,7 +4438,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  3294 02ab F3       		.byte	0xf3
  3295 02ac 01       		.uleb128 0x1
  3296 02ad 50       		.byte	0x50
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 75
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 75
 
 
  3297 02ae 9F       		.byte	0x9f
@@ -4498,7 +4498,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  3351 032e 0400     		.2byte	0x4
  3352 0330 F3       		.byte	0xf3
  3353 0331 01       		.uleb128 0x1
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 76
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 76
 
 
  3354 0332 50       		.byte	0x50
@@ -4558,7 +4558,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  3408 03b4 94000000 		.4byte	.LVL81
  3409 03b8 0100     		.2byte	0x1
  3410 03ba 56       		.byte	0x56
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 77
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 77
 
 
  3411 03bb 94000000 		.4byte	.LVL81
@@ -4618,7 +4618,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  3465 0440 0200     		.2byte	0x2
  3466 0442 30       		.byte	0x30
  3467 0443 9F       		.byte	0x9f
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 78
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 78
 
 
  3468 0444 92000000 		.4byte	.LVL79
@@ -4678,7 +4678,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  3522 04d3 30       		.byte	0x30
  3523 04d4 9F       		.byte	0x9f
  3524 04d5 00000000 		.4byte	0
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 79
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 79
 
 
  3525 04d9 00000000 		.4byte	0
@@ -4738,7 +4738,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  3579 0569 0100     		.2byte	0x1
  3580 056b 50       		.byte	0x50
  3581 056c CC000000 		.4byte	.LVL96
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 80
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 80
 
 
  3582 0570 FE000000 		.4byte	.LVL101
@@ -4798,7 +4798,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  3636 05fb 0400     		.2byte	0x4
  3637 05fd F3       		.byte	0xf3
  3638 05fe 01       		.uleb128 0x1
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 81
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 81
 
 
  3639 05ff 51       		.byte	0x51
@@ -4858,7 +4858,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  3693 067f 0100     		.2byte	0x1
  3694 0681 50       		.byte	0x50
  3695 0682 88000000 		.4byte	.LVL90
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 82
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 82
 
 
  3696 0686 B0000000 		.4byte	.LVL94
@@ -4918,7 +4918,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  3750 0715 FE000000 		.4byte	.LVL127
  3751 0719 0100     		.2byte	0x1
  3752 071b 54       		.byte	0x54
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 83
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 83
 
 
  3753 071c FE000000 		.4byte	.LVL127
@@ -4978,7 +4978,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  3807 07a4 51       		.byte	0x51
  3808 07a5 9F       		.byte	0x9f
  3809 07a6 88000000 		.4byte	.LVL116
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 84
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 84
 
 
  3810 07aa A0000000 		.4byte	.LVL118
@@ -5038,7 +5038,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  3864 082b B0000000 		.4byte	.LVL120
  3865 082f 0200     		.2byte	0x2
  3866 0831 30       		.byte	0x30
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 85
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 85
 
 
  3867 0832 9F       		.byte	0x9f
@@ -5098,7 +5098,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  3921 0010 00000000 		.4byte	.LFB46
  3922 0014 5C000000 		.4byte	.LFE46-.LFB46
  3923 0018 00000000 		.4byte	.LFB32
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 86
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 86
 
 
  3924 001c 0C000000 		.4byte	.LFE32-.LFB32
@@ -5158,7 +5158,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  3978 0054 14000000 		.4byte	.LFE41
  3979 0058 00000000 		.4byte	.LFB42
  3980 005c 96000000 		.4byte	.LFE42
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 87
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 87
 
 
  3981 0060 00000000 		.4byte	.LFB43
@@ -5218,7 +5218,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  4008              	.LASF53:
  4009 0080 67657444 		.ascii	"getDriverID\000"
  4009      72697665 
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 88
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 88
 
 
  4009      72494400 
@@ -5278,7 +5278,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  4031      73466173 
  4032              	.LASF45:
  4033 0129 7363616C 		.ascii	"scalingFactor\000"
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 89
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 89
 
 
  4033      696E6746 
@@ -5338,7 +5338,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  4051      66756E63 
  4051      74696F6E 
  4051      2D736563 
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 90
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 90
 
 
  4051      74696F6E 
@@ -5398,7 +5398,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  4075 02e1 54686572 		.ascii	"ThermalLimit\000"
  4075      6D616C4C 
  4075      696D6974 
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 91
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 91
 
 
  4075      00
@@ -5458,7 +5458,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  4098              	.LASF97:
  4099 038c 43794465 		.ascii	"CyDelayUs\000"
  4099      6C617955 
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 92
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 92
 
 
  4099      7300
@@ -5518,7 +5518,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  4119      6C617469 
  4119      6F6E4461 
  4119      74614661 
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 93
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 93
 
 
  4119      737400
@@ -5578,7 +5578,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  4139      64427269 
  4139      6768746E 
  4139      65737300 
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 94
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 94
 
 
  4140              	.LASF16:
@@ -5638,7 +5638,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  4163      333200
  4164              	.LASF5:
  4165 05e5 6C6F6E67 		.ascii	"long unsigned int\000"
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 95
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 95
 
 
  4165      20756E73 
@@ -5698,7 +5698,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  4185      00
  4186              	.LASF71:
  4187 069a 73616D70 		.ascii	"sampleArray\000"
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 96
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 96
 
 
  4187      6C654172 
@@ -5758,7 +5758,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 1
  4209 0748 6C6F6361 		.ascii	"localBrightness\000"
  4209      6C427269 
  4209      6768746E 
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccWuJiPt.s 			page 97
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccxuMgqY.s 			page 97
 
 
  4209      65737300 

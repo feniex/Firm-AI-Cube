@@ -259,10 +259,11 @@ MotorIO * motorControlLoop(int16 manualDesiredPostion)
             if(pMotor->desiredPot != rxPacketLocal->Payload.endMotorPosition) //&& getStateOfBar() == 0)
             {
                 pMotor->desiredPot = rxPacketLocal->Payload.endMotorPosition;
-                pMotor->calculatePercentageOfRange = pMotor->forwardLimitCS;
+                //pMotor->calculatePercentageOfRange = pMotor->forwardLimitCS;
+                pMotor->calculatePercentageOfRange = pMotor->desiredPot;
                 pMotor->calculatePercentageOfRange = pMotor->calculatePercentageOfRange/255;
                 pMotor->desiredPotFloat = pMotor->desiredPot;
-                pMotor->desiredPot = (int16)pMotor->desiredPotFloat*(pMotor->calculatePercentageOfRange);
+                pMotor->desiredPot = (60*(pMotor->calculatePercentageOfRange)) + pMotor->backwardLimitCS;
             }
         }
 

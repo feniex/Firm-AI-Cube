@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTl9YG9.s 			page 1
 
 
    1              		.syntax unified
@@ -58,7 +58,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 1
   28:Generated_Source\PSoC4/overCurrentTimer_PM.c **** * Summary:
   29:Generated_Source\PSoC4/overCurrentTimer_PM.c **** *     Save the current user configuration
   30:Generated_Source\PSoC4/overCurrentTimer_PM.c **** *
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 2
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTl9YG9.s 			page 2
 
 
   31:Generated_Source\PSoC4/overCurrentTimer_PM.c **** * Parameters:
@@ -89,12 +89,12 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 1
   37 0002 FFF7FEFF 		bl	overCurrentTimer_ReadCounter
   38              	.LVL0:
   39 0006 044C     		ldr	r4, .L2
-  40 0008 6080     		strh	r0, [r4, #2]
+  40 0008 6070     		strb	r0, [r4, #1]
   47:Generated_Source\PSoC4/overCurrentTimer_PM.c ****         overCurrentTimer_backup.InterruptMaskValue = overCurrentTimer_STATUS_MASK;
   41              		.loc 1 47 0
   42 000a 044B     		ldr	r3, .L2+4
   43 000c 1B78     		ldrb	r3, [r3]
-  44 000e 2371     		strb	r3, [r4, #4]
+  44 000e A370     		strb	r3, [r4, #2]
   48:Generated_Source\PSoC4/overCurrentTimer_PM.c ****         #if (overCurrentTimer_UsingHWCaptureCounter)
   49:Generated_Source\PSoC4/overCurrentTimer_PM.c ****             overCurrentTimer_backup.TimerCaptureCounter = overCurrentTimer_ReadCaptureCount();
   50:Generated_Source\PSoC4/overCurrentTimer_PM.c ****         #endif /* Back Up capture counter register  */
@@ -104,7 +104,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 1
   45              		.loc 1 53 0
   46 0010 FFF7FEFF 		bl	overCurrentTimer_ReadControlRegister
   47              	.LVL1:
-  48 0014 6071     		strb	r0, [r4, #5]
+  48 0014 E070     		strb	r0, [r4, #3]
   54:Generated_Source\PSoC4/overCurrentTimer_PM.c ****         #endif /* Backup the enable state of the Timer component */
   55:Generated_Source\PSoC4/overCurrentTimer_PM.c ****     #endif /* Backup non retention registers in UDB implementation. All fixed function registers ar
   56:Generated_Source\PSoC4/overCurrentTimer_PM.c **** }
@@ -115,10 +115,10 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 1
   53              		.align	2
   54              	.L2:
   55 0018 00000000 		.word	.LANCHOR0
-  56 001c 80000F40 		.word	1074724992
+  56 001c 83000F40 		.word	1074724995
   57              		.cfi_endproc
   58              	.LFE0:
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 3
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTl9YG9.s 			page 3
 
 
   59              		.size	overCurrentTimer_SaveConfig, .-overCurrentTimer_SaveConfig
@@ -165,12 +165,12 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 1
   81:Generated_Source\PSoC4/overCurrentTimer_PM.c ****         overCurrentTimer_WriteCounter(overCurrentTimer_backup.TimerUdb);
   76              		.loc 1 81 0
   77 0002 054C     		ldr	r4, .L5
-  78 0004 6088     		ldrh	r0, [r4, #2]
+  78 0004 6078     		ldrb	r0, [r4, #1]
   79 0006 FFF7FEFF 		bl	overCurrentTimer_WriteCounter
   80              	.LVL2:
   82:Generated_Source\PSoC4/overCurrentTimer_PM.c ****         overCurrentTimer_STATUS_MASK =overCurrentTimer_backup.InterruptMaskValue;
   81              		.loc 1 82 0
-  82 000a 2279     		ldrb	r2, [r4, #4]
+  82 000a A278     		ldrb	r2, [r4, #2]
   83 000c 034B     		ldr	r3, .L5+4
   84 000e 1A70     		strb	r2, [r3]
   83:Generated_Source\PSoC4/overCurrentTimer_PM.c ****         #if (overCurrentTimer_UsingHWCaptureCounter)
@@ -178,12 +178,12 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 1
   85:Generated_Source\PSoC4/overCurrentTimer_PM.c ****         #endif /* Restore Capture counter register*/
   86:Generated_Source\PSoC4/overCurrentTimer_PM.c **** 
   87:Generated_Source\PSoC4/overCurrentTimer_PM.c ****         #if(!overCurrentTimer_UDB_CONTROL_REG_REMOVED)
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 4
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTl9YG9.s 			page 4
 
 
   88:Generated_Source\PSoC4/overCurrentTimer_PM.c ****             overCurrentTimer_WriteControlRegister(overCurrentTimer_backup.TimerControlRegister);
   85              		.loc 1 88 0
-  86 0010 6079     		ldrb	r0, [r4, #5]
+  86 0010 E078     		ldrb	r0, [r4, #3]
   87 0012 FFF7FEFF 		bl	overCurrentTimer_WriteControlRegister
   88              	.LVL3:
   89:Generated_Source\PSoC4/overCurrentTimer_PM.c ****         #endif /* Restore the enable state of the Timer component */
@@ -196,7 +196,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 1
   93              		.align	2
   94              	.L5:
   95 0018 00000000 		.word	.LANCHOR0
-  96 001c 80000F40 		.word	1074724992
+  96 001c 83000F40 		.word	1074724995
   97              		.cfi_endproc
   98              	.LFE1:
   99              		.size	overCurrentTimer_RestoreConfig, .-overCurrentTimer_RestoreConfig
@@ -238,7 +238,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 1
  113              		.cfi_def_cfa_offset 8
  114              		.cfi_offset 4, -8
  115              		.cfi_offset 14, -4
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 5
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTl9YG9.s 			page 5
 
 
  114:Generated_Source\PSoC4/overCurrentTimer_PM.c ****     #if(!overCurrentTimer_UDB_CONTROL_REG_REMOVED)
@@ -286,7 +286,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 1
  142              	.L11:
  143              		.align	2
  144              	.L10:
- 145 0024 71000F40 		.word	1074724977
+ 145 0024 73000F40 		.word	1074724979
  146 0028 00000000 		.word	.LANCHOR0
  147              		.cfi_endproc
  148              	.LFE2:
@@ -298,7 +298,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 1
  154              		.thumb_func
  155              		.type	overCurrentTimer_Wakeup, %function
  156              	overCurrentTimer_Wakeup:
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 6
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTl9YG9.s 			page 6
 
 
  157              	.LFB3:
@@ -358,7 +358,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 1
  181              	.L15:
  182              		.align	2
  183              	.L14:
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 7
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTl9YG9.s 			page 7
 
 
  184 0014 00000000 		.word	.LANCHOR0
@@ -369,32 +369,31 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 1
  189              		.align	2
  190              		.set	.LANCHOR0,. + 0
  191              		.type	overCurrentTimer_backup, %object
- 192              		.size	overCurrentTimer_backup, 6
+ 192              		.size	overCurrentTimer_backup, 4
  193              	overCurrentTimer_backup:
- 194 0000 00000000 		.space	6
- 194      0000
+ 194 0000 00000000 		.space	4
  195              		.text
  196              	.Letext0:
  197              		.file 2 "Generated_Source\\PSoC4\\cytypes.h"
  198              		.file 3 "Generated_Source\\PSoC4\\overCurrentTimer.h"
  199              		.section	.debug_info,"",%progbits
  200              	.Ldebug_info0:
- 201 0000 EB010000 		.4byte	0x1eb
+ 201 0000 DF010000 		.4byte	0x1df
  202 0004 0400     		.2byte	0x4
  203 0006 00000000 		.4byte	.Ldebug_abbrev0
  204 000a 04       		.byte	0x4
  205 000b 01       		.uleb128 0x1
- 206 000c BF010000 		.4byte	.LASF32
+ 206 000c B8010000 		.4byte	.LASF31
  207 0010 0C       		.byte	0xc
- 208 0011 4F010000 		.4byte	.LASF33
- 209 0015 E6020000 		.4byte	.LASF34
+ 208 0011 4F010000 		.4byte	.LASF32
+ 209 0015 DF020000 		.4byte	.LASF33
  210 0019 00000000 		.4byte	.Ldebug_ranges0+0
  211 001d 00000000 		.4byte	0
  212 0021 00000000 		.4byte	.Ldebug_line0
  213 0025 02       		.uleb128 0x2
  214 0026 01       		.byte	0x1
  215 0027 06       		.byte	0x6
- 216 0028 AB020000 		.4byte	.LASF0
+ 216 0028 A4020000 		.4byte	.LASF0
  217 002c 02       		.uleb128 0x2
  218 002d 01       		.byte	0x1
  219 002e 08       		.byte	0x8
@@ -402,15 +401,15 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 1
  221 0033 02       		.uleb128 0x2
  222 0034 02       		.byte	0x2
  223 0035 05       		.byte	0x5
- 224 0036 8C020000 		.4byte	.LASF2
+ 224 0036 85020000 		.4byte	.LASF2
  225 003a 02       		.uleb128 0x2
  226 003b 02       		.byte	0x2
  227 003c 07       		.byte	0x7
- 228 003d B7020000 		.4byte	.LASF3
+ 228 003d B0020000 		.4byte	.LASF3
  229 0041 02       		.uleb128 0x2
  230 0042 04       		.byte	0x4
  231 0043 05       		.byte	0x5
- 232 0044 96020000 		.4byte	.LASF4
+ 232 0044 8F020000 		.4byte	.LASF4
  233 0048 02       		.uleb128 0x2
  234 0049 04       		.byte	0x4
  235 004a 07       		.byte	0x7
@@ -418,14 +417,14 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 1
  237 004f 02       		.uleb128 0x2
  238 0050 08       		.byte	0x8
  239 0051 05       		.byte	0x5
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 8
+ 240 0052 72020000 		.4byte	.LASF6
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTl9YG9.s 			page 8
 
 
- 240 0052 79020000 		.4byte	.LASF6
  241 0056 02       		.uleb128 0x2
  242 0057 08       		.byte	0x8
  243 0058 07       		.byte	0x7
- 244 0059 90010000 		.4byte	.LASF7
+ 244 0059 89010000 		.4byte	.LASF7
  245 005d 03       		.uleb128 0x3
  246 005e 04       		.byte	0x4
  247 005f 05       		.byte	0x5
@@ -433,620 +432,612 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 1
  249 0064 02       		.uleb128 0x2
  250 0065 04       		.byte	0x4
  251 0066 07       		.byte	0x7
- 252 0067 83010000 		.4byte	.LASF8
+ 252 0067 7C010000 		.4byte	.LASF8
  253 006b 04       		.uleb128 0x4
- 254 006c 05010000 		.4byte	.LASF9
+ 254 006c 05010000 		.4byte	.LASF12
  255 0070 02       		.byte	0x2
  256 0071 D201     		.2byte	0x1d2
  257 0073 2C000000 		.4byte	0x2c
- 258 0077 04       		.uleb128 0x4
- 259 0078 7C010000 		.4byte	.LASF10
- 260 007c 02       		.byte	0x2
- 261 007d D301     		.2byte	0x1d3
- 262 007f 3A000000 		.4byte	0x3a
- 263 0083 02       		.uleb128 0x2
- 264 0084 04       		.byte	0x4
- 265 0085 04       		.byte	0x4
- 266 0086 C2000000 		.4byte	.LASF11
- 267 008a 02       		.uleb128 0x2
- 268 008b 08       		.byte	0x8
- 269 008c 04       		.byte	0x4
- 270 008d 48010000 		.4byte	.LASF12
- 271 0091 02       		.uleb128 0x2
- 272 0092 01       		.byte	0x1
- 273 0093 08       		.byte	0x8
- 274 0094 87020000 		.4byte	.LASF13
- 275 0098 04       		.uleb128 0x4
- 276 0099 4D020000 		.4byte	.LASF14
- 277 009d 02       		.byte	0x2
- 278 009e 7C02     		.2byte	0x27c
- 279 00a0 A4000000 		.4byte	0xa4
- 280 00a4 05       		.uleb128 0x5
- 281 00a5 6B000000 		.4byte	0x6b
- 282 00a9 02       		.uleb128 0x2
- 283 00aa 08       		.byte	0x8
- 284 00ab 04       		.byte	0x4
- 285 00ac 9F020000 		.4byte	.LASF15
- 286 00b0 02       		.uleb128 0x2
- 287 00b1 04       		.byte	0x4
- 288 00b2 07       		.byte	0x7
- 289 00b3 52020000 		.4byte	.LASF16
- 290 00b7 06       		.uleb128 0x6
- 291 00b8 06       		.byte	0x6
- 292 00b9 03       		.byte	0x3
- 293 00ba 43       		.byte	0x43
- 294 00bb F0000000 		.4byte	0xf0
- 295 00bf 07       		.uleb128 0x7
- 296 00c0 16000000 		.4byte	.LASF17
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 9
+ 258 0077 02       		.uleb128 0x2
+ 259 0078 04       		.byte	0x4
+ 260 0079 04       		.byte	0x4
+ 261 007a C2000000 		.4byte	.LASF9
+ 262 007e 02       		.uleb128 0x2
+ 263 007f 08       		.byte	0x8
+ 264 0080 04       		.byte	0x4
+ 265 0081 48010000 		.4byte	.LASF10
+ 266 0085 02       		.uleb128 0x2
+ 267 0086 01       		.byte	0x1
+ 268 0087 08       		.byte	0x8
+ 269 0088 80020000 		.4byte	.LASF11
+ 270 008c 04       		.uleb128 0x4
+ 271 008d 46020000 		.4byte	.LASF13
+ 272 0091 02       		.byte	0x2
+ 273 0092 7C02     		.2byte	0x27c
+ 274 0094 98000000 		.4byte	0x98
+ 275 0098 05       		.uleb128 0x5
+ 276 0099 6B000000 		.4byte	0x6b
+ 277 009d 02       		.uleb128 0x2
+ 278 009e 08       		.byte	0x8
+ 279 009f 04       		.byte	0x4
+ 280 00a0 98020000 		.4byte	.LASF14
+ 281 00a4 02       		.uleb128 0x2
+ 282 00a5 04       		.byte	0x4
+ 283 00a6 07       		.byte	0x7
+ 284 00a7 4B020000 		.4byte	.LASF15
+ 285 00ab 06       		.uleb128 0x6
+ 286 00ac 04       		.byte	0x4
+ 287 00ad 03       		.byte	0x3
+ 288 00ae 43       		.byte	0x43
+ 289 00af E4000000 		.4byte	0xe4
+ 290 00b3 07       		.uleb128 0x7
+ 291 00b4 16000000 		.4byte	.LASF16
+ 292 00b8 03       		.byte	0x3
+ 293 00b9 45       		.byte	0x45
+ 294 00ba 6B000000 		.4byte	0x6b
+ 295 00be 00       		.byte	0
+ 296 00bf 07       		.uleb128 0x7
+ 297 00c0 9A000000 		.4byte	.LASF17
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTl9YG9.s 			page 9
 
 
- 297 00c4 03       		.byte	0x3
- 298 00c5 45       		.byte	0x45
- 299 00c6 6B000000 		.4byte	0x6b
- 300 00ca 00       		.byte	0
- 301 00cb 07       		.uleb128 0x7
- 302 00cc 9A000000 		.4byte	.LASF18
- 303 00d0 03       		.byte	0x3
- 304 00d1 48       		.byte	0x48
- 305 00d2 77000000 		.4byte	0x77
- 306 00d6 02       		.byte	0x2
- 307 00d7 07       		.uleb128 0x7
- 308 00d8 51030000 		.4byte	.LASF19
- 309 00dc 03       		.byte	0x3
- 310 00dd 49       		.byte	0x49
- 311 00de 6B000000 		.4byte	0x6b
- 312 00e2 04       		.byte	0x4
- 313 00e3 07       		.uleb128 0x7
- 314 00e4 64030000 		.4byte	.LASF20
- 315 00e8 03       		.byte	0x3
- 316 00e9 4F       		.byte	0x4f
- 317 00ea 6B000000 		.4byte	0x6b
- 318 00ee 05       		.byte	0x5
- 319 00ef 00       		.byte	0
- 320 00f0 08       		.uleb128 0x8
- 321 00f1 56000000 		.4byte	.LASF21
- 322 00f5 03       		.byte	0x3
- 323 00f6 53       		.byte	0x53
- 324 00f7 B7000000 		.4byte	0xb7
- 325 00fb 09       		.uleb128 0x9
- 326 00fc CA020000 		.4byte	.LASF22
- 327 0100 01       		.byte	0x1
- 328 0101 2B       		.byte	0x2b
- 329 0102 00000000 		.4byte	.LFB0
- 330 0106 20000000 		.4byte	.LFE0-.LFB0
- 331 010a 01       		.uleb128 0x1
- 332 010b 9C       		.byte	0x9c
- 333 010c 23010000 		.4byte	0x123
- 334 0110 0A       		.uleb128 0xa
- 335 0111 06000000 		.4byte	.LVL0
- 336 0115 AC010000 		.4byte	0x1ac
- 337 0119 0A       		.uleb128 0xa
- 338 011a 14000000 		.4byte	.LVL1
- 339 011e B7010000 		.4byte	0x1b7
- 340 0122 00       		.byte	0
- 341 0123 09       		.uleb128 0x9
- 342 0124 A3000000 		.4byte	.LASF23
- 343 0128 01       		.byte	0x1
- 344 0129 4D       		.byte	0x4d
- 345 012a 00000000 		.4byte	.LFB1
- 346 012e 20000000 		.4byte	.LFE1-.LFB1
- 347 0132 01       		.uleb128 0x1
- 348 0133 9C       		.byte	0x9c
- 349 0134 4B010000 		.4byte	0x14b
- 350 0138 0A       		.uleb128 0xa
- 351 0139 0A000000 		.4byte	.LVL2
- 352 013d C2010000 		.4byte	0x1c2
- 353 0141 0A       		.uleb128 0xa
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 10
+ 298 00c4 03       		.byte	0x3
+ 299 00c5 48       		.byte	0x48
+ 300 00c6 6B000000 		.4byte	0x6b
+ 301 00ca 01       		.byte	0x1
+ 302 00cb 07       		.uleb128 0x7
+ 303 00cc 4A030000 		.4byte	.LASF18
+ 304 00d0 03       		.byte	0x3
+ 305 00d1 49       		.byte	0x49
+ 306 00d2 6B000000 		.4byte	0x6b
+ 307 00d6 02       		.byte	0x2
+ 308 00d7 07       		.uleb128 0x7
+ 309 00d8 5D030000 		.4byte	.LASF19
+ 310 00dc 03       		.byte	0x3
+ 311 00dd 4F       		.byte	0x4f
+ 312 00de 6B000000 		.4byte	0x6b
+ 313 00e2 03       		.byte	0x3
+ 314 00e3 00       		.byte	0
+ 315 00e4 08       		.uleb128 0x8
+ 316 00e5 56000000 		.4byte	.LASF20
+ 317 00e9 03       		.byte	0x3
+ 318 00ea 53       		.byte	0x53
+ 319 00eb AB000000 		.4byte	0xab
+ 320 00ef 09       		.uleb128 0x9
+ 321 00f0 C3020000 		.4byte	.LASF21
+ 322 00f4 01       		.byte	0x1
+ 323 00f5 2B       		.byte	0x2b
+ 324 00f6 00000000 		.4byte	.LFB0
+ 325 00fa 20000000 		.4byte	.LFE0-.LFB0
+ 326 00fe 01       		.uleb128 0x1
+ 327 00ff 9C       		.byte	0x9c
+ 328 0100 17010000 		.4byte	0x117
+ 329 0104 0A       		.uleb128 0xa
+ 330 0105 06000000 		.4byte	.LVL0
+ 331 0109 A0010000 		.4byte	0x1a0
+ 332 010d 0A       		.uleb128 0xa
+ 333 010e 14000000 		.4byte	.LVL1
+ 334 0112 AB010000 		.4byte	0x1ab
+ 335 0116 00       		.byte	0
+ 336 0117 09       		.uleb128 0x9
+ 337 0118 A3000000 		.4byte	.LASF22
+ 338 011c 01       		.byte	0x1
+ 339 011d 4D       		.byte	0x4d
+ 340 011e 00000000 		.4byte	.LFB1
+ 341 0122 20000000 		.4byte	.LFE1-.LFB1
+ 342 0126 01       		.uleb128 0x1
+ 343 0127 9C       		.byte	0x9c
+ 344 0128 3F010000 		.4byte	0x13f
+ 345 012c 0A       		.uleb128 0xa
+ 346 012d 0A000000 		.4byte	.LVL2
+ 347 0131 B6010000 		.4byte	0x1b6
+ 348 0135 0A       		.uleb128 0xa
+ 349 0136 16000000 		.4byte	.LVL3
+ 350 013a C1010000 		.4byte	0x1c1
+ 351 013e 00       		.byte	0
+ 352 013f 09       		.uleb128 0x9
+ 353 0140 3F000000 		.4byte	.LASF23
+ 354 0144 01       		.byte	0x1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTl9YG9.s 			page 10
 
 
- 354 0142 16000000 		.4byte	.LVL3
- 355 0146 CD010000 		.4byte	0x1cd
- 356 014a 00       		.byte	0
- 357 014b 09       		.uleb128 0x9
- 358 014c 3F000000 		.4byte	.LASF24
- 359 0150 01       		.byte	0x1
- 360 0151 70       		.byte	0x70
- 361 0152 00000000 		.4byte	.LFB2
- 362 0156 2C000000 		.4byte	.LFE2-.LFB2
- 363 015a 01       		.uleb128 0x1
- 364 015b 9C       		.byte	0x9c
- 365 015c 73010000 		.4byte	0x173
- 366 0160 0A       		.uleb128 0xa
- 367 0161 1E000000 		.4byte	.LVL4
- 368 0165 D8010000 		.4byte	0x1d8
- 369 0169 0A       		.uleb128 0xa
- 370 016a 22000000 		.4byte	.LVL5
- 371 016e FB000000 		.4byte	0xfb
- 372 0172 00       		.byte	0
- 373 0173 09       		.uleb128 0x9
- 374 0174 A7010000 		.4byte	.LASF25
- 375 0178 01       		.byte	0x1
- 376 0179 96       		.byte	0x96
- 377 017a 00000000 		.4byte	.LFB3
- 378 017e 18000000 		.4byte	.LFE3-.LFB3
- 379 0182 01       		.uleb128 0x1
- 380 0183 9C       		.byte	0x9c
- 381 0184 9B010000 		.4byte	0x19b
- 382 0188 0A       		.uleb128 0xa
- 383 0189 06000000 		.4byte	.LVL6
- 384 018d 23010000 		.4byte	0x123
- 385 0191 0A       		.uleb128 0xa
- 386 0192 12000000 		.4byte	.LVL7
- 387 0196 E3010000 		.4byte	0x1e3
- 388 019a 00       		.byte	0
- 389 019b 0B       		.uleb128 0xb
- 390 019c 0B010000 		.4byte	.LASF35
- 391 01a0 01       		.byte	0x1
- 392 01a1 15       		.byte	0x15
- 393 01a2 F0000000 		.4byte	0xf0
- 394 01a6 05       		.uleb128 0x5
- 395 01a7 03       		.byte	0x3
- 396 01a8 00000000 		.4byte	overCurrentTimer_backup
- 397 01ac 0C       		.uleb128 0xc
- 398 01ad D6000000 		.4byte	.LASF26
- 399 01b1 D6000000 		.4byte	.LASF26
- 400 01b5 03       		.byte	0x3
- 401 01b6 69       		.byte	0x69
- 402 01b7 0C       		.uleb128 0xc
- 403 01b8 23010000 		.4byte	.LASF27
- 404 01bc 23010000 		.4byte	.LASF27
- 405 01c0 03       		.byte	0x3
- 406 01c1 63       		.byte	0x63
- 407 01c2 0C       		.uleb128 0xc
- 408 01c3 5B020000 		.4byte	.LASF28
- 409 01c7 5B020000 		.4byte	.LASF28
- 410 01cb 03       		.byte	0x3
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 11
+ 355 0145 70       		.byte	0x70
+ 356 0146 00000000 		.4byte	.LFB2
+ 357 014a 2C000000 		.4byte	.LFE2-.LFB2
+ 358 014e 01       		.uleb128 0x1
+ 359 014f 9C       		.byte	0x9c
+ 360 0150 67010000 		.4byte	0x167
+ 361 0154 0A       		.uleb128 0xa
+ 362 0155 1E000000 		.4byte	.LVL4
+ 363 0159 CC010000 		.4byte	0x1cc
+ 364 015d 0A       		.uleb128 0xa
+ 365 015e 22000000 		.4byte	.LVL5
+ 366 0162 EF000000 		.4byte	0xef
+ 367 0166 00       		.byte	0
+ 368 0167 09       		.uleb128 0x9
+ 369 0168 A0010000 		.4byte	.LASF24
+ 370 016c 01       		.byte	0x1
+ 371 016d 96       		.byte	0x96
+ 372 016e 00000000 		.4byte	.LFB3
+ 373 0172 18000000 		.4byte	.LFE3-.LFB3
+ 374 0176 01       		.uleb128 0x1
+ 375 0177 9C       		.byte	0x9c
+ 376 0178 8F010000 		.4byte	0x18f
+ 377 017c 0A       		.uleb128 0xa
+ 378 017d 06000000 		.4byte	.LVL6
+ 379 0181 17010000 		.4byte	0x117
+ 380 0185 0A       		.uleb128 0xa
+ 381 0186 12000000 		.4byte	.LVL7
+ 382 018a D7010000 		.4byte	0x1d7
+ 383 018e 00       		.byte	0
+ 384 018f 0B       		.uleb128 0xb
+ 385 0190 0B010000 		.4byte	.LASF34
+ 386 0194 01       		.byte	0x1
+ 387 0195 15       		.byte	0x15
+ 388 0196 E4000000 		.4byte	0xe4
+ 389 019a 05       		.uleb128 0x5
+ 390 019b 03       		.byte	0x3
+ 391 019c 00000000 		.4byte	overCurrentTimer_backup
+ 392 01a0 0C       		.uleb128 0xc
+ 393 01a1 D6000000 		.4byte	.LASF25
+ 394 01a5 D6000000 		.4byte	.LASF25
+ 395 01a9 03       		.byte	0x3
+ 396 01aa 69       		.byte	0x69
+ 397 01ab 0C       		.uleb128 0xc
+ 398 01ac 23010000 		.4byte	.LASF26
+ 399 01b0 23010000 		.4byte	.LASF26
+ 400 01b4 03       		.byte	0x3
+ 401 01b5 63       		.byte	0x63
+ 402 01b6 0C       		.uleb128 0xc
+ 403 01b7 54020000 		.4byte	.LASF27
+ 404 01bb 54020000 		.4byte	.LASF27
+ 405 01bf 03       		.byte	0x3
+ 406 01c0 6A       		.byte	0x6a
+ 407 01c1 0C       		.uleb128 0xc
+ 408 01c2 74000000 		.4byte	.LASF28
+ 409 01c6 74000000 		.4byte	.LASF28
+ 410 01ca 03       		.byte	0x3
+ 411 01cb 64       		.byte	0x64
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTl9YG9.s 			page 11
 
 
- 411 01cc 6A       		.byte	0x6a
- 412 01cd 0C       		.uleb128 0xc
- 413 01ce 74000000 		.4byte	.LASF29
- 414 01d2 74000000 		.4byte	.LASF29
- 415 01d6 03       		.byte	0x3
- 416 01d7 64       		.byte	0x64
- 417 01d8 0C       		.uleb128 0xc
- 418 01d9 00000000 		.4byte	.LASF30
- 419 01dd 00000000 		.4byte	.LASF30
- 420 01e1 03       		.byte	0x3
- 421 01e2 5B       		.byte	0x5b
- 422 01e3 0C       		.uleb128 0xc
- 423 01e4 27000000 		.4byte	.LASF31
- 424 01e8 27000000 		.4byte	.LASF31
- 425 01ec 03       		.byte	0x3
- 426 01ed 8B       		.byte	0x8b
- 427 01ee 00       		.byte	0
- 428              		.section	.debug_abbrev,"",%progbits
- 429              	.Ldebug_abbrev0:
- 430 0000 01       		.uleb128 0x1
- 431 0001 11       		.uleb128 0x11
- 432 0002 01       		.byte	0x1
- 433 0003 25       		.uleb128 0x25
- 434 0004 0E       		.uleb128 0xe
- 435 0005 13       		.uleb128 0x13
- 436 0006 0B       		.uleb128 0xb
- 437 0007 03       		.uleb128 0x3
- 438 0008 0E       		.uleb128 0xe
- 439 0009 1B       		.uleb128 0x1b
- 440 000a 0E       		.uleb128 0xe
- 441 000b 55       		.uleb128 0x55
- 442 000c 17       		.uleb128 0x17
- 443 000d 11       		.uleb128 0x11
- 444 000e 01       		.uleb128 0x1
- 445 000f 10       		.uleb128 0x10
- 446 0010 17       		.uleb128 0x17
- 447 0011 00       		.byte	0
- 448 0012 00       		.byte	0
- 449 0013 02       		.uleb128 0x2
- 450 0014 24       		.uleb128 0x24
- 451 0015 00       		.byte	0
- 452 0016 0B       		.uleb128 0xb
- 453 0017 0B       		.uleb128 0xb
- 454 0018 3E       		.uleb128 0x3e
- 455 0019 0B       		.uleb128 0xb
- 456 001a 03       		.uleb128 0x3
- 457 001b 0E       		.uleb128 0xe
- 458 001c 00       		.byte	0
- 459 001d 00       		.byte	0
- 460 001e 03       		.uleb128 0x3
- 461 001f 24       		.uleb128 0x24
- 462 0020 00       		.byte	0
- 463 0021 0B       		.uleb128 0xb
- 464 0022 0B       		.uleb128 0xb
- 465 0023 3E       		.uleb128 0x3e
- 466 0024 0B       		.uleb128 0xb
- 467 0025 03       		.uleb128 0x3
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 12
+ 412 01cc 0C       		.uleb128 0xc
+ 413 01cd 00000000 		.4byte	.LASF29
+ 414 01d1 00000000 		.4byte	.LASF29
+ 415 01d5 03       		.byte	0x3
+ 416 01d6 5B       		.byte	0x5b
+ 417 01d7 0C       		.uleb128 0xc
+ 418 01d8 27000000 		.4byte	.LASF30
+ 419 01dc 27000000 		.4byte	.LASF30
+ 420 01e0 03       		.byte	0x3
+ 421 01e1 8B       		.byte	0x8b
+ 422 01e2 00       		.byte	0
+ 423              		.section	.debug_abbrev,"",%progbits
+ 424              	.Ldebug_abbrev0:
+ 425 0000 01       		.uleb128 0x1
+ 426 0001 11       		.uleb128 0x11
+ 427 0002 01       		.byte	0x1
+ 428 0003 25       		.uleb128 0x25
+ 429 0004 0E       		.uleb128 0xe
+ 430 0005 13       		.uleb128 0x13
+ 431 0006 0B       		.uleb128 0xb
+ 432 0007 03       		.uleb128 0x3
+ 433 0008 0E       		.uleb128 0xe
+ 434 0009 1B       		.uleb128 0x1b
+ 435 000a 0E       		.uleb128 0xe
+ 436 000b 55       		.uleb128 0x55
+ 437 000c 17       		.uleb128 0x17
+ 438 000d 11       		.uleb128 0x11
+ 439 000e 01       		.uleb128 0x1
+ 440 000f 10       		.uleb128 0x10
+ 441 0010 17       		.uleb128 0x17
+ 442 0011 00       		.byte	0
+ 443 0012 00       		.byte	0
+ 444 0013 02       		.uleb128 0x2
+ 445 0014 24       		.uleb128 0x24
+ 446 0015 00       		.byte	0
+ 447 0016 0B       		.uleb128 0xb
+ 448 0017 0B       		.uleb128 0xb
+ 449 0018 3E       		.uleb128 0x3e
+ 450 0019 0B       		.uleb128 0xb
+ 451 001a 03       		.uleb128 0x3
+ 452 001b 0E       		.uleb128 0xe
+ 453 001c 00       		.byte	0
+ 454 001d 00       		.byte	0
+ 455 001e 03       		.uleb128 0x3
+ 456 001f 24       		.uleb128 0x24
+ 457 0020 00       		.byte	0
+ 458 0021 0B       		.uleb128 0xb
+ 459 0022 0B       		.uleb128 0xb
+ 460 0023 3E       		.uleb128 0x3e
+ 461 0024 0B       		.uleb128 0xb
+ 462 0025 03       		.uleb128 0x3
+ 463 0026 08       		.uleb128 0x8
+ 464 0027 00       		.byte	0
+ 465 0028 00       		.byte	0
+ 466 0029 04       		.uleb128 0x4
+ 467 002a 16       		.uleb128 0x16
+ 468 002b 00       		.byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTl9YG9.s 			page 12
 
 
- 468 0026 08       		.uleb128 0x8
- 469 0027 00       		.byte	0
- 470 0028 00       		.byte	0
- 471 0029 04       		.uleb128 0x4
- 472 002a 16       		.uleb128 0x16
- 473 002b 00       		.byte	0
- 474 002c 03       		.uleb128 0x3
- 475 002d 0E       		.uleb128 0xe
- 476 002e 3A       		.uleb128 0x3a
- 477 002f 0B       		.uleb128 0xb
- 478 0030 3B       		.uleb128 0x3b
- 479 0031 05       		.uleb128 0x5
- 480 0032 49       		.uleb128 0x49
- 481 0033 13       		.uleb128 0x13
- 482 0034 00       		.byte	0
- 483 0035 00       		.byte	0
- 484 0036 05       		.uleb128 0x5
- 485 0037 35       		.uleb128 0x35
- 486 0038 00       		.byte	0
- 487 0039 49       		.uleb128 0x49
- 488 003a 13       		.uleb128 0x13
- 489 003b 00       		.byte	0
- 490 003c 00       		.byte	0
- 491 003d 06       		.uleb128 0x6
- 492 003e 13       		.uleb128 0x13
- 493 003f 01       		.byte	0x1
- 494 0040 0B       		.uleb128 0xb
- 495 0041 0B       		.uleb128 0xb
- 496 0042 3A       		.uleb128 0x3a
- 497 0043 0B       		.uleb128 0xb
- 498 0044 3B       		.uleb128 0x3b
- 499 0045 0B       		.uleb128 0xb
- 500 0046 01       		.uleb128 0x1
- 501 0047 13       		.uleb128 0x13
- 502 0048 00       		.byte	0
- 503 0049 00       		.byte	0
- 504 004a 07       		.uleb128 0x7
- 505 004b 0D       		.uleb128 0xd
- 506 004c 00       		.byte	0
- 507 004d 03       		.uleb128 0x3
- 508 004e 0E       		.uleb128 0xe
- 509 004f 3A       		.uleb128 0x3a
- 510 0050 0B       		.uleb128 0xb
- 511 0051 3B       		.uleb128 0x3b
- 512 0052 0B       		.uleb128 0xb
- 513 0053 49       		.uleb128 0x49
- 514 0054 13       		.uleb128 0x13
- 515 0055 38       		.uleb128 0x38
- 516 0056 0B       		.uleb128 0xb
- 517 0057 00       		.byte	0
- 518 0058 00       		.byte	0
- 519 0059 08       		.uleb128 0x8
- 520 005a 16       		.uleb128 0x16
- 521 005b 00       		.byte	0
- 522 005c 03       		.uleb128 0x3
- 523 005d 0E       		.uleb128 0xe
- 524 005e 3A       		.uleb128 0x3a
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 13
+ 469 002c 03       		.uleb128 0x3
+ 470 002d 0E       		.uleb128 0xe
+ 471 002e 3A       		.uleb128 0x3a
+ 472 002f 0B       		.uleb128 0xb
+ 473 0030 3B       		.uleb128 0x3b
+ 474 0031 05       		.uleb128 0x5
+ 475 0032 49       		.uleb128 0x49
+ 476 0033 13       		.uleb128 0x13
+ 477 0034 00       		.byte	0
+ 478 0035 00       		.byte	0
+ 479 0036 05       		.uleb128 0x5
+ 480 0037 35       		.uleb128 0x35
+ 481 0038 00       		.byte	0
+ 482 0039 49       		.uleb128 0x49
+ 483 003a 13       		.uleb128 0x13
+ 484 003b 00       		.byte	0
+ 485 003c 00       		.byte	0
+ 486 003d 06       		.uleb128 0x6
+ 487 003e 13       		.uleb128 0x13
+ 488 003f 01       		.byte	0x1
+ 489 0040 0B       		.uleb128 0xb
+ 490 0041 0B       		.uleb128 0xb
+ 491 0042 3A       		.uleb128 0x3a
+ 492 0043 0B       		.uleb128 0xb
+ 493 0044 3B       		.uleb128 0x3b
+ 494 0045 0B       		.uleb128 0xb
+ 495 0046 01       		.uleb128 0x1
+ 496 0047 13       		.uleb128 0x13
+ 497 0048 00       		.byte	0
+ 498 0049 00       		.byte	0
+ 499 004a 07       		.uleb128 0x7
+ 500 004b 0D       		.uleb128 0xd
+ 501 004c 00       		.byte	0
+ 502 004d 03       		.uleb128 0x3
+ 503 004e 0E       		.uleb128 0xe
+ 504 004f 3A       		.uleb128 0x3a
+ 505 0050 0B       		.uleb128 0xb
+ 506 0051 3B       		.uleb128 0x3b
+ 507 0052 0B       		.uleb128 0xb
+ 508 0053 49       		.uleb128 0x49
+ 509 0054 13       		.uleb128 0x13
+ 510 0055 38       		.uleb128 0x38
+ 511 0056 0B       		.uleb128 0xb
+ 512 0057 00       		.byte	0
+ 513 0058 00       		.byte	0
+ 514 0059 08       		.uleb128 0x8
+ 515 005a 16       		.uleb128 0x16
+ 516 005b 00       		.byte	0
+ 517 005c 03       		.uleb128 0x3
+ 518 005d 0E       		.uleb128 0xe
+ 519 005e 3A       		.uleb128 0x3a
+ 520 005f 0B       		.uleb128 0xb
+ 521 0060 3B       		.uleb128 0x3b
+ 522 0061 0B       		.uleb128 0xb
+ 523 0062 49       		.uleb128 0x49
+ 524 0063 13       		.uleb128 0x13
+ 525 0064 00       		.byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTl9YG9.s 			page 13
 
 
- 525 005f 0B       		.uleb128 0xb
- 526 0060 3B       		.uleb128 0x3b
- 527 0061 0B       		.uleb128 0xb
- 528 0062 49       		.uleb128 0x49
- 529 0063 13       		.uleb128 0x13
- 530 0064 00       		.byte	0
- 531 0065 00       		.byte	0
- 532 0066 09       		.uleb128 0x9
- 533 0067 2E       		.uleb128 0x2e
- 534 0068 01       		.byte	0x1
- 535 0069 3F       		.uleb128 0x3f
- 536 006a 19       		.uleb128 0x19
- 537 006b 03       		.uleb128 0x3
- 538 006c 0E       		.uleb128 0xe
- 539 006d 3A       		.uleb128 0x3a
- 540 006e 0B       		.uleb128 0xb
- 541 006f 3B       		.uleb128 0x3b
- 542 0070 0B       		.uleb128 0xb
- 543 0071 27       		.uleb128 0x27
- 544 0072 19       		.uleb128 0x19
- 545 0073 11       		.uleb128 0x11
- 546 0074 01       		.uleb128 0x1
- 547 0075 12       		.uleb128 0x12
- 548 0076 06       		.uleb128 0x6
- 549 0077 40       		.uleb128 0x40
- 550 0078 18       		.uleb128 0x18
- 551 0079 9742     		.uleb128 0x2117
- 552 007b 19       		.uleb128 0x19
- 553 007c 01       		.uleb128 0x1
- 554 007d 13       		.uleb128 0x13
- 555 007e 00       		.byte	0
- 556 007f 00       		.byte	0
- 557 0080 0A       		.uleb128 0xa
- 558 0081 898201   		.uleb128 0x4109
- 559 0084 00       		.byte	0
- 560 0085 11       		.uleb128 0x11
- 561 0086 01       		.uleb128 0x1
- 562 0087 31       		.uleb128 0x31
- 563 0088 13       		.uleb128 0x13
- 564 0089 00       		.byte	0
- 565 008a 00       		.byte	0
- 566 008b 0B       		.uleb128 0xb
- 567 008c 34       		.uleb128 0x34
- 568 008d 00       		.byte	0
- 569 008e 03       		.uleb128 0x3
- 570 008f 0E       		.uleb128 0xe
- 571 0090 3A       		.uleb128 0x3a
- 572 0091 0B       		.uleb128 0xb
- 573 0092 3B       		.uleb128 0x3b
- 574 0093 0B       		.uleb128 0xb
- 575 0094 49       		.uleb128 0x49
- 576 0095 13       		.uleb128 0x13
- 577 0096 02       		.uleb128 0x2
- 578 0097 18       		.uleb128 0x18
- 579 0098 00       		.byte	0
- 580 0099 00       		.byte	0
- 581 009a 0C       		.uleb128 0xc
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 14
+ 526 0065 00       		.byte	0
+ 527 0066 09       		.uleb128 0x9
+ 528 0067 2E       		.uleb128 0x2e
+ 529 0068 01       		.byte	0x1
+ 530 0069 3F       		.uleb128 0x3f
+ 531 006a 19       		.uleb128 0x19
+ 532 006b 03       		.uleb128 0x3
+ 533 006c 0E       		.uleb128 0xe
+ 534 006d 3A       		.uleb128 0x3a
+ 535 006e 0B       		.uleb128 0xb
+ 536 006f 3B       		.uleb128 0x3b
+ 537 0070 0B       		.uleb128 0xb
+ 538 0071 27       		.uleb128 0x27
+ 539 0072 19       		.uleb128 0x19
+ 540 0073 11       		.uleb128 0x11
+ 541 0074 01       		.uleb128 0x1
+ 542 0075 12       		.uleb128 0x12
+ 543 0076 06       		.uleb128 0x6
+ 544 0077 40       		.uleb128 0x40
+ 545 0078 18       		.uleb128 0x18
+ 546 0079 9742     		.uleb128 0x2117
+ 547 007b 19       		.uleb128 0x19
+ 548 007c 01       		.uleb128 0x1
+ 549 007d 13       		.uleb128 0x13
+ 550 007e 00       		.byte	0
+ 551 007f 00       		.byte	0
+ 552 0080 0A       		.uleb128 0xa
+ 553 0081 898201   		.uleb128 0x4109
+ 554 0084 00       		.byte	0
+ 555 0085 11       		.uleb128 0x11
+ 556 0086 01       		.uleb128 0x1
+ 557 0087 31       		.uleb128 0x31
+ 558 0088 13       		.uleb128 0x13
+ 559 0089 00       		.byte	0
+ 560 008a 00       		.byte	0
+ 561 008b 0B       		.uleb128 0xb
+ 562 008c 34       		.uleb128 0x34
+ 563 008d 00       		.byte	0
+ 564 008e 03       		.uleb128 0x3
+ 565 008f 0E       		.uleb128 0xe
+ 566 0090 3A       		.uleb128 0x3a
+ 567 0091 0B       		.uleb128 0xb
+ 568 0092 3B       		.uleb128 0x3b
+ 569 0093 0B       		.uleb128 0xb
+ 570 0094 49       		.uleb128 0x49
+ 571 0095 13       		.uleb128 0x13
+ 572 0096 02       		.uleb128 0x2
+ 573 0097 18       		.uleb128 0x18
+ 574 0098 00       		.byte	0
+ 575 0099 00       		.byte	0
+ 576 009a 0C       		.uleb128 0xc
+ 577 009b 2E       		.uleb128 0x2e
+ 578 009c 00       		.byte	0
+ 579 009d 3F       		.uleb128 0x3f
+ 580 009e 19       		.uleb128 0x19
+ 581 009f 3C       		.uleb128 0x3c
+ 582 00a0 19       		.uleb128 0x19
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTl9YG9.s 			page 14
 
 
- 582 009b 2E       		.uleb128 0x2e
- 583 009c 00       		.byte	0
- 584 009d 3F       		.uleb128 0x3f
- 585 009e 19       		.uleb128 0x19
- 586 009f 3C       		.uleb128 0x3c
- 587 00a0 19       		.uleb128 0x19
- 588 00a1 6E       		.uleb128 0x6e
- 589 00a2 0E       		.uleb128 0xe
- 590 00a3 03       		.uleb128 0x3
- 591 00a4 0E       		.uleb128 0xe
- 592 00a5 3A       		.uleb128 0x3a
- 593 00a6 0B       		.uleb128 0xb
- 594 00a7 3B       		.uleb128 0x3b
- 595 00a8 0B       		.uleb128 0xb
- 596 00a9 00       		.byte	0
- 597 00aa 00       		.byte	0
- 598 00ab 00       		.byte	0
- 599              		.section	.debug_aranges,"",%progbits
- 600 0000 34000000 		.4byte	0x34
- 601 0004 0200     		.2byte	0x2
- 602 0006 00000000 		.4byte	.Ldebug_info0
- 603 000a 04       		.byte	0x4
- 604 000b 00       		.byte	0
- 605 000c 0000     		.2byte	0
- 606 000e 0000     		.2byte	0
- 607 0010 00000000 		.4byte	.LFB0
- 608 0014 20000000 		.4byte	.LFE0-.LFB0
- 609 0018 00000000 		.4byte	.LFB1
- 610 001c 20000000 		.4byte	.LFE1-.LFB1
- 611 0020 00000000 		.4byte	.LFB2
- 612 0024 2C000000 		.4byte	.LFE2-.LFB2
- 613 0028 00000000 		.4byte	.LFB3
- 614 002c 18000000 		.4byte	.LFE3-.LFB3
- 615 0030 00000000 		.4byte	0
- 616 0034 00000000 		.4byte	0
- 617              		.section	.debug_ranges,"",%progbits
- 618              	.Ldebug_ranges0:
- 619 0000 00000000 		.4byte	.LFB0
- 620 0004 20000000 		.4byte	.LFE0
- 621 0008 00000000 		.4byte	.LFB1
- 622 000c 20000000 		.4byte	.LFE1
- 623 0010 00000000 		.4byte	.LFB2
- 624 0014 2C000000 		.4byte	.LFE2
- 625 0018 00000000 		.4byte	.LFB3
- 626 001c 18000000 		.4byte	.LFE3
- 627 0020 00000000 		.4byte	0
- 628 0024 00000000 		.4byte	0
- 629              		.section	.debug_line,"",%progbits
- 630              	.Ldebug_line0:
- 631 0000 BD000000 		.section	.debug_str,"MS",%progbits,1
- 631      02006600 
- 631      00000201 
- 631      FB0E0D00 
- 631      01010101 
- 632              	.LASF30:
- 633 0000 6F766572 		.ascii	"overCurrentTimer_Stop\000"
- 633      43757272 
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 15
+ 583 00a1 6E       		.uleb128 0x6e
+ 584 00a2 0E       		.uleb128 0xe
+ 585 00a3 03       		.uleb128 0x3
+ 586 00a4 0E       		.uleb128 0xe
+ 587 00a5 3A       		.uleb128 0x3a
+ 588 00a6 0B       		.uleb128 0xb
+ 589 00a7 3B       		.uleb128 0x3b
+ 590 00a8 0B       		.uleb128 0xb
+ 591 00a9 00       		.byte	0
+ 592 00aa 00       		.byte	0
+ 593 00ab 00       		.byte	0
+ 594              		.section	.debug_aranges,"",%progbits
+ 595 0000 34000000 		.4byte	0x34
+ 596 0004 0200     		.2byte	0x2
+ 597 0006 00000000 		.4byte	.Ldebug_info0
+ 598 000a 04       		.byte	0x4
+ 599 000b 00       		.byte	0
+ 600 000c 0000     		.2byte	0
+ 601 000e 0000     		.2byte	0
+ 602 0010 00000000 		.4byte	.LFB0
+ 603 0014 20000000 		.4byte	.LFE0-.LFB0
+ 604 0018 00000000 		.4byte	.LFB1
+ 605 001c 20000000 		.4byte	.LFE1-.LFB1
+ 606 0020 00000000 		.4byte	.LFB2
+ 607 0024 2C000000 		.4byte	.LFE2-.LFB2
+ 608 0028 00000000 		.4byte	.LFB3
+ 609 002c 18000000 		.4byte	.LFE3-.LFB3
+ 610 0030 00000000 		.4byte	0
+ 611 0034 00000000 		.4byte	0
+ 612              		.section	.debug_ranges,"",%progbits
+ 613              	.Ldebug_ranges0:
+ 614 0000 00000000 		.4byte	.LFB0
+ 615 0004 20000000 		.4byte	.LFE0
+ 616 0008 00000000 		.4byte	.LFB1
+ 617 000c 20000000 		.4byte	.LFE1
+ 618 0010 00000000 		.4byte	.LFB2
+ 619 0014 2C000000 		.4byte	.LFE2
+ 620 0018 00000000 		.4byte	.LFB3
+ 621 001c 18000000 		.4byte	.LFE3
+ 622 0020 00000000 		.4byte	0
+ 623 0024 00000000 		.4byte	0
+ 624              		.section	.debug_line,"",%progbits
+ 625              	.Ldebug_line0:
+ 626 0000 BD000000 		.section	.debug_str,"MS",%progbits,1
+ 626      02006600 
+ 626      00000201 
+ 626      FB0E0D00 
+ 626      01010101 
+ 627              	.LASF29:
+ 628 0000 6F766572 		.ascii	"overCurrentTimer_Stop\000"
+ 628      43757272 
+ 628      656E7454 
+ 628      696D6572 
+ 628      5F53746F 
+ 629              	.LASF16:
+ 630 0016 54696D65 		.ascii	"TimerEnableState\000"
+ 630      72456E61 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTl9YG9.s 			page 15
 
 
- 633      656E7454 
- 633      696D6572 
- 633      5F53746F 
- 634              	.LASF17:
- 635 0016 54696D65 		.ascii	"TimerEnableState\000"
- 635      72456E61 
- 635      626C6553 
- 635      74617465 
- 635      00
- 636              	.LASF31:
- 637 0027 6F766572 		.ascii	"overCurrentTimer_Enable\000"
- 637      43757272 
- 637      656E7454 
- 637      696D6572 
- 637      5F456E61 
- 638              	.LASF24:
- 639 003f 6F766572 		.ascii	"overCurrentTimer_Sleep\000"
- 639      43757272 
- 639      656E7454 
- 639      696D6572 
- 639      5F536C65 
- 640              	.LASF21:
- 641 0056 6F766572 		.ascii	"overCurrentTimer_backupStruct\000"
- 641      43757272 
- 641      656E7454 
- 641      696D6572 
- 641      5F626163 
- 642              	.LASF29:
- 643 0074 6F766572 		.ascii	"overCurrentTimer_WriteControlRegister\000"
- 643      43757272 
- 643      656E7454 
- 643      696D6572 
- 643      5F577269 
- 644              	.LASF18:
- 645 009a 54696D65 		.ascii	"TimerUdb\000"
- 645      72556462 
- 645      00
- 646              	.LASF23:
- 647 00a3 6F766572 		.ascii	"overCurrentTimer_RestoreConfig\000"
- 647      43757272 
- 647      656E7454 
- 647      696D6572 
- 647      5F526573 
- 648              	.LASF11:
- 649 00c2 666C6F61 		.ascii	"float\000"
- 649      7400
- 650              	.LASF1:
- 651 00c8 756E7369 		.ascii	"unsigned char\000"
- 651      676E6564 
- 651      20636861 
- 651      7200
- 652              	.LASF26:
- 653 00d6 6F766572 		.ascii	"overCurrentTimer_ReadCounter\000"
- 653      43757272 
- 653      656E7454 
- 653      696D6572 
- 653      5F526561 
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 16
+ 630      626C6553 
+ 630      74617465 
+ 630      00
+ 631              	.LASF30:
+ 632 0027 6F766572 		.ascii	"overCurrentTimer_Enable\000"
+ 632      43757272 
+ 632      656E7454 
+ 632      696D6572 
+ 632      5F456E61 
+ 633              	.LASF23:
+ 634 003f 6F766572 		.ascii	"overCurrentTimer_Sleep\000"
+ 634      43757272 
+ 634      656E7454 
+ 634      696D6572 
+ 634      5F536C65 
+ 635              	.LASF20:
+ 636 0056 6F766572 		.ascii	"overCurrentTimer_backupStruct\000"
+ 636      43757272 
+ 636      656E7454 
+ 636      696D6572 
+ 636      5F626163 
+ 637              	.LASF28:
+ 638 0074 6F766572 		.ascii	"overCurrentTimer_WriteControlRegister\000"
+ 638      43757272 
+ 638      656E7454 
+ 638      696D6572 
+ 638      5F577269 
+ 639              	.LASF17:
+ 640 009a 54696D65 		.ascii	"TimerUdb\000"
+ 640      72556462 
+ 640      00
+ 641              	.LASF22:
+ 642 00a3 6F766572 		.ascii	"overCurrentTimer_RestoreConfig\000"
+ 642      43757272 
+ 642      656E7454 
+ 642      696D6572 
+ 642      5F526573 
+ 643              	.LASF9:
+ 644 00c2 666C6F61 		.ascii	"float\000"
+ 644      7400
+ 645              	.LASF1:
+ 646 00c8 756E7369 		.ascii	"unsigned char\000"
+ 646      676E6564 
+ 646      20636861 
+ 646      7200
+ 647              	.LASF25:
+ 648 00d6 6F766572 		.ascii	"overCurrentTimer_ReadCounter\000"
+ 648      43757272 
+ 648      656E7454 
+ 648      696D6572 
+ 648      5F526561 
+ 649              	.LASF5:
+ 650 00f3 6C6F6E67 		.ascii	"long unsigned int\000"
+ 650      20756E73 
+ 650      69676E65 
+ 650      6420696E 
+ 650      7400
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTl9YG9.s 			page 16
 
 
- 654              	.LASF5:
- 655 00f3 6C6F6E67 		.ascii	"long unsigned int\000"
- 655      20756E73 
- 655      69676E65 
- 655      6420696E 
- 655      7400
- 656              	.LASF9:
- 657 0105 75696E74 		.ascii	"uint8\000"
- 657      3800
- 658              	.LASF35:
- 659 010b 6F766572 		.ascii	"overCurrentTimer_backup\000"
- 659      43757272 
- 659      656E7454 
- 659      696D6572 
- 659      5F626163 
- 660              	.LASF27:
- 661 0123 6F766572 		.ascii	"overCurrentTimer_ReadControlRegister\000"
- 661      43757272 
- 661      656E7454 
- 661      696D6572 
- 661      5F526561 
- 662              	.LASF12:
- 663 0148 646F7562 		.ascii	"double\000"
- 663      6C6500
- 664              	.LASF33:
- 665 014f 47656E65 		.ascii	"Generated_Source\\PSoC4\\overCurrentTimer_PM.c\000"
- 665      72617465 
- 665      645F536F 
- 665      75726365 
- 665      5C50536F 
- 666              	.LASF10:
- 667 017c 75696E74 		.ascii	"uint16\000"
- 667      313600
- 668              	.LASF8:
- 669 0183 756E7369 		.ascii	"unsigned int\000"
- 669      676E6564 
- 669      20696E74 
- 669      00
- 670              	.LASF7:
- 671 0190 6C6F6E67 		.ascii	"long long unsigned int\000"
- 671      206C6F6E 
- 671      6720756E 
- 671      7369676E 
- 671      65642069 
- 672              	.LASF25:
- 673 01a7 6F766572 		.ascii	"overCurrentTimer_Wakeup\000"
- 673      43757272 
- 673      656E7454 
- 673      696D6572 
- 673      5F57616B 
- 674              	.LASF32:
- 675 01bf 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
- 675      43313120 
- 675      352E342E 
- 675      31203230 
- 675      31363036 
- 676 01f2 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m0 -mthumb -g -O"
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 17
+ 651              	.LASF12:
+ 652 0105 75696E74 		.ascii	"uint8\000"
+ 652      3800
+ 653              	.LASF34:
+ 654 010b 6F766572 		.ascii	"overCurrentTimer_backup\000"
+ 654      43757272 
+ 654      656E7454 
+ 654      696D6572 
+ 654      5F626163 
+ 655              	.LASF26:
+ 656 0123 6F766572 		.ascii	"overCurrentTimer_ReadControlRegister\000"
+ 656      43757272 
+ 656      656E7454 
+ 656      696D6572 
+ 656      5F526561 
+ 657              	.LASF10:
+ 658 0148 646F7562 		.ascii	"double\000"
+ 658      6C6500
+ 659              	.LASF32:
+ 660 014f 47656E65 		.ascii	"Generated_Source\\PSoC4\\overCurrentTimer_PM.c\000"
+ 660      72617465 
+ 660      645F536F 
+ 660      75726365 
+ 660      5C50536F 
+ 661              	.LASF8:
+ 662 017c 756E7369 		.ascii	"unsigned int\000"
+ 662      676E6564 
+ 662      20696E74 
+ 662      00
+ 663              	.LASF7:
+ 664 0189 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 664      206C6F6E 
+ 664      6720756E 
+ 664      7369676E 
+ 664      65642069 
+ 665              	.LASF24:
+ 666 01a0 6F766572 		.ascii	"overCurrentTimer_Wakeup\000"
+ 666      43757272 
+ 666      656E7454 
+ 666      696D6572 
+ 666      5F57616B 
+ 667              	.LASF31:
+ 668 01b8 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 668      43313120 
+ 668      352E342E 
+ 668      31203230 
+ 668      31363036 
+ 669 01eb 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m0 -mthumb -g -O"
+ 669      20726576 
+ 669      6973696F 
+ 669      6E203233 
+ 669      37373135 
+ 670 021e 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 670      66756E63 
+ 670      74696F6E 
+ 670      2D736563 
+ 670      74696F6E 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTl9YG9.s 			page 17
 
 
- 676      20726576 
- 676      6973696F 
- 676      6E203233 
- 676      37373135 
- 677 0225 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
- 677      66756E63 
- 677      74696F6E 
- 677      2D736563 
- 677      74696F6E 
- 678              	.LASF14:
- 679 024d 72656738 		.ascii	"reg8\000"
- 679      00
- 680              	.LASF16:
- 681 0252 73697A65 		.ascii	"sizetype\000"
- 681      74797065 
- 681      00
- 682              	.LASF28:
- 683 025b 6F766572 		.ascii	"overCurrentTimer_WriteCounter\000"
- 683      43757272 
- 683      656E7454 
- 683      696D6572 
- 683      5F577269 
- 684              	.LASF6:
- 685 0279 6C6F6E67 		.ascii	"long long int\000"
- 685      206C6F6E 
- 685      6720696E 
- 685      7400
- 686              	.LASF13:
- 687 0287 63686172 		.ascii	"char\000"
- 687      00
- 688              	.LASF2:
- 689 028c 73686F72 		.ascii	"short int\000"
- 689      7420696E 
- 689      7400
- 690              	.LASF4:
- 691 0296 6C6F6E67 		.ascii	"long int\000"
- 691      20696E74 
- 691      00
- 692              	.LASF15:
- 693 029f 6C6F6E67 		.ascii	"long double\000"
- 693      20646F75 
- 693      626C6500 
- 694              	.LASF0:
- 695 02ab 7369676E 		.ascii	"signed char\000"
- 695      65642063 
- 695      68617200 
- 696              	.LASF3:
- 697 02b7 73686F72 		.ascii	"short unsigned int\000"
- 697      7420756E 
- 697      7369676E 
- 697      65642069 
- 697      6E7400
- 698              	.LASF22:
- 699 02ca 6F766572 		.ascii	"overCurrentTimer_SaveConfig\000"
- 699      43757272 
- 699      656E7454 
- 699      696D6572 
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTt1vUi.s 			page 18
+ 671              	.LASF13:
+ 672 0246 72656738 		.ascii	"reg8\000"
+ 672      00
+ 673              	.LASF15:
+ 674 024b 73697A65 		.ascii	"sizetype\000"
+ 674      74797065 
+ 674      00
+ 675              	.LASF27:
+ 676 0254 6F766572 		.ascii	"overCurrentTimer_WriteCounter\000"
+ 676      43757272 
+ 676      656E7454 
+ 676      696D6572 
+ 676      5F577269 
+ 677              	.LASF6:
+ 678 0272 6C6F6E67 		.ascii	"long long int\000"
+ 678      206C6F6E 
+ 678      6720696E 
+ 678      7400
+ 679              	.LASF11:
+ 680 0280 63686172 		.ascii	"char\000"
+ 680      00
+ 681              	.LASF2:
+ 682 0285 73686F72 		.ascii	"short int\000"
+ 682      7420696E 
+ 682      7400
+ 683              	.LASF4:
+ 684 028f 6C6F6E67 		.ascii	"long int\000"
+ 684      20696E74 
+ 684      00
+ 685              	.LASF14:
+ 686 0298 6C6F6E67 		.ascii	"long double\000"
+ 686      20646F75 
+ 686      626C6500 
+ 687              	.LASF0:
+ 688 02a4 7369676E 		.ascii	"signed char\000"
+ 688      65642063 
+ 688      68617200 
+ 689              	.LASF3:
+ 690 02b0 73686F72 		.ascii	"short unsigned int\000"
+ 690      7420756E 
+ 690      7369676E 
+ 690      65642069 
+ 690      6E7400
+ 691              	.LASF21:
+ 692 02c3 6F766572 		.ascii	"overCurrentTimer_SaveConfig\000"
+ 692      43757272 
+ 692      656E7454 
+ 692      696D6572 
+ 692      5F536176 
+ 693              	.LASF33:
+ 694 02df 433A5C55 		.ascii	"C:\\Users\\kylep\\Box Sync\\Box Sync\\Feniex Electr"
+ 694      73657273 
+ 694      5C6B796C 
+ 694      65705C42 
+ 694      6F782053 
+ 695 030d 6963616C 		.ascii	"ical Files\\WorkingFolder-Kyle\\Firm-AI-Cube\\81-00"
+ 695      2046696C 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccTl9YG9.s 			page 18
 
 
- 699      5F536176 
- 700              	.LASF34:
- 701 02e6 433A5C55 		.ascii	"C:\\Users\\kylep\\Box Sync\\Box Sync\\Feniex Electr"
- 701      73657273 
- 701      5C6B796C 
- 701      65705C42 
- 701      6F782053 
- 702 0314 6963616C 		.ascii	"ical Files\\WorkingFolder-Kyle\\Firm-AI-Cube\\81-00"
- 702      2046696C 
- 702      65735C57 
- 702      6F726B69 
- 702      6E67466F 
- 703 0344 3032342D 		.ascii	"024-01.cydsn\000"
- 703      30312E63 
- 703      7964736E 
- 703      00
- 704              	.LASF19:
- 705 0351 496E7465 		.ascii	"InterruptMaskValue\000"
- 705      72727570 
- 705      744D6173 
- 705      6B56616C 
- 705      756500
- 706              	.LASF20:
- 707 0364 54696D65 		.ascii	"TimerControlRegister\000"
- 707      72436F6E 
- 707      74726F6C 
- 707      52656769 
- 707      73746572 
- 708              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran
+ 695      65735C57 
+ 695      6F726B69 
+ 695      6E67466F 
+ 696 033d 3032342D 		.ascii	"024-01.cydsn\000"
+ 696      30312E63 
+ 696      7964736E 
+ 696      00
+ 697              	.LASF18:
+ 698 034a 496E7465 		.ascii	"InterruptMaskValue\000"
+ 698      72727570 
+ 698      744D6173 
+ 698      6B56616C 
+ 698      756500
+ 699              	.LASF19:
+ 700 035d 54696D65 		.ascii	"TimerControlRegister\000"
+ 700      72436F6E 
+ 700      74726F6C 
+ 700      52656769 
+ 700      73746572 
+ 701              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

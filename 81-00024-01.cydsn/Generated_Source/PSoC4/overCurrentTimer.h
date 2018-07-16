@@ -36,7 +36,7 @@ extern uint8 overCurrentTimer_initVar;
 *           Parameter Defaults
 **************************************/
 
-#define overCurrentTimer_Resolution                 16u
+#define overCurrentTimer_Resolution                 8u
 #define overCurrentTimer_UsingFixedFunction         0u
 #define overCurrentTimer_UsingHWCaptureCounter      0u
 #define overCurrentTimer_SoftwareCaptureMode        0u
@@ -69,7 +69,7 @@ typedef struct
     uint8 TimerEnableState;
     #if(!overCurrentTimer_UsingFixedFunction)
 
-        uint16 TimerUdb;
+        uint8 TimerUdb;
         uint8 InterruptMaskValue;
         #if (overCurrentTimer_UsingHWCaptureCounter)
             uint8 TimerCaptureCounter;
@@ -100,11 +100,11 @@ uint8   overCurrentTimer_ReadStatusRegister(void) ;
     void    overCurrentTimer_WriteControlRegister(uint8 control) ;
 #endif /* (!overCurrentTimer_UDB_CONTROL_REG_REMOVED) */
 
-uint16  overCurrentTimer_ReadPeriod(void) ;
-void    overCurrentTimer_WritePeriod(uint16 period) ;
-uint16  overCurrentTimer_ReadCounter(void) ;
-void    overCurrentTimer_WriteCounter(uint16 counter) ;
-uint16  overCurrentTimer_ReadCapture(void) ;
+uint8  overCurrentTimer_ReadPeriod(void) ;
+void    overCurrentTimer_WritePeriod(uint8 period) ;
+uint8  overCurrentTimer_ReadCounter(void) ;
+void    overCurrentTimer_WriteCounter(uint8 counter) ;
+uint8  overCurrentTimer_ReadCapture(void) ;
 void    overCurrentTimer_SoftwareCapture(void) ;
 
 #if(!overCurrentTimer_UsingFixedFunction) /* UDB Prototypes */
@@ -168,7 +168,7 @@ void overCurrentTimer_Wakeup(void)        ;
 *    Initialial Parameter Constants
 ***************************************/
 
-#define overCurrentTimer_INIT_PERIOD             64999u
+#define overCurrentTimer_INIT_PERIOD             9u
 #define overCurrentTimer_INIT_CAPTURE_MODE       ((uint8)((uint8)0u << overCurrentTimer_CTRL_CAP_MODE_SHIFT))
 #define overCurrentTimer_INIT_TRIGGER_MODE       ((uint8)((uint8)0u << overCurrentTimer_CTRL_TRIG_MODE_SHIFT))
 #if (overCurrentTimer_UsingFixedFunction)
@@ -313,54 +313,54 @@ void overCurrentTimer_Wakeup(void)        ;
     #define overCurrentTimer_CONTROL             (* (reg8 *) overCurrentTimer_TimerUDB_sCTRLReg_SyncCtl_ctrlreg__CONTROL_REG )
     
     #if(overCurrentTimer_Resolution <= 8u) /* 8-bit Timer */
-        #define overCurrentTimer_CAPTURE_LSB         (* (reg8 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__F0_REG )
-        #define overCurrentTimer_CAPTURE_LSB_PTR       ((reg8 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__F0_REG )
-        #define overCurrentTimer_PERIOD_LSB          (* (reg8 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__D0_REG )
-        #define overCurrentTimer_PERIOD_LSB_PTR        ((reg8 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__D0_REG )
-        #define overCurrentTimer_COUNTER_LSB         (* (reg8 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__A0_REG )
-        #define overCurrentTimer_COUNTER_LSB_PTR       ((reg8 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__A0_REG )
+        #define overCurrentTimer_CAPTURE_LSB         (* (reg8 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__F0_REG )
+        #define overCurrentTimer_CAPTURE_LSB_PTR       ((reg8 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__F0_REG )
+        #define overCurrentTimer_PERIOD_LSB          (* (reg8 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__D0_REG )
+        #define overCurrentTimer_PERIOD_LSB_PTR        ((reg8 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__D0_REG )
+        #define overCurrentTimer_COUNTER_LSB         (* (reg8 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__A0_REG )
+        #define overCurrentTimer_COUNTER_LSB_PTR       ((reg8 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__A0_REG )
     #elif(overCurrentTimer_Resolution <= 16u) /* 8-bit Timer */
         #if(CY_PSOC3) /* 8-bit addres space */
-            #define overCurrentTimer_CAPTURE_LSB         (* (reg16 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__F0_REG )
-            #define overCurrentTimer_CAPTURE_LSB_PTR       ((reg16 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__F0_REG )
-            #define overCurrentTimer_PERIOD_LSB          (* (reg16 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__D0_REG )
-            #define overCurrentTimer_PERIOD_LSB_PTR        ((reg16 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__D0_REG )
-            #define overCurrentTimer_COUNTER_LSB         (* (reg16 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__A0_REG )
-            #define overCurrentTimer_COUNTER_LSB_PTR       ((reg16 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__A0_REG )
+            #define overCurrentTimer_CAPTURE_LSB         (* (reg16 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__F0_REG )
+            #define overCurrentTimer_CAPTURE_LSB_PTR       ((reg16 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__F0_REG )
+            #define overCurrentTimer_PERIOD_LSB          (* (reg16 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__D0_REG )
+            #define overCurrentTimer_PERIOD_LSB_PTR        ((reg16 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__D0_REG )
+            #define overCurrentTimer_COUNTER_LSB         (* (reg16 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__A0_REG )
+            #define overCurrentTimer_COUNTER_LSB_PTR       ((reg16 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__A0_REG )
         #else /* 16-bit address space */
-            #define overCurrentTimer_CAPTURE_LSB         (* (reg16 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__16BIT_F0_REG )
-            #define overCurrentTimer_CAPTURE_LSB_PTR       ((reg16 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__16BIT_F0_REG )
-            #define overCurrentTimer_PERIOD_LSB          (* (reg16 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__16BIT_D0_REG )
-            #define overCurrentTimer_PERIOD_LSB_PTR        ((reg16 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__16BIT_D0_REG )
-            #define overCurrentTimer_COUNTER_LSB         (* (reg16 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__16BIT_A0_REG )
-            #define overCurrentTimer_COUNTER_LSB_PTR       ((reg16 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__16BIT_A0_REG )
+            #define overCurrentTimer_CAPTURE_LSB         (* (reg16 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__16BIT_F0_REG )
+            #define overCurrentTimer_CAPTURE_LSB_PTR       ((reg16 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__16BIT_F0_REG )
+            #define overCurrentTimer_PERIOD_LSB          (* (reg16 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__16BIT_D0_REG )
+            #define overCurrentTimer_PERIOD_LSB_PTR        ((reg16 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__16BIT_D0_REG )
+            #define overCurrentTimer_COUNTER_LSB         (* (reg16 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__16BIT_A0_REG )
+            #define overCurrentTimer_COUNTER_LSB_PTR       ((reg16 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__16BIT_A0_REG )
         #endif /* CY_PSOC3 */
     #elif(overCurrentTimer_Resolution <= 24u)/* 24-bit Timer */
-        #define overCurrentTimer_CAPTURE_LSB         (* (reg32 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__F0_REG )
-        #define overCurrentTimer_CAPTURE_LSB_PTR       ((reg32 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__F0_REG )
-        #define overCurrentTimer_PERIOD_LSB          (* (reg32 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__D0_REG )
-        #define overCurrentTimer_PERIOD_LSB_PTR        ((reg32 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__D0_REG )
-        #define overCurrentTimer_COUNTER_LSB         (* (reg32 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__A0_REG )
-        #define overCurrentTimer_COUNTER_LSB_PTR       ((reg32 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__A0_REG )
+        #define overCurrentTimer_CAPTURE_LSB         (* (reg32 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__F0_REG )
+        #define overCurrentTimer_CAPTURE_LSB_PTR       ((reg32 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__F0_REG )
+        #define overCurrentTimer_PERIOD_LSB          (* (reg32 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__D0_REG )
+        #define overCurrentTimer_PERIOD_LSB_PTR        ((reg32 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__D0_REG )
+        #define overCurrentTimer_COUNTER_LSB         (* (reg32 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__A0_REG )
+        #define overCurrentTimer_COUNTER_LSB_PTR       ((reg32 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__A0_REG )
     #else /* 32-bit Timer */
         #if(CY_PSOC3 || CY_PSOC5) /* 8-bit address space */
-            #define overCurrentTimer_CAPTURE_LSB         (* (reg32 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__F0_REG )
-            #define overCurrentTimer_CAPTURE_LSB_PTR       ((reg32 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__F0_REG )
-            #define overCurrentTimer_PERIOD_LSB          (* (reg32 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__D0_REG )
-            #define overCurrentTimer_PERIOD_LSB_PTR        ((reg32 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__D0_REG )
-            #define overCurrentTimer_COUNTER_LSB         (* (reg32 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__A0_REG )
-            #define overCurrentTimer_COUNTER_LSB_PTR       ((reg32 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__A0_REG )
+            #define overCurrentTimer_CAPTURE_LSB         (* (reg32 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__F0_REG )
+            #define overCurrentTimer_CAPTURE_LSB_PTR       ((reg32 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__F0_REG )
+            #define overCurrentTimer_PERIOD_LSB          (* (reg32 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__D0_REG )
+            #define overCurrentTimer_PERIOD_LSB_PTR        ((reg32 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__D0_REG )
+            #define overCurrentTimer_COUNTER_LSB         (* (reg32 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__A0_REG )
+            #define overCurrentTimer_COUNTER_LSB_PTR       ((reg32 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__A0_REG )
         #else /* 32-bit address space */
-            #define overCurrentTimer_CAPTURE_LSB         (* (reg32 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__32BIT_F0_REG )
-            #define overCurrentTimer_CAPTURE_LSB_PTR       ((reg32 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__32BIT_F0_REG )
-            #define overCurrentTimer_PERIOD_LSB          (* (reg32 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__32BIT_D0_REG )
-            #define overCurrentTimer_PERIOD_LSB_PTR        ((reg32 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__32BIT_D0_REG )
-            #define overCurrentTimer_COUNTER_LSB         (* (reg32 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__32BIT_A0_REG )
-            #define overCurrentTimer_COUNTER_LSB_PTR       ((reg32 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__32BIT_A0_REG )
+            #define overCurrentTimer_CAPTURE_LSB         (* (reg32 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__32BIT_F0_REG )
+            #define overCurrentTimer_CAPTURE_LSB_PTR       ((reg32 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__32BIT_F0_REG )
+            #define overCurrentTimer_PERIOD_LSB          (* (reg32 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__32BIT_D0_REG )
+            #define overCurrentTimer_PERIOD_LSB_PTR        ((reg32 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__32BIT_D0_REG )
+            #define overCurrentTimer_COUNTER_LSB         (* (reg32 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__32BIT_A0_REG )
+            #define overCurrentTimer_COUNTER_LSB_PTR       ((reg32 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__32BIT_A0_REG )
         #endif /* CY_PSOC3 || CY_PSOC5 */ 
     #endif
 
-    #define overCurrentTimer_COUNTER_LSB_PTR_8BIT       ((reg8 *) overCurrentTimer_TimerUDB_sT16_timerdp_u0__A0_REG )
+    #define overCurrentTimer_COUNTER_LSB_PTR_8BIT       ((reg8 *) overCurrentTimer_TimerUDB_sT8_timerdp_u0__A0_REG )
     
     #if (overCurrentTimer_UsingHWCaptureCounter)
         #define overCurrentTimer_CAP_COUNT              (*(reg8 *) overCurrentTimer_TimerUDB_sCapCount_counter__PERIOD_REG )

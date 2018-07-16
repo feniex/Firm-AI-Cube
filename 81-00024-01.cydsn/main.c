@@ -33,7 +33,8 @@ static uint8 beepromCountAlreadyReset = 0;
 static const uint8 *peepromMemory;
 extern MotorIO *pMotor;
 
-volatile uint8 timerForInputs;
+volatile uint8 timerForInputs=0;
+volatile uint16 timerForMotorInputs=0;
 /**********LOCAL FUNCTION PROTOTYPES**********/
 static void initializePeripherals(void);
 
@@ -59,10 +60,12 @@ int main()
     CyGlobalIntEnable;
     initializePeripherals();
     modeChangeISR_Start();
+    ADC_SAR_Seq_1_Start();
+    ADC_SAR_Seq_1_GetResult16();
     //inputIncrease_Start();
     //inputTimerISR_Start();
     
-    if(*(volatile uint8 *) &eepromBrightnessMotorPosition[3] == 0)
+    //if(*(volatile uint8 *) &eepromBrightnessMotorPosition[3] == 0)
     {
         calibrateMotor();
         ramBrightnessMotorPosition[3] = 1;
@@ -72,10 +75,10 @@ int main()
         ramBrightnessMotorPosition[5] = pMotor->backwardLimitCS;
         EmEEPROM_Write(&ramBrightnessMotorPosition[1],&eepromBrightnessMotorPosition[1],5);
     }
-    else
-    {
-        loadLimitSwitchValue();
-    }
+    //else
+    //{
+    //    loadLimitSwitchValue();
+    //}
     
     
     {
@@ -111,58 +114,71 @@ int main()
 void takeInputValues(void)
 {
     volatile uint8 readInputValues = 0;
+    volatile uint8 previousReadInputValues = 0;
     uint8 test = 0;
     static uint16 trackBrightness = 0;
     static uint16 trackMotor = 0;
     
-    readInputValues = inputs_Read();
+    
     if(timerForInputs == 1)
     {
+        timerForInputs = 0;
+        readInputValues = inputs_Read();
+        timerForMotorInputs++;   
         
-    if((readInputValues&ZOOM_PLUS) == ZOOM_PLUS)
-    {
-        if(trackMotor>=251)
+        if((readInputValues&DIM_PLUS) == DIM_PLUS)
         {
-            trackMotor = 251;
+            if(trackBrightness>=254)
+            {
+                trackBrightness = 254;
+            }
+            trackBrightness+=1;
+            setBrightness(trackBrightness);
+            test = 2;
         }
-        trackMotor+=4;
+        else if((readInputValues&DIM_MINUS) == DIM_MINUS)    //DIMMINUS
+        {
+            if(trackBrightness<=1)
+            {
+                trackBrightness = 1;
+            }
+            //trackBrightness = 100;
+            trackBrightness-=1;
+            setBrightness(trackBrightness);
+            test = 3;
+        }
+        setBrightness(trackBrightness);
+    }
+    
+    if(timerForMotorInputs>5) //|| previousReadInputValues!= readInputValues)
+    {
+        timerForMotorInputs=0;
+        
+        if((readInputValues&ZOOM_PLUS) == ZOOM_PLUS)
+        {
+        if(trackMotor>=254)
+        {
+            trackMotor = 254;
+        }
+        //trackMotor=254;
+        trackMotor+=1;
         setMotorPosition(trackMotor);
         test = 0;
     }
-    else if((readInputValues&ZOOM_MINUS) == ZOOM_MINUS)  //DIMPLUS
-    {
-        if(trackMotor<=4)
+        else if((readInputValues&ZOOM_MINUS) == ZOOM_MINUS)  //DIMPLUS
         {
-            trackMotor = 4;
+        if(trackMotor<=1)
+        {
+            trackMotor = 1;
         }
-        trackMotor-=4;
+        //trackMotor=1;
+        trackMotor-=1;
         setMotorPosition(trackMotor);
         test = 1;
+    }                  
     }
-    if((readInputValues&DIM_PLUS) == DIM_PLUS)
-    {
-        if(trackBrightness>=247)
-        {
-            trackBrightness = 247;
-        }
-        trackBrightness+=4;
-        setBrightness(trackBrightness);
-        test = 2;
-    }
-    else if((readInputValues&DIM_MINUS) == DIM_MINUS)    //DIMMINUS
-    {
-        if(trackBrightness<=4)
-        {
-            trackBrightness = 4;
-        }
-        trackBrightness-=4;
-        setBrightness(trackBrightness);
-        test = 3;
-    }
+    previousReadInputValues = readInputValues;
     
-    setBrightness(trackBrightness);
-    timerForInputs = 0;
-    }
 }
 
 void clearInitializeAlreadyEEPROM(void)

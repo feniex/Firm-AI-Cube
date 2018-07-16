@@ -1,6 +1,6 @@
 // ======================================================================
 // 81-00024-01.v generated from TopDesign.cysch
-// 06/05/2018 at 08:56
+// 06/18/2018 at 17:02
 // This file is auto generated. ANY EDITS YOU MAKE MAY BE LOST WHEN THIS FILE IS REGENERATED!!!
 // ======================================================================
 
@@ -1616,7 +1616,7 @@ endmodule
 `include "C:\Users\kylep\My Documents\PSoC Creator\4.1\Downloads ( 4.1).cylib\B_Timer_v2_80\B_Timer_v2_80.v"
 `endif
 
-// Timer_v2_80(CaptureAlternatingFall=false, CaptureAlternatingRise=false, CaptureCount=2, CaptureCounterEnabled=false, CaptureInputEnabled=false, CaptureMode=0, CONTROL3=0, ControlRegRemoved=0, CtlModeReplacementString=SyncCtl, CyGetRegReplacementString=CY_GET_REG16, CySetRegReplacementString=CY_SET_REG16, DeviceFamily=PSoC4, EnableMode=0, FF16=false, FF8=false, FixedFunction=false, FixedFunctionUsed=0, HWCaptureCounterEnabled=false, InterruptOnCapture=false, InterruptOnFIFOFull=false, InterruptOnTC=true, IntOnCapture=0, IntOnFIFOFull=0, IntOnTC=1, NumberOfCaptures=1, param45=1, Period=64999, RegDefReplacementString=reg16, RegSizeReplacementString=uint16, Resolution=16, RstStatusReplacementString=rstSts, RunMode=0, SiliconRevision=17, SoftwareCaptureModeEnabled=false, SoftwareTriggerModeEnabled=false, TriggerInputEnabled=false, TriggerMode=0, UDB16=true, UDB24=false, UDB32=false, UDB8=false, UDBControlReg=true, UsesHWEnable=0, VerilogSectionReplacementString=sT16, CY_API_CALLBACK_HEADER_INCLUDE=, CY_COMMENT=, CY_COMPONENT_NAME=Timer_v2_80, CY_CONST_CONFIG=true, CY_CONTROL_FILE=<:default:>, CY_DATASHEET_FILE=<:default:>, CY_FITTER_NAME=overCurrentTimer, CY_INSTANCE_SHORT_NAME=overCurrentTimer, CY_MAJOR_VERSION=2, CY_MINOR_VERSION=80, CY_PDL_DRIVER_NAME=, CY_PDL_DRIVER_REQ_VERSION=, CY_PDL_DRIVER_SUBGROUP=, CY_PDL_DRIVER_VARIANT=, CY_REMOVE=false, CY_SUPPRESS_API_GEN=false, CY_VERSION=PSoC Creator  4.1 Update 1, INSTANCE_NAME=overCurrentTimer, )
+// Timer_v2_80(CaptureAlternatingFall=false, CaptureAlternatingRise=false, CaptureCount=2, CaptureCounterEnabled=false, CaptureInputEnabled=false, CaptureMode=0, CONTROL3=0, ControlRegRemoved=0, CtlModeReplacementString=SyncCtl, CyGetRegReplacementString=CY_GET_REG8, CySetRegReplacementString=CY_SET_REG8, DeviceFamily=PSoC4, EnableMode=0, FF16=false, FF8=false, FixedFunction=false, FixedFunctionUsed=0, HWCaptureCounterEnabled=false, InterruptOnCapture=false, InterruptOnFIFOFull=false, InterruptOnTC=true, IntOnCapture=0, IntOnFIFOFull=0, IntOnTC=1, NumberOfCaptures=1, param45=1, Period=9, RegDefReplacementString=reg8, RegSizeReplacementString=uint8, Resolution=8, RstStatusReplacementString=rstSts, RunMode=0, SiliconRevision=17, SoftwareCaptureModeEnabled=false, SoftwareTriggerModeEnabled=false, TriggerInputEnabled=false, TriggerMode=0, UDB16=false, UDB24=false, UDB32=false, UDB8=true, UDBControlReg=true, UsesHWEnable=0, VerilogSectionReplacementString=sT8, CY_API_CALLBACK_HEADER_INCLUDE=, CY_COMMENT=, CY_COMPONENT_NAME=Timer_v2_80, CY_CONST_CONFIG=true, CY_CONTROL_FILE=<:default:>, CY_DATASHEET_FILE=<:default:>, CY_FITTER_NAME=overCurrentTimer, CY_INSTANCE_SHORT_NAME=overCurrentTimer, CY_MAJOR_VERSION=2, CY_MINOR_VERSION=80, CY_PDL_DRIVER_NAME=, CY_PDL_DRIVER_REQ_VERSION=, CY_PDL_DRIVER_SUBGROUP=, CY_PDL_DRIVER_VARIANT=, CY_REMOVE=false, CY_SUPPRESS_API_GEN=false, CY_VERSION=PSoC Creator  4.1 Update 1, INSTANCE_NAME=overCurrentTimer, )
 module Timer_v2_80_9 (
     reset,
     interrupt,
@@ -1640,7 +1640,7 @@ module Timer_v2_80_9 (
     parameter DeviceFamily = "PSoC4";
     parameter InterruptOnCapture = 0;
     parameter InterruptOnTC = 1;
-    parameter Resolution = 16;
+    parameter Resolution = 8;
     parameter SiliconRevision = "17";
 
 
@@ -1658,7 +1658,7 @@ module Timer_v2_80_9 (
     defparam TimerUDB.CaptureMode = 0;
     defparam TimerUDB.EnableMode = 0;
     defparam TimerUDB.InterruptOnCapture = 0;
-    defparam TimerUDB.Resolution = 16;
+    defparam TimerUDB.Resolution = 8;
     defparam TimerUDB.RunMode = 0;
     defparam TimerUDB.TriggerMode = 0;
 
@@ -3001,7 +3001,7 @@ module top ;
     defparam overCurrentTimer.DeviceFamily = "PSoC4";
     defparam overCurrentTimer.InterruptOnCapture = 0;
     defparam overCurrentTimer.InterruptOnTC = 1;
-    defparam overCurrentTimer.Resolution = 16;
+    defparam overCurrentTimer.Resolution = 8;
     defparam overCurrentTimer.SiliconRevision = "17";
 
 
@@ -3016,7 +3016,7 @@ module top ;
 		#(.id("0594cb84-bb33-42ab-aeb1-f3ccc5c4a99f"),
 		  .source_clock_id(""),
 		  .divisor(0),
-		  .period("1000000000"),
+		  .period("100000000000"),
 		  .is_direct(0),
 		  .is_digital(1))
 		pwmClock_1
@@ -3142,7 +3142,7 @@ module top ;
 		#(.id("6d7c9926-fc3a-4a63-a0d7-8d3450816b71"),
 		  .source_clock_id(""),
 		  .divisor(0),
-		  .period("16666666666666.7"),
+		  .period("5000000000000"),
 		  .is_direct(0),
 		  .is_digital(1))
 		Clock_5

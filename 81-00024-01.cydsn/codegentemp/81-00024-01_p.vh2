@@ -1,5 +1,5 @@
 -- Project:   81-00024-01
--- Generated: 06/05/2018 08:56:51
+-- Generated: 06/18/2018 17:02:45
 -- PSoC Creator  4.1 Update 1
 
 ENTITY \81-00024-01\ IS
@@ -207,19 +207,6 @@ ARCHITECTURE __DEFAULT__ OF \81-00024-01\ IS
     ATTRIBUTE POWER OF tmpOE__HBridge_CS_net_0 : SIGNAL IS true;
     SIGNAL zero : bit;
     ATTRIBUTE GROUND OF zero : SIGNAL IS true;
-    SIGNAL \overCurrentTimer:TimerUDB:sT16:timerdp:u0.ce0__sig\ : bit;
-    SIGNAL \overCurrentTimer:TimerUDB:sT16:timerdp:u0.cl0__sig\ : bit;
-    SIGNAL \overCurrentTimer:TimerUDB:sT16:timerdp:u0.z0__sig\ : bit;
-    SIGNAL \overCurrentTimer:TimerUDB:sT16:timerdp:u0.ff0__sig\ : bit;
-    SIGNAL \overCurrentTimer:TimerUDB:sT16:timerdp:u0.ce1__sig\ : bit;
-    SIGNAL \overCurrentTimer:TimerUDB:sT16:timerdp:u0.cl1__sig\ : bit;
-    SIGNAL \overCurrentTimer:TimerUDB:sT16:timerdp:u0.z1__sig\ : bit;
-    SIGNAL \overCurrentTimer:TimerUDB:sT16:timerdp:u0.ff1__sig\ : bit;
-    SIGNAL \overCurrentTimer:TimerUDB:sT16:timerdp:u0.co_msb__sig\ : bit;
-    SIGNAL \overCurrentTimer:TimerUDB:sT16:timerdp:u0.sol_msb__sig\ : bit;
-    SIGNAL \overCurrentTimer:TimerUDB:sT16:timerdp:u0.cfbo__sig\ : bit;
-    SIGNAL \overCurrentTimer:TimerUDB:sT16:timerdp:u1.sor__sig\ : bit;
-    SIGNAL \overCurrentTimer:TimerUDB:sT16:timerdp:u1.cmsbo__sig\ : bit;
     ATTRIBUTE Location OF ClockGenBlock : LABEL IS "F(CLK_GEN,0)";
     ATTRIBUTE lib_model OF HBridge_CS(0) : LABEL IS "iocell1";
     ATTRIBUTE Location OF HBridge_CS(0) : LABEL IS "P2[4]";
@@ -254,8 +241,7 @@ ARCHITECTURE __DEFAULT__ OF \81-00024-01\ IS
     ATTRIBUTE Location OF \DieTemp:cy_psoc4_temp\ : LABEL IS "F(TEMP,0)";
     ATTRIBUTE lib_model OF \overCurrentTimer:TimerUDB:sCTRLReg:SyncCtl:ctrlreg\ : LABEL IS "controlcell4";
     ATTRIBUTE lib_model OF \overCurrentTimer:TimerUDB:rstSts:stsreg\ : LABEL IS "statusicell2";
-    ATTRIBUTE lib_model OF \overCurrentTimer:TimerUDB:sT16:timerdp:u0\ : LABEL IS "datapathcell3";
-    ATTRIBUTE lib_model OF \overCurrentTimer:TimerUDB:sT16:timerdp:u1\ : LABEL IS "datapathcell4";
+    ATTRIBUTE lib_model OF \overCurrentTimer:TimerUDB:sT8:timerdp:u0\ : LABEL IS "datapathcell3";
     ATTRIBUTE lib_model OF \inputs:sts:sts_reg\ : LABEL IS "statuscell1";
     ATTRIBUTE lib_model OF \motorControlPWM:PWMUDB:runmode_enable\ : LABEL IS "macrocell5";
     ATTRIBUTE lib_model OF Net_2173 : LABEL IS "macrocell6";
@@ -737,9 +723,9 @@ BEGIN
         PORT MAP(
             gen_clk_out_0 => Net_481_digital,
             gen_clk_in_0 => dclk_to_genclk,
-            gen_clk_out_1 => Net_3276_digital,
+            gen_clk_out_1 => Net_1983_digital,
             gen_clk_in_1 => dclk_to_genclk_1,
-            gen_clk_out_2 => Net_1983_digital,
+            gen_clk_out_2 => Net_3276_digital,
             gen_clk_in_2 => dclk_to_genclk_2,
             gen_clk_out_3 => Net_3332_digital,
             gen_clk_in_3 => dclk_to_genclk_3);
@@ -756,10 +742,10 @@ BEGIN
             udb_div_0 => dclk_to_genclk,
             ff_div_7 => \ADC_SAR_Seq:Net_1845_ff7\,
             ff_div_2 => \UART_LED:Net_847_ff2\,
-            udb_div_1 => dclk_to_genclk_1,
             ff_div_8 => Net_2005_ff8,
             ff_div_9 => Net_749_ff9,
             ff_div_10 => Net_3360_ff10,
+            udb_div_1 => dclk_to_genclk_1,
             udb_div_2 => dclk_to_genclk_2,
             ff_div_11 => Net_448_ff11,
             udb_div_3 => dclk_to_genclk_3);
@@ -2547,7 +2533,7 @@ BEGIN
             status_0 => \overCurrentTimer:TimerUDB:status_tc\,
             interrupt => Net_3294);
 
-    \overCurrentTimer:TimerUDB:sT16:timerdp:u0\:datapathcell
+    \overCurrentTimer:TimerUDB:sT8:timerdp:u0\:datapathcell
         GENERIC MAP(
             a0_init => "00000000",
             a1_init => "00000000",
@@ -2578,69 +2564,10 @@ BEGIN
             clock => Net_3276_digital,
             cs_addr_1 => \overCurrentTimer:TimerUDB:control_7\,
             cs_addr_0 => \overCurrentTimer:TimerUDB:per_zero\,
-            busclk => ClockBlock_HFCLK,
-            ce0 => \overCurrentTimer:TimerUDB:sT16:timerdp:u0.ce0__sig\,
-            cl0 => \overCurrentTimer:TimerUDB:sT16:timerdp:u0.cl0__sig\,
-            z0 => \overCurrentTimer:TimerUDB:sT16:timerdp:u0.z0__sig\,
-            ff0 => \overCurrentTimer:TimerUDB:sT16:timerdp:u0.ff0__sig\,
-            ce1 => \overCurrentTimer:TimerUDB:sT16:timerdp:u0.ce1__sig\,
-            cl1 => \overCurrentTimer:TimerUDB:sT16:timerdp:u0.cl1__sig\,
-            z1 => \overCurrentTimer:TimerUDB:sT16:timerdp:u0.z1__sig\,
-            ff1 => \overCurrentTimer:TimerUDB:sT16:timerdp:u0.ff1__sig\,
-            co_msb => \overCurrentTimer:TimerUDB:sT16:timerdp:u0.co_msb__sig\,
-            sol_msb => \overCurrentTimer:TimerUDB:sT16:timerdp:u0.sol_msb__sig\,
-            cfbo => \overCurrentTimer:TimerUDB:sT16:timerdp:u0.cfbo__sig\,
-            sil => \overCurrentTimer:TimerUDB:sT16:timerdp:u1.sor__sig\,
-            cmsbi => \overCurrentTimer:TimerUDB:sT16:timerdp:u1.cmsbo__sig\);
-
-    \overCurrentTimer:TimerUDB:sT16:timerdp:u1\:datapathcell
-        GENERIC MAP(
-            a0_init => "00000000",
-            a1_init => "00000000",
-            ce0_sync => 1,
-            ce1_sync => 1,
-            cl0_sync => 1,
-            cl1_sync => 1,
-            cmsb_sync => 1,
-            co_msb_sync => 1,
-            cy_dpconfig => "0000000001000000000000000100000001000000010000000000000010000000000000001000000000000000100000000000000010000000000000001000000011111111000000001111111111111111100000110000000000000001000000110000000000011000",
-            d0_init => "00000000",
-            d1_init => "00000000",
-            f0_blk_sync => 1,
-            f0_bus_sync => 1,
-            f1_blk_sync => 1,
-            f1_bus_sync => 1,
-            ff0_sync => 1,
-            ff1_sync => 1,
-            ov_msb_sync => 1,
-            so_sync => 1,
-            z0_sync => 1,
-            z1_sync => 1,
-            uses_p_in => '0',
-            uses_p_out => '0',
-            clk_inv => '0',
-            clken_mode => 1)
-        PORT MAP(
-            clock => Net_3276_digital,
-            cs_addr_1 => \overCurrentTimer:TimerUDB:control_7\,
-            cs_addr_0 => \overCurrentTimer:TimerUDB:per_zero\,
             z0_comb => \overCurrentTimer:TimerUDB:per_zero\,
             f0_bus_stat_comb => \overCurrentTimer:TimerUDB:status_3\,
             f0_blk_stat_comb => \overCurrentTimer:TimerUDB:status_2\,
-            busclk => ClockBlock_HFCLK,
-            ce0i => \overCurrentTimer:TimerUDB:sT16:timerdp:u0.ce0__sig\,
-            cl0i => \overCurrentTimer:TimerUDB:sT16:timerdp:u0.cl0__sig\,
-            z0i => \overCurrentTimer:TimerUDB:sT16:timerdp:u0.z0__sig\,
-            ff0i => \overCurrentTimer:TimerUDB:sT16:timerdp:u0.ff0__sig\,
-            ce1i => \overCurrentTimer:TimerUDB:sT16:timerdp:u0.ce1__sig\,
-            cl1i => \overCurrentTimer:TimerUDB:sT16:timerdp:u0.cl1__sig\,
-            z1i => \overCurrentTimer:TimerUDB:sT16:timerdp:u0.z1__sig\,
-            ff1i => \overCurrentTimer:TimerUDB:sT16:timerdp:u0.ff1__sig\,
-            ci => \overCurrentTimer:TimerUDB:sT16:timerdp:u0.co_msb__sig\,
-            sir => \overCurrentTimer:TimerUDB:sT16:timerdp:u0.sol_msb__sig\,
-            cfbi => \overCurrentTimer:TimerUDB:sT16:timerdp:u0.cfbo__sig\,
-            sor => \overCurrentTimer:TimerUDB:sT16:timerdp:u1.sor__sig\,
-            cmsbo => \overCurrentTimer:TimerUDB:sT16:timerdp:u1.cmsbo__sig\);
+            busclk => ClockBlock_HFCLK);
 
     overCurrentTimerISR:interrupt
         GENERIC MAP(
