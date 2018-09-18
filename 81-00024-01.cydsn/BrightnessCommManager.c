@@ -643,6 +643,7 @@ static uint8 processBrightnessPacket(uint8* packet, uint8 length, uint8 bFlashPa
     static uint8 bFirstBrightnessPacket = TRUE;
     uint8 currentBrightness = 0;
     uint8 driver_ID = 0;
+    static uint8 previousBrightness = 0;
     
     if(packet == NULL || length != (MAX_PACKET_SIZE - 1))
         return FAILURE;
@@ -662,17 +663,27 @@ static uint8 processBrightnessPacket(uint8* packet, uint8 length, uint8 bFlashPa
         //SamplingTimer_Start();
     }
     
-    if(isReadyToSendNextBrightnessPacket() == TRUE)
-    {
+    //if(isReadyToSendNextBrightnessPacket() == TRUE)
+    //{
         if(driver_ID == 1)
         {
             if(bFlashPattern)
                 updateBrightnessLevel(packet[driver_ID + PAYLOAD_START_INDEX - 1], FALSE);
             else
             {
-                currentBrightness =
+                if(currentBrightness != previousBrightness)
+                {
+                     currentBrightness =
+                    updateBrightnessLevel(packet[driver_ID + PAYLOAD_START_INDEX - 1], FALSE);
+                    memset(&packet[PAYLOAD_START_INDEX], currentBrightness, MAX_DRIVER_COUNT);
+                }
+                else
+                {
+                    currentBrightness =
                     updateBrightnessLevel(packet[driver_ID + PAYLOAD_START_INDEX - 1], TRUE);
-                memset(&packet[PAYLOAD_START_INDEX], currentBrightness, MAX_DRIVER_COUNT);
+                    memset(&packet[PAYLOAD_START_INDEX], currentBrightness, MAX_DRIVER_COUNT);
+                }
+                previousBrightness = currentBrightness;
             }
             //UART_LED_PutArray(packet, length);
         }
@@ -680,7 +691,7 @@ static uint8 processBrightnessPacket(uint8* packet, uint8 length, uint8 bFlashPa
         {
             updateBrightnessLevel(packet[driver_ID + PAYLOAD_START_INDEX - 1], FALSE);
         }
-    }
+    //}
     //TimeoutTimer_Start();
     
     return SUCCESS;

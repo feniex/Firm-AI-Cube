@@ -56,10 +56,10 @@ typedef struct
 
 static ThermalLimit ThermalLimitArray[ADC_SAMPLE_COUNT] = 
 {
-    {200, 100}, //LED
-    {200, 100}, //SwitchNode    
-    {25,  5}, //Micro
-    {300, 100}  //Ambient
+    {400, 100}, //LED
+    {500, 100}, //SwitchNode    
+    {500,  5}, //Micro
+    {500, 100}  //Ambient
 };
 
 /**********DATA STRUCTURES**********/
@@ -295,23 +295,23 @@ uint8 updateBrightnessLevel(uint8 brightnessLevel, uint8 bRegulated)
     if(brightnessLevel != RegulationData.requestedBrightness)
         RegulationData.requestedBrightness = brightnessLevel;
     
-    if((PositionData.ID_Number != HEAD_MODULE_ID) || (bRegulated == FALSE))
+    if(bRegulated == FALSE)
     {   
-        if(RegulationData.requestedBrightness != RegulationData.previousBrightness)
-        {
-            if(RegulationData.requestedBrightness > 0)
+       // if(RegulationData.requestedBrightness != RegulationData.previousBrightness)
+       // {
+            if(brightnessLevel > 0)
             {
                 PWM_Enable_Write(TRUE);
-                PWM_WriteCompare(RegulationData.requestedBrightness);
+                PWM_WriteCompare(brightnessLevel);
             }
             else
             {
                 PWM_Enable_Write(FALSE);
             }
-        };
+       // };
         
-        RegulationData.previousBrightness = RegulationData.requestedBrightness;
-        return RegulationData.requestedBrightness;
+        //RegulationData.previousBrightness = RegulationData.requestedBrightness;
+        return brightnessLevel;
     }
     
     if(RegulationData.regulatedBrightness != RegulationData.previousBrightness)
@@ -705,13 +705,20 @@ void setBrightness(unsigned char localBrightness)
     
     RegulationData.requestedBrightness = localBrightness;
     
-    if(previousBrightnessLocal != RegulationData.requestedBrightness)
+    if(localBrightness!=previousBrightnessLocal)
     {
-        updateBrightnessLevel(RegulationData.requestedBrightness, FALSE);
+        updateBrightnessLevel(localBrightness, FALSE);
     }
     else
     {
-        updateBrightnessLevel(RegulationData.requestedBrightness, TRUE);
+        if(previousBrightnessLocal != RegulationData.requestedBrightness)
+        {
+            updateBrightnessLevel(RegulationData.requestedBrightness, FALSE);
+        }
+        else
+        {
+            updateBrightnessLevel(RegulationData.requestedBrightness, TRUE);
+        }
     }
     
     previousBrightnessLocal = localBrightness;

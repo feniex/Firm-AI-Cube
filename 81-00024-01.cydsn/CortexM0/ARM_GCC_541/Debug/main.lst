@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 1
 
 
    1              		.syntax unified
@@ -58,7 +58,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 1
   29:main.c        **** static const uint8 CYCODE eepromBrightnessMotorPosition[6] = {0xFF, 0x00, 0x00, 0x00,0x00,0x00};   
   30:main.c        **** static uint8 ramBrightnessMotorPosition[6] ={0x00,0x00,0x00,0x00,00,00};
   31:main.c        **** static const uint8 bSetInitializedAlready = 1;
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 2
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 2
 
 
   32:main.c        **** static uint8 beepromCountAlreadyReset = 0;
@@ -92,25 +92,25 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 1
   60:main.c        ****     CyGlobalIntEnable;
   61:main.c        ****     initializePeripherals();
   62:main.c        ****     modeChangeISR_Start();
-  63:main.c        ****     ADC_SAR_Seq_1_Start();
-  64:main.c        ****     ADC_SAR_Seq_1_GetResult16();
+  63:main.c        ****     //ADC_SAR_Seq_1_Start();
+  64:main.c        ****     //ADC_SAR_Seq_1_GetResult16();
   65:main.c        ****     //inputIncrease_Start();
   66:main.c        ****     //inputTimerISR_Start();
   67:main.c        ****     
-  68:main.c        ****     //if(*(volatile uint8 *) &eepromBrightnessMotorPosition[3] == 0)
+  68:main.c        ****    // if(*(volatile uint8 *) &eepromBrightnessMotorPosition[3] == 0)
   69:main.c        ****     {
-  70:main.c        ****         calibrateMotor();
+  70:main.c        ****         //calibrateMotor();
   71:main.c        ****         ramBrightnessMotorPosition[3] = 1;
   72:main.c        ****         ramBrightnessMotorPosition[2] = 0;
   73:main.c        ****         //ramBrightnessMotorPosition[1] = 0xFF;
-  74:main.c        ****         ramBrightnessMotorPosition[4] = pMotor->forwardLimitCS;
-  75:main.c        ****         ramBrightnessMotorPosition[5] = pMotor->backwardLimitCS;
-  76:main.c        ****         EmEEPROM_Write(&ramBrightnessMotorPosition[1],&eepromBrightnessMotorPosition[1],5);
+  74:main.c        ****        // ramBrightnessMotorPosition[4] = pMotor->forwardLimitCS;
+  75:main.c        ****        // ramBrightnessMotorPosition[5] = pMotor->backwardLimitCS;
+  76:main.c        ****         //EmEEPROM_Write(&ramBrightnessMotorPosition[1],&eepromBrightnessMotorPosition[1],5);
   77:main.c        ****     }
-  78:main.c        ****     //else
-  79:main.c        ****     //{
-  80:main.c        ****     //    loadLimitSwitchValue();
-  81:main.c        ****     //}
+  78:main.c        ****    // else
+  79:main.c        ****     {
+  80:main.c        ****         //loadLimitSwitchValue();
+  81:main.c        ****     }
   82:main.c        ****     
   83:main.c        ****     
   84:main.c        ****     {
@@ -118,7 +118,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 1
   86:main.c        ****     }
   87:main.c        ****     }    
   88:main.c        **** 
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 3
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 3
 
 
   89:main.c        ****     for(;;)
@@ -178,7 +178,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 1
  143:main.c        ****                 trackBrightness = 1;
  144:main.c        ****             }
  145:main.c        ****             //trackBrightness = 100;
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 4
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 4
 
 
  146:main.c        ****             trackBrightness-=1;
@@ -188,7 +188,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 1
  150:main.c        ****         setBrightness(trackBrightness);
  151:main.c        ****     }
  152:main.c        ****     
- 153:main.c        ****     if(timerForMotorInputs>5) //|| previousReadInputValues!= readInputValues)
+ 153:main.c        ****     if(timerForMotorInputs>1) //|| previousReadInputValues!= readInputValues)
  154:main.c        ****     {
  155:main.c        ****         timerForMotorInputs=0;
  156:main.c        ****         
@@ -238,7 +238,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 1
  200:main.c        **** {
  201:main.c        ****     return &ramBrightnessMotorPosition[0];
  202:main.c        **** }
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 5
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 5
 
 
  203:main.c        **** 
@@ -298,7 +298,7 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 1
   62 0026 FFF7FEFF 		bl	UART_LED_ISR_Start
   63              	.LVL8:
  222:main.c        ****     UART_LED_Start();
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 6
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 6
 
 
   64              		.loc 1 222 0
@@ -358,2347 +358,1780 @@ ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 1
   99              		@ args = 0, pretend = 0, frame = 0
  100              		@ frame_needed = 0, uses_anonymous_args = 0
  101 0000 10B5     		push	{r4, lr}
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 7
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 7
 
 
  102              		.cfi_def_cfa_offset 8
  103              		.cfi_offset 4, -8
  104              		.cfi_offset 14, -4
- 105              	.LBB2:
   60:main.c        ****     initializePeripherals();
- 106              		.loc 1 60 0
- 107              		.syntax divided
- 108              	@ 60 "main.c" 1
- 109 0002 62B6     		CPSIE   i
- 110              	@ 0 "" 2
+ 105              		.loc 1 60 0
+ 106              		.syntax divided
+ 107              	@ 60 "main.c" 1
+ 108 0002 62B6     		CPSIE   i
+ 109              	@ 0 "" 2
   61:main.c        ****     modeChangeISR_Start();
- 111              		.loc 1 61 0
- 112              		.thumb
- 113              		.syntax unified
- 114 0004 FFF7FEFF 		bl	initializePeripherals
- 115              	.LVL15:
-  62:main.c        ****     ADC_SAR_Seq_1_Start();
- 116              		.loc 1 62 0
- 117 0008 FFF7FEFF 		bl	modeChangeISR_Start
- 118              	.LVL16:
-  63:main.c        ****     ADC_SAR_Seq_1_GetResult16();
- 119              		.loc 1 63 0
- 120 000c FFF7FEFF 		bl	ADC_SAR_Seq_1_Start
- 121              	.LVL17:
-  64:main.c        ****     //inputIncrease_Start();
- 122              		.loc 1 64 0
- 123 0010 FFF7FEFF 		bl	ADC_SAR_Seq_1_GetResult16
- 124              	.LVL18:
-  70:main.c        ****         ramBrightnessMotorPosition[3] = 1;
- 125              		.loc 1 70 0
- 126 0014 FFF7FEFF 		bl	calibrateMotor
- 127              	.LVL19:
+ 110              		.loc 1 61 0
+ 111              		.thumb
+ 112              		.syntax unified
+ 113 0004 FFF7FEFF 		bl	initializePeripherals
+ 114              	.LVL15:
+  62:main.c        ****     //ADC_SAR_Seq_1_Start();
+ 115              		.loc 1 62 0
+ 116 0008 FFF7FEFF 		bl	modeChangeISR_Start
+ 117              	.LVL16:
   71:main.c        ****         ramBrightnessMotorPosition[2] = 0;
- 128              		.loc 1 71 0
- 129 0018 0D48     		ldr	r0, .L4
- 130 001a 0123     		movs	r3, #1
- 131 001c C370     		strb	r3, [r0, #3]
+ 118              		.loc 1 71 0
+ 119 000c 074B     		ldr	r3, .L4
+ 120 000e 0122     		movs	r2, #1
+ 121 0010 DA70     		strb	r2, [r3, #3]
   72:main.c        ****         //ramBrightnessMotorPosition[1] = 0xFF;
- 132              		.loc 1 72 0
- 133 001e 0023     		movs	r3, #0
- 134 0020 8370     		strb	r3, [r0, #2]
-  74:main.c        ****         ramBrightnessMotorPosition[5] = pMotor->backwardLimitCS;
- 135              		.loc 1 74 0
- 136 0022 0C4B     		ldr	r3, .L4+4
- 137 0024 1B68     		ldr	r3, [r3]
- 138 0026 5A88     		ldrh	r2, [r3, #2]
- 139 0028 0271     		strb	r2, [r0, #4]
-  75:main.c        ****         EmEEPROM_Write(&ramBrightnessMotorPosition[1],&eepromBrightnessMotorPosition[1],5);
- 140              		.loc 1 75 0
- 141 002a 9B88     		ldrh	r3, [r3, #4]
- 142 002c 4371     		strb	r3, [r0, #5]
-  76:main.c        ****     }
- 143              		.loc 1 76 0
- 144 002e 0130     		adds	r0, r0, #1
- 145 0030 0522     		movs	r2, #5
- 146 0032 0949     		ldr	r1, .L4+8
- 147 0034 0131     		adds	r1, r1, #1
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 8
-
-
- 148 0036 FFF7FEFF 		bl	EmEEPROM_Write
- 149              	.LVL20:
+ 122              		.loc 1 72 0
+ 123 0012 0022     		movs	r2, #0
+ 124 0014 9A70     		strb	r2, [r3, #2]
   85:main.c        ****     }
- 150              		.loc 1 85 0
- 151 003a 0120     		movs	r0, #1
- 152 003c FFF7FEFF 		bl	setIdentityByComm
- 153              	.LVL21:
- 154              	.L3:
- 155              	.LBE2:
+ 125              		.loc 1 85 0
+ 126 0016 0120     		movs	r0, #1
+ 127 0018 FFF7FEFF 		bl	setIdentityByComm
+ 128              	.LVL17:
+ 129              	.L3:
   91:main.c        ****         motorControlLoop(0);
- 156              		.loc 1 91 0 discriminator 1
- 157 0040 0548     		ldr	r0, .L4+8
- 158 0042 FFF7FEFF 		bl	timeOutStateMachine
- 159              	.LVL22:
+ 130              		.loc 1 91 0 discriminator 1
+ 131 001c 0448     		ldr	r0, .L4+4
+ 132 001e FFF7FEFF 		bl	timeOutStateMachine
+ 133              	.LVL18:
   92:main.c        ****         
- 160              		.loc 1 92 0 discriminator 1
- 161 0046 0020     		movs	r0, #0
- 162 0048 FFF7FEFF 		bl	motorControlLoop
- 163              	.LVL23:
- 164 004c F8E7     		b	.L3
- 165              	.L5:
- 166 004e C046     		.align	2
- 167              	.L4:
- 168 0050 00000000 		.word	.LANCHOR0
- 169 0054 00000000 		.word	pMotor
- 170 0058 00000000 		.word	.LANCHOR1
- 171              		.cfi_endproc
- 172              	.LFE32:
- 173              		.size	main, .-main
- 174              		.section	.text.takeInputValues,"ax",%progbits
- 175              		.align	2
- 176              		.global	takeInputValues
- 177              		.code	16
- 178              		.thumb_func
- 179              		.type	takeInputValues, %function
- 180              	takeInputValues:
- 181              	.LFB33:
+ 134              		.loc 1 92 0 discriminator 1
+ 135 0022 0020     		movs	r0, #0
+ 136 0024 FFF7FEFF 		bl	motorControlLoop
+ 137              	.LVL19:
+ 138 0028 F8E7     		b	.L3
+ 139              	.L5:
+ 140 002a C046     		.align	2
+ 141              	.L4:
+ 142 002c 00000000 		.word	.LANCHOR0
+ 143 0030 00000000 		.word	.LANCHOR1
+ 144              		.cfi_endproc
+ 145              	.LFE32:
+ 146              		.size	main, .-main
+ 147              		.section	.text.takeInputValues,"ax",%progbits
+ 148              		.align	2
+ 149              		.global	takeInputValues
+ 150              		.code	16
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 8
+
+
+ 151              		.thumb_func
+ 152              		.type	takeInputValues, %function
+ 153              	takeInputValues:
+ 154              	.LFB33:
  115:main.c        ****     volatile uint8 readInputValues = 0;
- 182              		.loc 1 115 0
- 183              		.cfi_startproc
- 184              		@ args = 0, pretend = 0, frame = 8
- 185              		@ frame_needed = 0, uses_anonymous_args = 0
- 186 0000 10B5     		push	{r4, lr}
- 187              		.cfi_def_cfa_offset 8
- 188              		.cfi_offset 4, -8
- 189              		.cfi_offset 14, -4
- 190 0002 82B0     		sub	sp, sp, #8
- 191              		.cfi_def_cfa_offset 16
+ 155              		.loc 1 115 0
+ 156              		.cfi_startproc
+ 157              		@ args = 0, pretend = 0, frame = 8
+ 158              		@ frame_needed = 0, uses_anonymous_args = 0
+ 159 0000 10B5     		push	{r4, lr}
+ 160              		.cfi_def_cfa_offset 8
+ 161              		.cfi_offset 4, -8
+ 162              		.cfi_offset 14, -4
+ 163 0002 82B0     		sub	sp, sp, #8
+ 164              		.cfi_def_cfa_offset 16
  116:main.c        ****     volatile uint8 previousReadInputValues = 0;
- 192              		.loc 1 116 0
- 193 0004 0023     		movs	r3, #0
- 194 0006 6A46     		mov	r2, sp
- 195 0008 D371     		strb	r3, [r2, #7]
+ 165              		.loc 1 116 0
+ 166 0004 0023     		movs	r3, #0
+ 167 0006 6A46     		mov	r2, sp
+ 168 0008 D371     		strb	r3, [r2, #7]
  117:main.c        ****     uint8 test = 0;
- 196              		.loc 1 117 0
- 197 000a 6A46     		mov	r2, sp
- 198 000c 9371     		strb	r3, [r2, #6]
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 9
-
-
- 199              	.LVL24:
+ 169              		.loc 1 117 0
+ 170 000a 6A46     		mov	r2, sp
+ 171 000c 9371     		strb	r3, [r2, #6]
+ 172              	.LVL20:
  123:main.c        ****     {
- 200              		.loc 1 123 0
- 201 000e 3A4B     		ldr	r3, .L16
- 202 0010 9B79     		ldrb	r3, [r3, #6]
- 203 0012 012B     		cmp	r3, #1
- 204 0014 36D1     		bne	.L7
+ 173              		.loc 1 123 0
+ 174 000e 3A4B     		ldr	r3, .L16
+ 175 0010 9B79     		ldrb	r3, [r3, #6]
+ 176 0012 012B     		cmp	r3, #1
+ 177 0014 36D1     		bne	.L7
  125:main.c        ****         readInputValues = inputs_Read();
- 205              		.loc 1 125 0
- 206 0016 384C     		ldr	r4, .L16
- 207 0018 0023     		movs	r3, #0
- 208 001a A371     		strb	r3, [r4, #6]
+ 178              		.loc 1 125 0
+ 179 0016 384C     		ldr	r4, .L16
+ 180 0018 0023     		movs	r3, #0
+ 181 001a A371     		strb	r3, [r4, #6]
  126:main.c        ****         timerForMotorInputs++;   
- 209              		.loc 1 126 0
- 210 001c FFF7FEFF 		bl	inputs_Read
- 211              	.LVL25:
- 212 0020 6B46     		mov	r3, sp
- 213 0022 DA1D     		adds	r2, r3, #7
- 214 0024 D871     		strb	r0, [r3, #7]
+ 182              		.loc 1 126 0
+ 183 001c FFF7FEFF 		bl	inputs_Read
+ 184              	.LVL21:
+ 185 0020 6B46     		mov	r3, sp
+ 186 0022 DA1D     		adds	r2, r3, #7
+ 187 0024 D871     		strb	r0, [r3, #7]
  127:main.c        ****         
- 215              		.loc 1 127 0
- 216 0026 2389     		ldrh	r3, [r4, #8]
- 217 0028 0133     		adds	r3, r3, #1
- 218 002a 9BB2     		uxth	r3, r3
- 219 002c 2381     		strh	r3, [r4, #8]
+ 188              		.loc 1 127 0
+ 189 0026 2389     		ldrh	r3, [r4, #8]
+ 190 0028 0133     		adds	r3, r3, #1
+ 191 002a 9BB2     		uxth	r3, r3
+ 192 002c 2381     		strh	r3, [r4, #8]
  129:main.c        ****         {
- 220              		.loc 1 129 0
- 221 002e 1378     		ldrb	r3, [r2]
- 222 0030 9B07     		lsls	r3, r3, #30
- 223 0032 0FD5     		bpl	.L8
+ 193              		.loc 1 129 0
+ 194 002e 1378     		ldrb	r3, [r2]
+ 195 0030 9B07     		lsls	r3, r3, #30
+ 196 0032 0FD5     		bpl	.L8
  131:main.c        ****             {
- 224              		.loc 1 131 0
- 225 0034 304B     		ldr	r3, .L16
- 226 0036 5B89     		ldrh	r3, [r3, #10]
- 227 0038 FD2B     		cmp	r3, #253
- 228 003a 02D9     		bls	.L9
+ 197              		.loc 1 131 0
+ 198 0034 304B     		ldr	r3, .L16
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 9
+
+
+ 199 0036 5B89     		ldrh	r3, [r3, #10]
+ 200 0038 FD2B     		cmp	r3, #253
+ 201 003a 02D9     		bls	.L9
  133:main.c        ****             }
- 229              		.loc 1 133 0
- 230 003c FE22     		movs	r2, #254
- 231 003e 2E4B     		ldr	r3, .L16
- 232 0040 5A81     		strh	r2, [r3, #10]
- 233              	.L9:
+ 202              		.loc 1 133 0
+ 203 003c FE22     		movs	r2, #254
+ 204 003e 2E4B     		ldr	r3, .L16
+ 205 0040 5A81     		strh	r2, [r3, #10]
+ 206              	.L9:
  135:main.c        ****             setBrightness(trackBrightness);
- 234              		.loc 1 135 0
- 235 0042 2D4B     		ldr	r3, .L16
- 236 0044 5889     		ldrh	r0, [r3, #10]
- 237 0046 0130     		adds	r0, r0, #1
- 238 0048 80B2     		uxth	r0, r0
- 239 004a 5881     		strh	r0, [r3, #10]
+ 207              		.loc 1 135 0
+ 208 0042 2D4B     		ldr	r3, .L16
+ 209 0044 5889     		ldrh	r0, [r3, #10]
+ 210 0046 0130     		adds	r0, r0, #1
+ 211 0048 80B2     		uxth	r0, r0
+ 212 004a 5881     		strh	r0, [r3, #10]
  136:main.c        ****             test = 2;
- 240              		.loc 1 136 0
- 241 004c C0B2     		uxtb	r0, r0
- 242 004e FFF7FEFF 		bl	setBrightness
- 243              	.LVL26:
- 244 0052 13E0     		b	.L10
- 245              	.LVL27:
- 246              	.L8:
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 10
-
-
+ 213              		.loc 1 136 0
+ 214 004c C0B2     		uxtb	r0, r0
+ 215 004e FFF7FEFF 		bl	setBrightness
+ 216              	.LVL22:
+ 217 0052 13E0     		b	.L10
+ 218              	.LVL23:
+ 219              	.L8:
  139:main.c        ****         {
- 247              		.loc 1 139 0
- 248 0054 6B46     		mov	r3, sp
- 249 0056 0733     		adds	r3, r3, #7
- 250 0058 1B78     		ldrb	r3, [r3]
- 251 005a 1B07     		lsls	r3, r3, #28
- 252 005c 0ED5     		bpl	.L10
+ 220              		.loc 1 139 0
+ 221 0054 6B46     		mov	r3, sp
+ 222 0056 0733     		adds	r3, r3, #7
+ 223 0058 1B78     		ldrb	r3, [r3]
+ 224 005a 1B07     		lsls	r3, r3, #28
+ 225 005c 0ED5     		bpl	.L10
  141:main.c        ****             {
- 253              		.loc 1 141 0
- 254 005e 264B     		ldr	r3, .L16
- 255 0060 5B89     		ldrh	r3, [r3, #10]
- 256 0062 012B     		cmp	r3, #1
- 257 0064 02D8     		bhi	.L11
+ 226              		.loc 1 141 0
+ 227 005e 264B     		ldr	r3, .L16
+ 228 0060 5B89     		ldrh	r3, [r3, #10]
+ 229 0062 012B     		cmp	r3, #1
+ 230 0064 02D8     		bhi	.L11
  143:main.c        ****             }
- 258              		.loc 1 143 0
- 259 0066 0122     		movs	r2, #1
- 260 0068 234B     		ldr	r3, .L16
- 261 006a 5A81     		strh	r2, [r3, #10]
- 262              	.L11:
+ 231              		.loc 1 143 0
+ 232 0066 0122     		movs	r2, #1
+ 233 0068 234B     		ldr	r3, .L16
+ 234 006a 5A81     		strh	r2, [r3, #10]
+ 235              	.L11:
  146:main.c        ****             setBrightness(trackBrightness);
- 263              		.loc 1 146 0
- 264 006c 224B     		ldr	r3, .L16
- 265 006e 5889     		ldrh	r0, [r3, #10]
- 266 0070 0138     		subs	r0, r0, #1
- 267 0072 80B2     		uxth	r0, r0
- 268 0074 5881     		strh	r0, [r3, #10]
+ 236              		.loc 1 146 0
+ 237 006c 224B     		ldr	r3, .L16
+ 238 006e 5889     		ldrh	r0, [r3, #10]
+ 239 0070 0138     		subs	r0, r0, #1
+ 240 0072 80B2     		uxth	r0, r0
+ 241 0074 5881     		strh	r0, [r3, #10]
  147:main.c        ****             test = 3;
- 269              		.loc 1 147 0
- 270 0076 C0B2     		uxtb	r0, r0
- 271 0078 FFF7FEFF 		bl	setBrightness
- 272              	.LVL28:
- 273              	.L10:
+ 242              		.loc 1 147 0
+ 243 0076 C0B2     		uxtb	r0, r0
+ 244 0078 FFF7FEFF 		bl	setBrightness
+ 245              	.LVL24:
+ 246              	.L10:
  150:main.c        ****     }
- 274              		.loc 1 150 0
- 275 007c 1E4B     		ldr	r3, .L16
- 276 007e 987A     		ldrb	r0, [r3, #10]
- 277 0080 FFF7FEFF 		bl	setBrightness
- 278              	.LVL29:
- 279              	.L7:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 10
+
+
+ 247              		.loc 1 150 0
+ 248 007c 1E4B     		ldr	r3, .L16
+ 249 007e 987A     		ldrb	r0, [r3, #10]
+ 250 0080 FFF7FEFF 		bl	setBrightness
+ 251              	.LVL25:
+ 252              	.L7:
  153:main.c        ****     {
- 280              		.loc 1 153 0
- 281 0084 1C4B     		ldr	r3, .L16
- 282 0086 1B89     		ldrh	r3, [r3, #8]
- 283 0088 9BB2     		uxth	r3, r3
- 284 008a 052B     		cmp	r3, #5
- 285 008c 2BD9     		bls	.L12
+ 253              		.loc 1 153 0
+ 254 0084 1C4B     		ldr	r3, .L16
+ 255 0086 1B89     		ldrh	r3, [r3, #8]
+ 256 0088 9BB2     		uxth	r3, r3
+ 257 008a 012B     		cmp	r3, #1
+ 258 008c 2BD9     		bls	.L12
  155:main.c        ****         
- 286              		.loc 1 155 0
- 287 008e 0022     		movs	r2, #0
- 288 0090 194B     		ldr	r3, .L16
- 289 0092 1A81     		strh	r2, [r3, #8]
+ 259              		.loc 1 155 0
+ 260 008e 0022     		movs	r2, #0
+ 261 0090 194B     		ldr	r3, .L16
+ 262 0092 1A81     		strh	r2, [r3, #8]
  157:main.c        ****         {
- 290              		.loc 1 157 0
- 291 0094 6B46     		mov	r3, sp
- 292 0096 0733     		adds	r3, r3, #7
- 293 0098 1B78     		ldrb	r3, [r3]
- 294 009a 5B07     		lsls	r3, r3, #29
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 11
-
-
- 295 009c 0FD5     		bpl	.L13
+ 263              		.loc 1 157 0
+ 264 0094 6B46     		mov	r3, sp
+ 265 0096 0733     		adds	r3, r3, #7
+ 266 0098 1B78     		ldrb	r3, [r3]
+ 267 009a 5B07     		lsls	r3, r3, #29
+ 268 009c 0FD5     		bpl	.L13
  159:main.c        ****         {
- 296              		.loc 1 159 0
- 297 009e 164B     		ldr	r3, .L16
- 298 00a0 9B89     		ldrh	r3, [r3, #12]
- 299 00a2 FD2B     		cmp	r3, #253
- 300 00a4 02D9     		bls	.L14
+ 269              		.loc 1 159 0
+ 270 009e 164B     		ldr	r3, .L16
+ 271 00a0 9B89     		ldrh	r3, [r3, #12]
+ 272 00a2 FD2B     		cmp	r3, #253
+ 273 00a4 02D9     		bls	.L14
  161:main.c        ****         }
- 301              		.loc 1 161 0
- 302 00a6 FE32     		adds	r2, r2, #254
- 303 00a8 134B     		ldr	r3, .L16
- 304 00aa 9A81     		strh	r2, [r3, #12]
- 305              	.L14:
+ 274              		.loc 1 161 0
+ 275 00a6 FE32     		adds	r2, r2, #254
+ 276 00a8 134B     		ldr	r3, .L16
+ 277 00aa 9A81     		strh	r2, [r3, #12]
+ 278              	.L14:
  164:main.c        ****         setMotorPosition(trackMotor);
- 306              		.loc 1 164 0
- 307 00ac 124B     		ldr	r3, .L16
- 308 00ae 9889     		ldrh	r0, [r3, #12]
- 309 00b0 0130     		adds	r0, r0, #1
- 310 00b2 80B2     		uxth	r0, r0
- 311 00b4 9881     		strh	r0, [r3, #12]
+ 279              		.loc 1 164 0
+ 280 00ac 124B     		ldr	r3, .L16
+ 281 00ae 9889     		ldrh	r0, [r3, #12]
+ 282 00b0 0130     		adds	r0, r0, #1
+ 283 00b2 80B2     		uxth	r0, r0
+ 284 00b4 9881     		strh	r0, [r3, #12]
  165:main.c        ****         test = 0;
- 312              		.loc 1 165 0
- 313 00b6 C0B2     		uxtb	r0, r0
- 314 00b8 FFF7FEFF 		bl	setMotorPosition
- 315              	.LVL30:
- 316 00bc 13E0     		b	.L12
- 317              	.LVL31:
- 318              	.L13:
+ 285              		.loc 1 165 0
+ 286 00b6 C0B2     		uxtb	r0, r0
+ 287 00b8 FFF7FEFF 		bl	setMotorPosition
+ 288              	.LVL26:
+ 289 00bc 13E0     		b	.L12
+ 290              	.LVL27:
+ 291              	.L13:
  168:main.c        ****         {
- 319              		.loc 1 168 0
- 320 00be 6B46     		mov	r3, sp
- 321 00c0 0733     		adds	r3, r3, #7
- 322 00c2 1B78     		ldrb	r3, [r3]
- 323 00c4 DB07     		lsls	r3, r3, #31
- 324 00c6 0ED5     		bpl	.L12
+ 292              		.loc 1 168 0
+ 293 00be 6B46     		mov	r3, sp
+ 294 00c0 0733     		adds	r3, r3, #7
+ 295 00c2 1B78     		ldrb	r3, [r3]
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 11
+
+
+ 296 00c4 DB07     		lsls	r3, r3, #31
+ 297 00c6 0ED5     		bpl	.L12
  170:main.c        ****         {
- 325              		.loc 1 170 0
- 326 00c8 0B4B     		ldr	r3, .L16
- 327 00ca 9B89     		ldrh	r3, [r3, #12]
- 328 00cc 012B     		cmp	r3, #1
- 329 00ce 02D8     		bhi	.L15
+ 298              		.loc 1 170 0
+ 299 00c8 0B4B     		ldr	r3, .L16
+ 300 00ca 9B89     		ldrh	r3, [r3, #12]
+ 301 00cc 012B     		cmp	r3, #1
+ 302 00ce 02D8     		bhi	.L15
  172:main.c        ****         }
- 330              		.loc 1 172 0
- 331 00d0 0122     		movs	r2, #1
- 332 00d2 094B     		ldr	r3, .L16
- 333 00d4 9A81     		strh	r2, [r3, #12]
- 334              	.L15:
+ 303              		.loc 1 172 0
+ 304 00d0 0122     		movs	r2, #1
+ 305 00d2 094B     		ldr	r3, .L16
+ 306 00d4 9A81     		strh	r2, [r3, #12]
+ 307              	.L15:
  175:main.c        ****         setMotorPosition(trackMotor);
- 335              		.loc 1 175 0
- 336 00d6 084B     		ldr	r3, .L16
- 337 00d8 9889     		ldrh	r0, [r3, #12]
- 338 00da 0138     		subs	r0, r0, #1
- 339 00dc 80B2     		uxth	r0, r0
- 340 00de 9881     		strh	r0, [r3, #12]
+ 308              		.loc 1 175 0
+ 309 00d6 084B     		ldr	r3, .L16
+ 310 00d8 9889     		ldrh	r0, [r3, #12]
+ 311 00da 0138     		subs	r0, r0, #1
+ 312 00dc 80B2     		uxth	r0, r0
+ 313 00de 9881     		strh	r0, [r3, #12]
  176:main.c        ****         test = 1;
- 341              		.loc 1 176 0
- 342 00e0 C0B2     		uxtb	r0, r0
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 12
-
-
- 343 00e2 FFF7FEFF 		bl	setMotorPosition
- 344              	.LVL32:
- 345              	.L12:
+ 314              		.loc 1 176 0
+ 315 00e0 C0B2     		uxtb	r0, r0
+ 316 00e2 FFF7FEFF 		bl	setMotorPosition
+ 317              	.LVL28:
+ 318              	.L12:
  180:main.c        ****     
- 346              		.loc 1 180 0
- 347 00e6 6B46     		mov	r3, sp
- 348 00e8 0733     		adds	r3, r3, #7
- 349 00ea 1B78     		ldrb	r3, [r3]
- 350 00ec DBB2     		uxtb	r3, r3
- 351 00ee 6A46     		mov	r2, sp
- 352 00f0 9371     		strb	r3, [r2, #6]
+ 319              		.loc 1 180 0
+ 320 00e6 6B46     		mov	r3, sp
+ 321 00e8 0733     		adds	r3, r3, #7
+ 322 00ea 1B78     		ldrb	r3, [r3]
+ 323 00ec DBB2     		uxtb	r3, r3
+ 324 00ee 6A46     		mov	r2, sp
+ 325 00f0 9371     		strb	r3, [r2, #6]
  182:main.c        **** 
- 353              		.loc 1 182 0
- 354 00f2 02B0     		add	sp, sp, #8
- 355              		@ sp needed
- 356 00f4 10BD     		pop	{r4, pc}
- 357              	.L17:
- 358 00f6 C046     		.align	2
- 359              	.L16:
- 360 00f8 00000000 		.word	.LANCHOR0
- 361              		.cfi_endproc
- 362              	.LFE33:
- 363              		.size	takeInputValues, .-takeInputValues
- 364              		.section	.text.clearInitializeAlreadyEEPROM,"ax",%progbits
- 365              		.align	2
- 366              		.global	clearInitializeAlreadyEEPROM
- 367              		.code	16
- 368              		.thumb_func
- 369              		.type	clearInitializeAlreadyEEPROM, %function
- 370              	clearInitializeAlreadyEEPROM:
- 371              	.LFB34:
+ 326              		.loc 1 182 0
+ 327 00f2 02B0     		add	sp, sp, #8
+ 328              		@ sp needed
+ 329 00f4 10BD     		pop	{r4, pc}
+ 330              	.L17:
+ 331 00f6 C046     		.align	2
+ 332              	.L16:
+ 333 00f8 00000000 		.word	.LANCHOR0
+ 334              		.cfi_endproc
+ 335              	.LFE33:
+ 336              		.size	takeInputValues, .-takeInputValues
+ 337              		.section	.text.clearInitializeAlreadyEEPROM,"ax",%progbits
+ 338              		.align	2
+ 339              		.global	clearInitializeAlreadyEEPROM
+ 340              		.code	16
+ 341              		.thumb_func
+ 342              		.type	clearInitializeAlreadyEEPROM, %function
+ 343              	clearInitializeAlreadyEEPROM:
+ 344              	.LFB34:
  185:main.c        ****     static const uint8 detectedAlready = 0;
- 372              		.loc 1 185 0
- 373              		.cfi_startproc
- 374              		@ args = 0, pretend = 0, frame = 0
- 375              		@ frame_needed = 0, uses_anonymous_args = 0
- 376 0000 10B5     		push	{r4, lr}
- 377              		.cfi_def_cfa_offset 8
- 378              		.cfi_offset 4, -8
- 379              		.cfi_offset 14, -4
+ 345              		.loc 1 185 0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 12
+
+
+ 346              		.cfi_startproc
+ 347              		@ args = 0, pretend = 0, frame = 0
+ 348              		@ frame_needed = 0, uses_anonymous_args = 0
+ 349 0000 10B5     		push	{r4, lr}
+ 350              		.cfi_def_cfa_offset 8
+ 351              		.cfi_offset 4, -8
+ 352              		.cfi_offset 14, -4
  190:main.c        ****     //}
- 380              		.loc 1 190 0
- 381 0002 0348     		ldr	r0, .L19
- 382 0004 C11C     		adds	r1, r0, #3
- 383 0006 0630     		adds	r0, r0, #6
- 384 0008 0122     		movs	r2, #1
- 385 000a FFF7FEFF 		bl	EmEEPROM_Write
- 386              	.LVL33:
+ 353              		.loc 1 190 0
+ 354 0002 0348     		ldr	r0, .L19
+ 355 0004 C11C     		adds	r1, r0, #3
+ 356 0006 0630     		adds	r0, r0, #6
+ 357 0008 0122     		movs	r2, #1
+ 358 000a FFF7FEFF 		bl	EmEEPROM_Write
+ 359              	.LVL29:
  192:main.c        **** 
- 387              		.loc 1 192 0
- 388              		@ sp needed
- 389 000e 10BD     		pop	{r4, pc}
- 390              	.L20:
- 391              		.align	2
- 392              	.L19:
- 393 0010 00000000 		.word	.LANCHOR1
- 394              		.cfi_endproc
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 13
-
-
- 395              	.LFE34:
- 396              		.size	clearInitializeAlreadyEEPROM, .-clearInitializeAlreadyEEPROM
- 397              		.section	.text.getNonVolatileBarStateMemory,"ax",%progbits
- 398              		.align	2
- 399              		.global	getNonVolatileBarStateMemory
- 400              		.code	16
- 401              		.thumb_func
- 402              		.type	getNonVolatileBarStateMemory, %function
- 403              	getNonVolatileBarStateMemory:
- 404              	.LFB35:
+ 360              		.loc 1 192 0
+ 361              		@ sp needed
+ 362 000e 10BD     		pop	{r4, pc}
+ 363              	.L20:
+ 364              		.align	2
+ 365              	.L19:
+ 366 0010 00000000 		.word	.LANCHOR1
+ 367              		.cfi_endproc
+ 368              	.LFE34:
+ 369              		.size	clearInitializeAlreadyEEPROM, .-clearInitializeAlreadyEEPROM
+ 370              		.section	.text.getNonVolatileBarStateMemory,"ax",%progbits
+ 371              		.align	2
+ 372              		.global	getNonVolatileBarStateMemory
+ 373              		.code	16
+ 374              		.thumb_func
+ 375              		.type	getNonVolatileBarStateMemory, %function
+ 376              	getNonVolatileBarStateMemory:
+ 377              	.LFB35:
  195:main.c        ****     return &eepromBrightnessMotorPosition[0];
- 405              		.loc 1 195 0
- 406              		.cfi_startproc
- 407              		@ args = 0, pretend = 0, frame = 0
- 408              		@ frame_needed = 0, uses_anonymous_args = 0
- 409              		@ link register save eliminated.
+ 378              		.loc 1 195 0
+ 379              		.cfi_startproc
+ 380              		@ args = 0, pretend = 0, frame = 0
+ 381              		@ frame_needed = 0, uses_anonymous_args = 0
+ 382              		@ link register save eliminated.
  197:main.c        **** 
- 410              		.loc 1 197 0
- 411 0000 0048     		ldr	r0, .L22
- 412              		@ sp needed
- 413 0002 7047     		bx	lr
- 414              	.L23:
- 415              		.align	2
- 416              	.L22:
- 417 0004 00000000 		.word	.LANCHOR1
- 418              		.cfi_endproc
- 419              	.LFE35:
- 420              		.size	getNonVolatileBarStateMemory, .-getNonVolatileBarStateMemory
- 421              		.section	.text.getVolatileBarStateMemory,"ax",%progbits
- 422              		.align	2
- 423              		.global	getVolatileBarStateMemory
- 424              		.code	16
- 425              		.thumb_func
- 426              		.type	getVolatileBarStateMemory, %function
- 427              	getVolatileBarStateMemory:
- 428              	.LFB36:
+ 383              		.loc 1 197 0
+ 384 0000 0048     		ldr	r0, .L22
+ 385              		@ sp needed
+ 386 0002 7047     		bx	lr
+ 387              	.L23:
+ 388              		.align	2
+ 389              	.L22:
+ 390 0004 00000000 		.word	.LANCHOR1
+ 391              		.cfi_endproc
+ 392              	.LFE35:
+ 393              		.size	getNonVolatileBarStateMemory, .-getNonVolatileBarStateMemory
+ 394              		.section	.text.getVolatileBarStateMemory,"ax",%progbits
+ 395              		.align	2
+ 396              		.global	getVolatileBarStateMemory
+ 397              		.code	16
+ 398              		.thumb_func
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 13
+
+
+ 399              		.type	getVolatileBarStateMemory, %function
+ 400              	getVolatileBarStateMemory:
+ 401              	.LFB36:
  200:main.c        ****     return &ramBrightnessMotorPosition[0];
- 429              		.loc 1 200 0
- 430              		.cfi_startproc
- 431              		@ args = 0, pretend = 0, frame = 0
- 432              		@ frame_needed = 0, uses_anonymous_args = 0
- 433              		@ link register save eliminated.
+ 402              		.loc 1 200 0
+ 403              		.cfi_startproc
+ 404              		@ args = 0, pretend = 0, frame = 0
+ 405              		@ frame_needed = 0, uses_anonymous_args = 0
+ 406              		@ link register save eliminated.
  202:main.c        **** 
- 434              		.loc 1 202 0
- 435 0000 0048     		ldr	r0, .L25
- 436              		@ sp needed
- 437 0002 7047     		bx	lr
- 438              	.L26:
- 439              		.align	2
- 440              	.L25:
- 441 0004 00000000 		.word	.LANCHOR0
- 442              		.cfi_endproc
- 443              	.LFE36:
- 444              		.size	getVolatileBarStateMemory, .-getVolatileBarStateMemory
- 445              		.global	timerForMotorInputs
- 446              		.global	timerForInputs
- 447              		.section	.rodata
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 14
-
-
- 448              		.align	2
- 449              		.set	.LANCHOR1,. + 0
- 450              		.type	eepromBrightnessMotorPosition, %object
- 451              		.size	eepromBrightnessMotorPosition, 6
- 452              	eepromBrightnessMotorPosition:
- 453 0000 FF       		.byte	-1
- 454 0001 00       		.byte	0
- 455 0002 00       		.byte	0
- 456 0003 00       		.byte	0
- 457 0004 00       		.byte	0
- 458 0005 00       		.byte	0
- 459              		.type	detectedAlready.6617, %object
- 460              		.size	detectedAlready.6617, 1
- 461              	detectedAlready.6617:
- 462 0006 00       		.space	1
- 463              		.bss
- 464              		.align	2
- 465              		.set	.LANCHOR0,. + 0
- 466              		.type	ramBrightnessMotorPosition, %object
- 467              		.size	ramBrightnessMotorPosition, 6
- 468              	ramBrightnessMotorPosition:
- 469 0000 00000000 		.space	6
- 469      0000
- 470              		.type	timerForInputs, %object
- 471              		.size	timerForInputs, 1
- 472              	timerForInputs:
- 473 0006 00       		.space	1
- 474 0007 00       		.space	1
- 475              		.type	timerForMotorInputs, %object
- 476              		.size	timerForMotorInputs, 2
- 477              	timerForMotorInputs:
- 478 0008 0000     		.space	2
- 479              		.type	trackBrightness.6612, %object
- 480              		.size	trackBrightness.6612, 2
- 481              	trackBrightness.6612:
- 482 000a 0000     		.space	2
- 483              		.type	trackMotor.6613, %object
- 484              		.size	trackMotor.6613, 2
- 485              	trackMotor.6613:
- 486 000c 0000     		.space	2
- 487              		.text
- 488              	.Letext0:
- 489              		.file 2 "Generated_Source\\PSoC4/cytypes.h"
- 490              		.file 3 "motorControl.h"
- 491              		.file 4 "Generated_Source\\PSoC4/PWM_Enable.h"
- 492              		.file 5 "Generated_Source\\PSoC4/PWM.h"
- 493              		.file 6 "Generated_Source\\PSoC4/CommTimeoutISR.h"
- 494              		.file 7 "Generated_Source\\PSoC4/AckTimeoutISR.h"
- 495              		.file 8 "Generated_Source\\PSoC4/SamplingTimerISR.h"
- 496              		.file 9 "Generated_Source\\PSoC4/ADC_SAR_Seq.h"
- 497              		.file 10 "Generated_Source\\PSoC4/UART_LED_ISR.h"
- 498              		.file 11 "Generated_Source\\PSoC4/UART_LED.h"
- 499              		.file 12 "Generated_Source\\PSoC4/LED_ISR.h"
- 500              		.file 13 "Generated_Source\\PSoC4/SamplingTimer.h"
- 501              		.file 14 "Generated_Source\\PSoC4/TimeoutTimer.h"
- 502              		.file 15 "Generated_Source\\PSoC4/EmEEPROM.h"
- 503              		.file 16 "Generated_Source\\PSoC4/modeChangeISR.h"
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 15
-
-
- 504              		.file 17 "DriverControl.h"
- 505              		.file 18 "BrightnessCommManager.h"
- 506              		.file 19 "Generated_Source\\PSoC4/inputs.h"
- 507              		.section	.debug_info,"",%progbits
- 508              	.Ldebug_info0:
- 509 0000 73060000 		.4byte	0x673
- 510 0004 0400     		.2byte	0x4
- 511 0006 00000000 		.4byte	.Ldebug_abbrev0
- 512 000a 04       		.byte	0x4
- 513 000b 01       		.uleb128 0x1
- 514 000c 8A010000 		.4byte	.LASF88
- 515 0010 0C       		.byte	0xc
- 516 0011 1C050000 		.4byte	.LASF89
- 517 0015 65030000 		.4byte	.LASF90
- 518 0019 00000000 		.4byte	.Ldebug_ranges0+0
- 519 001d 00000000 		.4byte	0
- 520 0021 00000000 		.4byte	.Ldebug_line0
- 521 0025 02       		.uleb128 0x2
- 522 0026 01       		.byte	0x1
- 523 0027 06       		.byte	0x6
- 524 0028 FF030000 		.4byte	.LASF0
- 525 002c 02       		.uleb128 0x2
- 526 002d 01       		.byte	0x1
- 527 002e 08       		.byte	0x8
- 528 002f F3020000 		.4byte	.LASF1
- 529 0033 02       		.uleb128 0x2
- 530 0034 02       		.byte	0x2
- 531 0035 05       		.byte	0x5
- 532 0036 CB000000 		.4byte	.LASF2
- 533 003a 02       		.uleb128 0x2
- 534 003b 02       		.byte	0x2
- 535 003c 07       		.byte	0x7
- 536 003d 6F040000 		.4byte	.LASF3
- 537 0041 02       		.uleb128 0x2
- 538 0042 04       		.byte	0x4
- 539 0043 05       		.byte	0x5
- 540 0044 75020000 		.4byte	.LASF4
- 541 0048 02       		.uleb128 0x2
- 542 0049 04       		.byte	0x4
- 543 004a 07       		.byte	0x7
- 544 004b 38050000 		.4byte	.LASF5
- 545 004f 02       		.uleb128 0x2
- 546 0050 08       		.byte	0x8
- 547 0051 05       		.byte	0x5
- 548 0052 4A020000 		.4byte	.LASF6
- 549 0056 02       		.uleb128 0x2
- 550 0057 08       		.byte	0x8
- 551 0058 07       		.byte	0x7
- 552 0059 0B040000 		.4byte	.LASF7
- 553 005d 03       		.uleb128 0x3
- 554 005e 04       		.byte	0x4
- 555 005f 05       		.byte	0x5
- 556 0060 696E7400 		.ascii	"int\000"
- 557 0064 02       		.uleb128 0x2
- 558 0065 04       		.byte	0x4
- 559 0066 07       		.byte	0x7
- 560 0067 32040000 		.4byte	.LASF8
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 16
-
-
- 561 006b 04       		.uleb128 0x4
- 562 006c 36020000 		.4byte	.LASF9
- 563 0070 02       		.byte	0x2
- 564 0071 D201     		.2byte	0x1d2
- 565 0073 2C000000 		.4byte	0x2c
- 566 0077 04       		.uleb128 0x4
- 567 0078 D7040000 		.4byte	.LASF10
- 568 007c 02       		.byte	0x2
- 569 007d D301     		.2byte	0x1d3
- 570 007f 3A000000 		.4byte	0x3a
- 571 0083 04       		.uleb128 0x4
- 572 0084 30020000 		.4byte	.LASF11
- 573 0088 02       		.byte	0x2
- 574 0089 D601     		.2byte	0x1d6
- 575 008b 33000000 		.4byte	0x33
- 576 008f 02       		.uleb128 0x2
- 577 0090 04       		.byte	0x4
- 578 0091 04       		.byte	0x4
- 579 0092 44020000 		.4byte	.LASF12
- 580 0096 02       		.uleb128 0x2
- 581 0097 08       		.byte	0x8
- 582 0098 04       		.byte	0x4
- 583 0099 72050000 		.4byte	.LASF13
- 584 009d 02       		.uleb128 0x2
- 585 009e 01       		.byte	0x1
- 586 009f 08       		.byte	0x8
- 587 00a0 8D040000 		.4byte	.LASF14
- 588 00a4 05       		.uleb128 0x5
- 589 00a5 6B000000 		.4byte	0x6b
- 590 00a9 05       		.uleb128 0x5
- 591 00aa 77000000 		.4byte	0x77
- 592 00ae 02       		.uleb128 0x2
- 593 00af 08       		.byte	0x8
- 594 00b0 04       		.byte	0x4
- 595 00b1 35030000 		.4byte	.LASF15
- 596 00b5 02       		.uleb128 0x2
- 597 00b6 04       		.byte	0x4
- 598 00b7 07       		.byte	0x7
- 599 00b8 D5000000 		.4byte	.LASF16
- 600 00bc 06       		.uleb128 0x6
- 601 00bd 04       		.byte	0x4
- 602 00be 6B000000 		.4byte	0x6b
- 603 00c2 07       		.uleb128 0x7
- 604 00c3 50030000 		.4byte	.LASF91
- 605 00c7 54       		.byte	0x54
- 606 00c8 03       		.byte	0x3
- 607 00c9 1D       		.byte	0x1d
- 608 00ca 07020000 		.4byte	0x207
- 609 00ce 08       		.uleb128 0x8
- 610 00cf 50010000 		.4byte	.LASF17
- 611 00d3 03       		.byte	0x3
- 612 00d4 1F       		.byte	0x1f
- 613 00d5 77000000 		.4byte	0x77
- 614 00d9 00       		.byte	0
- 615 00da 08       		.uleb128 0x8
- 616 00db 56030000 		.4byte	.LASF18
- 617 00df 03       		.byte	0x3
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 17
-
-
- 618 00e0 20       		.byte	0x20
- 619 00e1 77000000 		.4byte	0x77
- 620 00e5 02       		.byte	0x2
- 621 00e6 08       		.uleb128 0x8
- 622 00e7 33060000 		.4byte	.LASF19
- 623 00eb 03       		.byte	0x3
- 624 00ec 21       		.byte	0x21
- 625 00ed 77000000 		.4byte	0x77
- 626 00f1 04       		.byte	0x4
- 627 00f2 08       		.uleb128 0x8
- 628 00f3 00000000 		.4byte	.LASF20
- 629 00f7 03       		.byte	0x3
- 630 00f8 22       		.byte	0x22
- 631 00f9 8F000000 		.4byte	0x8f
- 632 00fd 08       		.byte	0x8
- 633 00fe 08       		.uleb128 0x8
- 634 00ff B6040000 		.4byte	.LASF21
- 635 0103 03       		.byte	0x3
- 636 0104 23       		.byte	0x23
- 637 0105 6B000000 		.4byte	0x6b
- 638 0109 0C       		.byte	0xc
- 639 010a 08       		.uleb128 0x8
- 640 010b 23050000 		.4byte	.LASF22
- 641 010f 03       		.byte	0x3
- 642 0110 25       		.byte	0x25
- 643 0111 6B000000 		.4byte	0x6b
- 644 0115 0D       		.byte	0xd
- 645 0116 08       		.uleb128 0x8
- 646 0117 79050000 		.4byte	.LASF23
- 647 011b 03       		.byte	0x3
- 648 011c 27       		.byte	0x27
- 649 011d 83000000 		.4byte	0x83
- 650 0121 0E       		.byte	0xe
- 651 0122 08       		.uleb128 0x8
- 652 0123 38000000 		.4byte	.LASF24
- 653 0127 03       		.byte	0x3
- 654 0128 28       		.byte	0x28
- 655 0129 83000000 		.4byte	0x83
- 656 012d 10       		.byte	0x10
- 657 012e 08       		.uleb128 0x8
- 658 012f 82040000 		.4byte	.LASF25
- 659 0133 03       		.byte	0x3
- 660 0134 29       		.byte	0x29
- 661 0135 83000000 		.4byte	0x83
- 662 0139 12       		.byte	0x12
- 663 013a 08       		.uleb128 0x8
- 664 013b 0C030000 		.4byte	.LASF26
- 665 013f 03       		.byte	0x3
- 666 0140 2B       		.byte	0x2b
- 667 0141 8F000000 		.4byte	0x8f
- 668 0145 14       		.byte	0x14
- 669 0146 08       		.uleb128 0x8
- 670 0147 98020000 		.4byte	.LASF27
- 671 014b 03       		.byte	0x3
- 672 014c 2C       		.byte	0x2c
- 673 014d 83000000 		.4byte	0x83
- 674 0151 18       		.byte	0x18
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 18
-
-
- 675 0152 08       		.uleb128 0x8
- 676 0153 C2000000 		.4byte	.LASF28
- 677 0157 03       		.byte	0x3
- 678 0158 2D       		.byte	0x2d
- 679 0159 83000000 		.4byte	0x83
- 680 015d 1A       		.byte	0x1a
- 681 015e 08       		.uleb128 0x8
- 682 015f 50040000 		.4byte	.LASF29
- 683 0163 03       		.byte	0x3
- 684 0164 2E       		.byte	0x2e
- 685 0165 83000000 		.4byte	0x83
- 686 0169 1C       		.byte	0x1c
- 687 016a 08       		.uleb128 0x8
- 688 016b D0030000 		.4byte	.LASF30
- 689 016f 03       		.byte	0x3
- 690 0170 30       		.byte	0x30
- 691 0171 8F000000 		.4byte	0x8f
- 692 0175 20       		.byte	0x20
- 693 0176 08       		.uleb128 0x8
- 694 0177 8F020000 		.4byte	.LASF31
- 695 017b 03       		.byte	0x3
- 696 017c 31       		.byte	0x31
- 697 017d 8F000000 		.4byte	0x8f
- 698 0181 24       		.byte	0x24
- 699 0182 08       		.uleb128 0x8
- 700 0183 58020000 		.4byte	.LASF32
- 701 0187 03       		.byte	0x3
- 702 0188 32       		.byte	0x32
- 703 0189 8F000000 		.4byte	0x8f
- 704 018d 28       		.byte	0x28
- 705 018e 08       		.uleb128 0x8
- 706 018f 24020000 		.4byte	.LASF33
- 707 0193 03       		.byte	0x3
- 708 0194 33       		.byte	0x33
- 709 0195 83000000 		.4byte	0x83
- 710 0199 2C       		.byte	0x2c
- 711 019a 08       		.uleb128 0x8
- 712 019b 61040000 		.4byte	.LASF34
- 713 019f 03       		.byte	0x3
- 714 01a0 35       		.byte	0x35
- 715 01a1 6B000000 		.4byte	0x6b
- 716 01a5 2E       		.byte	0x2e
- 717 01a6 08       		.uleb128 0x8
- 718 01a7 25010000 		.4byte	.LASF35
- 719 01ab 03       		.byte	0x3
- 720 01ac 36       		.byte	0x36
- 721 01ad 6B000000 		.4byte	0x6b
- 722 01b1 2F       		.byte	0x2f
- 723 01b2 08       		.uleb128 0x8
- 724 01b3 01030000 		.4byte	.LASF36
- 725 01b7 03       		.byte	0x3
- 726 01b8 38       		.byte	0x38
- 727 01b9 6B000000 		.4byte	0x6b
- 728 01bd 30       		.byte	0x30
- 729 01be 08       		.uleb128 0x8
- 730 01bf 4A050000 		.4byte	.LASF37
- 731 01c3 03       		.byte	0x3
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 19
-
-
- 732 01c4 3A       		.byte	0x3a
- 733 01c5 07020000 		.4byte	0x207
- 734 01c9 32       		.byte	0x32
- 735 01ca 08       		.uleb128 0x8
- 736 01cb 5A010000 		.4byte	.LASF38
- 737 01cf 03       		.byte	0x3
- 738 01d0 3B       		.byte	0x3b
- 739 01d1 6B000000 		.4byte	0x6b
- 740 01d5 4A       		.byte	0x4a
- 741 01d6 08       		.uleb128 0x8
- 742 01d7 BB050000 		.4byte	.LASF39
- 743 01db 03       		.byte	0x3
- 744 01dc 3C       		.byte	0x3c
- 745 01dd 77000000 		.4byte	0x77
- 746 01e1 4C       		.byte	0x4c
- 747 01e2 08       		.uleb128 0x8
- 748 01e3 63020000 		.4byte	.LASF40
- 749 01e7 03       		.byte	0x3
- 750 01e8 3D       		.byte	0x3d
- 751 01e9 6B000000 		.4byte	0x6b
- 752 01ed 4E       		.byte	0x4e
- 753 01ee 08       		.uleb128 0x8
- 754 01ef BC020000 		.4byte	.LASF41
- 755 01f3 03       		.byte	0x3
- 756 01f4 3E       		.byte	0x3e
- 757 01f5 6B000000 		.4byte	0x6b
- 758 01f9 4F       		.byte	0x4f
- 759 01fa 08       		.uleb128 0x8
- 760 01fb 72000000 		.4byte	.LASF42
- 761 01ff 03       		.byte	0x3
- 762 0200 3F       		.byte	0x3f
- 763 0201 77000000 		.4byte	0x77
- 764 0205 50       		.byte	0x50
- 765 0206 00       		.byte	0
- 766 0207 09       		.uleb128 0x9
- 767 0208 77000000 		.4byte	0x77
- 768 020c 17020000 		.4byte	0x217
- 769 0210 0A       		.uleb128 0xa
- 770 0211 B5000000 		.4byte	0xb5
- 771 0215 0B       		.byte	0xb
- 772 0216 00       		.byte	0
- 773 0217 0B       		.uleb128 0xb
- 774 0218 3C020000 		.4byte	.LASF43
- 775 021c 03       		.byte	0x3
- 776 021d 40       		.byte	0x40
- 777 021e C2000000 		.4byte	0xc2
- 778 0222 0C       		.uleb128 0xc
- 779 0223 F2050000 		.4byte	.LASF92
- 780 0227 01       		.byte	0x1
- 781 0228 CE       		.byte	0xce
- 782 0229 00000000 		.4byte	.LFB37
- 783 022d 44000000 		.4byte	.LFE37-.LFB37
- 784 0231 01       		.uleb128 0x1
- 785 0232 9C       		.byte	0x9c
- 786 0233 D3020000 		.4byte	0x2d3
- 787 0237 0D       		.uleb128 0xd
- 788 0238 08000000 		.4byte	.LVL0
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 20
-
-
- 789 023c 56050000 		.4byte	0x556
- 790 0240 4A020000 		.4byte	0x24a
- 791 0244 0E       		.uleb128 0xe
- 792 0245 01       		.uleb128 0x1
- 793 0246 50       		.byte	0x50
- 794 0247 01       		.uleb128 0x1
- 795 0248 30       		.byte	0x30
- 796 0249 00       		.byte	0
- 797 024a 0F       		.uleb128 0xf
- 798 024b 0C000000 		.4byte	.LVL1
- 799 024f 61050000 		.4byte	0x561
- 800 0253 0D       		.uleb128 0xd
- 801 0254 12000000 		.4byte	.LVL2
- 802 0258 6C050000 		.4byte	0x56c
- 803 025c 66020000 		.4byte	0x266
- 804 0260 0E       		.uleb128 0xe
- 805 0261 01       		.uleb128 0x1
- 806 0262 50       		.byte	0x50
- 807 0263 01       		.uleb128 0x1
- 808 0264 30       		.byte	0x30
- 809 0265 00       		.byte	0
- 810 0266 0F       		.uleb128 0xf
- 811 0267 16000000 		.4byte	.LVL3
- 812 026b 77050000 		.4byte	0x577
- 813 026f 0F       		.uleb128 0xf
- 814 0270 1A000000 		.4byte	.LVL4
- 815 0274 82050000 		.4byte	0x582
- 816 0278 0F       		.uleb128 0xf
- 817 0279 1E000000 		.4byte	.LVL5
- 818 027d 8D050000 		.4byte	0x58d
- 819 0281 0F       		.uleb128 0xf
- 820 0282 22000000 		.4byte	.LVL6
- 821 0286 98050000 		.4byte	0x598
- 822 028a 0F       		.uleb128 0xf
- 823 028b 26000000 		.4byte	.LVL7
- 824 028f A3050000 		.4byte	0x5a3
- 825 0293 0F       		.uleb128 0xf
- 826 0294 2A000000 		.4byte	.LVL8
- 827 0298 AE050000 		.4byte	0x5ae
- 828 029c 0F       		.uleb128 0xf
- 829 029d 2E000000 		.4byte	.LVL9
- 830 02a1 B9050000 		.4byte	0x5b9
- 831 02a5 0F       		.uleb128 0xf
- 832 02a6 32000000 		.4byte	.LVL10
- 833 02aa C4050000 		.4byte	0x5c4
- 834 02ae 0F       		.uleb128 0xf
- 835 02af 36000000 		.4byte	.LVL11
- 836 02b3 CF050000 		.4byte	0x5cf
- 837 02b7 0F       		.uleb128 0xf
- 838 02b8 3A000000 		.4byte	.LVL12
- 839 02bc DB050000 		.4byte	0x5db
- 840 02c0 0F       		.uleb128 0xf
- 841 02c1 3E000000 		.4byte	.LVL13
- 842 02c5 E7050000 		.4byte	0x5e7
- 843 02c9 0F       		.uleb128 0xf
- 844 02ca 42000000 		.4byte	.LVL14
- 845 02ce F2050000 		.4byte	0x5f2
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 21
-
-
- 846 02d2 00       		.byte	0
- 847 02d3 10       		.uleb128 0x10
- 848 02d4 2F010000 		.4byte	.LASF93
- 849 02d8 01       		.byte	0x1
- 850 02d9 39       		.byte	0x39
- 851 02da 5D000000 		.4byte	0x5d
- 852 02de 00000000 		.4byte	.LFB32
- 853 02e2 5C000000 		.4byte	.LFE32-.LFB32
- 854 02e6 01       		.uleb128 0x1
- 855 02e7 9C       		.byte	0x9c
- 856 02e8 A4030000 		.4byte	0x3a4
- 857 02ec 11       		.uleb128 0x11
- 858 02ed 02000000 		.4byte	.LBB2
- 859 02f1 3E000000 		.4byte	.LBE2-.LBB2
- 860 02f5 7D030000 		.4byte	0x37d
- 861 02f9 12       		.uleb128 0x12
- 862 02fa 52060000 		.4byte	.LASF44
- 863 02fe 01       		.byte	0x1
- 864 02ff 3F       		.byte	0x3f
- 865 0300 5D000000 		.4byte	0x5d
- 866 0304 0A030000 		.4byte	0x30a
- 867 0308 13       		.uleb128 0x13
- 868 0309 00       		.byte	0
- 869 030a 12       		.uleb128 0x12
- 870 030b 08060000 		.4byte	.LASF45
- 871 030f 01       		.byte	0x1
- 872 0310 40       		.byte	0x40
- 873 0311 5D000000 		.4byte	0x5d
- 874 0315 1B030000 		.4byte	0x31b
- 875 0319 13       		.uleb128 0x13
- 876 031a 00       		.byte	0
- 877 031b 0F       		.uleb128 0xf
- 878 031c 08000000 		.4byte	.LVL15
- 879 0320 22020000 		.4byte	0x222
- 880 0324 0F       		.uleb128 0xf
- 881 0325 0C000000 		.4byte	.LVL16
- 882 0329 FD050000 		.4byte	0x5fd
- 883 032d 0F       		.uleb128 0xf
- 884 032e 10000000 		.4byte	.LVL17
- 885 0332 08060000 		.4byte	0x608
- 886 0336 0F       		.uleb128 0xf
- 887 0337 14000000 		.4byte	.LVL18
- 888 033b 13060000 		.4byte	0x613
- 889 033f 0F       		.uleb128 0xf
- 890 0340 18000000 		.4byte	.LVL19
- 891 0344 1E060000 		.4byte	0x61e
- 892 0348 0D       		.uleb128 0xd
- 893 0349 3A000000 		.4byte	.LVL20
- 894 034d 29060000 		.4byte	0x629
- 895 0351 6D030000 		.4byte	0x36d
- 896 0355 0E       		.uleb128 0xe
- 897 0356 01       		.uleb128 0x1
- 898 0357 50       		.byte	0x50
- 899 0358 05       		.uleb128 0x5
- 900 0359 03       		.byte	0x3
- 901 035a 01000000 		.4byte	.LANCHOR0+1
- 902 035e 0E       		.uleb128 0xe
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 22
-
-
- 903 035f 01       		.uleb128 0x1
- 904 0360 51       		.byte	0x51
- 905 0361 05       		.uleb128 0x5
- 906 0362 03       		.byte	0x3
- 907 0363 01000000 		.4byte	.LANCHOR1+1
- 908 0367 0E       		.uleb128 0xe
- 909 0368 01       		.uleb128 0x1
- 910 0369 52       		.byte	0x52
- 911 036a 01       		.uleb128 0x1
- 912 036b 35       		.byte	0x35
- 913 036c 00       		.byte	0
- 914 036d 14       		.uleb128 0x14
- 915 036e 40000000 		.4byte	.LVL21
- 916 0372 34060000 		.4byte	0x634
- 917 0376 0E       		.uleb128 0xe
- 918 0377 01       		.uleb128 0x1
- 919 0378 50       		.byte	0x50
- 920 0379 01       		.uleb128 0x1
- 921 037a 31       		.byte	0x31
- 922 037b 00       		.byte	0
- 923 037c 00       		.byte	0
- 924 037d 0D       		.uleb128 0xd
- 925 037e 46000000 		.4byte	.LVL22
- 926 0382 3F060000 		.4byte	0x63f
- 927 0386 94030000 		.4byte	0x394
- 928 038a 0E       		.uleb128 0xe
- 929 038b 01       		.uleb128 0x1
- 930 038c 50       		.byte	0x50
- 931 038d 05       		.uleb128 0x5
- 932 038e 03       		.byte	0x3
- 933 038f 00000000 		.4byte	.LANCHOR1
- 934 0393 00       		.byte	0
- 935 0394 14       		.uleb128 0x14
- 936 0395 4C000000 		.4byte	.LVL23
- 937 0399 4A060000 		.4byte	0x64a
- 938 039d 0E       		.uleb128 0xe
- 939 039e 01       		.uleb128 0x1
- 940 039f 50       		.byte	0x50
- 941 03a0 01       		.uleb128 0x1
- 942 03a1 30       		.byte	0x30
- 943 03a2 00       		.byte	0
- 944 03a3 00       		.byte	0
- 945 03a4 15       		.uleb128 0x15
- 946 03a5 AB050000 		.4byte	.LASF51
- 947 03a9 01       		.byte	0x1
- 948 03aa 72       		.byte	0x72
- 949 03ab 00000000 		.4byte	.LFB33
- 950 03af FC000000 		.4byte	.LFE33-.LFB33
- 951 03b3 01       		.uleb128 0x1
- 952 03b4 9C       		.byte	0x9c
- 953 03b5 3D040000 		.4byte	0x43d
- 954 03b9 16       		.uleb128 0x16
- 955 03ba 22040000 		.4byte	.LASF46
- 956 03be 01       		.byte	0x1
- 957 03bf 74       		.byte	0x74
- 958 03c0 A4000000 		.4byte	0xa4
- 959 03c4 02       		.uleb128 0x2
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 23
-
-
- 960 03c5 91       		.byte	0x91
- 961 03c6 77       		.sleb128 -9
- 962 03c7 16       		.uleb128 0x16
- 963 03c8 AA000000 		.4byte	.LASF47
- 964 03cc 01       		.byte	0x1
- 965 03cd 75       		.byte	0x75
- 966 03ce A4000000 		.4byte	0xa4
- 967 03d2 02       		.uleb128 0x2
- 968 03d3 91       		.byte	0x91
- 969 03d4 76       		.sleb128 -10
- 970 03d5 17       		.uleb128 0x17
- 971 03d6 D2040000 		.4byte	.LASF48
- 972 03da 01       		.byte	0x1
- 973 03db 76       		.byte	0x76
- 974 03dc 6B000000 		.4byte	0x6b
- 975 03e0 00000000 		.4byte	.LLST0
- 976 03e4 16       		.uleb128 0x16
- 977 03e5 C2040000 		.4byte	.LASF49
- 978 03e9 01       		.byte	0x1
- 979 03ea 77       		.byte	0x77
- 980 03eb 77000000 		.4byte	0x77
- 981 03ef 05       		.uleb128 0x5
- 982 03f0 03       		.byte	0x3
- 983 03f1 0A000000 		.4byte	trackBrightness.6612
- 984 03f5 16       		.uleb128 0x16
- 985 03f6 34010000 		.4byte	.LASF50
- 986 03fa 01       		.byte	0x1
- 987 03fb 78       		.byte	0x78
- 988 03fc 77000000 		.4byte	0x77
- 989 0400 05       		.uleb128 0x5
- 990 0401 03       		.byte	0x3
- 991 0402 0C000000 		.4byte	trackMotor.6613
- 992 0406 0F       		.uleb128 0xf
- 993 0407 20000000 		.4byte	.LVL25
- 994 040b 55060000 		.4byte	0x655
- 995 040f 0F       		.uleb128 0xf
- 996 0410 52000000 		.4byte	.LVL26
- 997 0414 60060000 		.4byte	0x660
- 998 0418 0F       		.uleb128 0xf
- 999 0419 7C000000 		.4byte	.LVL28
- 1000 041d 60060000 		.4byte	0x660
- 1001 0421 0F       		.uleb128 0xf
- 1002 0422 84000000 		.4byte	.LVL29
- 1003 0426 60060000 		.4byte	0x660
- 1004 042a 0F       		.uleb128 0xf
- 1005 042b BC000000 		.4byte	.LVL30
- 1006 042f 6B060000 		.4byte	0x66b
- 1007 0433 0F       		.uleb128 0xf
- 1008 0434 E6000000 		.4byte	.LVL32
- 1009 0438 6B060000 		.4byte	0x66b
- 1010 043c 00       		.byte	0
- 1011 043d 15       		.uleb128 0x15
- 1012 043e DE000000 		.4byte	.LASF52
- 1013 0442 01       		.byte	0x1
- 1014 0443 B8       		.byte	0xb8
- 1015 0444 00000000 		.4byte	.LFB34
- 1016 0448 14000000 		.4byte	.LFE34-.LFB34
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 24
-
-
- 1017 044c 01       		.uleb128 0x1
- 1018 044d 9C       		.byte	0x9c
- 1019 044e 85040000 		.4byte	0x485
- 1020 0452 16       		.uleb128 0x16
- 1021 0453 FB000000 		.4byte	.LASF53
- 1022 0457 01       		.byte	0x1
- 1023 0458 BA       		.byte	0xba
- 1024 0459 85040000 		.4byte	0x485
- 1025 045d 05       		.uleb128 0x5
- 1026 045e 03       		.byte	0x3
- 1027 045f 06000000 		.4byte	detectedAlready.6617
- 1028 0463 14       		.uleb128 0x14
- 1029 0464 0E000000 		.4byte	.LVL33
- 1030 0468 29060000 		.4byte	0x629
- 1031 046c 0E       		.uleb128 0xe
- 1032 046d 01       		.uleb128 0x1
- 1033 046e 50       		.byte	0x50
- 1034 046f 05       		.uleb128 0x5
- 1035 0470 03       		.byte	0x3
- 1036 0471 06000000 		.4byte	.LANCHOR1+6
- 1037 0475 0E       		.uleb128 0xe
- 1038 0476 01       		.uleb128 0x1
- 1039 0477 51       		.byte	0x51
- 1040 0478 05       		.uleb128 0x5
- 1041 0479 03       		.byte	0x3
- 1042 047a 03000000 		.4byte	.LANCHOR1+3
- 1043 047e 0E       		.uleb128 0xe
- 1044 047f 01       		.uleb128 0x1
- 1045 0480 52       		.byte	0x52
- 1046 0481 01       		.uleb128 0x1
- 1047 0482 31       		.byte	0x31
- 1048 0483 00       		.byte	0
- 1049 0484 00       		.byte	0
- 1050 0485 18       		.uleb128 0x18
- 1051 0486 6B000000 		.4byte	0x6b
- 1052 048a 19       		.uleb128 0x19
- 1053 048b 1B000000 		.4byte	.LASF54
- 1054 048f 01       		.byte	0x1
- 1055 0490 C2       		.byte	0xc2
- 1056 0491 9F040000 		.4byte	0x49f
- 1057 0495 00000000 		.4byte	.LFB35
- 1058 0499 08000000 		.4byte	.LFE35-.LFB35
- 1059 049d 01       		.uleb128 0x1
- 1060 049e 9C       		.byte	0x9c
- 1061 049f 06       		.uleb128 0x6
- 1062 04a0 04       		.byte	0x4
- 1063 04a1 85040000 		.4byte	0x485
- 1064 04a5 19       		.uleb128 0x19
- 1065 04a6 0B010000 		.4byte	.LASF55
- 1066 04aa 01       		.byte	0x1
- 1067 04ab C7       		.byte	0xc7
- 1068 04ac BC000000 		.4byte	0xbc
- 1069 04b0 00000000 		.4byte	.LFB36
- 1070 04b4 08000000 		.4byte	.LFE36-.LFB36
- 1071 04b8 01       		.uleb128 0x1
- 1072 04b9 9C       		.byte	0x9c
- 1073 04ba 09       		.uleb128 0x9
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 25
-
-
- 1074 04bb 85040000 		.4byte	0x485
- 1075 04bf CA040000 		.4byte	0x4ca
- 1076 04c3 0A       		.uleb128 0xa
- 1077 04c4 B5000000 		.4byte	0xb5
- 1078 04c8 05       		.byte	0x5
- 1079 04c9 00       		.byte	0
- 1080 04ca 16       		.uleb128 0x16
- 1081 04cb 75060000 		.4byte	.LASF56
- 1082 04cf 01       		.byte	0x1
- 1083 04d0 1D       		.byte	0x1d
- 1084 04d1 DB040000 		.4byte	0x4db
- 1085 04d5 05       		.uleb128 0x5
- 1086 04d6 03       		.byte	0x3
- 1087 04d7 00000000 		.4byte	eepromBrightnessMotorPosition
- 1088 04db 18       		.uleb128 0x18
- 1089 04dc BA040000 		.4byte	0x4ba
- 1090 04e0 09       		.uleb128 0x9
- 1091 04e1 6B000000 		.4byte	0x6b
- 1092 04e5 F0040000 		.4byte	0x4f0
- 1093 04e9 0A       		.uleb128 0xa
- 1094 04ea B5000000 		.4byte	0xb5
- 1095 04ee 05       		.byte	0x5
- 1096 04ef 00       		.byte	0
- 1097 04f0 16       		.uleb128 0x16
- 1098 04f1 57050000 		.4byte	.LASF57
- 1099 04f5 01       		.byte	0x1
- 1100 04f6 1E       		.byte	0x1e
- 1101 04f7 E0040000 		.4byte	0x4e0
- 1102 04fb 05       		.uleb128 0x5
- 1103 04fc 03       		.byte	0x3
- 1104 04fd 00000000 		.4byte	ramBrightnessMotorPosition
- 1105 0501 1A       		.uleb128 0x1a
- 1106 0502 05050000 		.4byte	.LASF58
- 1107 0506 01       		.byte	0x1
- 1108 0507 1F       		.byte	0x1f
- 1109 0508 85040000 		.4byte	0x485
- 1110 050c 01       		.byte	0x1
- 1111 050d 1B       		.uleb128 0x1b
- 1112 050e A3020000 		.4byte	.LASF59
- 1113 0512 01       		.byte	0x1
- 1114 0513 20       		.byte	0x20
- 1115 0514 6B000000 		.4byte	0x6b
- 1116 0518 1B       		.uleb128 0x1b
- 1117 0519 89050000 		.4byte	.LASF60
- 1118 051d 01       		.byte	0x1
- 1119 051e 21       		.byte	0x21
- 1120 051f 9F040000 		.4byte	0x49f
- 1121 0523 1C       		.uleb128 0x1c
- 1122 0524 41030000 		.4byte	.LASF61
- 1123 0528 01       		.byte	0x1
- 1124 0529 24       		.byte	0x24
- 1125 052a A4000000 		.4byte	0xa4
- 1126 052e 05       		.uleb128 0x5
- 1127 052f 03       		.byte	0x3
- 1128 0530 00000000 		.4byte	timerForInputs
- 1129 0534 1D       		.uleb128 0x1d
- 1130 0535 93060000 		.4byte	.LASF62
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 26
-
-
- 1131 0539 01       		.byte	0x1
- 1132 053a 22       		.byte	0x22
- 1133 053b 3F050000 		.4byte	0x53f
- 1134 053f 06       		.uleb128 0x6
- 1135 0540 04       		.byte	0x4
- 1136 0541 17020000 		.4byte	0x217
- 1137 0545 1C       		.uleb128 0x1c
- 1138 0546 CC020000 		.4byte	.LASF63
- 1139 054a 01       		.byte	0x1
- 1140 054b 25       		.byte	0x25
- 1141 054c A9000000 		.4byte	0xa9
- 1142 0550 05       		.uleb128 0x5
- 1143 0551 03       		.byte	0x3
- 1144 0552 00000000 		.4byte	timerForMotorInputs
- 1145 0556 1E       		.uleb128 0x1e
- 1146 0557 7E020000 		.4byte	.LASF64
- 1147 055b 7E020000 		.4byte	.LASF64
- 1148 055f 04       		.byte	0x4
- 1149 0560 2F       		.byte	0x2f
- 1150 0561 1E       		.uleb128 0x1e
- 1151 0562 E8050000 		.4byte	.LASF65
- 1152 0566 E8050000 		.4byte	.LASF65
- 1153 056a 05       		.byte	0x5
- 1154 056b 92       		.byte	0x92
- 1155 056c 1E       		.uleb128 0x1e
- 1156 056d 3F040000 		.4byte	.LASF66
- 1157 0571 3F040000 		.4byte	.LASF66
- 1158 0575 05       		.byte	0x5
- 1159 0576 C3       		.byte	0xc3
- 1160 0577 1E       		.uleb128 0x1e
- 1161 0578 49000000 		.4byte	.LASF67
- 1162 057c 49000000 		.4byte	.LASF67
- 1163 0580 06       		.byte	0x6
- 1164 0581 17       		.byte	0x17
- 1165 0582 1E       		.uleb128 0x1e
- 1166 0583 5E000000 		.4byte	.LASF68
- 1167 0587 5E000000 		.4byte	.LASF68
- 1168 058b 07       		.byte	0x7
- 1169 058c 17       		.byte	0x17
- 1170 058d 1E       		.uleb128 0x1e
- 1171 058e EE040000 		.4byte	.LASF69
- 1172 0592 EE040000 		.4byte	.LASF69
- 1173 0596 08       		.byte	0x8
- 1174 0597 17       		.byte	0x17
- 1175 0598 1E       		.uleb128 0x1e
- 1176 0599 A4040000 		.4byte	.LASF70
- 1177 059d A4040000 		.4byte	.LASF70
- 1178 05a1 09       		.byte	0x9
- 1179 05a2 99       		.byte	0x99
- 1180 05a3 1E       		.uleb128 0x1e
- 1181 05a4 1C030000 		.4byte	.LASF71
- 1182 05a8 1C030000 		.4byte	.LASF71
- 1183 05ac 09       		.byte	0x9
- 1184 05ad 9D       		.byte	0x9d
- 1185 05ae 1E       		.uleb128 0x1e
- 1186 05af E0020000 		.4byte	.LASF72
- 1187 05b3 E0020000 		.4byte	.LASF72
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 27
-
-
- 1188 05b7 0A       		.byte	0xa
- 1189 05b8 17       		.byte	0x17
- 1190 05b9 1E       		.uleb128 0x1e
- 1191 05ba 43060000 		.4byte	.LASF73
- 1192 05be 43060000 		.4byte	.LASF73
- 1193 05c2 0B       		.byte	0xb
- 1194 05c3 72       		.byte	0x72
- 1195 05c4 1E       		.uleb128 0x1e
- 1196 05c5 DA050000 		.4byte	.LASF74
- 1197 05c9 DA050000 		.4byte	.LASF74
- 1198 05cd 0C       		.byte	0xc
- 1199 05ce 17       		.byte	0x17
- 1200 05cf 1F       		.uleb128 0x1f
- 1201 05d0 C6050000 		.4byte	.LASF75
- 1202 05d4 C6050000 		.4byte	.LASF75
- 1203 05d8 0D       		.byte	0xd
- 1204 05d9 3201     		.2byte	0x132
- 1205 05db 1F       		.uleb128 0x1f
- 1206 05dc DD030000 		.4byte	.LASF76
- 1207 05e0 DD030000 		.4byte	.LASF76
- 1208 05e4 0E       		.byte	0xe
- 1209 05e5 3201     		.2byte	0x132
- 1210 05e7 1E       		.uleb128 0x1e
- 1211 05e8 F0030000 		.4byte	.LASF77
- 1212 05ec F0030000 		.4byte	.LASF77
- 1213 05f0 0F       		.byte	0xf
- 1214 05f1 29       		.byte	0x29
- 1215 05f2 1E       		.uleb128 0x1e
- 1216 05f3 DE040000 		.4byte	.LASF78
- 1217 05f7 DE040000 		.4byte	.LASF78
- 1218 05fb 03       		.byte	0x3
- 1219 05fc 6E       		.byte	0x6e
- 1220 05fd 1E       		.uleb128 0x1e
- 1221 05fe 97050000 		.4byte	.LASF79
- 1222 0602 97050000 		.4byte	.LASF79
- 1223 0606 10       		.byte	0x10
- 1224 0607 17       		.byte	0x17
- 1225 0608 1E       		.uleb128 0x1e
- 1226 0609 52060000 		.4byte	.LASF44
- 1227 060d 52060000 		.4byte	.LASF44
- 1228 0611 01       		.byte	0x1
- 1229 0612 3F       		.byte	0x3f
- 1230 0613 1E       		.uleb128 0x1e
- 1231 0614 08060000 		.4byte	.LASF45
- 1232 0618 08060000 		.4byte	.LASF45
- 1233 061c 01       		.byte	0x1
- 1234 061d 40       		.byte	0x40
- 1235 061e 1E       		.uleb128 0x1e
- 1236 061f 8D000000 		.4byte	.LASF80
- 1237 0623 8D000000 		.4byte	.LASF80
- 1238 0627 03       		.byte	0x3
- 1239 0628 71       		.byte	0x71
- 1240 0629 1E       		.uleb128 0x1e
- 1241 062a 66060000 		.4byte	.LASF81
- 1242 062e 66060000 		.4byte	.LASF81
- 1243 0632 0F       		.byte	0xf
- 1244 0633 2F       		.byte	0x2f
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 28
-
-
- 1245 0634 1E       		.uleb128 0x1e
- 1246 0635 92040000 		.4byte	.LASF82
- 1247 0639 92040000 		.4byte	.LASF82
- 1248 063d 11       		.byte	0x11
- 1249 063e 28       		.byte	0x28
- 1250 063f 1E       		.uleb128 0x1e
- 1251 0640 76010000 		.4byte	.LASF83
- 1252 0644 76010000 		.4byte	.LASF83
- 1253 0648 12       		.byte	0x12
- 1254 0649 31       		.byte	0x31
- 1255 064a 1E       		.uleb128 0x1e
- 1256 064b 3F010000 		.4byte	.LASF84
- 1257 064f 3F010000 		.4byte	.LASF84
- 1258 0653 03       		.byte	0x3
- 1259 0654 70       		.byte	0x70
- 1260 0655 1E       		.uleb128 0x1e
- 1261 0656 18020000 		.4byte	.LASF85
- 1262 065a 18020000 		.4byte	.LASF85
- 1263 065e 13       		.byte	0x13
- 1264 065f 30       		.byte	0x30
- 1265 0660 1E       		.uleb128 0x1e
- 1266 0661 9C000000 		.4byte	.LASF86
- 1267 0665 9C000000 		.4byte	.LASF86
- 1268 0669 11       		.byte	0x11
- 1269 066a 35       		.byte	0x35
- 1270 066b 1E       		.uleb128 0x1e
- 1271 066c 22060000 		.4byte	.LASF87
- 1272 0670 22060000 		.4byte	.LASF87
- 1273 0674 03       		.byte	0x3
- 1274 0675 73       		.byte	0x73
- 1275 0676 00       		.byte	0
- 1276              		.section	.debug_abbrev,"",%progbits
- 1277              	.Ldebug_abbrev0:
- 1278 0000 01       		.uleb128 0x1
- 1279 0001 11       		.uleb128 0x11
- 1280 0002 01       		.byte	0x1
- 1281 0003 25       		.uleb128 0x25
- 1282 0004 0E       		.uleb128 0xe
- 1283 0005 13       		.uleb128 0x13
- 1284 0006 0B       		.uleb128 0xb
- 1285 0007 03       		.uleb128 0x3
- 1286 0008 0E       		.uleb128 0xe
- 1287 0009 1B       		.uleb128 0x1b
- 1288 000a 0E       		.uleb128 0xe
- 1289 000b 55       		.uleb128 0x55
- 1290 000c 17       		.uleb128 0x17
- 1291 000d 11       		.uleb128 0x11
- 1292 000e 01       		.uleb128 0x1
- 1293 000f 10       		.uleb128 0x10
- 1294 0010 17       		.uleb128 0x17
- 1295 0011 00       		.byte	0
- 1296 0012 00       		.byte	0
- 1297 0013 02       		.uleb128 0x2
- 1298 0014 24       		.uleb128 0x24
- 1299 0015 00       		.byte	0
- 1300 0016 0B       		.uleb128 0xb
- 1301 0017 0B       		.uleb128 0xb
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 29
-
-
- 1302 0018 3E       		.uleb128 0x3e
- 1303 0019 0B       		.uleb128 0xb
- 1304 001a 03       		.uleb128 0x3
- 1305 001b 0E       		.uleb128 0xe
- 1306 001c 00       		.byte	0
- 1307 001d 00       		.byte	0
- 1308 001e 03       		.uleb128 0x3
- 1309 001f 24       		.uleb128 0x24
- 1310 0020 00       		.byte	0
- 1311 0021 0B       		.uleb128 0xb
- 1312 0022 0B       		.uleb128 0xb
- 1313 0023 3E       		.uleb128 0x3e
- 1314 0024 0B       		.uleb128 0xb
- 1315 0025 03       		.uleb128 0x3
- 1316 0026 08       		.uleb128 0x8
- 1317 0027 00       		.byte	0
- 1318 0028 00       		.byte	0
- 1319 0029 04       		.uleb128 0x4
- 1320 002a 16       		.uleb128 0x16
- 1321 002b 00       		.byte	0
- 1322 002c 03       		.uleb128 0x3
- 1323 002d 0E       		.uleb128 0xe
- 1324 002e 3A       		.uleb128 0x3a
- 1325 002f 0B       		.uleb128 0xb
- 1326 0030 3B       		.uleb128 0x3b
- 1327 0031 05       		.uleb128 0x5
- 1328 0032 49       		.uleb128 0x49
- 1329 0033 13       		.uleb128 0x13
- 1330 0034 00       		.byte	0
- 1331 0035 00       		.byte	0
- 1332 0036 05       		.uleb128 0x5
- 1333 0037 35       		.uleb128 0x35
- 1334 0038 00       		.byte	0
- 1335 0039 49       		.uleb128 0x49
- 1336 003a 13       		.uleb128 0x13
- 1337 003b 00       		.byte	0
- 1338 003c 00       		.byte	0
- 1339 003d 06       		.uleb128 0x6
- 1340 003e 0F       		.uleb128 0xf
- 1341 003f 00       		.byte	0
- 1342 0040 0B       		.uleb128 0xb
- 1343 0041 0B       		.uleb128 0xb
- 1344 0042 49       		.uleb128 0x49
- 1345 0043 13       		.uleb128 0x13
- 1346 0044 00       		.byte	0
- 1347 0045 00       		.byte	0
- 1348 0046 07       		.uleb128 0x7
- 1349 0047 13       		.uleb128 0x13
- 1350 0048 01       		.byte	0x1
- 1351 0049 03       		.uleb128 0x3
- 1352 004a 0E       		.uleb128 0xe
- 1353 004b 0B       		.uleb128 0xb
- 1354 004c 0B       		.uleb128 0xb
- 1355 004d 3A       		.uleb128 0x3a
- 1356 004e 0B       		.uleb128 0xb
- 1357 004f 3B       		.uleb128 0x3b
- 1358 0050 0B       		.uleb128 0xb
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 30
-
-
- 1359 0051 01       		.uleb128 0x1
- 1360 0052 13       		.uleb128 0x13
- 1361 0053 00       		.byte	0
- 1362 0054 00       		.byte	0
- 1363 0055 08       		.uleb128 0x8
- 1364 0056 0D       		.uleb128 0xd
- 1365 0057 00       		.byte	0
- 1366 0058 03       		.uleb128 0x3
- 1367 0059 0E       		.uleb128 0xe
- 1368 005a 3A       		.uleb128 0x3a
- 1369 005b 0B       		.uleb128 0xb
- 1370 005c 3B       		.uleb128 0x3b
- 1371 005d 0B       		.uleb128 0xb
- 1372 005e 49       		.uleb128 0x49
- 1373 005f 13       		.uleb128 0x13
- 1374 0060 38       		.uleb128 0x38
- 1375 0061 0B       		.uleb128 0xb
- 1376 0062 00       		.byte	0
- 1377 0063 00       		.byte	0
- 1378 0064 09       		.uleb128 0x9
- 1379 0065 01       		.uleb128 0x1
- 1380 0066 01       		.byte	0x1
- 1381 0067 49       		.uleb128 0x49
- 1382 0068 13       		.uleb128 0x13
- 1383 0069 01       		.uleb128 0x1
- 1384 006a 13       		.uleb128 0x13
- 1385 006b 00       		.byte	0
- 1386 006c 00       		.byte	0
- 1387 006d 0A       		.uleb128 0xa
- 1388 006e 21       		.uleb128 0x21
- 1389 006f 00       		.byte	0
- 1390 0070 49       		.uleb128 0x49
- 1391 0071 13       		.uleb128 0x13
- 1392 0072 2F       		.uleb128 0x2f
- 1393 0073 0B       		.uleb128 0xb
- 1394 0074 00       		.byte	0
- 1395 0075 00       		.byte	0
- 1396 0076 0B       		.uleb128 0xb
- 1397 0077 16       		.uleb128 0x16
- 1398 0078 00       		.byte	0
- 1399 0079 03       		.uleb128 0x3
- 1400 007a 0E       		.uleb128 0xe
- 1401 007b 3A       		.uleb128 0x3a
- 1402 007c 0B       		.uleb128 0xb
- 1403 007d 3B       		.uleb128 0x3b
- 1404 007e 0B       		.uleb128 0xb
- 1405 007f 49       		.uleb128 0x49
- 1406 0080 13       		.uleb128 0x13
- 1407 0081 00       		.byte	0
- 1408 0082 00       		.byte	0
- 1409 0083 0C       		.uleb128 0xc
- 1410 0084 2E       		.uleb128 0x2e
- 1411 0085 01       		.byte	0x1
- 1412 0086 03       		.uleb128 0x3
- 1413 0087 0E       		.uleb128 0xe
- 1414 0088 3A       		.uleb128 0x3a
- 1415 0089 0B       		.uleb128 0xb
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 31
-
-
- 1416 008a 3B       		.uleb128 0x3b
- 1417 008b 0B       		.uleb128 0xb
- 1418 008c 27       		.uleb128 0x27
- 1419 008d 19       		.uleb128 0x19
- 1420 008e 11       		.uleb128 0x11
- 1421 008f 01       		.uleb128 0x1
- 1422 0090 12       		.uleb128 0x12
- 1423 0091 06       		.uleb128 0x6
- 1424 0092 40       		.uleb128 0x40
- 1425 0093 18       		.uleb128 0x18
- 1426 0094 9742     		.uleb128 0x2117
- 1427 0096 19       		.uleb128 0x19
- 1428 0097 01       		.uleb128 0x1
- 1429 0098 13       		.uleb128 0x13
- 1430 0099 00       		.byte	0
- 1431 009a 00       		.byte	0
- 1432 009b 0D       		.uleb128 0xd
- 1433 009c 898201   		.uleb128 0x4109
- 1434 009f 01       		.byte	0x1
- 1435 00a0 11       		.uleb128 0x11
- 1436 00a1 01       		.uleb128 0x1
- 1437 00a2 31       		.uleb128 0x31
- 1438 00a3 13       		.uleb128 0x13
- 1439 00a4 01       		.uleb128 0x1
- 1440 00a5 13       		.uleb128 0x13
- 1441 00a6 00       		.byte	0
- 1442 00a7 00       		.byte	0
- 1443 00a8 0E       		.uleb128 0xe
- 1444 00a9 8A8201   		.uleb128 0x410a
- 1445 00ac 00       		.byte	0
- 1446 00ad 02       		.uleb128 0x2
- 1447 00ae 18       		.uleb128 0x18
- 1448 00af 9142     		.uleb128 0x2111
- 1449 00b1 18       		.uleb128 0x18
- 1450 00b2 00       		.byte	0
- 1451 00b3 00       		.byte	0
- 1452 00b4 0F       		.uleb128 0xf
- 1453 00b5 898201   		.uleb128 0x4109
- 1454 00b8 00       		.byte	0
- 1455 00b9 11       		.uleb128 0x11
- 1456 00ba 01       		.uleb128 0x1
- 1457 00bb 31       		.uleb128 0x31
- 1458 00bc 13       		.uleb128 0x13
- 1459 00bd 00       		.byte	0
- 1460 00be 00       		.byte	0
- 1461 00bf 10       		.uleb128 0x10
- 1462 00c0 2E       		.uleb128 0x2e
- 1463 00c1 01       		.byte	0x1
- 1464 00c2 3F       		.uleb128 0x3f
- 1465 00c3 19       		.uleb128 0x19
- 1466 00c4 03       		.uleb128 0x3
- 1467 00c5 0E       		.uleb128 0xe
- 1468 00c6 3A       		.uleb128 0x3a
- 1469 00c7 0B       		.uleb128 0xb
- 1470 00c8 3B       		.uleb128 0x3b
- 1471 00c9 0B       		.uleb128 0xb
- 1472 00ca 49       		.uleb128 0x49
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 32
-
-
- 1473 00cb 13       		.uleb128 0x13
- 1474 00cc 8701     		.uleb128 0x87
- 1475 00ce 19       		.uleb128 0x19
- 1476 00cf 11       		.uleb128 0x11
- 1477 00d0 01       		.uleb128 0x1
- 1478 00d1 12       		.uleb128 0x12
- 1479 00d2 06       		.uleb128 0x6
- 1480 00d3 40       		.uleb128 0x40
- 1481 00d4 18       		.uleb128 0x18
- 1482 00d5 9742     		.uleb128 0x2117
- 1483 00d7 19       		.uleb128 0x19
- 1484 00d8 01       		.uleb128 0x1
- 1485 00d9 13       		.uleb128 0x13
- 1486 00da 00       		.byte	0
- 1487 00db 00       		.byte	0
- 1488 00dc 11       		.uleb128 0x11
- 1489 00dd 0B       		.uleb128 0xb
- 1490 00de 01       		.byte	0x1
- 1491 00df 11       		.uleb128 0x11
- 1492 00e0 01       		.uleb128 0x1
- 1493 00e1 12       		.uleb128 0x12
- 1494 00e2 06       		.uleb128 0x6
- 1495 00e3 01       		.uleb128 0x1
- 1496 00e4 13       		.uleb128 0x13
- 1497 00e5 00       		.byte	0
- 1498 00e6 00       		.byte	0
- 1499 00e7 12       		.uleb128 0x12
- 1500 00e8 2E       		.uleb128 0x2e
- 1501 00e9 01       		.byte	0x1
- 1502 00ea 3F       		.uleb128 0x3f
- 1503 00eb 19       		.uleb128 0x19
- 1504 00ec 03       		.uleb128 0x3
- 1505 00ed 0E       		.uleb128 0xe
- 1506 00ee 3A       		.uleb128 0x3a
- 1507 00ef 0B       		.uleb128 0xb
- 1508 00f0 3B       		.uleb128 0x3b
- 1509 00f1 0B       		.uleb128 0xb
- 1510 00f2 49       		.uleb128 0x49
- 1511 00f3 13       		.uleb128 0x13
- 1512 00f4 3C       		.uleb128 0x3c
- 1513 00f5 19       		.uleb128 0x19
- 1514 00f6 01       		.uleb128 0x1
- 1515 00f7 13       		.uleb128 0x13
- 1516 00f8 00       		.byte	0
- 1517 00f9 00       		.byte	0
- 1518 00fa 13       		.uleb128 0x13
- 1519 00fb 18       		.uleb128 0x18
- 1520 00fc 00       		.byte	0
- 1521 00fd 00       		.byte	0
- 1522 00fe 00       		.byte	0
- 1523 00ff 14       		.uleb128 0x14
- 1524 0100 898201   		.uleb128 0x4109
- 1525 0103 01       		.byte	0x1
- 1526 0104 11       		.uleb128 0x11
- 1527 0105 01       		.uleb128 0x1
- 1528 0106 31       		.uleb128 0x31
- 1529 0107 13       		.uleb128 0x13
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 33
-
-
- 1530 0108 00       		.byte	0
- 1531 0109 00       		.byte	0
- 1532 010a 15       		.uleb128 0x15
- 1533 010b 2E       		.uleb128 0x2e
- 1534 010c 01       		.byte	0x1
- 1535 010d 3F       		.uleb128 0x3f
- 1536 010e 19       		.uleb128 0x19
- 1537 010f 03       		.uleb128 0x3
- 1538 0110 0E       		.uleb128 0xe
- 1539 0111 3A       		.uleb128 0x3a
- 1540 0112 0B       		.uleb128 0xb
- 1541 0113 3B       		.uleb128 0x3b
- 1542 0114 0B       		.uleb128 0xb
- 1543 0115 27       		.uleb128 0x27
- 1544 0116 19       		.uleb128 0x19
- 1545 0117 11       		.uleb128 0x11
- 1546 0118 01       		.uleb128 0x1
- 1547 0119 12       		.uleb128 0x12
- 1548 011a 06       		.uleb128 0x6
- 1549 011b 40       		.uleb128 0x40
- 1550 011c 18       		.uleb128 0x18
- 1551 011d 9742     		.uleb128 0x2117
- 1552 011f 19       		.uleb128 0x19
- 1553 0120 01       		.uleb128 0x1
- 1554 0121 13       		.uleb128 0x13
- 1555 0122 00       		.byte	0
- 1556 0123 00       		.byte	0
- 1557 0124 16       		.uleb128 0x16
- 1558 0125 34       		.uleb128 0x34
- 1559 0126 00       		.byte	0
- 1560 0127 03       		.uleb128 0x3
- 1561 0128 0E       		.uleb128 0xe
- 1562 0129 3A       		.uleb128 0x3a
- 1563 012a 0B       		.uleb128 0xb
- 1564 012b 3B       		.uleb128 0x3b
- 1565 012c 0B       		.uleb128 0xb
- 1566 012d 49       		.uleb128 0x49
- 1567 012e 13       		.uleb128 0x13
- 1568 012f 02       		.uleb128 0x2
- 1569 0130 18       		.uleb128 0x18
- 1570 0131 00       		.byte	0
- 1571 0132 00       		.byte	0
- 1572 0133 17       		.uleb128 0x17
- 1573 0134 34       		.uleb128 0x34
- 1574 0135 00       		.byte	0
- 1575 0136 03       		.uleb128 0x3
- 1576 0137 0E       		.uleb128 0xe
- 1577 0138 3A       		.uleb128 0x3a
- 1578 0139 0B       		.uleb128 0xb
- 1579 013a 3B       		.uleb128 0x3b
- 1580 013b 0B       		.uleb128 0xb
- 1581 013c 49       		.uleb128 0x49
- 1582 013d 13       		.uleb128 0x13
- 1583 013e 02       		.uleb128 0x2
- 1584 013f 17       		.uleb128 0x17
- 1585 0140 00       		.byte	0
- 1586 0141 00       		.byte	0
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 34
-
-
- 1587 0142 18       		.uleb128 0x18
- 1588 0143 26       		.uleb128 0x26
- 1589 0144 00       		.byte	0
- 1590 0145 49       		.uleb128 0x49
- 1591 0146 13       		.uleb128 0x13
- 1592 0147 00       		.byte	0
- 1593 0148 00       		.byte	0
- 1594 0149 19       		.uleb128 0x19
- 1595 014a 2E       		.uleb128 0x2e
- 1596 014b 00       		.byte	0
- 1597 014c 3F       		.uleb128 0x3f
- 1598 014d 19       		.uleb128 0x19
- 1599 014e 03       		.uleb128 0x3
- 1600 014f 0E       		.uleb128 0xe
- 1601 0150 3A       		.uleb128 0x3a
- 1602 0151 0B       		.uleb128 0xb
- 1603 0152 3B       		.uleb128 0x3b
- 1604 0153 0B       		.uleb128 0xb
- 1605 0154 27       		.uleb128 0x27
- 1606 0155 19       		.uleb128 0x19
- 1607 0156 49       		.uleb128 0x49
- 1608 0157 13       		.uleb128 0x13
- 1609 0158 11       		.uleb128 0x11
- 1610 0159 01       		.uleb128 0x1
- 1611 015a 12       		.uleb128 0x12
- 1612 015b 06       		.uleb128 0x6
- 1613 015c 40       		.uleb128 0x40
- 1614 015d 18       		.uleb128 0x18
- 1615 015e 9742     		.uleb128 0x2117
- 1616 0160 19       		.uleb128 0x19
- 1617 0161 00       		.byte	0
- 1618 0162 00       		.byte	0
- 1619 0163 1A       		.uleb128 0x1a
- 1620 0164 34       		.uleb128 0x34
- 1621 0165 00       		.byte	0
- 1622 0166 03       		.uleb128 0x3
- 1623 0167 0E       		.uleb128 0xe
- 1624 0168 3A       		.uleb128 0x3a
- 1625 0169 0B       		.uleb128 0xb
- 1626 016a 3B       		.uleb128 0x3b
- 1627 016b 0B       		.uleb128 0xb
- 1628 016c 49       		.uleb128 0x49
- 1629 016d 13       		.uleb128 0x13
- 1630 016e 1C       		.uleb128 0x1c
- 1631 016f 0B       		.uleb128 0xb
- 1632 0170 00       		.byte	0
- 1633 0171 00       		.byte	0
- 1634 0172 1B       		.uleb128 0x1b
- 1635 0173 34       		.uleb128 0x34
- 1636 0174 00       		.byte	0
- 1637 0175 03       		.uleb128 0x3
- 1638 0176 0E       		.uleb128 0xe
- 1639 0177 3A       		.uleb128 0x3a
- 1640 0178 0B       		.uleb128 0xb
- 1641 0179 3B       		.uleb128 0x3b
- 1642 017a 0B       		.uleb128 0xb
- 1643 017b 49       		.uleb128 0x49
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 35
-
-
- 1644 017c 13       		.uleb128 0x13
- 1645 017d 00       		.byte	0
- 1646 017e 00       		.byte	0
- 1647 017f 1C       		.uleb128 0x1c
- 1648 0180 34       		.uleb128 0x34
- 1649 0181 00       		.byte	0
- 1650 0182 03       		.uleb128 0x3
- 1651 0183 0E       		.uleb128 0xe
- 1652 0184 3A       		.uleb128 0x3a
- 1653 0185 0B       		.uleb128 0xb
- 1654 0186 3B       		.uleb128 0x3b
- 1655 0187 0B       		.uleb128 0xb
- 1656 0188 49       		.uleb128 0x49
- 1657 0189 13       		.uleb128 0x13
- 1658 018a 3F       		.uleb128 0x3f
- 1659 018b 19       		.uleb128 0x19
- 1660 018c 02       		.uleb128 0x2
- 1661 018d 18       		.uleb128 0x18
- 1662 018e 00       		.byte	0
- 1663 018f 00       		.byte	0
- 1664 0190 1D       		.uleb128 0x1d
- 1665 0191 34       		.uleb128 0x34
- 1666 0192 00       		.byte	0
- 1667 0193 03       		.uleb128 0x3
- 1668 0194 0E       		.uleb128 0xe
- 1669 0195 3A       		.uleb128 0x3a
- 1670 0196 0B       		.uleb128 0xb
- 1671 0197 3B       		.uleb128 0x3b
- 1672 0198 0B       		.uleb128 0xb
- 1673 0199 49       		.uleb128 0x49
- 1674 019a 13       		.uleb128 0x13
- 1675 019b 3F       		.uleb128 0x3f
- 1676 019c 19       		.uleb128 0x19
- 1677 019d 3C       		.uleb128 0x3c
- 1678 019e 19       		.uleb128 0x19
- 1679 019f 00       		.byte	0
- 1680 01a0 00       		.byte	0
- 1681 01a1 1E       		.uleb128 0x1e
- 1682 01a2 2E       		.uleb128 0x2e
- 1683 01a3 00       		.byte	0
- 1684 01a4 3F       		.uleb128 0x3f
- 1685 01a5 19       		.uleb128 0x19
- 1686 01a6 3C       		.uleb128 0x3c
- 1687 01a7 19       		.uleb128 0x19
- 1688 01a8 6E       		.uleb128 0x6e
- 1689 01a9 0E       		.uleb128 0xe
- 1690 01aa 03       		.uleb128 0x3
- 1691 01ab 0E       		.uleb128 0xe
- 1692 01ac 3A       		.uleb128 0x3a
- 1693 01ad 0B       		.uleb128 0xb
- 1694 01ae 3B       		.uleb128 0x3b
- 1695 01af 0B       		.uleb128 0xb
- 1696 01b0 00       		.byte	0
- 1697 01b1 00       		.byte	0
- 1698 01b2 1F       		.uleb128 0x1f
- 1699 01b3 2E       		.uleb128 0x2e
- 1700 01b4 00       		.byte	0
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 36
-
-
- 1701 01b5 3F       		.uleb128 0x3f
- 1702 01b6 19       		.uleb128 0x19
- 1703 01b7 3C       		.uleb128 0x3c
- 1704 01b8 19       		.uleb128 0x19
- 1705 01b9 6E       		.uleb128 0x6e
- 1706 01ba 0E       		.uleb128 0xe
- 1707 01bb 03       		.uleb128 0x3
- 1708 01bc 0E       		.uleb128 0xe
- 1709 01bd 3A       		.uleb128 0x3a
- 1710 01be 0B       		.uleb128 0xb
- 1711 01bf 3B       		.uleb128 0x3b
- 1712 01c0 05       		.uleb128 0x5
- 1713 01c1 00       		.byte	0
- 1714 01c2 00       		.byte	0
- 1715 01c3 00       		.byte	0
- 1716              		.section	.debug_loc,"",%progbits
- 1717              	.Ldebug_loc0:
- 1718              	.LLST0:
- 1719 0000 0E000000 		.4byte	.LVL24
- 1720 0004 52000000 		.4byte	.LVL26
- 1721 0008 0200     		.2byte	0x2
- 1722 000a 30       		.byte	0x30
- 1723 000b 9F       		.byte	0x9f
- 1724 000c 52000000 		.4byte	.LVL26
- 1725 0010 54000000 		.4byte	.LVL27
- 1726 0014 0200     		.2byte	0x2
- 1727 0016 32       		.byte	0x32
- 1728 0017 9F       		.byte	0x9f
- 1729 0018 54000000 		.4byte	.LVL27
- 1730 001c 7C000000 		.4byte	.LVL28
- 1731 0020 0200     		.2byte	0x2
- 1732 0022 30       		.byte	0x30
- 1733 0023 9F       		.byte	0x9f
- 1734 0024 BC000000 		.4byte	.LVL30
- 1735 0028 BE000000 		.4byte	.LVL31
- 1736 002c 0200     		.2byte	0x2
- 1737 002e 30       		.byte	0x30
- 1738 002f 9F       		.byte	0x9f
- 1739 0030 00000000 		.4byte	0
- 1740 0034 00000000 		.4byte	0
- 1741              		.section	.debug_aranges,"",%progbits
- 1742 0000 44000000 		.4byte	0x44
- 1743 0004 0200     		.2byte	0x2
- 1744 0006 00000000 		.4byte	.Ldebug_info0
- 1745 000a 04       		.byte	0x4
- 1746 000b 00       		.byte	0
- 1747 000c 0000     		.2byte	0
- 1748 000e 0000     		.2byte	0
- 1749 0010 00000000 		.4byte	.LFB37
- 1750 0014 44000000 		.4byte	.LFE37-.LFB37
- 1751 0018 00000000 		.4byte	.LFB32
- 1752 001c 5C000000 		.4byte	.LFE32-.LFB32
- 1753 0020 00000000 		.4byte	.LFB33
- 1754 0024 FC000000 		.4byte	.LFE33-.LFB33
- 1755 0028 00000000 		.4byte	.LFB34
- 1756 002c 14000000 		.4byte	.LFE34-.LFB34
- 1757 0030 00000000 		.4byte	.LFB35
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 37
-
-
- 1758 0034 08000000 		.4byte	.LFE35-.LFB35
- 1759 0038 00000000 		.4byte	.LFB36
- 1760 003c 08000000 		.4byte	.LFE36-.LFB36
- 1761 0040 00000000 		.4byte	0
- 1762 0044 00000000 		.4byte	0
- 1763              		.section	.debug_ranges,"",%progbits
- 1764              	.Ldebug_ranges0:
- 1765 0000 00000000 		.4byte	.LFB37
- 1766 0004 44000000 		.4byte	.LFE37
- 1767 0008 00000000 		.4byte	.LFB32
- 1768 000c 5C000000 		.4byte	.LFE32
- 1769 0010 00000000 		.4byte	.LFB33
- 1770 0014 FC000000 		.4byte	.LFE33
- 1771 0018 00000000 		.4byte	.LFB34
- 1772 001c 14000000 		.4byte	.LFE34
- 1773 0020 00000000 		.4byte	.LFB35
- 1774 0024 08000000 		.4byte	.LFE35
- 1775 0028 00000000 		.4byte	.LFB36
- 1776 002c 08000000 		.4byte	.LFE36
- 1777 0030 00000000 		.4byte	0
- 1778 0034 00000000 		.4byte	0
- 1779              		.section	.debug_line,"",%progbits
- 1780              	.Ldebug_line0:
- 1781 0000 17020000 		.section	.debug_str,"MS",%progbits,1
- 1781      02006701 
- 1781      00000201 
- 1781      FB0E0D00 
- 1781      01010101 
- 1782              	.LASF20:
- 1783 0000 63616C63 		.ascii	"calculatePercentageOfRange\000"
- 1783      756C6174 
- 1783      65506572 
- 1783      63656E74 
- 1783      6167654F 
- 1784              	.LASF54:
- 1785 001b 6765744E 		.ascii	"getNonVolatileBarStateMemory\000"
- 1785      6F6E566F 
- 1785      6C617469 
- 1785      6C654261 
- 1785      72537461 
- 1786              	.LASF24:
- 1787 0038 6261636B 		.ascii	"backwardPotLimit\000"
- 1787      77617264 
- 1787      506F744C 
- 1787      696D6974 
- 1787      00
- 1788              	.LASF67:
- 1789 0049 436F6D6D 		.ascii	"CommTimeoutISR_Start\000"
- 1789      54696D65 
- 1789      6F757449 
- 1789      53525F53 
- 1789      74617274 
- 1790              	.LASF68:
- 1791 005e 41636B54 		.ascii	"AckTimeoutISR_Start\000"
- 1791      696D656F 
- 1791      75744953 
- 1791      525F5374 
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 38
-
-
- 1791      61727400 
- 1792              	.LASF42:
- 1793 0072 6F766572 		.ascii	"overCurrentTimerOutCounter\000"
- 1793      43757272 
- 1793      656E7454 
- 1793      696D6572 
- 1793      4F757443 
- 1794              	.LASF80:
- 1795 008d 63616C69 		.ascii	"calibrateMotor\000"
- 1795      62726174 
- 1795      654D6F74 
- 1795      6F7200
- 1796              	.LASF86:
- 1797 009c 73657442 		.ascii	"setBrightness\000"
- 1797      72696768 
- 1797      746E6573 
- 1797      7300
- 1798              	.LASF47:
- 1799 00aa 70726576 		.ascii	"previousReadInputValues\000"
- 1799      696F7573 
- 1799      52656164 
- 1799      496E7075 
- 1799      7456616C 
- 1800              	.LASF28:
- 1801 00c2 6572726F 		.ascii	"errorPot\000"
- 1801      72506F74 
- 1801      00
- 1802              	.LASF2:
- 1803 00cb 73686F72 		.ascii	"short int\000"
- 1803      7420696E 
- 1803      7400
- 1804              	.LASF16:
- 1805 00d5 73697A65 		.ascii	"sizetype\000"
- 1805      74797065 
- 1805      00
- 1806              	.LASF52:
- 1807 00de 636C6561 		.ascii	"clearInitializeAlreadyEEPROM\000"
- 1807      72496E69 
- 1807      7469616C 
- 1807      697A6541 
- 1807      6C726561 
- 1808              	.LASF53:
- 1809 00fb 64657465 		.ascii	"detectedAlready\000"
- 1809      63746564 
- 1809      416C7265 
- 1809      61647900 
- 1810              	.LASF55:
- 1811 010b 67657456 		.ascii	"getVolatileBarStateMemory\000"
- 1811      6F6C6174 
- 1811      696C6542 
- 1811      61725374 
- 1811      6174654D 
- 1812              	.LASF35:
- 1813 0125 64697265 		.ascii	"direction\000"
- 1813      6374696F 
- 1813      6E00
- 1814              	.LASF93:
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 39
-
-
- 1815 012f 6D61696E 		.ascii	"main\000"
- 1815      00
- 1816              	.LASF50:
- 1817 0134 74726163 		.ascii	"trackMotor\000"
- 1817      6B4D6F74 
- 1817      6F7200
- 1818              	.LASF84:
- 1819 013f 6D6F746F 		.ascii	"motorControlLoop\000"
- 1819      72436F6E 
- 1819      74726F6C 
- 1819      4C6F6F70 
- 1819      00
- 1820              	.LASF17:
- 1821 0150 63757272 		.ascii	"currentCS\000"
- 1821      656E7443 
- 1821      5300
- 1822              	.LASF38:
- 1823 015a 6D6F746F 		.ascii	"motorCurrentSamplesIterator\000"
- 1823      72437572 
- 1823      72656E74 
- 1823      53616D70 
- 1823      6C657349 
- 1824              	.LASF83:
- 1825 0176 74696D65 		.ascii	"timeOutStateMachine\000"
- 1825      4F757453 
- 1825      74617465 
- 1825      4D616368 
- 1825      696E6500 
- 1826              	.LASF88:
- 1827 018a 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
- 1827      43313120 
- 1827      352E342E 
- 1827      31203230 
- 1827      31363036 
- 1828 01bd 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m0 -mthumb -g -O"
- 1828      20726576 
- 1828      6973696F 
- 1828      6E203233 
- 1828      37373135 
- 1829 01f0 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
- 1829      66756E63 
- 1829      74696F6E 
- 1829      2D736563 
- 1829      74696F6E 
- 1830              	.LASF85:
- 1831 0218 696E7075 		.ascii	"inputs_Read\000"
- 1831      74735F52 
- 1831      65616400 
- 1832              	.LASF33:
- 1833 0224 4D6F746F 		.ascii	"MotorOutput\000"
- 1833      724F7574 
- 1833      70757400 
- 1834              	.LASF11:
- 1835 0230 696E7431 		.ascii	"int16\000"
- 1835      3600
- 1836              	.LASF9:
- 1837 0236 75696E74 		.ascii	"uint8\000"
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 40
-
-
- 1837      3800
- 1838              	.LASF43:
- 1839 023c 4D6F746F 		.ascii	"MotorIO\000"
- 1839      72494F00 
- 1840              	.LASF12:
- 1841 0244 666C6F61 		.ascii	"float\000"
- 1841      7400
- 1842              	.LASF6:
- 1843 024a 6C6F6E67 		.ascii	"long long int\000"
- 1843      206C6F6E 
- 1843      6720696E 
- 1843      7400
- 1844              	.LASF32:
- 1845 0258 44657269 		.ascii	"Derivative\000"
- 1845      76617469 
- 1845      766500
- 1846              	.LASF40:
- 1847 0263 624F7665 		.ascii	"bOverCurrentStart\000"
- 1847      72437572 
- 1847      72656E74 
- 1847      53746172 
- 1847      7400
- 1848              	.LASF4:
- 1849 0275 6C6F6E67 		.ascii	"long int\000"
- 1849      20696E74 
- 1849      00
- 1850              	.LASF64:
- 1851 027e 50574D5F 		.ascii	"PWM_Enable_Write\000"
- 1851      456E6162 
- 1851      6C655F57 
- 1851      72697465 
- 1851      00
- 1852              	.LASF31:
- 1853 028f 496E7465 		.ascii	"Integral\000"
- 1853      6772616C 
- 1853      00
- 1854              	.LASF27:
- 1855 0298 64657369 		.ascii	"desiredPot\000"
- 1855      72656450 
- 1855      6F7400
- 1856              	.LASF59:
- 1857 02a3 62656570 		.ascii	"beepromCountAlreadyReset\000"
- 1857      726F6D43 
- 1857      6F756E74 
- 1857      416C7265 
- 1857      61647952 
- 1858              	.LASF41:
- 1859 02bc 624F7665 		.ascii	"bOverCurrentEnd\000"
- 1859      72437572 
- 1859      72656E74 
- 1859      456E6400 
- 1860              	.LASF63:
- 1861 02cc 74696D65 		.ascii	"timerForMotorInputs\000"
- 1861      72466F72 
- 1861      4D6F746F 
- 1861      72496E70 
- 1861      75747300 
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 41
-
-
- 1862              	.LASF72:
- 1863 02e0 55415254 		.ascii	"UART_LED_ISR_Start\000"
- 1863      5F4C4544 
- 1863      5F495352 
- 1863      5F537461 
- 1863      727400
- 1864              	.LASF1:
- 1865 02f3 756E7369 		.ascii	"unsigned char\000"
- 1865      676E6564 
- 1865      20636861 
- 1865      7200
- 1866              	.LASF36:
- 1867 0301 63616C69 		.ascii	"calibrated\000"
- 1867      62726174 
- 1867      656400
- 1868              	.LASF26:
- 1869 030c 64657369 		.ascii	"desiredPotFloat\000"
- 1869      72656450 
- 1869      6F74466C 
- 1869      6F617400 
- 1870              	.LASF71:
- 1871 031c 4144435F 		.ascii	"ADC_SAR_Seq_StartConvert\000"
- 1871      5341525F 
- 1871      5365715F 
- 1871      53746172 
- 1871      74436F6E 
- 1872              	.LASF15:
- 1873 0335 6C6F6E67 		.ascii	"long double\000"
- 1873      20646F75 
- 1873      626C6500 
- 1874              	.LASF61:
- 1875 0341 74696D65 		.ascii	"timerForInputs\000"
- 1875      72466F72 
- 1875      496E7075 
- 1875      747300
- 1876              	.LASF91:
- 1877 0350 4D6F746F 		.ascii	"Motor\000"
- 1877      7200
- 1878              	.LASF18:
- 1879 0356 666F7277 		.ascii	"forwardLimitCS\000"
- 1879      6172644C 
- 1879      696D6974 
- 1879      435300
- 1880              	.LASF90:
- 1881 0365 433A5C55 		.ascii	"C:\\Users\\kylep\\Box Sync\\Box Sync\\Feniex Electr"
- 1881      73657273 
- 1881      5C6B796C 
- 1881      65705C42 
- 1881      6F782053 
- 1882 0393 6963616C 		.ascii	"ical Files\\WorkingFolder-Kyle\\Firm-AI-Cube\\81-00"
- 1882      2046696C 
- 1882      65735C57 
- 1882      6F726B69 
- 1882      6E67466F 
- 1883 03c3 3032342D 		.ascii	"024-01.cydsn\000"
- 1883      30312E63 
- 1883      7964736E 
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 42
-
-
- 1883      00
- 1884              	.LASF30:
- 1885 03d0 50726F70 		.ascii	"Proportional\000"
- 1885      6F727469 
- 1885      6F6E616C 
- 1885      00
- 1886              	.LASF76:
- 1887 03dd 54696D65 		.ascii	"TimeoutTimer_Start\000"
- 1887      6F757454 
- 1887      696D6572 
- 1887      5F537461 
- 1887      727400
- 1888              	.LASF77:
- 1889 03f0 456D4545 		.ascii	"EmEEPROM_Start\000"
- 1889      50524F4D 
- 1889      5F537461 
- 1889      727400
- 1890              	.LASF0:
- 1891 03ff 7369676E 		.ascii	"signed char\000"
- 1891      65642063 
- 1891      68617200 
- 1892              	.LASF7:
- 1893 040b 6C6F6E67 		.ascii	"long long unsigned int\000"
- 1893      206C6F6E 
- 1893      6720756E 
- 1893      7369676E 
- 1893      65642069 
- 1894              	.LASF46:
- 1895 0422 72656164 		.ascii	"readInputValues\000"
- 1895      496E7075 
- 1895      7456616C 
- 1895      75657300 
- 1896              	.LASF8:
- 1897 0432 756E7369 		.ascii	"unsigned int\000"
- 1897      676E6564 
- 1897      20696E74 
- 1897      00
- 1898              	.LASF66:
- 1899 043f 50574D5F 		.ascii	"PWM_WriteCompare\000"
- 1899      57726974 
- 1899      65436F6D 
- 1899      70617265 
- 1899      00
- 1900              	.LASF29:
- 1901 0450 70726576 		.ascii	"previousErrorPot\000"
- 1901      696F7573 
- 1901      4572726F 
- 1901      72506F74 
- 1901      00
- 1902              	.LASF34:
- 1903 0461 61646A75 		.ascii	"adjustedSpeed\000"
- 1903      73746564 
- 1903      53706565 
- 1903      6400
- 1904              	.LASF3:
- 1905 046f 73686F72 		.ascii	"short unsigned int\000"
- 1905      7420756E 
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 43
-
-
- 1905      7369676E 
- 1905      65642069 
- 1905      6E7400
- 1906              	.LASF25:
- 1907 0482 63757272 		.ascii	"currentPot\000"
- 1907      656E7450 
- 1907      6F7400
- 1908              	.LASF14:
- 1909 048d 63686172 		.ascii	"char\000"
- 1909      00
- 1910              	.LASF82:
- 1911 0492 73657449 		.ascii	"setIdentityByComm\000"
- 1911      64656E74 
- 1911      69747942 
- 1911      79436F6D 
- 1911      6D00
- 1912              	.LASF70:
- 1913 04a4 4144435F 		.ascii	"ADC_SAR_Seq_Start\000"
- 1913      5341525F 
- 1913      5365715F 
- 1913      53746172 
- 1913      7400
- 1914              	.LASF21:
- 1915 04b6 62446F6E 		.ascii	"bDoneMoving\000"
- 1915      654D6F76 
- 1915      696E6700 
- 1916              	.LASF49:
- 1917 04c2 74726163 		.ascii	"trackBrightness\000"
- 1917      6B427269 
- 1917      6768746E 
- 1917      65737300 
- 1918              	.LASF48:
- 1919 04d2 74657374 		.ascii	"test\000"
- 1919      00
- 1920              	.LASF10:
- 1921 04d7 75696E74 		.ascii	"uint16\000"
- 1921      313600
- 1922              	.LASF78:
- 1923 04de 696E6974 		.ascii	"initializeMotor\000"
- 1923      69616C69 
- 1923      7A654D6F 
- 1923      746F7200 
- 1924              	.LASF69:
- 1925 04ee 53616D70 		.ascii	"SamplingTimerISR_Start\000"
- 1925      6C696E67 
- 1925      54696D65 
- 1925      72495352 
- 1925      5F537461 
- 1926              	.LASF58:
- 1927 0505 62536574 		.ascii	"bSetInitializedAlready\000"
- 1927      496E6974 
- 1927      69616C69 
- 1927      7A656441 
- 1927      6C726561 
- 1928              	.LASF89:
- 1929 051c 6D61696E 		.ascii	"main.c\000"
- 1929      2E6300
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 44
-
-
- 1930              	.LASF22:
- 1931 0523 68616C6C 		.ascii	"hallEffectEdgeDetect\000"
- 1931      45666665 
- 1931      63744564 
- 1931      67654465 
- 1931      74656374 
- 1932              	.LASF5:
- 1933 0538 6C6F6E67 		.ascii	"long unsigned int\000"
- 1933      20756E73 
- 1933      69676E65 
- 1933      6420696E 
- 1933      7400
- 1934              	.LASF37:
- 1935 054a 6D6F746F 		.ascii	"motorCurrent\000"
- 1935      72437572 
- 1935      72656E74 
- 1935      00
- 1936              	.LASF57:
- 1937 0557 72616D42 		.ascii	"ramBrightnessMotorPosition\000"
- 1937      72696768 
- 1937      746E6573 
- 1937      734D6F74 
- 1937      6F72506F 
- 1938              	.LASF13:
- 1939 0572 646F7562 		.ascii	"double\000"
- 1939      6C6500
- 1940              	.LASF23:
- 1941 0579 666F7277 		.ascii	"forwardPotLimit\000"
- 1941      61726450 
- 1941      6F744C69 
- 1941      6D697400 
- 1942              	.LASF60:
- 1943 0589 70656570 		.ascii	"peepromMemory\000"
- 1943      726F6D4D 
- 1943      656D6F72 
- 1943      7900
- 1944              	.LASF79:
- 1945 0597 6D6F6465 		.ascii	"modeChangeISR_Start\000"
- 1945      4368616E 
- 1945      67654953 
- 1945      525F5374 
- 1945      61727400 
- 1946              	.LASF51:
- 1947 05ab 74616B65 		.ascii	"takeInputValues\000"
- 1947      496E7075 
- 1947      7456616C 
- 1947      75657300 
- 1948              	.LASF39:
- 1949 05bb 62757356 		.ascii	"busVoltage\000"
- 1949      6F6C7461 
- 1949      676500
- 1950              	.LASF75:
- 1951 05c6 53616D70 		.ascii	"SamplingTimer_Start\000"
- 1951      6C696E67 
- 1951      54696D65 
- 1951      725F5374 
- 1951      61727400 
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 45
-
-
- 1952              	.LASF74:
- 1953 05da 4C45445F 		.ascii	"LED_ISR_Start\000"
- 1953      4953525F 
- 1953      53746172 
- 1953      7400
- 1954              	.LASF65:
- 1955 05e8 50574D5F 		.ascii	"PWM_Start\000"
- 1955      53746172 
- 1955      7400
- 1956              	.LASF92:
- 1957 05f2 696E6974 		.ascii	"initializePeripherals\000"
- 1957      69616C69 
- 1957      7A655065 
- 1957      72697068 
- 1957      6572616C 
- 1958              	.LASF45:
- 1959 0608 4144435F 		.ascii	"ADC_SAR_Seq_1_GetResult16\000"
- 1959      5341525F 
- 1959      5365715F 
- 1959      315F4765 
- 1959      74526573 
- 1960              	.LASF87:
- 1961 0622 7365744D 		.ascii	"setMotorPosition\000"
- 1961      6F746F72 
- 1961      506F7369 
- 1961      74696F6E 
- 1961      00
- 1962              	.LASF19:
- 1963 0633 6261636B 		.ascii	"backwardLimitCS\000"
- 1963      77617264 
- 1963      4C696D69 
- 1963      74435300 
- 1964              	.LASF73:
- 1965 0643 55415254 		.ascii	"UART_LED_Start\000"
- 1965      5F4C4544 
- 1965      5F537461 
- 1965      727400
- 1966              	.LASF44:
- 1967 0652 4144435F 		.ascii	"ADC_SAR_Seq_1_Start\000"
- 1967      5341525F 
- 1967      5365715F 
- 1967      315F5374 
- 1967      61727400 
- 1968              	.LASF81:
- 1969 0666 456D4545 		.ascii	"EmEEPROM_Write\000"
- 1969      50524F4D 
- 1969      5F577269 
- 1969      746500
- 1970              	.LASF56:
- 1971 0675 65657072 		.ascii	"eepromBrightnessMotorPosition\000"
- 1971      6F6D4272 
- 1971      69676874 
- 1971      6E657373 
- 1971      4D6F746F 
- 1972              	.LASF62:
- 1973 0693 704D6F74 		.ascii	"pMotor\000"
- 1973      6F7200
-ARM GAS  C:\Users\kylep\AppData\Local\Temp\cckg6dNi.s 			page 46
-
-
- 1974              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran
+ 407              		.loc 1 202 0
+ 408 0000 0048     		ldr	r0, .L25
+ 409              		@ sp needed
+ 410 0002 7047     		bx	lr
+ 411              	.L26:
+ 412              		.align	2
+ 413              	.L25:
+ 414 0004 00000000 		.word	.LANCHOR0
+ 415              		.cfi_endproc
+ 416              	.LFE36:
+ 417              		.size	getVolatileBarStateMemory, .-getVolatileBarStateMemory
+ 418              		.global	timerForMotorInputs
+ 419              		.global	timerForInputs
+ 420              		.section	.rodata
+ 421              		.align	2
+ 422              		.set	.LANCHOR1,. + 0
+ 423              		.type	eepromBrightnessMotorPosition, %object
+ 424              		.size	eepromBrightnessMotorPosition, 6
+ 425              	eepromBrightnessMotorPosition:
+ 426 0000 FF       		.byte	-1
+ 427 0001 00       		.byte	0
+ 428 0002 00       		.byte	0
+ 429 0003 00       		.byte	0
+ 430 0004 00       		.byte	0
+ 431 0005 00       		.byte	0
+ 432              		.type	detectedAlready.6613, %object
+ 433              		.size	detectedAlready.6613, 1
+ 434              	detectedAlready.6613:
+ 435 0006 00       		.space	1
+ 436              		.bss
+ 437              		.align	2
+ 438              		.set	.LANCHOR0,. + 0
+ 439              		.type	ramBrightnessMotorPosition, %object
+ 440              		.size	ramBrightnessMotorPosition, 6
+ 441              	ramBrightnessMotorPosition:
+ 442 0000 00000000 		.space	6
+ 442      0000
+ 443              		.type	timerForInputs, %object
+ 444              		.size	timerForInputs, 1
+ 445              	timerForInputs:
+ 446 0006 00       		.space	1
+ 447 0007 00       		.space	1
+ 448              		.type	timerForMotorInputs, %object
+ 449              		.size	timerForMotorInputs, 2
+ 450              	timerForMotorInputs:
+ 451 0008 0000     		.space	2
+ 452              		.type	trackBrightness.6608, %object
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 14
+
+
+ 453              		.size	trackBrightness.6608, 2
+ 454              	trackBrightness.6608:
+ 455 000a 0000     		.space	2
+ 456              		.type	trackMotor.6609, %object
+ 457              		.size	trackMotor.6609, 2
+ 458              	trackMotor.6609:
+ 459 000c 0000     		.space	2
+ 460              		.text
+ 461              	.Letext0:
+ 462              		.file 2 "Generated_Source\\PSoC4/cytypes.h"
+ 463              		.file 3 "Generated_Source\\PSoC4/PWM_Enable.h"
+ 464              		.file 4 "Generated_Source\\PSoC4/PWM.h"
+ 465              		.file 5 "Generated_Source\\PSoC4/CommTimeoutISR.h"
+ 466              		.file 6 "Generated_Source\\PSoC4/AckTimeoutISR.h"
+ 467              		.file 7 "Generated_Source\\PSoC4/SamplingTimerISR.h"
+ 468              		.file 8 "Generated_Source\\PSoC4/ADC_SAR_Seq.h"
+ 469              		.file 9 "Generated_Source\\PSoC4/UART_LED_ISR.h"
+ 470              		.file 10 "Generated_Source\\PSoC4/UART_LED.h"
+ 471              		.file 11 "Generated_Source\\PSoC4/LED_ISR.h"
+ 472              		.file 12 "Generated_Source\\PSoC4/SamplingTimer.h"
+ 473              		.file 13 "Generated_Source\\PSoC4/TimeoutTimer.h"
+ 474              		.file 14 "Generated_Source\\PSoC4/EmEEPROM.h"
+ 475              		.file 15 "motorControl.h"
+ 476              		.file 16 "Generated_Source\\PSoC4/modeChangeISR.h"
+ 477              		.file 17 "DriverControl.h"
+ 478              		.file 18 "BrightnessCommManager.h"
+ 479              		.file 19 "Generated_Source\\PSoC4/inputs.h"
+ 480              		.section	.debug_info,"",%progbits
+ 481              	.Ldebug_info0:
+ 482 0000 69040000 		.4byte	0x469
+ 483 0004 0400     		.2byte	0x4
+ 484 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 485 000a 04       		.byte	0x4
+ 486 000b 01       		.uleb128 0x1
+ 487 000c A5020000 		.4byte	.LASF56
+ 488 0010 0C       		.byte	0xc
+ 489 0011 61030000 		.4byte	.LASF57
+ 490 0015 3B040000 		.4byte	.LASF58
+ 491 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 492 001d 00000000 		.4byte	0
+ 493 0021 00000000 		.4byte	.Ldebug_line0
+ 494 0025 02       		.uleb128 0x2
+ 495 0026 01       		.byte	0x1
+ 496 0027 06       		.byte	0x6
+ 497 0028 0D040000 		.4byte	.LASF0
+ 498 002c 02       		.uleb128 0x2
+ 499 002d 01       		.byte	0x1
+ 500 002e 08       		.byte	0x8
+ 501 002f 10010000 		.4byte	.LASF1
+ 502 0033 02       		.uleb128 0x2
+ 503 0034 02       		.byte	0x2
+ 504 0035 05       		.byte	0x5
+ 505 0036 AA030000 		.4byte	.LASF2
+ 506 003a 02       		.uleb128 0x2
+ 507 003b 02       		.byte	0x2
+ 508 003c 07       		.byte	0x7
+ 509 003d 94000000 		.4byte	.LASF3
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 15
+
+
+ 510 0041 02       		.uleb128 0x2
+ 511 0042 04       		.byte	0x4
+ 512 0043 05       		.byte	0x5
+ 513 0044 EA030000 		.4byte	.LASF4
+ 514 0048 02       		.uleb128 0x2
+ 515 0049 04       		.byte	0x4
+ 516 004a 07       		.byte	0x7
+ 517 004b 32010000 		.4byte	.LASF5
+ 518 004f 02       		.uleb128 0x2
+ 519 0050 08       		.byte	0x8
+ 520 0051 05       		.byte	0x5
+ 521 0052 53030000 		.4byte	.LASF6
+ 522 0056 02       		.uleb128 0x2
+ 523 0057 08       		.byte	0x8
+ 524 0058 07       		.byte	0x7
+ 525 0059 66020000 		.4byte	.LASF7
+ 526 005d 03       		.uleb128 0x3
+ 527 005e 04       		.byte	0x4
+ 528 005f 05       		.byte	0x5
+ 529 0060 696E7400 		.ascii	"int\000"
+ 530 0064 02       		.uleb128 0x2
+ 531 0065 04       		.byte	0x4
+ 532 0066 07       		.byte	0x7
+ 533 0067 45020000 		.4byte	.LASF8
+ 534 006b 04       		.uleb128 0x4
+ 535 006c 8F020000 		.4byte	.LASF9
+ 536 0070 02       		.byte	0x2
+ 537 0071 D201     		.2byte	0x1d2
+ 538 0073 2C000000 		.4byte	0x2c
+ 539 0077 04       		.uleb128 0x4
+ 540 0078 FA010000 		.4byte	.LASF10
+ 541 007c 02       		.byte	0x2
+ 542 007d D301     		.2byte	0x1d3
+ 543 007f 3A000000 		.4byte	0x3a
+ 544 0083 02       		.uleb128 0x2
+ 545 0084 04       		.byte	0x4
+ 546 0085 04       		.byte	0x4
+ 547 0086 FB000000 		.4byte	.LASF11
+ 548 008a 02       		.uleb128 0x2
+ 549 008b 08       		.byte	0x8
+ 550 008c 04       		.byte	0x4
+ 551 008d CE010000 		.4byte	.LASF12
+ 552 0091 02       		.uleb128 0x2
+ 553 0092 01       		.byte	0x1
+ 554 0093 08       		.byte	0x8
+ 555 0094 68030000 		.4byte	.LASF13
+ 556 0098 05       		.uleb128 0x5
+ 557 0099 6B000000 		.4byte	0x6b
+ 558 009d 05       		.uleb128 0x5
+ 559 009e 77000000 		.4byte	0x77
+ 560 00a2 02       		.uleb128 0x2
+ 561 00a3 08       		.byte	0x8
+ 562 00a4 04       		.byte	0x4
+ 563 00a5 01040000 		.4byte	.LASF14
+ 564 00a9 02       		.uleb128 0x2
+ 565 00aa 04       		.byte	0x4
+ 566 00ab 07       		.byte	0x7
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 16
+
+
+ 567 00ac 4A030000 		.4byte	.LASF15
+ 568 00b0 06       		.uleb128 0x6
+ 569 00b1 04       		.byte	0x4
+ 570 00b2 6B000000 		.4byte	0x6b
+ 571 00b6 07       		.uleb128 0x7
+ 572 00b7 2A020000 		.4byte	.LASF59
+ 573 00bb 01       		.byte	0x1
+ 574 00bc CE       		.byte	0xce
+ 575 00bd 00000000 		.4byte	.LFB37
+ 576 00c1 44000000 		.4byte	.LFE37-.LFB37
+ 577 00c5 01       		.uleb128 0x1
+ 578 00c6 9C       		.byte	0x9c
+ 579 00c7 67010000 		.4byte	0x167
+ 580 00cb 08       		.uleb128 0x8
+ 581 00cc 08000000 		.4byte	.LVL0
+ 582 00d0 6D030000 		.4byte	0x36d
+ 583 00d4 DE000000 		.4byte	0xde
+ 584 00d8 09       		.uleb128 0x9
+ 585 00d9 01       		.uleb128 0x1
+ 586 00da 50       		.byte	0x50
+ 587 00db 01       		.uleb128 0x1
+ 588 00dc 30       		.byte	0x30
+ 589 00dd 00       		.byte	0
+ 590 00de 0A       		.uleb128 0xa
+ 591 00df 0C000000 		.4byte	.LVL1
+ 592 00e3 78030000 		.4byte	0x378
+ 593 00e7 08       		.uleb128 0x8
+ 594 00e8 12000000 		.4byte	.LVL2
+ 595 00ec 83030000 		.4byte	0x383
+ 596 00f0 FA000000 		.4byte	0xfa
+ 597 00f4 09       		.uleb128 0x9
+ 598 00f5 01       		.uleb128 0x1
+ 599 00f6 50       		.byte	0x50
+ 600 00f7 01       		.uleb128 0x1
+ 601 00f8 30       		.byte	0x30
+ 602 00f9 00       		.byte	0
+ 603 00fa 0A       		.uleb128 0xa
+ 604 00fb 16000000 		.4byte	.LVL3
+ 605 00ff 8E030000 		.4byte	0x38e
+ 606 0103 0A       		.uleb128 0xa
+ 607 0104 1A000000 		.4byte	.LVL4
+ 608 0108 99030000 		.4byte	0x399
+ 609 010c 0A       		.uleb128 0xa
+ 610 010d 1E000000 		.4byte	.LVL5
+ 611 0111 A4030000 		.4byte	0x3a4
+ 612 0115 0A       		.uleb128 0xa
+ 613 0116 22000000 		.4byte	.LVL6
+ 614 011a AF030000 		.4byte	0x3af
+ 615 011e 0A       		.uleb128 0xa
+ 616 011f 26000000 		.4byte	.LVL7
+ 617 0123 BA030000 		.4byte	0x3ba
+ 618 0127 0A       		.uleb128 0xa
+ 619 0128 2A000000 		.4byte	.LVL8
+ 620 012c C5030000 		.4byte	0x3c5
+ 621 0130 0A       		.uleb128 0xa
+ 622 0131 2E000000 		.4byte	.LVL9
+ 623 0135 D0030000 		.4byte	0x3d0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 17
+
+
+ 624 0139 0A       		.uleb128 0xa
+ 625 013a 32000000 		.4byte	.LVL10
+ 626 013e DB030000 		.4byte	0x3db
+ 627 0142 0A       		.uleb128 0xa
+ 628 0143 36000000 		.4byte	.LVL11
+ 629 0147 E6030000 		.4byte	0x3e6
+ 630 014b 0A       		.uleb128 0xa
+ 631 014c 3A000000 		.4byte	.LVL12
+ 632 0150 F2030000 		.4byte	0x3f2
+ 633 0154 0A       		.uleb128 0xa
+ 634 0155 3E000000 		.4byte	.LVL13
+ 635 0159 FE030000 		.4byte	0x3fe
+ 636 015d 0A       		.uleb128 0xa
+ 637 015e 42000000 		.4byte	.LVL14
+ 638 0162 09040000 		.4byte	0x409
+ 639 0166 00       		.byte	0
+ 640 0167 0B       		.uleb128 0xb
+ 641 0168 F5010000 		.4byte	.LASF60
+ 642 016c 01       		.byte	0x1
+ 643 016d 39       		.byte	0x39
+ 644 016e 5D000000 		.4byte	0x5d
+ 645 0172 00000000 		.4byte	.LFB32
+ 646 0176 34000000 		.4byte	.LFE32-.LFB32
+ 647 017a 01       		.uleb128 0x1
+ 648 017b 9C       		.byte	0x9c
+ 649 017c CC010000 		.4byte	0x1cc
+ 650 0180 0A       		.uleb128 0xa
+ 651 0181 08000000 		.4byte	.LVL15
+ 652 0185 B6000000 		.4byte	0xb6
+ 653 0189 0A       		.uleb128 0xa
+ 654 018a 0C000000 		.4byte	.LVL16
+ 655 018e 14040000 		.4byte	0x414
+ 656 0192 08       		.uleb128 0x8
+ 657 0193 1C000000 		.4byte	.LVL17
+ 658 0197 1F040000 		.4byte	0x41f
+ 659 019b A5010000 		.4byte	0x1a5
+ 660 019f 09       		.uleb128 0x9
+ 661 01a0 01       		.uleb128 0x1
+ 662 01a1 50       		.byte	0x50
+ 663 01a2 01       		.uleb128 0x1
+ 664 01a3 31       		.byte	0x31
+ 665 01a4 00       		.byte	0
+ 666 01a5 08       		.uleb128 0x8
+ 667 01a6 22000000 		.4byte	.LVL18
+ 668 01aa 2A040000 		.4byte	0x42a
+ 669 01ae BC010000 		.4byte	0x1bc
+ 670 01b2 09       		.uleb128 0x9
+ 671 01b3 01       		.uleb128 0x1
+ 672 01b4 50       		.byte	0x50
+ 673 01b5 05       		.uleb128 0x5
+ 674 01b6 03       		.byte	0x3
+ 675 01b7 00000000 		.4byte	.LANCHOR1
+ 676 01bb 00       		.byte	0
+ 677 01bc 0C       		.uleb128 0xc
+ 678 01bd 28000000 		.4byte	.LVL19
+ 679 01c1 35040000 		.4byte	0x435
+ 680 01c5 09       		.uleb128 0x9
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 18
+
+
+ 681 01c6 01       		.uleb128 0x1
+ 682 01c7 50       		.byte	0x50
+ 683 01c8 01       		.uleb128 0x1
+ 684 01c9 30       		.byte	0x30
+ 685 01ca 00       		.byte	0
+ 686 01cb 00       		.byte	0
+ 687 01cc 0D       		.uleb128 0xd
+ 688 01cd 01020000 		.4byte	.LASF21
+ 689 01d1 01       		.byte	0x1
+ 690 01d2 72       		.byte	0x72
+ 691 01d3 00000000 		.4byte	.LFB33
+ 692 01d7 FC000000 		.4byte	.LFE33-.LFB33
+ 693 01db 01       		.uleb128 0x1
+ 694 01dc 9C       		.byte	0x9c
+ 695 01dd 65020000 		.4byte	0x265
+ 696 01e1 0E       		.uleb128 0xe
+ 697 01e2 AF010000 		.4byte	.LASF16
+ 698 01e6 01       		.byte	0x1
+ 699 01e7 74       		.byte	0x74
+ 700 01e8 98000000 		.4byte	0x98
+ 701 01ec 02       		.uleb128 0x2
+ 702 01ed 91       		.byte	0x91
+ 703 01ee 77       		.sleb128 -9
+ 704 01ef 0E       		.uleb128 0xe
+ 705 01f0 65010000 		.4byte	.LASF17
+ 706 01f4 01       		.byte	0x1
+ 707 01f5 75       		.byte	0x75
+ 708 01f6 98000000 		.4byte	0x98
+ 709 01fa 02       		.uleb128 0x2
+ 710 01fb 91       		.byte	0x91
+ 711 01fc 76       		.sleb128 -10
+ 712 01fd 0F       		.uleb128 0xf
+ 713 01fe 40020000 		.4byte	.LASF18
+ 714 0202 01       		.byte	0x1
+ 715 0203 76       		.byte	0x76
+ 716 0204 6B000000 		.4byte	0x6b
+ 717 0208 00000000 		.4byte	.LLST0
+ 718 020c 0E       		.uleb128 0xe
+ 719 020d A7000000 		.4byte	.LASF19
+ 720 0211 01       		.byte	0x1
+ 721 0212 77       		.byte	0x77
+ 722 0213 77000000 		.4byte	0x77
+ 723 0217 05       		.uleb128 0x5
+ 724 0218 03       		.byte	0x3
+ 725 0219 0A000000 		.4byte	trackBrightness.6608
+ 726 021d 0E       		.uleb128 0xe
+ 727 021e 9F030000 		.4byte	.LASF20
+ 728 0222 01       		.byte	0x1
+ 729 0223 78       		.byte	0x78
+ 730 0224 77000000 		.4byte	0x77
+ 731 0228 05       		.uleb128 0x5
+ 732 0229 03       		.byte	0x3
+ 733 022a 0C000000 		.4byte	trackMotor.6609
+ 734 022e 0A       		.uleb128 0xa
+ 735 022f 20000000 		.4byte	.LVL21
+ 736 0233 40040000 		.4byte	0x440
+ 737 0237 0A       		.uleb128 0xa
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 19
+
+
+ 738 0238 52000000 		.4byte	.LVL22
+ 739 023c 4B040000 		.4byte	0x44b
+ 740 0240 0A       		.uleb128 0xa
+ 741 0241 7C000000 		.4byte	.LVL24
+ 742 0245 4B040000 		.4byte	0x44b
+ 743 0249 0A       		.uleb128 0xa
+ 744 024a 84000000 		.4byte	.LVL25
+ 745 024e 4B040000 		.4byte	0x44b
+ 746 0252 0A       		.uleb128 0xa
+ 747 0253 BC000000 		.4byte	.LVL26
+ 748 0257 56040000 		.4byte	0x456
+ 749 025b 0A       		.uleb128 0xa
+ 750 025c E6000000 		.4byte	.LVL28
+ 751 0260 56040000 		.4byte	0x456
+ 752 0264 00       		.byte	0
+ 753 0265 0D       		.uleb128 0xd
+ 754 0266 CD030000 		.4byte	.LASF22
+ 755 026a 01       		.byte	0x1
+ 756 026b B8       		.byte	0xb8
+ 757 026c 00000000 		.4byte	.LFB34
+ 758 0270 14000000 		.4byte	.LFE34-.LFB34
+ 759 0274 01       		.uleb128 0x1
+ 760 0275 9C       		.byte	0x9c
+ 761 0276 AD020000 		.4byte	0x2ad
+ 762 027a 0E       		.uleb128 0xe
+ 763 027b 95020000 		.4byte	.LASF23
+ 764 027f 01       		.byte	0x1
+ 765 0280 BA       		.byte	0xba
+ 766 0281 AD020000 		.4byte	0x2ad
+ 767 0285 05       		.uleb128 0x5
+ 768 0286 03       		.byte	0x3
+ 769 0287 06000000 		.4byte	detectedAlready.6613
+ 770 028b 0C       		.uleb128 0xc
+ 771 028c 0E000000 		.4byte	.LVL29
+ 772 0290 61040000 		.4byte	0x461
+ 773 0294 09       		.uleb128 0x9
+ 774 0295 01       		.uleb128 0x1
+ 775 0296 50       		.byte	0x50
+ 776 0297 05       		.uleb128 0x5
+ 777 0298 03       		.byte	0x3
+ 778 0299 06000000 		.4byte	.LANCHOR1+6
+ 779 029d 09       		.uleb128 0x9
+ 780 029e 01       		.uleb128 0x1
+ 781 029f 51       		.byte	0x51
+ 782 02a0 05       		.uleb128 0x5
+ 783 02a1 03       		.byte	0x3
+ 784 02a2 03000000 		.4byte	.LANCHOR1+3
+ 785 02a6 09       		.uleb128 0x9
+ 786 02a7 01       		.uleb128 0x1
+ 787 02a8 52       		.byte	0x52
+ 788 02a9 01       		.uleb128 0x1
+ 789 02aa 31       		.byte	0x31
+ 790 02ab 00       		.byte	0
+ 791 02ac 00       		.byte	0
+ 792 02ad 10       		.uleb128 0x10
+ 793 02ae 6B000000 		.4byte	0x6b
+ 794 02b2 11       		.uleb128 0x11
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 20
+
+
+ 795 02b3 B7000000 		.4byte	.LASF24
+ 796 02b7 01       		.byte	0x1
+ 797 02b8 C2       		.byte	0xc2
+ 798 02b9 C7020000 		.4byte	0x2c7
+ 799 02bd 00000000 		.4byte	.LFB35
+ 800 02c1 08000000 		.4byte	.LFE35-.LFB35
+ 801 02c5 01       		.uleb128 0x1
+ 802 02c6 9C       		.byte	0x9c
+ 803 02c7 06       		.uleb128 0x6
+ 804 02c8 04       		.byte	0x4
+ 805 02c9 AD020000 		.4byte	0x2ad
+ 806 02cd 11       		.uleb128 0x11
+ 807 02ce 00000000 		.4byte	.LASF25
+ 808 02d2 01       		.byte	0x1
+ 809 02d3 C7       		.byte	0xc7
+ 810 02d4 B0000000 		.4byte	0xb0
+ 811 02d8 00000000 		.4byte	.LFB36
+ 812 02dc 08000000 		.4byte	.LFE36-.LFB36
+ 813 02e0 01       		.uleb128 0x1
+ 814 02e1 9C       		.byte	0x9c
+ 815 02e2 12       		.uleb128 0x12
+ 816 02e3 AD020000 		.4byte	0x2ad
+ 817 02e7 F2020000 		.4byte	0x2f2
+ 818 02eb 13       		.uleb128 0x13
+ 819 02ec A9000000 		.4byte	0xa9
+ 820 02f0 05       		.byte	0x5
+ 821 02f1 00       		.byte	0
+ 822 02f2 0E       		.uleb128 0xe
+ 823 02f3 81030000 		.4byte	.LASF26
+ 824 02f7 01       		.byte	0x1
+ 825 02f8 1D       		.byte	0x1d
+ 826 02f9 03030000 		.4byte	0x303
+ 827 02fd 05       		.uleb128 0x5
+ 828 02fe 03       		.byte	0x3
+ 829 02ff 00000000 		.4byte	eepromBrightnessMotorPosition
+ 830 0303 10       		.uleb128 0x10
+ 831 0304 E2020000 		.4byte	0x2e2
+ 832 0308 12       		.uleb128 0x12
+ 833 0309 6B000000 		.4byte	0x6b
+ 834 030d 18030000 		.4byte	0x318
+ 835 0311 13       		.uleb128 0x13
+ 836 0312 A9000000 		.4byte	0xa9
+ 837 0316 05       		.byte	0x5
+ 838 0317 00       		.byte	0
+ 839 0318 0E       		.uleb128 0xe
+ 840 0319 94010000 		.4byte	.LASF27
+ 841 031d 01       		.byte	0x1
+ 842 031e 1E       		.byte	0x1e
+ 843 031f 08030000 		.4byte	0x308
+ 844 0323 05       		.uleb128 0x5
+ 845 0324 03       		.byte	0x3
+ 846 0325 00000000 		.4byte	ramBrightnessMotorPosition
+ 847 0329 14       		.uleb128 0x14
+ 848 032a 7D010000 		.4byte	.LASF28
+ 849 032e 01       		.byte	0x1
+ 850 032f 1F       		.byte	0x1f
+ 851 0330 AD020000 		.4byte	0x2ad
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 21
+
+
+ 852 0334 01       		.byte	0x1
+ 853 0335 15       		.uleb128 0x15
+ 854 0336 7B000000 		.4byte	.LASF29
+ 855 033a 01       		.byte	0x1
+ 856 033b 20       		.byte	0x20
+ 857 033c 6B000000 		.4byte	0x6b
+ 858 0340 15       		.uleb128 0x15
+ 859 0341 6D000000 		.4byte	.LASF30
+ 860 0345 01       		.byte	0x1
+ 861 0346 21       		.byte	0x21
+ 862 0347 C7020000 		.4byte	0x2c7
+ 863 034b 16       		.uleb128 0x16
+ 864 034c BF010000 		.4byte	.LASF31
+ 865 0350 01       		.byte	0x1
+ 866 0351 24       		.byte	0x24
+ 867 0352 98000000 		.4byte	0x98
+ 868 0356 05       		.uleb128 0x5
+ 869 0357 03       		.byte	0x3
+ 870 0358 00000000 		.4byte	timerForInputs
+ 871 035c 16       		.uleb128 0x16
+ 872 035d 1E010000 		.4byte	.LASF32
+ 873 0361 01       		.byte	0x1
+ 874 0362 25       		.byte	0x25
+ 875 0363 9D000000 		.4byte	0x9d
+ 876 0367 05       		.uleb128 0x5
+ 877 0368 03       		.byte	0x3
+ 878 0369 00000000 		.4byte	timerForMotorInputs
+ 879 036d 17       		.uleb128 0x17
+ 880 036e 54010000 		.4byte	.LASF33
+ 881 0372 54010000 		.4byte	.LASF33
+ 882 0376 03       		.byte	0x3
+ 883 0377 2F       		.byte	0x2f
+ 884 0378 17       		.uleb128 0x17
+ 885 0379 B4030000 		.4byte	.LASF34
+ 886 037d B4030000 		.4byte	.LASF34
+ 887 0381 04       		.byte	0x4
+ 888 0382 92       		.byte	0x92
+ 889 0383 17       		.uleb128 0x17
+ 890 0384 D5010000 		.4byte	.LASF35
+ 891 0388 D5010000 		.4byte	.LASF35
+ 892 038c 04       		.byte	0x4
+ 893 038d C3       		.byte	0xc3
+ 894 038e 17       		.uleb128 0x17
+ 895 038f A6040000 		.4byte	.LASF36
+ 896 0393 A6040000 		.4byte	.LASF36
+ 897 0397 05       		.byte	0x5
+ 898 0398 17       		.byte	0x17
+ 899 0399 17       		.uleb128 0x17
+ 900 039a E7000000 		.4byte	.LASF37
+ 901 039e E7000000 		.4byte	.LASF37
+ 902 03a2 06       		.byte	0x6
+ 903 03a3 17       		.byte	0x17
+ 904 03a4 17       		.uleb128 0x17
+ 905 03a5 33030000 		.4byte	.LASF38
+ 906 03a9 33030000 		.4byte	.LASF38
+ 907 03ad 07       		.byte	0x7
+ 908 03ae 17       		.byte	0x17
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 22
+
+
+ 909 03af 17       		.uleb128 0x17
+ 910 03b0 7D020000 		.4byte	.LASF39
+ 911 03b4 7D020000 		.4byte	.LASF39
+ 912 03b8 08       		.byte	0x8
+ 913 03b9 99       		.byte	0x99
+ 914 03ba 17       		.uleb128 0x17
+ 915 03bb 11020000 		.4byte	.LASF40
+ 916 03bf 11020000 		.4byte	.LASF40
+ 917 03c3 08       		.byte	0x8
+ 918 03c4 9D       		.byte	0x9d
+ 919 03c5 17       		.uleb128 0x17
+ 920 03c6 2B000000 		.4byte	.LASF41
+ 921 03ca 2B000000 		.4byte	.LASF41
+ 922 03ce 09       		.byte	0x9
+ 923 03cf 17       		.byte	0x17
+ 924 03d0 17       		.uleb128 0x17
+ 925 03d1 BE030000 		.4byte	.LASF42
+ 926 03d5 BE030000 		.4byte	.LASF42
+ 927 03d9 0A       		.byte	0xa
+ 928 03da 72       		.byte	0x72
+ 929 03db 17       		.uleb128 0x17
+ 930 03dc F3030000 		.4byte	.LASF43
+ 931 03e0 F3030000 		.4byte	.LASF43
+ 932 03e4 0B       		.byte	0xb
+ 933 03e5 17       		.byte	0x17
+ 934 03e6 18       		.uleb128 0x18
+ 935 03e7 6D030000 		.4byte	.LASF44
+ 936 03eb 6D030000 		.4byte	.LASF44
+ 937 03ef 0C       		.byte	0xc
+ 938 03f0 3201     		.2byte	0x132
+ 939 03f2 18       		.uleb128 0x18
+ 940 03f3 D4000000 		.4byte	.LASF45
+ 941 03f7 D4000000 		.4byte	.LASF45
+ 942 03fb 0D       		.byte	0xd
+ 943 03fc 3201     		.2byte	0x132
+ 944 03fe 17       		.uleb128 0x17
+ 945 03ff 01010000 		.4byte	.LASF46
+ 946 0403 01010000 		.4byte	.LASF46
+ 947 0407 0E       		.byte	0xe
+ 948 0408 29       		.byte	0x29
+ 949 0409 17       		.uleb128 0x17
+ 950 040a 44010000 		.4byte	.LASF47
+ 951 040e 44010000 		.4byte	.LASF47
+ 952 0412 0F       		.byte	0xf
+ 953 0413 6E       		.byte	0x6e
+ 954 0414 17       		.uleb128 0x17
+ 955 0415 19040000 		.4byte	.LASF48
+ 956 0419 19040000 		.4byte	.LASF48
+ 957 041d 10       		.byte	0x10
+ 958 041e 17       		.byte	0x17
+ 959 041f 17       		.uleb128 0x17
+ 960 0420 4A000000 		.4byte	.LASF49
+ 961 0424 4A000000 		.4byte	.LASF49
+ 962 0428 11       		.byte	0x11
+ 963 0429 28       		.byte	0x28
+ 964 042a 17       		.uleb128 0x17
+ 965 042b 52020000 		.4byte	.LASF50
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 23
+
+
+ 966 042f 52020000 		.4byte	.LASF50
+ 967 0433 12       		.byte	0x12
+ 968 0434 31       		.byte	0x31
+ 969 0435 17       		.uleb128 0x17
+ 970 0436 5C000000 		.4byte	.LASF51
+ 971 043a 5C000000 		.4byte	.LASF51
+ 972 043e 0F       		.byte	0xf
+ 973 043f 70       		.byte	0x70
+ 974 0440 17       		.uleb128 0x17
+ 975 0441 3E000000 		.4byte	.LASF52
+ 976 0445 3E000000 		.4byte	.LASF52
+ 977 0449 13       		.byte	0x13
+ 978 044a 30       		.byte	0x30
+ 979 044b 17       		.uleb128 0x17
+ 980 044c 2D040000 		.4byte	.LASF53
+ 981 0450 2D040000 		.4byte	.LASF53
+ 982 0454 11       		.byte	0x11
+ 983 0455 35       		.byte	0x35
+ 984 0456 17       		.uleb128 0x17
+ 985 0457 1A000000 		.4byte	.LASF54
+ 986 045b 1A000000 		.4byte	.LASF54
+ 987 045f 0F       		.byte	0xf
+ 988 0460 73       		.byte	0x73
+ 989 0461 17       		.uleb128 0x17
+ 990 0462 E6010000 		.4byte	.LASF55
+ 991 0466 E6010000 		.4byte	.LASF55
+ 992 046a 0E       		.byte	0xe
+ 993 046b 2F       		.byte	0x2f
+ 994 046c 00       		.byte	0
+ 995              		.section	.debug_abbrev,"",%progbits
+ 996              	.Ldebug_abbrev0:
+ 997 0000 01       		.uleb128 0x1
+ 998 0001 11       		.uleb128 0x11
+ 999 0002 01       		.byte	0x1
+ 1000 0003 25       		.uleb128 0x25
+ 1001 0004 0E       		.uleb128 0xe
+ 1002 0005 13       		.uleb128 0x13
+ 1003 0006 0B       		.uleb128 0xb
+ 1004 0007 03       		.uleb128 0x3
+ 1005 0008 0E       		.uleb128 0xe
+ 1006 0009 1B       		.uleb128 0x1b
+ 1007 000a 0E       		.uleb128 0xe
+ 1008 000b 55       		.uleb128 0x55
+ 1009 000c 17       		.uleb128 0x17
+ 1010 000d 11       		.uleb128 0x11
+ 1011 000e 01       		.uleb128 0x1
+ 1012 000f 10       		.uleb128 0x10
+ 1013 0010 17       		.uleb128 0x17
+ 1014 0011 00       		.byte	0
+ 1015 0012 00       		.byte	0
+ 1016 0013 02       		.uleb128 0x2
+ 1017 0014 24       		.uleb128 0x24
+ 1018 0015 00       		.byte	0
+ 1019 0016 0B       		.uleb128 0xb
+ 1020 0017 0B       		.uleb128 0xb
+ 1021 0018 3E       		.uleb128 0x3e
+ 1022 0019 0B       		.uleb128 0xb
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 24
+
+
+ 1023 001a 03       		.uleb128 0x3
+ 1024 001b 0E       		.uleb128 0xe
+ 1025 001c 00       		.byte	0
+ 1026 001d 00       		.byte	0
+ 1027 001e 03       		.uleb128 0x3
+ 1028 001f 24       		.uleb128 0x24
+ 1029 0020 00       		.byte	0
+ 1030 0021 0B       		.uleb128 0xb
+ 1031 0022 0B       		.uleb128 0xb
+ 1032 0023 3E       		.uleb128 0x3e
+ 1033 0024 0B       		.uleb128 0xb
+ 1034 0025 03       		.uleb128 0x3
+ 1035 0026 08       		.uleb128 0x8
+ 1036 0027 00       		.byte	0
+ 1037 0028 00       		.byte	0
+ 1038 0029 04       		.uleb128 0x4
+ 1039 002a 16       		.uleb128 0x16
+ 1040 002b 00       		.byte	0
+ 1041 002c 03       		.uleb128 0x3
+ 1042 002d 0E       		.uleb128 0xe
+ 1043 002e 3A       		.uleb128 0x3a
+ 1044 002f 0B       		.uleb128 0xb
+ 1045 0030 3B       		.uleb128 0x3b
+ 1046 0031 05       		.uleb128 0x5
+ 1047 0032 49       		.uleb128 0x49
+ 1048 0033 13       		.uleb128 0x13
+ 1049 0034 00       		.byte	0
+ 1050 0035 00       		.byte	0
+ 1051 0036 05       		.uleb128 0x5
+ 1052 0037 35       		.uleb128 0x35
+ 1053 0038 00       		.byte	0
+ 1054 0039 49       		.uleb128 0x49
+ 1055 003a 13       		.uleb128 0x13
+ 1056 003b 00       		.byte	0
+ 1057 003c 00       		.byte	0
+ 1058 003d 06       		.uleb128 0x6
+ 1059 003e 0F       		.uleb128 0xf
+ 1060 003f 00       		.byte	0
+ 1061 0040 0B       		.uleb128 0xb
+ 1062 0041 0B       		.uleb128 0xb
+ 1063 0042 49       		.uleb128 0x49
+ 1064 0043 13       		.uleb128 0x13
+ 1065 0044 00       		.byte	0
+ 1066 0045 00       		.byte	0
+ 1067 0046 07       		.uleb128 0x7
+ 1068 0047 2E       		.uleb128 0x2e
+ 1069 0048 01       		.byte	0x1
+ 1070 0049 03       		.uleb128 0x3
+ 1071 004a 0E       		.uleb128 0xe
+ 1072 004b 3A       		.uleb128 0x3a
+ 1073 004c 0B       		.uleb128 0xb
+ 1074 004d 3B       		.uleb128 0x3b
+ 1075 004e 0B       		.uleb128 0xb
+ 1076 004f 27       		.uleb128 0x27
+ 1077 0050 19       		.uleb128 0x19
+ 1078 0051 11       		.uleb128 0x11
+ 1079 0052 01       		.uleb128 0x1
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 25
+
+
+ 1080 0053 12       		.uleb128 0x12
+ 1081 0054 06       		.uleb128 0x6
+ 1082 0055 40       		.uleb128 0x40
+ 1083 0056 18       		.uleb128 0x18
+ 1084 0057 9742     		.uleb128 0x2117
+ 1085 0059 19       		.uleb128 0x19
+ 1086 005a 01       		.uleb128 0x1
+ 1087 005b 13       		.uleb128 0x13
+ 1088 005c 00       		.byte	0
+ 1089 005d 00       		.byte	0
+ 1090 005e 08       		.uleb128 0x8
+ 1091 005f 898201   		.uleb128 0x4109
+ 1092 0062 01       		.byte	0x1
+ 1093 0063 11       		.uleb128 0x11
+ 1094 0064 01       		.uleb128 0x1
+ 1095 0065 31       		.uleb128 0x31
+ 1096 0066 13       		.uleb128 0x13
+ 1097 0067 01       		.uleb128 0x1
+ 1098 0068 13       		.uleb128 0x13
+ 1099 0069 00       		.byte	0
+ 1100 006a 00       		.byte	0
+ 1101 006b 09       		.uleb128 0x9
+ 1102 006c 8A8201   		.uleb128 0x410a
+ 1103 006f 00       		.byte	0
+ 1104 0070 02       		.uleb128 0x2
+ 1105 0071 18       		.uleb128 0x18
+ 1106 0072 9142     		.uleb128 0x2111
+ 1107 0074 18       		.uleb128 0x18
+ 1108 0075 00       		.byte	0
+ 1109 0076 00       		.byte	0
+ 1110 0077 0A       		.uleb128 0xa
+ 1111 0078 898201   		.uleb128 0x4109
+ 1112 007b 00       		.byte	0
+ 1113 007c 11       		.uleb128 0x11
+ 1114 007d 01       		.uleb128 0x1
+ 1115 007e 31       		.uleb128 0x31
+ 1116 007f 13       		.uleb128 0x13
+ 1117 0080 00       		.byte	0
+ 1118 0081 00       		.byte	0
+ 1119 0082 0B       		.uleb128 0xb
+ 1120 0083 2E       		.uleb128 0x2e
+ 1121 0084 01       		.byte	0x1
+ 1122 0085 3F       		.uleb128 0x3f
+ 1123 0086 19       		.uleb128 0x19
+ 1124 0087 03       		.uleb128 0x3
+ 1125 0088 0E       		.uleb128 0xe
+ 1126 0089 3A       		.uleb128 0x3a
+ 1127 008a 0B       		.uleb128 0xb
+ 1128 008b 3B       		.uleb128 0x3b
+ 1129 008c 0B       		.uleb128 0xb
+ 1130 008d 49       		.uleb128 0x49
+ 1131 008e 13       		.uleb128 0x13
+ 1132 008f 8701     		.uleb128 0x87
+ 1133 0091 19       		.uleb128 0x19
+ 1134 0092 11       		.uleb128 0x11
+ 1135 0093 01       		.uleb128 0x1
+ 1136 0094 12       		.uleb128 0x12
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 26
+
+
+ 1137 0095 06       		.uleb128 0x6
+ 1138 0096 40       		.uleb128 0x40
+ 1139 0097 18       		.uleb128 0x18
+ 1140 0098 9742     		.uleb128 0x2117
+ 1141 009a 19       		.uleb128 0x19
+ 1142 009b 01       		.uleb128 0x1
+ 1143 009c 13       		.uleb128 0x13
+ 1144 009d 00       		.byte	0
+ 1145 009e 00       		.byte	0
+ 1146 009f 0C       		.uleb128 0xc
+ 1147 00a0 898201   		.uleb128 0x4109
+ 1148 00a3 01       		.byte	0x1
+ 1149 00a4 11       		.uleb128 0x11
+ 1150 00a5 01       		.uleb128 0x1
+ 1151 00a6 31       		.uleb128 0x31
+ 1152 00a7 13       		.uleb128 0x13
+ 1153 00a8 00       		.byte	0
+ 1154 00a9 00       		.byte	0
+ 1155 00aa 0D       		.uleb128 0xd
+ 1156 00ab 2E       		.uleb128 0x2e
+ 1157 00ac 01       		.byte	0x1
+ 1158 00ad 3F       		.uleb128 0x3f
+ 1159 00ae 19       		.uleb128 0x19
+ 1160 00af 03       		.uleb128 0x3
+ 1161 00b0 0E       		.uleb128 0xe
+ 1162 00b1 3A       		.uleb128 0x3a
+ 1163 00b2 0B       		.uleb128 0xb
+ 1164 00b3 3B       		.uleb128 0x3b
+ 1165 00b4 0B       		.uleb128 0xb
+ 1166 00b5 27       		.uleb128 0x27
+ 1167 00b6 19       		.uleb128 0x19
+ 1168 00b7 11       		.uleb128 0x11
+ 1169 00b8 01       		.uleb128 0x1
+ 1170 00b9 12       		.uleb128 0x12
+ 1171 00ba 06       		.uleb128 0x6
+ 1172 00bb 40       		.uleb128 0x40
+ 1173 00bc 18       		.uleb128 0x18
+ 1174 00bd 9742     		.uleb128 0x2117
+ 1175 00bf 19       		.uleb128 0x19
+ 1176 00c0 01       		.uleb128 0x1
+ 1177 00c1 13       		.uleb128 0x13
+ 1178 00c2 00       		.byte	0
+ 1179 00c3 00       		.byte	0
+ 1180 00c4 0E       		.uleb128 0xe
+ 1181 00c5 34       		.uleb128 0x34
+ 1182 00c6 00       		.byte	0
+ 1183 00c7 03       		.uleb128 0x3
+ 1184 00c8 0E       		.uleb128 0xe
+ 1185 00c9 3A       		.uleb128 0x3a
+ 1186 00ca 0B       		.uleb128 0xb
+ 1187 00cb 3B       		.uleb128 0x3b
+ 1188 00cc 0B       		.uleb128 0xb
+ 1189 00cd 49       		.uleb128 0x49
+ 1190 00ce 13       		.uleb128 0x13
+ 1191 00cf 02       		.uleb128 0x2
+ 1192 00d0 18       		.uleb128 0x18
+ 1193 00d1 00       		.byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 27
+
+
+ 1194 00d2 00       		.byte	0
+ 1195 00d3 0F       		.uleb128 0xf
+ 1196 00d4 34       		.uleb128 0x34
+ 1197 00d5 00       		.byte	0
+ 1198 00d6 03       		.uleb128 0x3
+ 1199 00d7 0E       		.uleb128 0xe
+ 1200 00d8 3A       		.uleb128 0x3a
+ 1201 00d9 0B       		.uleb128 0xb
+ 1202 00da 3B       		.uleb128 0x3b
+ 1203 00db 0B       		.uleb128 0xb
+ 1204 00dc 49       		.uleb128 0x49
+ 1205 00dd 13       		.uleb128 0x13
+ 1206 00de 02       		.uleb128 0x2
+ 1207 00df 17       		.uleb128 0x17
+ 1208 00e0 00       		.byte	0
+ 1209 00e1 00       		.byte	0
+ 1210 00e2 10       		.uleb128 0x10
+ 1211 00e3 26       		.uleb128 0x26
+ 1212 00e4 00       		.byte	0
+ 1213 00e5 49       		.uleb128 0x49
+ 1214 00e6 13       		.uleb128 0x13
+ 1215 00e7 00       		.byte	0
+ 1216 00e8 00       		.byte	0
+ 1217 00e9 11       		.uleb128 0x11
+ 1218 00ea 2E       		.uleb128 0x2e
+ 1219 00eb 00       		.byte	0
+ 1220 00ec 3F       		.uleb128 0x3f
+ 1221 00ed 19       		.uleb128 0x19
+ 1222 00ee 03       		.uleb128 0x3
+ 1223 00ef 0E       		.uleb128 0xe
+ 1224 00f0 3A       		.uleb128 0x3a
+ 1225 00f1 0B       		.uleb128 0xb
+ 1226 00f2 3B       		.uleb128 0x3b
+ 1227 00f3 0B       		.uleb128 0xb
+ 1228 00f4 27       		.uleb128 0x27
+ 1229 00f5 19       		.uleb128 0x19
+ 1230 00f6 49       		.uleb128 0x49
+ 1231 00f7 13       		.uleb128 0x13
+ 1232 00f8 11       		.uleb128 0x11
+ 1233 00f9 01       		.uleb128 0x1
+ 1234 00fa 12       		.uleb128 0x12
+ 1235 00fb 06       		.uleb128 0x6
+ 1236 00fc 40       		.uleb128 0x40
+ 1237 00fd 18       		.uleb128 0x18
+ 1238 00fe 9742     		.uleb128 0x2117
+ 1239 0100 19       		.uleb128 0x19
+ 1240 0101 00       		.byte	0
+ 1241 0102 00       		.byte	0
+ 1242 0103 12       		.uleb128 0x12
+ 1243 0104 01       		.uleb128 0x1
+ 1244 0105 01       		.byte	0x1
+ 1245 0106 49       		.uleb128 0x49
+ 1246 0107 13       		.uleb128 0x13
+ 1247 0108 01       		.uleb128 0x1
+ 1248 0109 13       		.uleb128 0x13
+ 1249 010a 00       		.byte	0
+ 1250 010b 00       		.byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 28
+
+
+ 1251 010c 13       		.uleb128 0x13
+ 1252 010d 21       		.uleb128 0x21
+ 1253 010e 00       		.byte	0
+ 1254 010f 49       		.uleb128 0x49
+ 1255 0110 13       		.uleb128 0x13
+ 1256 0111 2F       		.uleb128 0x2f
+ 1257 0112 0B       		.uleb128 0xb
+ 1258 0113 00       		.byte	0
+ 1259 0114 00       		.byte	0
+ 1260 0115 14       		.uleb128 0x14
+ 1261 0116 34       		.uleb128 0x34
+ 1262 0117 00       		.byte	0
+ 1263 0118 03       		.uleb128 0x3
+ 1264 0119 0E       		.uleb128 0xe
+ 1265 011a 3A       		.uleb128 0x3a
+ 1266 011b 0B       		.uleb128 0xb
+ 1267 011c 3B       		.uleb128 0x3b
+ 1268 011d 0B       		.uleb128 0xb
+ 1269 011e 49       		.uleb128 0x49
+ 1270 011f 13       		.uleb128 0x13
+ 1271 0120 1C       		.uleb128 0x1c
+ 1272 0121 0B       		.uleb128 0xb
+ 1273 0122 00       		.byte	0
+ 1274 0123 00       		.byte	0
+ 1275 0124 15       		.uleb128 0x15
+ 1276 0125 34       		.uleb128 0x34
+ 1277 0126 00       		.byte	0
+ 1278 0127 03       		.uleb128 0x3
+ 1279 0128 0E       		.uleb128 0xe
+ 1280 0129 3A       		.uleb128 0x3a
+ 1281 012a 0B       		.uleb128 0xb
+ 1282 012b 3B       		.uleb128 0x3b
+ 1283 012c 0B       		.uleb128 0xb
+ 1284 012d 49       		.uleb128 0x49
+ 1285 012e 13       		.uleb128 0x13
+ 1286 012f 00       		.byte	0
+ 1287 0130 00       		.byte	0
+ 1288 0131 16       		.uleb128 0x16
+ 1289 0132 34       		.uleb128 0x34
+ 1290 0133 00       		.byte	0
+ 1291 0134 03       		.uleb128 0x3
+ 1292 0135 0E       		.uleb128 0xe
+ 1293 0136 3A       		.uleb128 0x3a
+ 1294 0137 0B       		.uleb128 0xb
+ 1295 0138 3B       		.uleb128 0x3b
+ 1296 0139 0B       		.uleb128 0xb
+ 1297 013a 49       		.uleb128 0x49
+ 1298 013b 13       		.uleb128 0x13
+ 1299 013c 3F       		.uleb128 0x3f
+ 1300 013d 19       		.uleb128 0x19
+ 1301 013e 02       		.uleb128 0x2
+ 1302 013f 18       		.uleb128 0x18
+ 1303 0140 00       		.byte	0
+ 1304 0141 00       		.byte	0
+ 1305 0142 17       		.uleb128 0x17
+ 1306 0143 2E       		.uleb128 0x2e
+ 1307 0144 00       		.byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 29
+
+
+ 1308 0145 3F       		.uleb128 0x3f
+ 1309 0146 19       		.uleb128 0x19
+ 1310 0147 3C       		.uleb128 0x3c
+ 1311 0148 19       		.uleb128 0x19
+ 1312 0149 6E       		.uleb128 0x6e
+ 1313 014a 0E       		.uleb128 0xe
+ 1314 014b 03       		.uleb128 0x3
+ 1315 014c 0E       		.uleb128 0xe
+ 1316 014d 3A       		.uleb128 0x3a
+ 1317 014e 0B       		.uleb128 0xb
+ 1318 014f 3B       		.uleb128 0x3b
+ 1319 0150 0B       		.uleb128 0xb
+ 1320 0151 00       		.byte	0
+ 1321 0152 00       		.byte	0
+ 1322 0153 18       		.uleb128 0x18
+ 1323 0154 2E       		.uleb128 0x2e
+ 1324 0155 00       		.byte	0
+ 1325 0156 3F       		.uleb128 0x3f
+ 1326 0157 19       		.uleb128 0x19
+ 1327 0158 3C       		.uleb128 0x3c
+ 1328 0159 19       		.uleb128 0x19
+ 1329 015a 6E       		.uleb128 0x6e
+ 1330 015b 0E       		.uleb128 0xe
+ 1331 015c 03       		.uleb128 0x3
+ 1332 015d 0E       		.uleb128 0xe
+ 1333 015e 3A       		.uleb128 0x3a
+ 1334 015f 0B       		.uleb128 0xb
+ 1335 0160 3B       		.uleb128 0x3b
+ 1336 0161 05       		.uleb128 0x5
+ 1337 0162 00       		.byte	0
+ 1338 0163 00       		.byte	0
+ 1339 0164 00       		.byte	0
+ 1340              		.section	.debug_loc,"",%progbits
+ 1341              	.Ldebug_loc0:
+ 1342              	.LLST0:
+ 1343 0000 0E000000 		.4byte	.LVL20
+ 1344 0004 52000000 		.4byte	.LVL22
+ 1345 0008 0200     		.2byte	0x2
+ 1346 000a 30       		.byte	0x30
+ 1347 000b 9F       		.byte	0x9f
+ 1348 000c 52000000 		.4byte	.LVL22
+ 1349 0010 54000000 		.4byte	.LVL23
+ 1350 0014 0200     		.2byte	0x2
+ 1351 0016 32       		.byte	0x32
+ 1352 0017 9F       		.byte	0x9f
+ 1353 0018 54000000 		.4byte	.LVL23
+ 1354 001c 7C000000 		.4byte	.LVL24
+ 1355 0020 0200     		.2byte	0x2
+ 1356 0022 30       		.byte	0x30
+ 1357 0023 9F       		.byte	0x9f
+ 1358 0024 BC000000 		.4byte	.LVL26
+ 1359 0028 BE000000 		.4byte	.LVL27
+ 1360 002c 0200     		.2byte	0x2
+ 1361 002e 30       		.byte	0x30
+ 1362 002f 9F       		.byte	0x9f
+ 1363 0030 00000000 		.4byte	0
+ 1364 0034 00000000 		.4byte	0
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 30
+
+
+ 1365              		.section	.debug_aranges,"",%progbits
+ 1366 0000 44000000 		.4byte	0x44
+ 1367 0004 0200     		.2byte	0x2
+ 1368 0006 00000000 		.4byte	.Ldebug_info0
+ 1369 000a 04       		.byte	0x4
+ 1370 000b 00       		.byte	0
+ 1371 000c 0000     		.2byte	0
+ 1372 000e 0000     		.2byte	0
+ 1373 0010 00000000 		.4byte	.LFB37
+ 1374 0014 44000000 		.4byte	.LFE37-.LFB37
+ 1375 0018 00000000 		.4byte	.LFB32
+ 1376 001c 34000000 		.4byte	.LFE32-.LFB32
+ 1377 0020 00000000 		.4byte	.LFB33
+ 1378 0024 FC000000 		.4byte	.LFE33-.LFB33
+ 1379 0028 00000000 		.4byte	.LFB34
+ 1380 002c 14000000 		.4byte	.LFE34-.LFB34
+ 1381 0030 00000000 		.4byte	.LFB35
+ 1382 0034 08000000 		.4byte	.LFE35-.LFB35
+ 1383 0038 00000000 		.4byte	.LFB36
+ 1384 003c 08000000 		.4byte	.LFE36-.LFB36
+ 1385 0040 00000000 		.4byte	0
+ 1386 0044 00000000 		.4byte	0
+ 1387              		.section	.debug_ranges,"",%progbits
+ 1388              	.Ldebug_ranges0:
+ 1389 0000 00000000 		.4byte	.LFB37
+ 1390 0004 44000000 		.4byte	.LFE37
+ 1391 0008 00000000 		.4byte	.LFB32
+ 1392 000c 34000000 		.4byte	.LFE32
+ 1393 0010 00000000 		.4byte	.LFB33
+ 1394 0014 FC000000 		.4byte	.LFE33
+ 1395 0018 00000000 		.4byte	.LFB34
+ 1396 001c 14000000 		.4byte	.LFE34
+ 1397 0020 00000000 		.4byte	.LFB35
+ 1398 0024 08000000 		.4byte	.LFE35
+ 1399 0028 00000000 		.4byte	.LFB36
+ 1400 002c 08000000 		.4byte	.LFE36
+ 1401 0030 00000000 		.4byte	0
+ 1402 0034 00000000 		.4byte	0
+ 1403              		.section	.debug_line,"",%progbits
+ 1404              	.Ldebug_line0:
+ 1405 0000 13020000 		.section	.debug_str,"MS",%progbits,1
+ 1405      02006701 
+ 1405      00000201 
+ 1405      FB0E0D00 
+ 1405      01010101 
+ 1406              	.LASF25:
+ 1407 0000 67657456 		.ascii	"getVolatileBarStateMemory\000"
+ 1407      6F6C6174 
+ 1407      696C6542 
+ 1407      61725374 
+ 1407      6174654D 
+ 1408              	.LASF54:
+ 1409 001a 7365744D 		.ascii	"setMotorPosition\000"
+ 1409      6F746F72 
+ 1409      506F7369 
+ 1409      74696F6E 
+ 1409      00
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 31
+
+
+ 1410              	.LASF41:
+ 1411 002b 55415254 		.ascii	"UART_LED_ISR_Start\000"
+ 1411      5F4C4544 
+ 1411      5F495352 
+ 1411      5F537461 
+ 1411      727400
+ 1412              	.LASF52:
+ 1413 003e 696E7075 		.ascii	"inputs_Read\000"
+ 1413      74735F52 
+ 1413      65616400 
+ 1414              	.LASF49:
+ 1415 004a 73657449 		.ascii	"setIdentityByComm\000"
+ 1415      64656E74 
+ 1415      69747942 
+ 1415      79436F6D 
+ 1415      6D00
+ 1416              	.LASF51:
+ 1417 005c 6D6F746F 		.ascii	"motorControlLoop\000"
+ 1417      72436F6E 
+ 1417      74726F6C 
+ 1417      4C6F6F70 
+ 1417      00
+ 1418              	.LASF30:
+ 1419 006d 70656570 		.ascii	"peepromMemory\000"
+ 1419      726F6D4D 
+ 1419      656D6F72 
+ 1419      7900
+ 1420              	.LASF29:
+ 1421 007b 62656570 		.ascii	"beepromCountAlreadyReset\000"
+ 1421      726F6D43 
+ 1421      6F756E74 
+ 1421      416C7265 
+ 1421      61647952 
+ 1422              	.LASF3:
+ 1423 0094 73686F72 		.ascii	"short unsigned int\000"
+ 1423      7420756E 
+ 1423      7369676E 
+ 1423      65642069 
+ 1423      6E7400
+ 1424              	.LASF19:
+ 1425 00a7 74726163 		.ascii	"trackBrightness\000"
+ 1425      6B427269 
+ 1425      6768746E 
+ 1425      65737300 
+ 1426              	.LASF24:
+ 1427 00b7 6765744E 		.ascii	"getNonVolatileBarStateMemory\000"
+ 1427      6F6E566F 
+ 1427      6C617469 
+ 1427      6C654261 
+ 1427      72537461 
+ 1428              	.LASF45:
+ 1429 00d4 54696D65 		.ascii	"TimeoutTimer_Start\000"
+ 1429      6F757454 
+ 1429      696D6572 
+ 1429      5F537461 
+ 1429      727400
+ 1430              	.LASF37:
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 32
+
+
+ 1431 00e7 41636B54 		.ascii	"AckTimeoutISR_Start\000"
+ 1431      696D656F 
+ 1431      75744953 
+ 1431      525F5374 
+ 1431      61727400 
+ 1432              	.LASF11:
+ 1433 00fb 666C6F61 		.ascii	"float\000"
+ 1433      7400
+ 1434              	.LASF46:
+ 1435 0101 456D4545 		.ascii	"EmEEPROM_Start\000"
+ 1435      50524F4D 
+ 1435      5F537461 
+ 1435      727400
+ 1436              	.LASF1:
+ 1437 0110 756E7369 		.ascii	"unsigned char\000"
+ 1437      676E6564 
+ 1437      20636861 
+ 1437      7200
+ 1438              	.LASF32:
+ 1439 011e 74696D65 		.ascii	"timerForMotorInputs\000"
+ 1439      72466F72 
+ 1439      4D6F746F 
+ 1439      72496E70 
+ 1439      75747300 
+ 1440              	.LASF5:
+ 1441 0132 6C6F6E67 		.ascii	"long unsigned int\000"
+ 1441      20756E73 
+ 1441      69676E65 
+ 1441      6420696E 
+ 1441      7400
+ 1442              	.LASF47:
+ 1443 0144 696E6974 		.ascii	"initializeMotor\000"
+ 1443      69616C69 
+ 1443      7A654D6F 
+ 1443      746F7200 
+ 1444              	.LASF33:
+ 1445 0154 50574D5F 		.ascii	"PWM_Enable_Write\000"
+ 1445      456E6162 
+ 1445      6C655F57 
+ 1445      72697465 
+ 1445      00
+ 1446              	.LASF17:
+ 1447 0165 70726576 		.ascii	"previousReadInputValues\000"
+ 1447      696F7573 
+ 1447      52656164 
+ 1447      496E7075 
+ 1447      7456616C 
+ 1448              	.LASF28:
+ 1449 017d 62536574 		.ascii	"bSetInitializedAlready\000"
+ 1449      496E6974 
+ 1449      69616C69 
+ 1449      7A656441 
+ 1449      6C726561 
+ 1450              	.LASF27:
+ 1451 0194 72616D42 		.ascii	"ramBrightnessMotorPosition\000"
+ 1451      72696768 
+ 1451      746E6573 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 33
+
+
+ 1451      734D6F74 
+ 1451      6F72506F 
+ 1452              	.LASF16:
+ 1453 01af 72656164 		.ascii	"readInputValues\000"
+ 1453      496E7075 
+ 1453      7456616C 
+ 1453      75657300 
+ 1454              	.LASF31:
+ 1455 01bf 74696D65 		.ascii	"timerForInputs\000"
+ 1455      72466F72 
+ 1455      496E7075 
+ 1455      747300
+ 1456              	.LASF12:
+ 1457 01ce 646F7562 		.ascii	"double\000"
+ 1457      6C6500
+ 1458              	.LASF35:
+ 1459 01d5 50574D5F 		.ascii	"PWM_WriteCompare\000"
+ 1459      57726974 
+ 1459      65436F6D 
+ 1459      70617265 
+ 1459      00
+ 1460              	.LASF55:
+ 1461 01e6 456D4545 		.ascii	"EmEEPROM_Write\000"
+ 1461      50524F4D 
+ 1461      5F577269 
+ 1461      746500
+ 1462              	.LASF60:
+ 1463 01f5 6D61696E 		.ascii	"main\000"
+ 1463      00
+ 1464              	.LASF10:
+ 1465 01fa 75696E74 		.ascii	"uint16\000"
+ 1465      313600
+ 1466              	.LASF21:
+ 1467 0201 74616B65 		.ascii	"takeInputValues\000"
+ 1467      496E7075 
+ 1467      7456616C 
+ 1467      75657300 
+ 1468              	.LASF40:
+ 1469 0211 4144435F 		.ascii	"ADC_SAR_Seq_StartConvert\000"
+ 1469      5341525F 
+ 1469      5365715F 
+ 1469      53746172 
+ 1469      74436F6E 
+ 1470              	.LASF59:
+ 1471 022a 696E6974 		.ascii	"initializePeripherals\000"
+ 1471      69616C69 
+ 1471      7A655065 
+ 1471      72697068 
+ 1471      6572616C 
+ 1472              	.LASF18:
+ 1473 0240 74657374 		.ascii	"test\000"
+ 1473      00
+ 1474              	.LASF8:
+ 1475 0245 756E7369 		.ascii	"unsigned int\000"
+ 1475      676E6564 
+ 1475      20696E74 
+ 1475      00
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 34
+
+
+ 1476              	.LASF50:
+ 1477 0252 74696D65 		.ascii	"timeOutStateMachine\000"
+ 1477      4F757453 
+ 1477      74617465 
+ 1477      4D616368 
+ 1477      696E6500 
+ 1478              	.LASF7:
+ 1479 0266 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 1479      206C6F6E 
+ 1479      6720756E 
+ 1479      7369676E 
+ 1479      65642069 
+ 1480              	.LASF39:
+ 1481 027d 4144435F 		.ascii	"ADC_SAR_Seq_Start\000"
+ 1481      5341525F 
+ 1481      5365715F 
+ 1481      53746172 
+ 1481      7400
+ 1482              	.LASF9:
+ 1483 028f 75696E74 		.ascii	"uint8\000"
+ 1483      3800
+ 1484              	.LASF23:
+ 1485 0295 64657465 		.ascii	"detectedAlready\000"
+ 1485      63746564 
+ 1485      416C7265 
+ 1485      61647900 
+ 1486              	.LASF56:
+ 1487 02a5 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 1487      43313120 
+ 1487      352E342E 
+ 1487      31203230 
+ 1487      31363036 
+ 1488 02d8 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m0 -mthumb -g -O"
+ 1488      20726576 
+ 1488      6973696F 
+ 1488      6E203233 
+ 1488      37373135 
+ 1489 030b 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 1489      66756E63 
+ 1489      74696F6E 
+ 1489      2D736563 
+ 1489      74696F6E 
+ 1490              	.LASF38:
+ 1491 0333 53616D70 		.ascii	"SamplingTimerISR_Start\000"
+ 1491      6C696E67 
+ 1491      54696D65 
+ 1491      72495352 
+ 1491      5F537461 
+ 1492              	.LASF15:
+ 1493 034a 73697A65 		.ascii	"sizetype\000"
+ 1493      74797065 
+ 1493      00
+ 1494              	.LASF6:
+ 1495 0353 6C6F6E67 		.ascii	"long long int\000"
+ 1495      206C6F6E 
+ 1495      6720696E 
+ 1495      7400
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 35
+
+
+ 1496              	.LASF57:
+ 1497 0361 6D61696E 		.ascii	"main.c\000"
+ 1497      2E6300
+ 1498              	.LASF13:
+ 1499 0368 63686172 		.ascii	"char\000"
+ 1499      00
+ 1500              	.LASF44:
+ 1501 036d 53616D70 		.ascii	"SamplingTimer_Start\000"
+ 1501      6C696E67 
+ 1501      54696D65 
+ 1501      725F5374 
+ 1501      61727400 
+ 1502              	.LASF26:
+ 1503 0381 65657072 		.ascii	"eepromBrightnessMotorPosition\000"
+ 1503      6F6D4272 
+ 1503      69676874 
+ 1503      6E657373 
+ 1503      4D6F746F 
+ 1504              	.LASF20:
+ 1505 039f 74726163 		.ascii	"trackMotor\000"
+ 1505      6B4D6F74 
+ 1505      6F7200
+ 1506              	.LASF2:
+ 1507 03aa 73686F72 		.ascii	"short int\000"
+ 1507      7420696E 
+ 1507      7400
+ 1508              	.LASF34:
+ 1509 03b4 50574D5F 		.ascii	"PWM_Start\000"
+ 1509      53746172 
+ 1509      7400
+ 1510              	.LASF42:
+ 1511 03be 55415254 		.ascii	"UART_LED_Start\000"
+ 1511      5F4C4544 
+ 1511      5F537461 
+ 1511      727400
+ 1512              	.LASF22:
+ 1513 03cd 636C6561 		.ascii	"clearInitializeAlreadyEEPROM\000"
+ 1513      72496E69 
+ 1513      7469616C 
+ 1513      697A6541 
+ 1513      6C726561 
+ 1514              	.LASF4:
+ 1515 03ea 6C6F6E67 		.ascii	"long int\000"
+ 1515      20696E74 
+ 1515      00
+ 1516              	.LASF43:
+ 1517 03f3 4C45445F 		.ascii	"LED_ISR_Start\000"
+ 1517      4953525F 
+ 1517      53746172 
+ 1517      7400
+ 1518              	.LASF14:
+ 1519 0401 6C6F6E67 		.ascii	"long double\000"
+ 1519      20646F75 
+ 1519      626C6500 
+ 1520              	.LASF0:
+ 1521 040d 7369676E 		.ascii	"signed char\000"
+ 1521      65642063 
+ARM GAS  C:\Users\kylep\AppData\Local\Temp\ccbmExmC.s 			page 36
+
+
+ 1521      68617200 
+ 1522              	.LASF48:
+ 1523 0419 6D6F6465 		.ascii	"modeChangeISR_Start\000"
+ 1523      4368616E 
+ 1523      67654953 
+ 1523      525F5374 
+ 1523      61727400 
+ 1524              	.LASF53:
+ 1525 042d 73657442 		.ascii	"setBrightness\000"
+ 1525      72696768 
+ 1525      746E6573 
+ 1525      7300
+ 1526              	.LASF58:
+ 1527 043b 433A5C55 		.ascii	"C:\\Users\\kylep\\Box Sync\\Box Sync\\Feniex Electr"
+ 1527      73657273 
+ 1527      5C6B796C 
+ 1527      65705C42 
+ 1527      6F782053 
+ 1528 0469 6963616C 		.ascii	"ical Files\\WorkingFolder-Kyle\\Firm-AI-Cube\\81-00"
+ 1528      2046696C 
+ 1528      65735C57 
+ 1528      6F726B69 
+ 1528      6E67466F 
+ 1529 0499 3032342D 		.ascii	"024-01.cydsn\000"
+ 1529      30312E63 
+ 1529      7964736E 
+ 1529      00
+ 1530              	.LASF36:
+ 1531 04a6 436F6D6D 		.ascii	"CommTimeoutISR_Start\000"
+ 1531      54696D65 
+ 1531      6F757449 
+ 1531      53525F53 
+ 1531      74617274 
+ 1532              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

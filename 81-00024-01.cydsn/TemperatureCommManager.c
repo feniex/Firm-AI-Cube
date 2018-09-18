@@ -239,13 +239,13 @@ void processSamplingTimerRoutine(void)
     
     SamplingTimer_ClearInterrupt(SamplingTimer_INTR_MASK_TC);   
     
-    readyToSendThresholdCounter++;
+    //readyToSendThresholdCounter++;
     
-    if(readyToSendThresholdCounter>=4)
-    {
-        readyToSendThresholdCounter = 0;
-        bReadyToSendNextBrightnessTimeoutPacket = TRUE;
-    }
+    //if(readyToSendThresholdCounter>=1)
+    //{
+    //    readyToSendThresholdCounter = 0;
+    //    bReadyToSendNextBrightnessTimeoutPacket = TRUE;
+    //}
     
 
     //Get next temperature sample to add to array

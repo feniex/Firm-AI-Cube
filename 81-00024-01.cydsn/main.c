@@ -60,25 +60,25 @@ int main()
     CyGlobalIntEnable;
     initializePeripherals();
     modeChangeISR_Start();
-    ADC_SAR_Seq_1_Start();
-    ADC_SAR_Seq_1_GetResult16();
+    //ADC_SAR_Seq_1_Start();
+    //ADC_SAR_Seq_1_GetResult16();
     //inputIncrease_Start();
     //inputTimerISR_Start();
     
-    //if(*(volatile uint8 *) &eepromBrightnessMotorPosition[3] == 0)
+   // if(*(volatile uint8 *) &eepromBrightnessMotorPosition[3] == 0)
     {
-        calibrateMotor();
+        //calibrateMotor();
         ramBrightnessMotorPosition[3] = 1;
         ramBrightnessMotorPosition[2] = 0;
         //ramBrightnessMotorPosition[1] = 0xFF;
-        ramBrightnessMotorPosition[4] = pMotor->forwardLimitCS;
-        ramBrightnessMotorPosition[5] = pMotor->backwardLimitCS;
-        EmEEPROM_Write(&ramBrightnessMotorPosition[1],&eepromBrightnessMotorPosition[1],5);
+       // ramBrightnessMotorPosition[4] = pMotor->forwardLimitCS;
+       // ramBrightnessMotorPosition[5] = pMotor->backwardLimitCS;
+        //EmEEPROM_Write(&ramBrightnessMotorPosition[1],&eepromBrightnessMotorPosition[1],5);
     }
-    //else
-    //{
-    //    loadLimitSwitchValue();
-    //}
+   // else
+    {
+        //loadLimitSwitchValue();
+    }
     
     
     {
@@ -150,7 +150,7 @@ void takeInputValues(void)
         setBrightness(trackBrightness);
     }
     
-    if(timerForMotorInputs>5) //|| previousReadInputValues!= readInputValues)
+    if(timerForMotorInputs>1) //|| previousReadInputValues!= readInputValues)
     {
         timerForMotorInputs=0;
         
