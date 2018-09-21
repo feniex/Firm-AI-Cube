@@ -35,6 +35,7 @@ extern MotorIO *pMotor;
 
 volatile uint8 timerForInputs=0;
 volatile uint16 timerForMotorInputs=0;
+volatile uint8 timerForInputsMotor = 0; 
 /**********LOCAL FUNCTION PROTOTYPES**********/
 static void initializePeripherals(void);
 
@@ -67,13 +68,13 @@ int main()
     
    // if(*(volatile uint8 *) &eepromBrightnessMotorPosition[3] == 0)
     {
-        //calibrateMotor();
+        calibrateMotor();
         ramBrightnessMotorPosition[3] = 1;
         ramBrightnessMotorPosition[2] = 0;
         //ramBrightnessMotorPosition[1] = 0xFF;
-       // ramBrightnessMotorPosition[4] = pMotor->forwardLimitCS;
-       // ramBrightnessMotorPosition[5] = pMotor->backwardLimitCS;
-        //EmEEPROM_Write(&ramBrightnessMotorPosition[1],&eepromBrightnessMotorPosition[1],5);
+        ramBrightnessMotorPosition[4] = pMotor->forwardLimitCS;
+        ramBrightnessMotorPosition[5] = pMotor->backwardLimitCS;
+        EmEEPROM_Write(&ramBrightnessMotorPosition[1],&eepromBrightnessMotorPosition[1],5);
     }
    // else
     {
@@ -150,9 +151,9 @@ void takeInputValues(void)
         setBrightness(trackBrightness);
     }
     
-    if(timerForMotorInputs>1) //|| previousReadInputValues!= readInputValues)
+    if(timerForInputsMotor==1) //|| previousReadInputValues!= readInputValues)
     {
-        timerForMotorInputs=0;
+        timerForInputsMotor=0;
         
         if((readInputValues&ZOOM_PLUS) == ZOOM_PLUS)
         {

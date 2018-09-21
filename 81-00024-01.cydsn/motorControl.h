@@ -93,7 +93,7 @@ typedef enum MotorConstants
 
 #define TOLERANCE 5
 
-#define OVER_CURRENT_VALUE 500
+#define OVER_CURRENT_VALUE 1000//500
 #define OVER_CURRENT_TIMER_THRESHOLD 500
 
 #define CENTER_POT 0x080

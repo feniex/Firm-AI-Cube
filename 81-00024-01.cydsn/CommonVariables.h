@@ -34,7 +34,9 @@
 #define DIM_MINUS   0x08
     
 /**********DEFINED CONSTANTS**********/
-extern volatile uint8 timerForInputs;    
+extern volatile uint8 timerForInputs; 
+extern volatile uint8 timerForInputsMotor; 
+    
 
 /**********DATA STRUCTURES**********/
     

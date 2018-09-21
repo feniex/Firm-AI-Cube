@@ -91,6 +91,7 @@ CY_ISR(OVER_CURRENT_ISR)
     }
     
     timerForInputs = 1;
+    timerForInputsMotor = 1;
     
     overCurrentTimerISR_ClearPending();
     overCurrentTimer_ReadStatusRegister();
