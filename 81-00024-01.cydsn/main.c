@@ -66,7 +66,7 @@ int main()
     //inputIncrease_Start();
     //inputTimerISR_Start();
     
-   // if(*(volatile uint8 *) &eepromBrightnessMotorPosition[3] == 0)
+    if(*(volatile uint8 *) &eepromBrightnessMotorPosition[3] == 0)
     {
         calibrateMotor();
         ramBrightnessMotorPosition[3] = 1;
@@ -76,9 +76,9 @@ int main()
         ramBrightnessMotorPosition[5] = pMotor->backwardLimitCS;
         EmEEPROM_Write(&ramBrightnessMotorPosition[1],&eepromBrightnessMotorPosition[1],5);
     }
-   // else
+    else
     {
-        //loadLimitSwitchValue();
+        loadLimitSwitchValue();
     }
     
     

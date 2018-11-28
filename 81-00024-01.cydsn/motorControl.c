@@ -19,6 +19,9 @@ MotorIO motorStatus =
 {0, 0, 0, FALSE, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 MotorIO *pMotor;
 
+uint16 motorCurrentTestValue[1024];
+uint16 iteratorTest = 1;
+
 uint8 bDoneMovingCalibrate = FALSE;
 static uint32 timeOutCalibrate = 0;
 uint16 checkMotorCurrent(void);
@@ -62,9 +65,29 @@ CY_ISR(OVER_CURRENT_ISR)
     if(ADC_SAR_Seq_IsEndConversion(ADC_SAR_Seq_RETURN_STATUS) !=0)
     {
         pMotor->motorCurrent[pMotor->motorCurrentSamplesIterator] = checkMotorCurrent();
+        //if(pMotor->motorCurrent[pMotor->motorCurrentSamplesIterator]>600)
+        //{
+        //    motorCurrentTestValue[iteratorTest] = pMotor->motorCurrent[pMotor->motorCurrentSamplesIterator];
+        //    iteratorTest++;
+        //}
+        
         pMotor->motorCurrentSamplesIterator++;
+        
     }
     
+    //if( motorCurrentTestValue[0]<motorCurrentTestValue[iteratorTest-1])
+    //{
+    //     motorCurrentTestValue[0]=motorCurrentTestValue[iteratorTest-1];
+    //}   
+    
+    //if(iteratorTest>25)
+    //{
+        
+        //setMotorOutputs(BRAKE,0xFF);
+        //CyDelay(500);
+        //iteratorTest = 1;
+        //motorCurrentTestValue[0] = 0;
+    //}
 
     if(pMotor->motorCurrent[0]>= OVER_CURRENT_VALUE && pMotor->motorCurrent[1]>= OVER_CURRENT_VALUE && pMotor->motorCurrent[2] >= OVER_CURRENT_VALUE && pMotor->motorCurrent[3] >= OVER_CURRENT_VALUE && pMotor->motorCurrent[4] >= OVER_CURRENT_VALUE && pMotor->motorCurrent[5] >= OVER_CURRENT_VALUE && pMotor->motorCurrent[6] >= OVER_CURRENT_VALUE && pMotor->motorCurrent[7] >= OVER_CURRENT_VALUE && pMotor->motorCurrent[8] >= OVER_CURRENT_VALUE && pMotor->motorCurrent[9] >= OVER_CURRENT_VALUE && pMotor->motorCurrent[10] >= OVER_CURRENT_VALUE && pMotor->motorCurrent[11] >= OVER_CURRENT_VALUE)// && pMotor->motorCurrent[12] >= OVER_CURRENT_VALUE && pMotor->motorCurrent[13] >= OVER_CURRENT_VALUE && pMotor->motorCurrent[14] >= OVER_CURRENT_VALUE && pMotor->motorCurrent[15] >= OVER_CURRENT_VALUE && pMotor->motorCurrent[16] >= OVER_CURRENT_VALUE && pMotor->motorCurrent[17] >= OVER_CURRENT_VALUE && pMotor->motorCurrent[18] >= OVER_CURRENT_VALUE && pMotor->motorCurrent[19] >= OVER_CURRENT_VALUE && pMotor->motorCurrent[20] >= OVER_CURRENT_VALUE && pMotor->motorCurrent[21] >= OVER_CURRENT_VALUE && pMotor->motorCurrent[22] >= OVER_CURRENT_VALUE && pMotor->motorCurrent[23] >= OVER_CURRENT_VALUE && pMotor->motorCurrent[24] >= OVER_CURRENT_VALUE)
     {
@@ -87,6 +110,7 @@ CY_ISR(OVER_CURRENT_ISR)
     }
     if(pMotor->motorCurrentSamplesIterator>=12)
     {
+        setMotorOutputs(BRAKE,0xFF);
         pMotor->motorCurrentSamplesIterator = 0;
     }
     
