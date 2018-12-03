@@ -56,8 +56,8 @@ typedef struct
 
 static ThermalLimit ThermalLimitArray[ADC_SAMPLE_COUNT] = 
 {
-    {400, 100}, //LED
-    {500, 100}, //SwitchNode    
+    {200, 100}, //LED
+    {500, 100}, //SwitchNode  
     {500,  5}, //Micro
     {500, 100}  //Ambient
 };
