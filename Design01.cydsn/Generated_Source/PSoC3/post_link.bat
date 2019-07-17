@@ -7,15 +7,15 @@
 @REM    arg3: Name of the project.
 @REM NOTE: This script is auto generated. Do not modify.
 
-"C:\Program Files (x86)\Cypress\PSoC Creator\4.1\PSoC Creator\bin\cyvalidateide.exe" -dev CY8C3245AXI-166 -ide "%~1\%~3" -flsAddr 0x0 -flsSize 0x8000 -sramAddr 0x0 -sramSize 0x1000
+"C:\Program Files (x86)\Cypress\PSoC Creator\4.2\PSoC Creator\bin\cyvalidateide.exe" -dev CY8C3245AXI-166 -ide "%~1\%~3" -flsAddr 0x0 -flsSize 0x8000 -sramAddr 0x0 -sramSize 0x1000
 @IF %errorlevel% NEQ 0 EXIT /b %errorlevel% 
 move "%~1\%~2\%~n3.hex" "%~1\%~2\%~n3.ihx"
 @IF %errorlevel% NEQ 0 EXIT /b %errorlevel% 
-"C:\Program Files (x86)\Cypress\PSoC Creator\4.1\PSoC Creator\import\gnu\c8051\1.0\bin\c8051-elf-omf2elf.exe" "%~1\%~2\%~n3" "%~1\%~2\%~n3.elf"
+"C:\Program Files (x86)\Cypress\PSoC Creator\4.2\PSoC Creator\import\gnu\c8051\1.0\bin\c8051-elf-omf2elf.exe" "%~1\%~2\%~n3" "%~1\%~2\%~n3.elf"
 @IF %errorlevel% NEQ 0 EXIT /b %errorlevel% 
-"C:\Program Files (x86)\Cypress\PSoC Creator\4.1\PSoC Creator\bin\CyHexTool" -o "%~1\%~2\%~n3.hex" -f "%~1\%~2\%~n3.ihx" -prot "%~dp0protect.hex" -id 1E0A6069 -a EEPROM=90200000:400,PROGRAM=00000000:8000,CONFIG=80000000:1000,PROTECT=90400000:20 -meta 0301 -cunv 00004005 -wonv BC90ACAF -ecc "%~dp0config.hex" 
+"C:\Program Files (x86)\Cypress\PSoC Creator\4.2\PSoC Creator\bin\CyHexTool" -o "%~1\%~2\%~n3.hex" -f "%~1\%~2\%~n3.ihx" -prot "%~dp0protect.hex" -id 1E0A6069 -a EEPROM=90200000:400,PROGRAM=00000000:8000,CONFIG=80000000:1000,PROTECT=90400000:20 -meta 0301 -cunv 00004005 -wonv BC90ACAF -ecc "%~dp0config.hex" 
 @IF %errorlevel% NEQ 0 EXIT /b %errorlevel% 
 CD /D "C:\Keil\UV4"
 @IF %errorlevel% NEQ 0 EXIT /b %errorlevel% 
-IF NOT EXIST "C:\Users\kylep\Box Sync\Box Sync\Feniex Electrical Files\WorkingFolder-Kyle\Firm-AI-Cube\Design01.cydsn\Design01.svd" rem "C:\Users\kylep\Box Sync\Box Sync\Feniex Electrical Files\WorkingFolder-Kyle\Firm-AI-Cube\Design01.cydsn\Design01.sfr"
+IF NOT EXIST "C:\Users\kylep\Box Sync\Box Sync\Box Sync\Feniex Electrical Files\WorkingFolder-Kyle\Firm-AI-Cube\Design01.cydsn\Design01.svd" rem "C:\Users\kylep\Box Sync\Box Sync\Box Sync\Feniex Electrical Files\WorkingFolder-Kyle\Firm-AI-Cube\Design01.cydsn\Design01.sfr"
 @IF %errorlevel% NEQ 0 EXIT /b %errorlevel% 
