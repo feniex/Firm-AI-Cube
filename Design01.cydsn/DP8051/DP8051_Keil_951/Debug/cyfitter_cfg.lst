@@ -1,4 +1,4 @@
-C51 COMPILER V9.51   CYFITTER_CFG                                                          07/15/2019 21:26:56 PAGE 1   
+C51 COMPILER V9.51   CYFITTER_CFG                                                          07/31/2019 15:57:16 PAGE 1   
 
 
 C51 COMPILER V9.51, COMPILATION OF MODULE CYFITTER_CFG
@@ -62,7 +62,7 @@ line level    source
   50          /* Clock startup error codes                                                   */
   51          #define CYCLOCKSTART_NO_ERROR    0u
   52          #define CYCLOCKSTART_XTAL_ERROR  1u
-C51 COMPILER V9.51   CYFITTER_CFG                                                          07/15/2019 21:26:56 PAGE 2   
+C51 COMPILER V9.51   CYFITTER_CFG                                                          07/31/2019 15:57:16 PAGE 2   
 
   53          #define CYCLOCKSTART_32KHZ_ERROR 2u
   54          #define CYCLOCKSTART_PLL_ERROR   3u
@@ -126,7 +126,7 @@ line level    source
  112          
  113          /*******************************************************************************
  114          * Function Name: ClockSetup
-C51 COMPILER V9.51   CYFITTER_CFG                                                          07/15/2019 21:26:56 PAGE 3   
+C51 COMPILER V9.51   CYFITTER_CFG                                                          07/31/2019 15:57:16 PAGE 3   
 
  115          ********************************************************************************
  116          *
@@ -190,7 +190,7 @@ line level    source
  172          
  173          /*******************************************************************************
  174          * Function Name: AnalogSetDefault
-C51 COMPILER V9.51   CYFITTER_CFG                                                          07/15/2019 21:26:56 PAGE 4   
+C51 COMPILER V9.51   CYFITTER_CFG                                                          07/31/2019 15:57:16 PAGE 4   
 
  175          ********************************************************************************
  176          *
@@ -254,7 +254,7 @@ line level    source
  234          ********************************************************************************
  235          * Summary:
  236          *  This function is called by the start-up code for the selected device. It
-C51 COMPILER V9.51   CYFITTER_CFG                                                          07/15/2019 21:26:56 PAGE 5   
+C51 COMPILER V9.51   CYFITTER_CFG                                                          07/31/2019 15:57:16 PAGE 5   
 
  237          *  performs all of the necessary device configuration based on the design
  238          *  settings.  This includes settings from the Design Wide Resources (DWR) such
@@ -318,7 +318,7 @@ line level    source
  292   1              CYCONFIGCPY((void CYFAR *)(CYREG_PRT0_DM0), (const void CYFAR *)(BS_IOPINS0_0_VAL), 8u);
  293   1              CYCONFIGCPY((void CYFAR *)(CYREG_PRT1_DM0), (const void CYFAR *)(BS_IOPINS0_1_VAL), 8u);
  294   1              CYCONFIGCPY((void CYFAR *)(CYREG_PRT3_DM0), (const void CYFAR *)(BS_IOPINS0_3_VAL), 8u);
-C51 COMPILER V9.51   CYFITTER_CFG                                                          07/15/2019 21:26:56 PAGE 6   
+C51 COMPILER V9.51   CYFITTER_CFG                                                          07/31/2019 15:57:16 PAGE 6   
 
  295   1              /* Switch Boost to the precision bandgap reference from its internal reference */
  296   1              CY_SET_REG8((void CYXDATA *)CYREG_BOOST_CR2, (CY_GET_REG8((void CYXDATA *)CYREG_BOOST_CR2) | 0x08u));
@@ -343,7 +343,7 @@ line level    source
  315   1              CY_SET_REG8((void CYXDATA *)CYREG_PM_STBY_CFG0, CY_GET_REG8((void CYXDATA *)CYREG_PM_STBY_CFG0) & (uint8)
              -~0x02u);        /* Disable CPU */
  316   1      }
-C51 COMPILER V9.51   CYFITTER_CFG                                                          07/15/2019 21:26:56 PAGE 7   
+C51 COMPILER V9.51   CYFITTER_CFG                                                          07/31/2019 15:57:16 PAGE 7   
 
 ASSEMBLY LISTING OF GENERATED OBJECT CODE
 
@@ -407,7 +407,7 @@ ASSEMBLY LISTING OF GENERATED OBJECT CODE
                                            ; SOURCE LINE # 148
 003A 900000      R     MOV     DPTR,#pllLock
 003D E4                CLR     A
-C51 COMPILER V9.51   CYFITTER_CFG                                                          07/15/2019 21:26:56 PAGE 8   
+C51 COMPILER V9.51   CYFITTER_CFG                                                          07/31/2019 15:57:16 PAGE 8   
 
 003E F0                MOVX    @DPTR,A
                                            ; SOURCE LINE # 149
@@ -471,7 +471,7 @@ ASSEMBLY LISTING OF GENERATED OBJECT CODE
 009D 78FF              MOV     R0,#0FFH
 009F 120000      E     LCALL   ?C?LADD
 00A2 900000      R     MOV     DPTR,#timeout
-C51 COMPILER V9.51   CYFITTER_CFG                                                          07/15/2019 21:26:56 PAGE 9   
+C51 COMPILER V9.51   CYFITTER_CFG                                                          07/31/2019 15:57:16 PAGE 9   
 
 00A5 120000      E     LCALL   ?C?LSTXDATA
 00A8 80A3              SJMP    ?C0004
@@ -535,7 +535,7 @@ ASSEMBLY LISTING OF GENERATED OBJECT CODE
 0011 E0                MOVX    A,@DPTR
 0012 FF                MOV     R7,A
 0013 EF                MOV     A,R7
-C51 COMPILER V9.51   CYFITTER_CFG                                                          07/15/2019 21:26:56 PAGE 10  
+C51 COMPILER V9.51   CYFITTER_CFG                                                          07/31/2019 15:57:16 PAGE 10  
 
 0014 5407              ANL     A,#07H
 0016 FF                MOV     R7,A
@@ -599,7 +599,7 @@ ASSEMBLY LISTING OF GENERATED OBJECT CODE
 0027         ?C0010:
                                            ; SOURCE LINE # 223
                                            ; SOURCE LINE # 224
-C51 COMPILER V9.51   CYFITTER_CFG                                                          07/15/2019 21:26:56 PAGE 11  
+C51 COMPILER V9.51   CYFITTER_CFG                                                          07/31/2019 15:57:16 PAGE 11  
 
 0027 900000      R     MOV     DPTR,#regValue
 002A E0                MOVX    A,@DPTR
@@ -663,7 +663,7 @@ ASSEMBLY LISTING OF GENERATED OBJECT CODE
 0036 8F00        R     MOV     ms+01H,R7
                                            ; SOURCE LINE # 280
 0038 AE00        R     MOV     R6,ms
-C51 COMPILER V9.51   CYFITTER_CFG                                                          07/15/2019 21:26:56 PAGE 12  
+C51 COMPILER V9.51   CYFITTER_CFG                                                          07/31/2019 15:57:16 PAGE 12  
 
 003A AF00        R     MOV     R7,ms+01H
 003C 8F82              MOV     DPL,R7
@@ -727,7 +727,7 @@ ASSEMBLY LISTING OF GENERATED OBJECT CODE
 00A1 900000      E     MOV     DPTR,#?_cyconfigcpy?BYTE+05H
 00A4 120000      E     LCALL   ?C?PSTXDATA
 00A7 D001              POP     AR1
-C51 COMPILER V9.51   CYFITTER_CFG                                                          07/15/2019 21:26:56 PAGE 13  
+C51 COMPILER V9.51   CYFITTER_CFG                                                          07/31/2019 15:57:16 PAGE 13  
 
 00A9 D002              POP     AR2
 00AB D003              POP     AR3
@@ -791,7 +791,7 @@ ASSEMBLY LISTING OF GENERATED OBJECT CODE
                                            ; SOURCE LINE # 298
                                            ; SOURCE LINE # 299
 0117 904689            MOV     DPTR,#04689H
-C51 COMPILER V9.51   CYFITTER_CFG                                                          07/15/2019 21:26:56 PAGE 14  
+C51 COMPILER V9.51   CYFITTER_CFG                                                          07/31/2019 15:57:16 PAGE 14  
 
 011A 743A              MOV     A,#03AH
 011C F0                MOVX    @DPTR,A
@@ -856,7 +856,7 @@ MODULE INFORMATION:   STATIC OVERLAYABLE
    FAR CONST SIZE   =   ----    ----
 END OF MODULE INFORMATION.
 
-C51 COMPILER V9.51   CYFITTER_CFG                                                          07/15/2019 21:26:56 PAGE 15  
+C51 COMPILER V9.51   CYFITTER_CFG                                                          07/31/2019 15:57:16 PAGE 15  
 
 
 C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -12,6 +12,7 @@
 
 #include "motorControl.h"
 #include "BrightnessCommManager.h"
+#include "DriverControl.h"
 
 MotorIO *pMotor;
 RxPacket * rxPacketLocal;
@@ -25,6 +26,11 @@ uint16 iteratorTest = 1;
 uint8 bDoneMovingCalibrate = FALSE;
 static uint32 timeOutCalibrate = 0;
 uint16 checkMotorCurrent(void);
+
+static uint8 oldMotorPosition = 0;
+static uint8 oldLedBrightness = 0;
+static uint16 counterToSaveOffValues = 0;
+static uint8 savedCubeValue = 0;
 
 /*******************************************************************************
 * ISR Name: HALL_EFFECT_EDGE_DETECT_INTERRUPT
@@ -116,6 +122,40 @@ CY_ISR(OVER_CURRENT_ISR)
     
     timerForInputs = 1;
     timerForInputsMotor = 1;
+    
+
+
+    counterToSaveOffValues++;
+    if(counterToSaveOffValues>800)
+    {
+        if(savedCubeValue == 0)
+        {
+            if(oldLedBrightness == getRegulatedBrightness() && oldMotorPosition == getMotorPosition())
+            {
+                savedCubeValue = 1;
+                saveStateBarNotComms(getVolatileBarStateMemory(), getNonVolatileBarStateMemory(), getRegulatedBrightness(), getMotorPosition());
+                
+            }
+        }
+    }
+   
+    
+    if(oldLedBrightness != getRegulatedBrightness() || oldMotorPosition != getMotorPosition())
+    {
+        savedCubeValue = 0;
+    }
+    
+    if(counterToSaveOffValues%200 == 0)
+    {
+        oldLedBrightness = getRegulatedBrightness();
+        oldMotorPosition = getMotorPosition();
+    }
+    
+    
+    if(counterToSaveOffValues>1000)
+    {
+        counterToSaveOffValues = 0;
+    }
     
     overCurrentTimerISR_ClearPending();
     overCurrentTimer_ReadStatusRegister();
@@ -234,7 +274,11 @@ void loadLimitSwitchValue(void)
     pLocalNonVolatileMemory = getNonVolatileBarStateMemory();
     pMotor->forwardLimitCS = pLocalNonVolatileMemory[4];
     pMotor->backwardLimitCS = pLocalNonVolatileMemory[5];
+    
+    
 }
+
+
 
 void setMotorOutputs(Direction direction, Speed speed)
 {
@@ -402,6 +446,11 @@ MotorIO * motorControlLoop(int16 manualDesiredPostion)
 void setMotorPosition(uint8 localMotorPosition)
 {
     rxPacketLocal->Payload.endMotorPosition = localMotorPosition;
+}
+
+uint8 getMotorPosition(void)
+{
+    return rxPacketLocal->Payload.endMotorPosition;
 }
 
 uint16 checkMotorCurrent(void)

@@ -894,15 +894,15 @@
 .set ADC_SAR_Seq_IRQ__INTC_SET_PD_REG, CYREG_CM0_ISPR
 
 /* HBridge_INA */
-.set HBridge_INA__0__DM__MASK, 0x1C0
-.set HBridge_INA__0__DM__SHIFT, 6
+.set HBridge_INA__0__DM__MASK, 0x1C0000
+.set HBridge_INA__0__DM__SHIFT, 18
 .set HBridge_INA__0__DR, CYREG_PRT0_DR
 .set HBridge_INA__0__HSIOM, CYREG_HSIOM_PORT_SEL0
-.set HBridge_INA__0__HSIOM_MASK, 0x00000F00
-.set HBridge_INA__0__HSIOM_SHIFT, 8
+.set HBridge_INA__0__HSIOM_MASK, 0x0F000000
+.set HBridge_INA__0__HSIOM_SHIFT, 24
 .set HBridge_INA__0__INTCFG, CYREG_PRT0_INTCFG
 .set HBridge_INA__0__INTSTAT, CYREG_PRT0_INTSTAT
-.set HBridge_INA__0__MASK, 0x04
+.set HBridge_INA__0__MASK, 0x40
 .set HBridge_INA__0__PA__CFG0, CYREG_UDB_PA0_CFG0
 .set HBridge_INA__0__PA__CFG1, CYREG_UDB_PA0_CFG1
 .set HBridge_INA__0__PA__CFG10, CYREG_UDB_PA0_CFG10
@@ -922,11 +922,11 @@
 .set HBridge_INA__0__PC2, CYREG_PRT0_PC2
 .set HBridge_INA__0__PORT, 0
 .set HBridge_INA__0__PS, CYREG_PRT0_PS
-.set HBridge_INA__0__SHIFT, 2
+.set HBridge_INA__0__SHIFT, 6
 .set HBridge_INA__DR, CYREG_PRT0_DR
 .set HBridge_INA__INTCFG, CYREG_PRT0_INTCFG
 .set HBridge_INA__INTSTAT, CYREG_PRT0_INTSTAT
-.set HBridge_INA__MASK, 0x04
+.set HBridge_INA__MASK, 0x40
 .set HBridge_INA__PA__CFG0, CYREG_UDB_PA0_CFG0
 .set HBridge_INA__PA__CFG1, CYREG_UDB_PA0_CFG1
 .set HBridge_INA__PA__CFG10, CYREG_UDB_PA0_CFG10
@@ -946,18 +946,18 @@
 .set HBridge_INA__PC2, CYREG_PRT0_PC2
 .set HBridge_INA__PORT, 0
 .set HBridge_INA__PS, CYREG_PRT0_PS
-.set HBridge_INA__SHIFT, 2
+.set HBridge_INA__SHIFT, 6
 
 /* HBridge_INB */
-.set HBridge_INB__0__DM__MASK, 0x1C0000
-.set HBridge_INB__0__DM__SHIFT, 18
+.set HBridge_INB__0__DM__MASK, 0x1C0
+.set HBridge_INB__0__DM__SHIFT, 6
 .set HBridge_INB__0__DR, CYREG_PRT0_DR
 .set HBridge_INB__0__HSIOM, CYREG_HSIOM_PORT_SEL0
-.set HBridge_INB__0__HSIOM_MASK, 0x0F000000
-.set HBridge_INB__0__HSIOM_SHIFT, 24
+.set HBridge_INB__0__HSIOM_MASK, 0x00000F00
+.set HBridge_INB__0__HSIOM_SHIFT, 8
 .set HBridge_INB__0__INTCFG, CYREG_PRT0_INTCFG
 .set HBridge_INB__0__INTSTAT, CYREG_PRT0_INTSTAT
-.set HBridge_INB__0__MASK, 0x40
+.set HBridge_INB__0__MASK, 0x04
 .set HBridge_INB__0__PA__CFG0, CYREG_UDB_PA0_CFG0
 .set HBridge_INB__0__PA__CFG1, CYREG_UDB_PA0_CFG1
 .set HBridge_INB__0__PA__CFG10, CYREG_UDB_PA0_CFG10
@@ -977,11 +977,11 @@
 .set HBridge_INB__0__PC2, CYREG_PRT0_PC2
 .set HBridge_INB__0__PORT, 0
 .set HBridge_INB__0__PS, CYREG_PRT0_PS
-.set HBridge_INB__0__SHIFT, 6
+.set HBridge_INB__0__SHIFT, 2
 .set HBridge_INB__DR, CYREG_PRT0_DR
 .set HBridge_INB__INTCFG, CYREG_PRT0_INTCFG
 .set HBridge_INB__INTSTAT, CYREG_PRT0_INTSTAT
-.set HBridge_INB__MASK, 0x40
+.set HBridge_INB__MASK, 0x04
 .set HBridge_INB__PA__CFG0, CYREG_UDB_PA0_CFG0
 .set HBridge_INB__PA__CFG1, CYREG_UDB_PA0_CFG1
 .set HBridge_INB__PA__CFG10, CYREG_UDB_PA0_CFG10
@@ -1001,7 +1001,7 @@
 .set HBridge_INB__PC2, CYREG_PRT0_PC2
 .set HBridge_INB__PORT, 0
 .set HBridge_INB__PS, CYREG_PRT0_PS
-.set HBridge_INB__SHIFT, 6
+.set HBridge_INB__SHIFT, 2
 
 /* HBridge_PWM */
 .set HBridge_PWM__0__DM__MASK, 0xE00

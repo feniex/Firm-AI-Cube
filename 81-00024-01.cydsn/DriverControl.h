@@ -51,5 +51,6 @@ uint8 getNewMaxBrightness(void);
 uint8 regulateBrightness(int16* TemperatureData, uint8 length);
 uint8 getPreviousBrightness(void);
 void setBrightness(unsigned char localBrightness);
+uint8 getRegulatedBrightness(void);
 #endif
 /* [] END OF FILE */

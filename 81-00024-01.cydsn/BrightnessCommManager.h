@@ -55,6 +55,7 @@ void processCalibrationPacket(void);
 uint8 getStateOfBar(void);
 uint8 getDegaultPosition(void);
  RxPacket * getRxPacket(void);
+void saveStateBarNotComms(uint8 * volatileMemoryArray, const uint8 * nonVolatileMemoryArray, uint8 brightness, uint8 motorPosition);
 
 #endif
 /* [] END OF FILE */

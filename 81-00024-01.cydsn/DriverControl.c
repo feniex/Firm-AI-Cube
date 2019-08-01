@@ -724,4 +724,9 @@ void setBrightness(unsigned char localBrightness)
     previousBrightnessLocal = localBrightness;
 }
 
+uint8 getRegulatedBrightness(void)
+{
+    return RegulationData.requestedBrightness;
+}
+
 /* [] END OF FILE */

@@ -113,5 +113,8 @@ MotorIO * motorControlLoop(int16 manualDesiredPostion);
 int16 calibrateMotor(void);
 void loadLimitSwitchValue(void);
 void setMotorPosition(uint8 localMotorPosition);
+uint8 getMotorPosition(void);
+void setMotorPositionValue(uint8 localMotor);
+void setLightValue(uint8 localLED);
 
 /* [] END OF FILE */

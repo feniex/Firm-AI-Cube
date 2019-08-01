@@ -812,4 +812,13 @@ void processCalibrationPacket(void)
     
     return pRxPacket;
 }
+
+void saveStateBarNotComms(uint8 * volatileMemoryArray, const uint8 * nonVolatileMemoryArray, uint8 brightness, uint8 motorPosition)
+{  
+    volatileMemoryArray[0] = brightness;
+    EmEEPROM_Write(volatileMemoryArray,nonVolatileMemoryArray,1);
+    
+    volatileMemoryArray[1] = motorPosition;
+    EmEEPROM_Write(&volatileMemoryArray[1],&nonVolatileMemoryArray[1],1);
+}
 /* [] END OF FILE */

@@ -38,6 +38,10 @@ volatile uint16 timerForMotorInputs=0;
 volatile uint8 timerForInputsMotor = 0; 
 /**********LOCAL FUNCTION PROTOTYPES**********/
 static void initializePeripherals(void);
+void loadInitialMotorBrightnessValue(void);
+
+static uint16 trackBrightness = 0;
+static uint16 trackMotor = 0;
 
 /**********DEFINED GLOBAL FUNCTIONS**********/
 
@@ -79,8 +83,9 @@ int main()
     else
     {
         loadLimitSwitchValue();
+        loadInitialMotorBrightnessValue();
     }
-    
+    loadInitialMotorBrightnessValue();
     
     {
         setIdentityByComm(HEAD_MODULE_ID);
@@ -117,8 +122,6 @@ void takeInputValues(void)
     volatile uint8 readInputValues = 0;
     volatile uint8 previousReadInputValues = 0;
     uint8 test = 0;
-    static uint16 trackBrightness = 0;
-    static uint16 trackMotor = 0;
     
     
     if(timerForInputs == 1)
@@ -240,5 +243,23 @@ static void initializePeripherals(void)
     //UART_LED_Control_Write(FALSE);
 }
 
+void loadInitialMotorBrightnessValue(void)
+{
+    static const uint8 * pLocalNonVolatileMemory;
+    pLocalNonVolatileMemory = getNonVolatileBarStateMemory();
+    
+    trackBrightness = pLocalNonVolatileMemory[0];
+    trackMotor = pLocalNonVolatileMemory[1];
+}
+
+void setMotorPositionValue(uint8 localMotor)
+{
+    trackMotor = localMotor;
+}
+
+void setLightValue(uint8 localLED)
+{
+    trackBrightness = localLED;
+}
 
 /* [] END OF FILE */
